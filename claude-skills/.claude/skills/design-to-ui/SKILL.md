@@ -22,7 +22,7 @@ The stack is newer than most training data. Copy from the project and the refere
 - **shadcn, style `radix-nova`** (`components.json`). Add a component with `pnpm dlx shadcn@latest add <name>`. Never edit `src/components/ui/`: it is generated, lint ignores it, and re-adding a component overwrites your edits. The template ships only `alert button card field input label separator skeleton sonner`; anything else (Textarea, Badge, Dialog, Select...) is added with the CLI first.
 - **`cn` from `@/lib/utils`** for conditional classes. Lint rejects `clsx` and `tailwind-merge`.
 - **Icons are lucide-react** (`components.json`: `"iconLibrary": "lucide"`), as named imports, the way `src/components/ui/sonner.tsx` does it, in the app's quote style:
-  ```tsx
+  ```tsx sketch
   import { CircleCheckIcon, InfoIcon } from 'lucide-react';
   ```
   No other icon package, and no SVG copied out of the design for an icon lucide already has.

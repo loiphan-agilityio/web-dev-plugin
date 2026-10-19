@@ -1,6 +1,6 @@
 # Effect Schema, Effect.fn and ApiClient
 
-Read `node_modules/effect/AGENTS.md` completely before writing Effect code. Everything below is copied from the template and the verified todos feature.
+Read `node_modules/effect/AGENTS.md` completely before writing Effect code. Every code block below is copied from the template or the verified todos feature.
 
 ## Schema (`features/<name>/schemas.ts`)
 
@@ -9,6 +9,7 @@ Response shapes and the request body, with derived types:
 ```ts
 import { Schema } from 'effect';
 
+/** A todo as the API returns it. */
 export const Todo = Schema.Struct({
   id: Schema.Number,
   title: Schema.String,
@@ -68,9 +69,21 @@ readonly get: <S extends Schema.Constraint>(
   schema: S,
   options?: { readonly urlParams?: Record<string, string> },
 ) => Effect.Effect<S['Type'], ApiError, S['DecodingServices']>;
-readonly post: <S extends Schema.Constraint>(path: string, body: unknown, schema: S) => ...;
-readonly put:  ...same shape as post
-readonly patch: ...same shape as post
+readonly post: <S extends Schema.Constraint>(
+  path: string,
+  body: unknown,
+  schema: S,
+) => Effect.Effect<S['Type'], ApiError, S['DecodingServices']>;
+readonly put: <S extends Schema.Constraint>(
+  path: string,
+  body: unknown,
+  schema: S,
+) => Effect.Effect<S['Type'], ApiError, S['DecodingServices']>;
+readonly patch: <S extends Schema.Constraint>(
+  path: string,
+  body: unknown,
+  schema: S,
+) => Effect.Effect<S['Type'], ApiError, S['DecodingServices']>;
 readonly delete: (path: string) => Effect.Effect<void, ApiError>;
 ```
 

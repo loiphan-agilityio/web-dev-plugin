@@ -72,6 +72,7 @@ ApiClient → effect/http`
 
 - `renderRoute('/path')` renders the real route tree; `renderWithProviders(<X />)` renders one
   component. Both return `{ user, queryClient, router, ...rtl }`; use `user` (user-event).
+  Both mount the `Toaster`, so a toast is asserted as text (`findByText`); do not mock `sonner`.
 - MSW runs for every test with `onUnhandledFrame: 'error'`: a request without a handler fails
   the test. Drive states with `server.use(...)`; **a later `server.use()` call wins**, and
   within one call the first matching handler wins.
@@ -115,7 +116,8 @@ and concepts that the guide doesn't cover, search through the source code in
 Project skills (in `.claude/skills/` or `~/.claude/skills/`):
 
 - `code-skeleton` — scaffold a new app from this template.
-- `develop-feature` — ticket → schema, API, queries, form, UI, tests.
+- `develop-feature` — ticket → schema, API, queries, form, UI, tests. Loads `integrate-api` for
+  endpoints beyond list + create, and `design-to-ui` when the ticket has a design.
 - `integrate-api` — add or change an endpoint: schema, `ApiClient` call, query/mutation, MSW.
 - `design-to-ui` — a design (screenshot, mockup, Figma) → a UI that matches it: tokens, shadcn
   components, states, tests, visual check.

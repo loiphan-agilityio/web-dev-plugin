@@ -17,6 +17,12 @@ check() { # <label> <command...>  → prints ✓/✗ and counts
   else fail=$((fail + 1)); printf '    ✗ %s\n' "$label"; fi
 }
 has() { grep -qE "$2" "$1" 2>/dev/null; }
+# A skill counts as loaded when the Skill tool invoked it or its SKILL.md was read: a lead skill
+# may open the other one with Read or with `cat` in Bash instead. Uses the loop's $skills and $dir.
+loaded() { # <skill>
+  grep -qE "(^|,|:)$1(,|$)" <<< "$skills" ||
+    jq -e --arg f "$1/SKILL.md" 'select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | select((.input.file_path // .input.command // "") | contains($f))' "$dir/events.jsonl" >/dev/null 2>&1
+}
 count_tests() { grep -rhoE '^\s*(it|test)\(' "$@" 2>/dev/null | wc -l; }
 
 printf '%-18s %-6s %-9s %-8s %-7s %-6s %s\n' run gates asserts forbid cost turns skills
@@ -77,8 +83,7 @@ for dir in "$runs"/*/; do
         p="$(primary "$app/src/styles/index.css")"
         check "theme --primary changed" bash -c '[ -n "$1" ] && [ -n "$2" ] && [ "$1" != "$2" ]' _ "$p" "$p0"
         check "lucide-react used" grep -rqE "from ['\"]lucide-react['\"]" "$f"
-        # develop-feature may load it with Read instead of the Skill tool.
-        check "design-to-ui loaded" bash -c 'grep -qE "(^|,|:)design-to-ui(,|$)" <<< "$1" || jq -e "select(.type==\"assistant\") | .message.content[]? | select(.type==\"tool_use\" and .name==\"Read\") | select(.input.file_path | test(\"design-to-ui/SKILL.md\"))" "$2"' _ "$skills" "$dir/events.jsonl"
+        check "design-to-ui loaded" loaded design-to-ui
       fi
       ;;
     api)
@@ -91,6 +96,22 @@ for dir in "$runs"/*/; do
       check "404 tested" grep -rqiE 'no longer exists|404' "$f/components"
       # The fixture starts with 10 tests; toggle + delete + their 404s add at least 5.
       check ">= 15 todos tests" test "$(count_tests "$f")" -ge 15
+      ;;
+    feature-api)
+      # A ticket whose endpoints go beyond list + create: develop-feature leads and loads integrate-api.
+      f="$app/src/features/todos"
+      check "develop-feature invoked" grep -qE '(^|,|:)develop-feature(,|$)' <<< "$skills"
+      check "integrate-api loaded" loaded integrate-api
+      check "api.patch for edit" has "$f/api.ts" 'api\.patch\('
+      check "api.delete for delete" has "$f/api.ts" 'api\.delete\('
+      check "PATCH + DELETE handlers" bash -c "grep -q 'http.patch' '$f/mocks.ts' && grep -q 'http.delete' '$f/mocks.ts'"
+      check "mutations invalidate" test "$(grep -c 'invalidateQueries' "$f/queries.ts" 2>/dev/null || echo 0)" -ge 3
+      check "404 handled via NotFoundError" grep -rq 'NotFoundError' "$f"
+      check "404 toast tested" grep -rqi 'no longer exists' --include='*.test.tsx' "$f/components"
+      check "sonner not mocked" bash -c '! grep -rqE "vi\.mock\(.sonner" "$1"' _ "$f"
+      check "every todos component has a test" bash -c 'for c in "$1"/components/*.tsx; do case "$c" in *.test.tsx) ;; *) test -f "${c%.tsx}.test.tsx" || exit 1;; esac; done' _ "$f"
+      # The fixture starts with 10 tests; edit (validation, success, 422, 404) and delete (success, 404) add 6.
+      check ">= 16 todos tests" test "$(count_tests "$f")" -ge 16
       ;;
   esac
   [ "$gates" = pass ] && pass=$((pass + 1)) || fail=$((fail + 1))

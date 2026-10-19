@@ -53,6 +53,7 @@ const fromStatus = (
     case 422:
       return response.json.pipe(
         Effect.flatMap(Schema.decodeUnknownEffect(ValidationBody)),
+        // A malformed error body still means "invalid input", just without field details.
         Effect.catch(() => Effect.succeed({ message: undefined, errors: undefined })),
         Effect.flatMap((body) =>
           Effect.fail(
@@ -68,6 +69,7 @@ const fromStatus = (
   }
 };
 
+/** Maps Effect's transport-level errors onto the app's `ApiError` union. */
 const toApiError = (
   error: HttpClientError.HttpClientError | Schema.SchemaError,
 ): Effect.Effect<never, ApiError> => {
@@ -97,7 +99,7 @@ Add a `case` in `fromStatus` (e.g. 409 to a new `ConflictError`, 429, 5xx splits
 ## Adding a new ApiError case
 
 1. `errors.ts`: add the class, same shape as the others, and add it to the `ApiError` union.
-   ```ts
+   ```ts sketch
    export class ConflictError extends Schema.TaggedError<ConflictError>()('ConflictError', {}) {}
    ```
 2. `toUserMessage` in `errors.ts`: add a `case`. The switch is exhaustive over `error._tag`, so TypeScript flags it if you forget.

@@ -6,6 +6,7 @@ import { createMemoryRouter, type RouteObject } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
 import { createRoutes } from '@/app/routes';
+import { Toaster } from '@/components/ui/sonner';
 
 /** A fresh client per test: no shared cache, no retries (a failure shows up immediately). */
 const createTestQueryClient = () =>
@@ -20,6 +21,8 @@ const renderRouter = (routes: RouteObject[], path: string) => {
   const result = render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      {/* As in AppProviders, so tests can assert toasts with findByText. */}
+      <Toaster richColors />
     </QueryClientProvider>,
   );
   return { ...result, user, queryClient, router };

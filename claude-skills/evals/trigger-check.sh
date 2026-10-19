@@ -22,6 +22,8 @@ cases=(
   "code-skeleton|Set up a brand-new frontend project for our team's stack in a folder called admin-console."
   "develop-feature|Implement ticket PROFILE-3: a profile page at /profile showing the user's name and email from GET /me, with an edit form."
   "integrate-api|Our backend added GET /todos/stats returning { total, done }. Call it and expose a query for it."
+  "integrate-api|DELETE /todos/:id now answers 404 when the todo is already gone. Handle that error and add a mock for it."
+  "develop-feature|Implement ticket TODOS-9: users can delete a todo with DELETE /todos/:id; if it is already gone (404), show a toast."
   "design-to-ui|Make the settings page look like design/settings.png."
   "design-to-ui|Build this screen from the mockup in design/checkout.png."
   "design-to-ui|Implement this design for the profile page: https://www.figma.com/design/abc123/Profile?node-id=1-2"

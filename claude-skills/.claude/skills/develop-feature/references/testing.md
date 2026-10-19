@@ -4,16 +4,39 @@ Source: the todos feature (`components/todo-list.test.tsx`, `components/todo-for
 
 ## Harness (already in the template)
 
-`src/test/setup.ts` starts MSW with `onUnhandledFrame: 'error'` and resets handlers after each test:
+`src/test/setup.ts` stubs `matchMedia` (jsdom has none; the Toaster needs it), starts MSW with `onUnhandledFrame: 'error'`, clears sonner's toasts before each test and resets handlers after it:
 
 ```ts
 import '@testing-library/jest-dom/vitest';
 
+import { toast } from 'sonner';
+
 import { server } from '@/mocks/server';
+
+// jsdom has no matchMedia; sonner's Toaster (mounted by src/test/render.tsx) reads it for the
+// system theme.
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }),
+});
 
 // 'error' makes a request with no matching handler fail the test instead of hitting the network.
 beforeAll(() => {
   server.listen({ onUnhandledFrame: 'error' });
+});
+// sonner keeps toasts in a module-level store; without this a toast from one test shows up in the
+// next test's Toaster.
+beforeEach(() => {
+  toast.dismiss();
 });
 // Drop per-test overrides added with server.use().
 afterEach(() => {
@@ -24,7 +47,7 @@ afterAll(() => {
 });
 ```
 
-`src/test/render.tsx` exports `renderRoute(path)` (real route tree) and `renderWithProviders(ui, { path })` (one component). Both create a fresh `QueryClient` (no retries) and router, and return `{ user, queryClient, router, ...rtl }`. Always use that `user`.
+`src/test/render.tsx` exports `renderRoute(path)` (real route tree) and `renderWithProviders(ui, { path })` (one component). Both create a fresh `QueryClient` (no retries) and router, mount the app's `Toaster`, and return `{ user, queryClient, router, ...rtl }`. Always use that `user`.
 
 ## One test file per component
 
@@ -206,6 +229,7 @@ describe('NewTodo', () => {
 
 - Query by role and label (`getByRole`, `findByRole`, `getByLabelText`); no test ids. Use `findBy*` for anything after a request.
 - Assert behaviour (what the user sees), not implementation (hook calls, cache keys).
+- A toast is text on screen: `expect(await screen.findByText('Todo added')).toBeInTheDocument()`. The render helpers mount the `Toaster`; never `vi.mock('sonner')`. In a project scaffolded before the template did this, add the `<Toaster />` to `src/test/render.tsx`, and the `matchMedia` stub and `toast.dismiss()` to `src/test/setup.ts`, as in `.claude/skills/code-skeleton/template/src/test/`.
 - Vitest 5 globals (`describe`, `it`, `expect`) are on; `clearMocks` is default true; `vi.mock` only at file top level. There is no Jest; do not use `jest.*`.
 - MSW 3 imports: `msw/http`, `msw/utils/delay`. Root `msw` imports of `http`/`HttpResponse`/`delay` are rejected by lint.
 - Don't make a test pass by weakening it: no removing assertions, no `.skip`, no loosening queries. If a test exposes a bug, fix the code.

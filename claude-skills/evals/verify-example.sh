@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Proves the todos fixture that develop-feature's references quote still works on a fresh scaffold:
-# check every file is quoted verbatim → scaffold → copy the feature → apply wiring.diff → install →
+# every code block in every skill is copied from the template or the fixture (check-quotes.mjs) →
+# every fixture file is quoted in full → scaffold → copy the feature → apply wiring.diff → install →
 # all four gates.
 set -euo pipefail
 
@@ -9,6 +10,8 @@ example="$root/evals/fixtures/todos"
 refs="$root/.claude/skills/develop-feature/references"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
+
+node "$root/evals/check-quotes.mjs"
 
 # The skill ships only references/; each fixture file must be quoted there verbatim.
 mkdir -p "$tmp/blocks"

@@ -1,6 +1,6 @@
 ---
 name: integrate-api
-description: Add or change one backend endpoint in an app built on the Effect 4 HttpClient + TanStack Query stack (ApiClient, runEffect, MSW 3). Use when asked to "add an endpoint", "call the API", "hook this up to the backend", "fetch X from the server", "add a mutation", "the API returns 422 / handle API errors", "mock this endpoint", "add an ApiError case", or to invalidate/update cached data after a write. Covers the Effect Schema, the Effect.fn in api.ts, queryOptions or mutation hooks, MSW handlers, and tests for success, 404/422/500/network and invalidation. Not for scaffolding a project or building a whole feature (screens, forms, routes) from a ticket.
+description: Add or change one backend endpoint in an app built on the Effect 4 HttpClient + TanStack Query stack (ApiClient, runEffect, MSW 3). Use when asked to "add an endpoint", "call the API", "hook this up to the backend", "fetch X from the server", "add a mutation", "the API returns 422 / handle API errors", "mock this endpoint", "add an ApiError case", or to invalidate/update cached data after a write. Covers the Effect Schema, the Effect.fn in api.ts, queryOptions or mutation hooks, MSW handlers, and tests for success, 404/422/500/network and invalidation. When a ticket needs such an endpoint, develop-feature leads and loads this skill for it. Not for scaffolding a project or building a whole feature (screens, forms, routes) from a ticket.
 ---
 
 # Integrate an API endpoint
@@ -19,7 +19,9 @@ component -> useQuery(xQueryOptions()) / useXMutation() -> runEffect(effect, sig
 - Mock an endpoint (tests and `VITE_API_MOCKING=true pnpm dev`).
 - Decide what a mutation invalidates or writes into the cache.
 
-Do not use for: scaffolding a new app, or building a whole feature (page, form, routes) from a ticket. Those are the `code-skeleton` and `develop-feature` skills. If a feature needs an endpoint, this skill covers that slice.
+Do not use for: scaffolding a new app, or building a whole feature (page, form, routes) from a ticket. Those are the `code-skeleton` and `develop-feature` skills.
+
+**Loaded by `develop-feature`** (a ticket that needs an endpoint beyond list + create): do the steps below for that endpoint inside the ticket's plan, leave the page, routes and nav to `develop-feature`, run `pnpm check` once at its gate step, and put what you did and saw into its Result instead of writing a second one.
 
 ## Before writing any code
 
@@ -35,7 +37,7 @@ Work in `src/features/<name>/` (create the folder files you need; names below ar
 2. **API function** (`api.ts`): one `Effect.fn('<name>.<action>')` per endpoint that does `const api = yield* ApiClient` and calls `api.get/post/put/patch/delete` with the schema. No `fetch`, no error handling here: `ApiClient` already maps failures to `ApiError`.
 3. **Queries** (`queries.ts`): add keys to the key factory (`todoKeys`), a `queryOptions` factory for reads (`todoListQueryOptions`), a mutation hook for writes (`useCreateTodo`). Always go through `runEffect`; pass `signal` for queries. See [references/react-query.md](references/react-query.md).
 4. **Mocks** (`mocks.ts`): extend the handler factory (`createTodosHandlers(initial)`) and the one-off states (`todosMocks`: pending, error, validation). Register the feature's handlers in `src/mocks/handlers.ts`. See [references/msw.md](references/msw.md).
-5. **Tests**: success, each error tag this endpoint can produce (see [references/errors.md](references/errors.md)), and for mutations the invalidation (the list shows the new data). Use `renderRoute` / `renderWithProviders` and `server.use(...)`. Each test goes in the test file of the component that shows the result (a toggle in the list → `todo-list.test.tsx`, rendered alone with `renderWithProviders`); a new component gets its own `.test.tsx`; only flows that span components (invalidation shown in another component) go in the page test. `src/lib/api/client.test.ts` already proves every status → `ApiError` mapping, so feature tests check what the UI does with the error, not the mapping again.
+5. **Tests**: success, each error tag this endpoint can produce (see [references/errors.md](references/errors.md)), and for mutations the invalidation (the list shows the new data). Use `renderRoute` / `renderWithProviders` and `server.use(...)`. Each test goes in the test file of the component that shows the result (a toggle in the list → `todo-list.test.tsx`, rendered alone with `renderWithProviders`); a new component gets its own `.test.tsx`; only flows that span components (invalidation shown in another component) go in the page test. `src/lib/api/client.test.ts` already proves every status → `ApiError` mapping, so feature tests check what the UI does with the error, not the mapping again. A toast is asserted as text with `findByText`: the render helpers mount the `Toaster` ([references/msw.md](references/msw.md), Toasts).
 6. **`pnpm check`** (lint, typecheck, test, build). Not done until it passes.
 
 ## Rules that are easy to break
@@ -43,7 +45,7 @@ Work in `src/features/<name>/` (create the folder files you need; names below ar
 - **Never call `fetch` or axios.** ESLint rejects `fetch` (`no-restricted-globals`) and `axios` (`no-restricted-imports`). Everything goes through `ApiClient`, which prefixes `config.apiUrl`, applies `filterStatusOk`, decodes with the schema and maps every failure to an `ApiError`.
 - **Callers pass already-decoded values.** `ApiClient` sends the body with `HttpClientRequest.bodyJsonUnsafe(body)`, which does not run the schema. Decode form input first (the form resolver does), then pass the `Type` side to the `Effect.fn`.
 - **Retries live only in TanStack Query** (`createQueryClient`: queries retry once, only for `NetworkError` / `ServerError`; mutations never). Do not add `HttpClient.retryTransient`: it multiplies retries and pushes failing tests past React Testing Library's 1s `findBy*` timeout.
-- **`runEffect` rejects with the typed error**, so `query.error` / mutation `error` is `ApiError` (declared once through `Register.defaultError`). Switch on `error._tag`; show text with `toUserMessage(error)`; put server field errors on forms with `setFormErrors(form.setError, error)`.
+- **`runEffect` rejects with the typed error**, so `query.error` / mutation `error` is `ApiError` (declared once through `Register.defaultError`). Switch on `error._tag`; show text with `toUserMessage(error)`; put server field errors on forms with `setFormErrors(form.setError, error)`. A mutation outside a form (a row's toggle or delete) handles its error in `mutate`'s `onError` at the call site, like the form does.
 - **Mutations return the `invalidateQueries` promise** from `onSuccess`, so the mutation stays pending until the list has refetched and the UI never shows stale data after "success".
 - **Auth header**: not implemented. The hook point is the commented line in `ApiClient.layer`'s `mapRequest` in `client.ts` (`HttpClientRequest.bearerToken(token)`). Adding auth changes a shared file; do it only when asked and say so in the result.
 - **Mocks use `config.apiUrl`** (`const url = (path: string) => \`${config.apiUrl}${path}\``), so handlers match exactly what `ApiClient` requests in tests and in dev mocking.
@@ -70,6 +72,8 @@ Companion skills installed in projects (see `CLAUDE.md` for priority: project sk
 
 ## References
 
+Code blocks in them are copied from the template or the verified todos feature; a block marked `sketch` shows a standard pattern that is in neither, so check it with `pnpm check`.
+
 - [references/effect-http.md](references/effect-http.md): read when writing a schema, an `Effect.fn`, or calling a verb with params or a body; also how `ApiClient` works inside.
 - [references/errors.md](references/errors.md): read when handling a status, adding an `ApiError` case, or deciding which error tests an endpoint needs.
 - [references/react-query.md](references/react-query.md): read when writing keys, `queryOptions`, a mutation hook, invalidation or `setQueryData`.
@@ -77,7 +81,7 @@ Companion skills installed in projects (see `CLAUDE.md` for priority: project sk
 
 ## Finish
 
-End your final message with this block, filled in honestly:
+End your final message with this block, filled in honestly (when `develop-feature` loaded this skill, its Result is the only one):
 
 ```
 ## Result

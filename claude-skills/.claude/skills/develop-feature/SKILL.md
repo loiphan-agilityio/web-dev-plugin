@@ -1,6 +1,6 @@
 ---
 name: develop-feature
-description: Implements a feature end to end in an existing React + Effect + TanStack Query app, from a ticket, story or issue to a tested UI. Use for "implement this ticket/story/feature", "build the X page/screen", "add a form for X", "develop feature from this issue URL", "create a CRUD screen", including tickets that come with a design (it loads design-to-ui for the UI). It reads the ticket, lists acceptance criteria and open questions, then writes schemas, API calls, queries, the form, the four UI states, routes, a unit test file for every component plus a page test, and runs pnpm check. Not for scaffolding a new project, wiring one endpoint on its own, or matching a design with no ticket (design-to-ui).
+description: Implements a feature end to end in an existing React + Effect + TanStack Query app, from a ticket, story or issue to a tested UI. Use for "implement this ticket/story/feature", "build the X page/screen", "add a form for X", "develop feature from this issue URL", "create a CRUD screen", including tickets that come with a design (it loads design-to-ui for the UI) or need update, delete or detail endpoints (it loads integrate-api for those). It reads the ticket, lists acceptance criteria and open questions, then writes schemas, API calls, queries, the form, the four UI states, routes, a unit test file for every component plus a page test, and runs pnpm check. Not for scaffolding a new project, wiring one endpoint on its own, or matching a design with no ticket (design-to-ui).
 ---
 
 # develop-feature
@@ -45,11 +45,13 @@ src/features/<name>/
 Plus three registrations outside the folder: see step 5.
 
 ### 2. Schema, API, queries
-Read `references/feature-layout.md` before writing these files; it has each one in full. Endpoint-level details live in the `integrate-api` project skill. The essentials:
+Read `references/feature-layout.md` before writing these files; it has each one in full. The essentials:
 
 - `schemas.ts`: Effect Schemas for API shapes and form input; derive types (`typeof X.Type`, `typeof X.Encoded`).
 - `api.ts`: one `Effect.fn` per call, going through `ApiClient` (never `fetch`; lint rejects it). Retries live in TanStack Query only.
 - `queries.ts`: a key factory, `queryOptions`, and mutation hooks. `runEffect` is the only bridge; pass the query `signal`. Mutations invalidate exactly the keys they change and return the invalidate promise from `onSuccess`.
+
+The todos example covers a list (`GET`) and a create (`POST`) with a 422. When the ticket needs any other endpoint (`PUT` / `PATCH` / `DELETE`, a detail by id, filters or pagination) or an error the UI must handle besides 422 and 500 (404, 409, 401 / 403), invoke the `integrate-api` skill (Skill tool) before writing that endpoint, and follow it for the schema, `api.ts`, keys, invalidation, mocks and error tests. This skill still owns the plan, the UI, the wiring and the one Result block.
 
 ### 3. Form
 React Hook Form with the Effect Schema as resolver: `standardSchemaResolver<Input, unknown, Output>(Schema.toStandardSchemaV1(Schema))`. Read `references/forms.md` before writing the form; it has the full component and edge cases.
@@ -77,6 +79,7 @@ A feature exposes a lazy route factory (`todoRoutes = (): RouteObject[] => [...]
 - Take `user` from the render result. MSW runs with `onUnhandledFrame: 'error'`: an unhandled request fails the test. Components that own a query or mutation are driven with `server.use(...)`, never by mocking hooks or `api.ts`.
 - `create<Name>Handlers(initial)` gives fresh in-memory state; `<name>Mocks` gives pending (`delay('infinite')`), error and 422 responses.
 - A later `server.use()` call wins; within one call the first matching handler wins.
+- A toast is asserted as text (`findByText`): the render helpers mount the `Toaster`. Do not mock `sonner`.
 - Minimum set: list test = the four states; form test = client validation, submit success (input cleared), server 422 field error; page test = create flow (item appears); schema unit tests with `Schema.decodeUnknownSync`.
 - Before the gates, check that every `components/*.tsx` has its `.test.tsx`.
 - Query by role and label, never test ids.
@@ -106,7 +109,7 @@ Companions installed in projects; priority when they disagree: CLAUDE.md and pro
 - `react-testing` — RTL patterns. Vitest only (use `vitest-axe` if you want axe); its MSW imports are v2-style root `msw`, use `msw/http`; first load is `isPending`. It defines its own `renderWithProviders` (MemoryRouter + a theme provider) with the same name as ours: always import ours from `@/test/render`. Ignore its dead cross-references.
 - `vercel-react-best-practices` — client-side performance (`rerender-*`, `js-*`, `advanced-*`, most `bundle-*`). Skip `server-*`, `async-api-routes`, `async-suspense-boundaries`, `rendering-hydration-*`, `rendering-resource-hints`, `rendering-script-defer-async`. Replace `next/dynamic` with `React.lazy`, `optimizePackageImports` with direct imports, SWR with TanStack Query, and the raw `fetch` / Promise examples (`async-parallel`, `async-defer-await`) with Effect (`Effect.all` with `concurrency`).
 - `vercel-composition-patterns` — compound components, React 19 APIs; its examples use React Native `TextInput`, adapt to DOM / shadcn.
-- `integrate-api` (project skill) — endpoint-level work.
+- `integrate-api` (project skill) — one endpoint end to end (schema, `ApiClient` call, keys, invalidation, MSW, error tests). Step 2 loads it for every endpoint beyond list + create; it hands the UI, wiring and Result back here.
 - `design-to-ui` (project skill) — building a UI that matches a design (screenshot, mockup, Figma). With a ticket, this skill leads and `design-to-ui` does the visual work; it hands data work back here.
 
 ## Result

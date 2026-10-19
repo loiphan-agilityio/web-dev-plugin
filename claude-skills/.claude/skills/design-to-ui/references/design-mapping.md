@@ -95,7 +95,7 @@ In `@theme inline`:
 
 Named imports from `lucide-react`, as `sonner.tsx` does, written in the app's style (single quotes and a semicolon, `.prettierrc.json`; generated `components/ui` files use double quotes):
 
-```tsx
+```tsx sketch
 import { CircleCheckIcon, InfoIcon } from 'lucide-react';
 ```
 

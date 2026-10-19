@@ -2,7 +2,7 @@
 # Runs skill evals as parallel headless Claude Code sessions, one temp project per run.
 #
 #   run-evals.sh <config> <eval>...     config: full | skills | none
-#                                       eval: skeleton | feature | api | design | skeleton-baseline (use with none)
+#                                       eval: skeleton | feature | api | feature-api | design | skeleton-baseline (use with none)
 #
 #   full    our 4 skills + the 8 companions      skills  our 4 skills only      none  no skills (baseline)
 #
@@ -14,7 +14,7 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 skills="$root/.claude/skills"
 config="${1:?usage: run-evals.sh <full|skills|none> <eval>...}"; shift
-[ $# -gt 0 ] || { echo "name at least one eval: skeleton feature api design" >&2; exit 1; }
+[ $# -gt 0 ] || { echo "name at least one eval: skeleton feature api feature-api design" >&2; exit 1; }
 claude_bin="${CLAUDE_BIN:-$(command -v claude || ls -d "$HOME"/.vscode/extensions/anthropic.claude-code-*/resources/native-binary/claude 2>/dev/null | sort -V | tail -1)}"
 [ -x "$claude_bin" ] || { echo "claude binary not found; set CLAUDE_BIN" >&2; exit 1; }
 
@@ -26,9 +26,13 @@ prepare() { # <eval> <dir>
   mkdir -p "$dir/app"
   if [ "${eval%%-*}" != skeleton ]; then
     "$skills/code-skeleton/scripts/scaffold.sh" "$dir/app" eval-app >/dev/null
-    if [ "$eval" = api ]; then
+    # api and feature-api change the todos feature, so they start from it.
+    if [ "$eval" = api ] || [ "$eval" = feature-api ]; then
       cp -r "$root/evals/fixtures/todos/src/." "$dir/app/src/"
-      (cd "$dir/app" && git apply "$root/evals/fixtures/todos/wiring.diff")
+      # git init first: inside this repo's work tree, git apply resolves the paths against the
+      # outer repo, skips every file and still exits 0.
+      (cd "$dir/app" && git init -q && git apply "$root/evals/fixtures/todos/wiring.diff")
+      grep -q todoRoutes "$dir/app/src/app/routes.tsx" || { echo "wiring.diff did not apply in $dir/app" >&2; exit 1; }
     fi
     (cd "$dir/app" && pnpm install --frozen-lockfile --silent)
   fi

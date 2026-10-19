@@ -9,7 +9,7 @@ shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library
 | Skill | Use it for | Example prompt |
 |---|---|---|
 | `code-skeleton` | A new project: copies a verified template, installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal" |
-| `develop-feature` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file per component | "Implement this ticket: <paste or GitLab URL>" |
+| `develop-feature` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file per component. Loads `integrate-api` for endpoints beyond list + create and `design-to-ui` for a design | "Implement this ticket: <paste or GitLab URL>" |
 | `integrate-api` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `design-to-ui` | A design (screenshot, mockup, Figma frame) → a UI that matches it: theme tokens, shadcn components, states, tests, a visual check in the browser | "Make the settings page look like design/settings.png" |
 
@@ -55,6 +55,8 @@ build. The parts every feature builds on:
 - **Forms**: React Hook Form + `standardSchemaResolver(Schema.toStandardSchemaV1(schema))` +
   shadcn `Field`; `setFormErrors` puts server field errors under the right inputs.
 - **Tests**: MSW 3 for every test (unhandled requests fail), `renderRoute` / `renderWithProviders`.
+  Both mount the `Toaster` (with a `matchMedia` stub and a per-test reset in `setup.ts`), so a
+  toast is asserted as text.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
   helpers, `clsx`, global `fetch`).
@@ -121,10 +123,12 @@ evals/                   ← end-to-end evals of the skills; fixtures/todos/ is 
 
 1. Edit `.claude/skills/code-skeleton/template/` and run `pnpm check` inside it.
 2. `bash .claude/skills/code-skeleton/scripts/verify.sh` — fresh scaffold, all gates.
-3. `bash evals/verify-example.sh` — the todos fixture is quoted verbatim in develop-feature's
-   references and passes all gates on a fresh scaffold.
-4. Update any snippet in the skills that quotes the changed code. Snippets are copied from the
-   template, never written from memory; keep it that way.
+3. `bash evals/verify-example.sh` — every code block in every skill is copied verbatim from the
+   template or the fixture (`evals/check-quotes.mjs`), the todos fixture is quoted in full in
+   develop-feature's references, and it passes all gates on a fresh scaffold.
+4. Update every snippet `check-quotes.mjs` names. Snippets are copied from the template, never
+   written from memory; keep it that way. A block that shows a pattern found in neither (a detail
+   key, `setQueryData`) is marked ` ```ts sketch ` and says so in the text.
 5. Run the evals.
 
 **Upgrade a companion:** read the diff between the pinned and the new commit, re-check it
@@ -136,9 +140,10 @@ against the conventions, then change the SHA in `install-companions.sh` and in t
 ```bash
 evals/run-evals.sh full skeleton feature api   # our skills + companions
 evals/run-evals.sh skills feature design       # our skills only
+evals/run-evals.sh skills feature-api          # a ticket that needs PATCH/DELETE/404: develop-feature must load integrate-api
 evals/run-evals.sh none feature                # baseline without skills
 evals/grade.sh evals/runs/<timestamp>
-evals/trigger-check.sh                         # which skill fires for 12 short prompts (cents)
+evals/trigger-check.sh                         # which skill fires for 14 short prompts (about $2)
 ```
 
 Latest results and what they showed: [`evals/RESULTS.md`](evals/RESULTS.md). Each run is capped by `EVAL_BUDGET` (USD, default 3; a feature run cost about $0.42 on Sonnet) and `EVAL_MAX_TURNS`; the model defaults to

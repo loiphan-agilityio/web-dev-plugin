@@ -103,3 +103,72 @@ What the runs showed:
   connected.
 - **A green design run after the fix.** Run 2 loaded the skill and passed all 18 content checks,
   but its gates failed for the runner reason above.
+
+## develop-feature ↔ integrate-api handoff — 2026-10-19
+
+Question: should the two skills be merged? No. They trigger on different requests (a ticket vs
+one endpoint) and each eval used only its own skill. The problem was the handoff:
+`develop-feature` only said "endpoint-level details live in `integrate-api`", the same kind of
+advice-only line the design eval showed is ignored. Changes:
+
+- `develop-feature` step 2 now says: for any endpoint beyond list + create (PUT/PATCH/DELETE,
+  detail, filters, pagination) or an error besides 422/500, **invoke `integrate-api` (Skill tool)**.
+  `integrate-api` has a "Loaded by develop-feature" paragraph: its steps only, one Result.
+- **Toasts were untestable.** `renderRoute` / `renderWithProviders` did not mount the `Toaster`,
+  so `findByText` on a toast always failed; adding `<Toaster />` in a test crashed jsdom
+  (`window.matchMedia is not a function`); with a stub, a toast from one test leaked into the next
+  (sonner's store is module-level). The template's `src/test/render.tsx` now mounts the
+  `Toaster`, and `src/test/setup.ts` stubs `matchMedia` and calls `toast.dismiss()` before each
+  test. Each step was reproduced with a failing test first.
+- **Snippets drifted.** 12 code blocks in `integrate-api/references` were not verbatim copies of
+  the template or fixture. Some were intended patterns (now marked `sketch`); the rest had
+  trimmed comments, an abbreviated `ApiClient` interface, a page-level 422 test that is not in the
+  fixture and contradicted the one-test-file-per-component rule, and a link to a
+  `todos-page.test.tsx` example that was not there. `evals/check-quotes.mjs` (run by
+  `verify-example.sh`) now requires every ts/tsx/js/css/diff block in every skill to appear
+  verbatim in the template or fixture, unless it is marked ` ```ts sketch `. 41 blocks match, 8
+  are sketches; it was checked to fail when a quoted source line changes.
+- **Runner bug: `wiring.diff` never applied.** `run-evals.sh` ran `git apply` inside this repo's
+  work tree, where git resolves the patch paths against the outer repo, prints "Skipped patch"
+  for every file and exits 0. Every `api` run so far started with the todos feature unregistered
+  (no route, no default handlers, no nav link) and had to find and wire it first. Fixed with
+  `git init` before `git apply` and a check that the wiring is there.
+- `grade.sh`: a skill counts as loaded when it was invoked or its `SKILL.md` was read with Read
+  **or `cat`** (one run read `integrate-api/SKILL.md` with `cat`). New `feature-api` eval: ticket
+  TODOS-7 (inline edit via PATCH, delete via DELETE 204, 404 → toast + refresh).
+
+| Eval | Config | Skills invoked | Gates | Checks | Forbidden | Turns | Cost |
+|---|---|---|---|---|---|---|---|
+| feature-api, run 1 (wiring bug) | skills | `develop-feature` (+ `cat integrate-api/SKILL.md`) | pass | 12/12 | 0 | 66 | $0.78 |
+| api, run 1 (wiring bug) | skills | `integrate-api` | FAIL* | 6/8 | 0 | 44 | $0.54 |
+| feature (regression) | skills | `develop-feature` | pass | 15/15 | 0 | 28 | $0.50 |
+| **feature-api, run 2** | skills | `develop-feature`, `integrate-api` | pass | 12/12 | 0 | 51 | $0.56 |
+| **api, run 2** | skills | `integrate-api` | pass | 8/8 | 0 | 36 | $0.53 |
+
+\*Run 1 of `api`: the unwired route failed the existing page test, then a compound shell command
+was denied by the `Bash(pnpm *)` allow-list and the model stopped running `pnpm check` (the
+runner limitation noted twice above). Its "mutations invalidate" miss is the grep-based check
+(`≥ 3` lines with `invalidateQueries`): it called one shared `refresh` helper instead, which is
+correct; the check is left as is.
+
+**Trigger check**, 14 prompts (two new: a ticket with DELETE + 404 → `develop-feature`; a bare
+404 handling request → `integrate-api`): 14/14, $1.12.
+
+**Spend for this section: ≈ $4.00** (total ≈ $11.70).
+
+What the runs showed:
+
+- **The handoff works.** Run 1 opened `integrate-api/SKILL.md` and its `errors.md` /
+  `react-query.md` right after loading `develop-feature`; run 2 invoked it with the Skill tool.
+  Both ended with one Result block, and `feature` (list + create only) did not load it.
+- **Toast tests are now plain text assertions.** Every run that needed one asserted it with
+  `findByText`; none mocked `sonner`.
+- **`api` dropped from 42–62 turns to 36** once it started from a wired feature. One run per
+  configuration, so this is a direction, not a measurement.
+
+## Not covered (handoff)
+
+- Variance: one clean run each for `feature-api` and `api`.
+- The runner's `Bash(pnpm *)` allow-list still denies compound shell commands, and the model can
+  then stop running gates (design run 2 above, `api` run 1 here). `EVAL_PERMISSION_MODE=auto` avoids it
+  but changes what the runs are allowed to do; not changed here.
