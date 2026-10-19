@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+dist
+coverage
+public/mockServiceWorker.js
+src/components/ui
+.claude

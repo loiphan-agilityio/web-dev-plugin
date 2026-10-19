@@ -1,0 +1,13 @@
+{
+  "env": {
+    "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm *)",
+      "Bash(npx skills *)",
+      "Bash(curl -s *)",
+      "Bash(git ls-remote *)"
+    ]
+  }
+}

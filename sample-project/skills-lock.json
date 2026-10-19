@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "skills": {
+    "react-hook-form": {
+      "source": "pproenca/dot-skills",
+      "ref": "cf93c57cac89d6fc3e4194686000411567f5caf3",
+      "sourceType": "github",
+      "skillPath": "skills/.curated/react-hook-form/SKILL.md",
+      "computedHash": "e9881245bb3f993f93c9fce336ca7a517ce39864aa46c95d04238fc5ebc4e4d1"
+    },
+    "react-router-data-mode": {
+      "source": "remix-run/agent-skills",
+      "ref": "33578aae4aa36a90c9f8f602105a1ccb0f4efe45",
+      "sourceType": "github",
+      "skillPath": "skills/react-router-data-mode/SKILL.md",
+      "computedHash": "76e3e0f70ff47b743bd90999e676515221e25fd7ee89cd9e5b340417b1a601e2"
+    },
+    "react-testing": {
+      "source": "affaan-m/ecc",
+      "ref": "76aaa77df6adc5b889e689007bf99b9a4f74af34",
+      "sourceType": "github",
+      "skillPath": "skills/react-testing/SKILL.md",
+      "computedHash": "59bd15f26f018d6629557108f936ab691af887508ae71b9d339855e49e337012"
+    },
+    "shadcn": {
+      "source": "shadcn-ui/ui",
+      "ref": "d2fba50ee5b9113008b5bb908563527b7efd2f27",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "b864a958765563321f485a96f4d59c0bb6539f4286ab6d8b8b66895b7ebd302d"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "ref": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourceType": "github",
+      "skillPath": "skills/composition-patterns/SKILL.md",
+      "computedHash": "f98931159fa9c7fed043bcd18a891a46dcf89ababa38df13a4c5b7b30dc0ce07"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "ref": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357"
+    },
+    "vite": {
+      "source": "antfu/skills",
+      "ref": "feb0f3aba6566426f12230e7fc7a10d97c1293bb",
+      "sourceType": "github",
+      "skillPath": "skills/vite/SKILL.md",
+      "computedHash": "88ee465fd10f711efecc76e91e96accae2b229dda371614dcf219099c264a486"
+    },
+    "vitest": {
+      "source": "antfu/skills",
+      "ref": "feb0f3aba6566426f12230e7fc7a10d97c1293bb",
+      "sourceType": "github",
+      "skillPath": "skills/vitest/SKILL.md",
+      "computedHash": "21af2b13d47d31f3094b61c0f41abc8d6a7eed0df3c9a4029ea671f6978b7209"
+    }
+  }
+}
