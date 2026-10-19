@@ -72,11 +72,15 @@ ApiClient → effect/http`
 
 - `renderRoute('/path')` renders the real route tree; `renderWithProviders(<X />)` renders one
   component. Both return `{ user, queryClient, router, ...rtl }`; use `user` (user-event).
+  Both mount the `Toaster`, so a toast is asserted as text (`findByText`); do not mock `sonner`.
 - MSW runs for every test with `onUnhandledFrame: 'error'`: a request without a handler fails
   the test. Drive states with `server.use(...)`; **a later `server.use()` call wins**, and
   within one call the first matching handler wins.
 - Each feature's `mocks.ts` exports `create<Name>Handlers(initial)` (fresh in-memory data per
   call) and `<name>Mocks` (pending / error / validation responses).
+- Every component file has a unit test file beside it (`x.tsx` → `x.test.tsx`) that renders it
+  alone with `renderWithProviders(<X />)`. The page test (`renderRoute`) covers only how the
+  parts work together, not each component's cases again.
 - Query by role and label, not test ids. Test all four states and every form error path.
 
 ## Library versions newer than most training data
@@ -112,14 +116,17 @@ and concepts that the guide doesn't cover, search through the source code in
 Project skills (in `.claude/skills/` or `~/.claude/skills/`):
 
 - `code-skeleton` — scaffold a new app from this template.
-- `develop-feature` — ticket → schema, API, queries, form, UI, tests.
+- `develop-feature` — ticket → schema, API, queries, form, UI, tests. Loads `integrate-api` for
+  endpoints beyond list + create, and `design-to-ui` when the ticket has a design.
 - `integrate-api` — add or change an endpoint: schema, `ApiClient` call, query/mutation, MSW.
+- `design-to-ui` — a design (screenshot, mockup, Figma) → a UI that matches it: tokens, shadcn
+  components, states, tests, visual check.
 
 Companion skills (installed by `install-companions.sh`): `shadcn`, `react-router-data-mode`,
 `vite`, `vitest`, `vercel-react-best-practices`, `vercel-composition-patterns`,
 `react-hook-form`, `react-testing`.
 
-**Priority when they disagree:** this file and the three project skills, then
+**Priority when they disagree:** this file and the four project skills, then
 `node_modules/effect/AGENTS.md` and the installed type definitions, then companion skills.
 Companions are generic: ignore their Next.js / SSR / RSC advice, zod resolvers, Jest,
 `react-router-dom`, raw `fetch` examples and loader-first data fetching.

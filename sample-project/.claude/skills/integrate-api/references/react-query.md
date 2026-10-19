@@ -2,6 +2,8 @@
 
 Object syntax only. `isPending` is the first-load state (not `isLoading`). Retries come from `createQueryClient` only.
 
+Code blocks are copied from the template or the verified todos feature; blocks marked `sketch` show standard TanStack Query 5 patterns that are in neither.
+
 ## `runEffect`: the bridge
 
 ```ts
@@ -26,13 +28,28 @@ export const runEffect = async <A, E extends ApiError>(
 
 ```ts
 declare module '@tanstack/react-query' {
-  interface Register { defaultError: ApiError; }
+  interface Register {
+    /** `runEffect` rejects with an `ApiError`, so that is the type of every `query.error`. */
+    defaultError: ApiError;
+  }
 }
+
+/** Only failures that can succeed on a second try are retried; 4xx answers will not change. */
 const isTransient = (error: ApiError) =>
   error._tag === 'NetworkError' || error._tag === 'ServerError';
 
-queries: { staleTime: 30_000, retry: (failureCount, error) => failureCount < 1 && isTransient(error) },
-mutations: { retry: 0 },
+export const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        // Avoid refetching the same data on every route change.
+        staleTime: 30_000,
+        retry: (failureCount, error) => failureCount < 1 && isTransient(error),
+      },
+      // Mutations are not idempotent: never retry them automatically.
+      mutations: { retry: 0 },
+    },
+  });
 ```
 
 Do not set per-query `retry` or add `HttpClient.retryTransient`.
@@ -64,7 +81,7 @@ Components use `useQuery(todoListQueryOptions())`. Because it is `queryOptions`,
 
 Adding a detail endpoint: extend the same pattern (the key hierarchy `all -> lists / details -> detail(id)` lets you invalidate a whole branch). This is the standard TanStack Query key-factory convention; the todos example has only `lists()`, so check the result with `pnpm check`:
 
-```ts
+```ts sketch
 export const todoKeys = {
   all: ['todos'] as const,
   lists: () => [...todoKeys.all, 'list'] as const,
@@ -93,17 +110,26 @@ Name `use<Action><Name>`. Invalidate exactly the keys the write changes: the lis
 Call-site error handling (from `todo-form.tsx`):
 
 ```ts
-createTodo.mutate(values, {
-  onSuccess: () => { /* reset the form */ },
-  onError: (error) => { setFormErrors(form.setError, error); },
+const onSubmit = form.handleSubmit((values) => {
+  createTodo.mutate(values, {
+    onSuccess: () => {
+      form.reset();
+      toast.success('Todo added');
+    },
+    onError: (error) => {
+      setFormErrors(form.setError, error);
+    },
+  });
 });
 ```
+
+Callbacks that touch the component (form reset, toast) go to `mutate`; the hook's own `onSuccess` only invalidates. A mutation outside a form (a row's toggle or delete button) handles its errors the same way, at the call site: `onError: (error) => { if (error._tag === 'NotFoundError') … else toast.error(toUserMessage(error)); }`.
 
 ## Invalidate vs setQueryData
 
 - Default: **invalidate**. Simple, always correct, one extra request.
 - **`setQueryData`** when the response already contains the new truth and a refetch would be wasteful or flicker (e.g. an update returning the full item). Use it for the detail key, and still invalidate lists. Pattern (standard TanStack Query 5 API; not in the todos example):
-  ```ts
+  ```ts sketch
   onSuccess: (updated) => {
     queryClient.setQueryData(todoKeys.detail(updated.id), updated);
     return queryClient.invalidateQueries({ queryKey: todoKeys.lists() });
@@ -114,4 +140,4 @@ createTodo.mutate(values, {
 
 ## Testing invalidation
 
-Drive it through the UI with in-memory handlers: render the list with `createTodosHandlers([])`, perform the mutation, and `await screen.findByRole('list', ...)`; if the new item shows, the list refetched. See `todos-page.test.tsx` in [msw.md](msw.md). Each test gets a fresh `QueryClient` from `renderRoute` / `renderWithProviders` (returned as `queryClient` when you need to inspect the cache).
+Drive it through the UI with in-memory handlers: render the list with `createTodosHandlers([])`, perform the mutation, and `await screen.findByRole('list', ...)`; if the new item shows, the list refetched. The `todos-page.test.tsx` test in [msw.md](msw.md) does exactly this. Each test gets a fresh `QueryClient` from `renderRoute` / `renderWithProviders` (returned as `queryClient` when you need to inspect the cache).

@@ -11,7 +11,7 @@ One folder per feature: `src/features/<name>/`. All code below is the todos feat
 | `queries.ts` | key factory, `queryOptions`, mutation hooks | `todoKeys`, `todoListQueryOptions`, `useCreateTodo` |
 | `mocks.ts` | MSW handlers | `createTodosHandlers`, `todosHandlers`, `todosMocks`, `todoFixtures` |
 | `routes.tsx` | lazy route factory | `todoRoutes` |
-| `components/` | kebab-case files, PascalCase named exports, tests beside them | `todo-form.tsx` -> `TodoForm` |
+| `components/` | kebab-case files, PascalCase named exports, a `.test.tsx` beside each one | `todo-form.tsx` -> `TodoForm` |
 
 Import from `@/...` for anything outside the feature, relative paths inside it. Use inline type imports (`import { type NewTodo, Todo } from './schemas'`); lint enforces it.
 

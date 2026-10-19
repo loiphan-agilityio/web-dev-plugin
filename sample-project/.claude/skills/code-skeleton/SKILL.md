@@ -1,6 +1,6 @@
 ---
 name: code-skeleton
-description: Scaffolds a new web app (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query, React Router 8, shadcn/ui on Tailwind 4, Vitest 5 + MSW 3) from a verified template. Use when asked to create, scaffold, bootstrap or set up a new web app, project or frontend, to "start a new React app with our stack", or to make a "new project from the template". Do NOT use for adding features, pages or endpoints to an existing app (use develop-feature or integrate-api).
+description: Scaffolds a new web app (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query, React Router 8, shadcn/ui on Tailwind 4, Vitest 5 + MSW 3) from a verified template. Use when asked to create, scaffold, bootstrap or set up a new web app, project or frontend, to "start a new React app with our stack", or to make a "new project from the template". Do NOT use for adding features, pages or endpoints to an existing app (use develop-feature, integrate-api or design-to-ui).
 ---
 
 # Code skeleton
@@ -48,8 +48,9 @@ always call the scripts by that full path.
    - `pnpm dev`; `VITE_API_MOCKING=true pnpm dev` serves the API from `src/mocks` (MSW).
    - Copy `.env.example` to `.env.local` and set `VITE_API_URL` (all `VITE_*` values are public).
    - Conventions live in the project's `CLAUDE.md`.
-   - Next steps: the `develop-feature` skill (ticket to working feature) and the
-     `integrate-api` skill (add or change an endpoint).
+   - Next steps: the `develop-feature` skill (ticket to working feature), the
+     `integrate-api` skill (add or change an endpoint) and the `design-to-ui` skill (a design
+     to a UI that matches it).
 
 `<skill-dir>/scripts/verify.sh [--keep]` scaffolds into a temp dir, runs `pnpm install --frozen-lockfile`
 and `pnpm check`; use it to confirm the template itself still passes.
@@ -113,7 +114,7 @@ Companions installed by step 5, for setup-time questions:
   (accepted knowingly; teams may strip that line).
 
 The generated `CLAUDE.md` ("Skills" section) sets the priority when a companion disagrees with
-the project conventions. After scaffolding, hand off to `develop-feature` and `integrate-api`.
+the project conventions. After scaffolding, hand off to `develop-feature`, `integrate-api` and `design-to-ui`.
 
 ## Result
 

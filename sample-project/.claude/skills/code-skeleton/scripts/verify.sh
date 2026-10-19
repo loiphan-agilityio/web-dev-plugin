@@ -13,7 +13,7 @@ if [ "${1:-}" != "--keep" ]; then trap 'rm -rf "$tmp"' EXIT; fi
 # Install the skills inside the project, as teams do: the app's gates must ignore .claude/.
 skills_root="$(cd "$here/../.." && pwd)"
 mkdir -p "$tmp/app/.claude/skills"
-for s in code-skeleton develop-feature integrate-api; do
+for s in code-skeleton develop-feature integrate-api design-to-ui; do
   [ -d "$skills_root/$s" ] || continue
   (cd "$skills_root" && tar -cf - --exclude=node_modules --exclude=dist "$s") | (cd "$tmp/app/.claude/skills" && tar -xf -)
 done

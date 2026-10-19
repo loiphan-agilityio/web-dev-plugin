@@ -1,8 +1,10 @@
 # MSW 3 handlers and tests
 
+Code blocks are copied from the template or the verified todos feature; blocks marked `sketch` show patterns that are in neither.
+
 ## Imports (lint enforces the root-`msw` ban on these names)
 
-```ts
+```ts sketch
 import { http, HttpResponse } from 'msw/http';
 import { delay } from 'msw/utils/delay';        // also bypass, passthrough: msw/utils/<name>
 import { setupServer } from 'msw/node';         // src/mocks/server.ts
@@ -78,7 +80,7 @@ Conventions:
 
 Currently `export const handlers: RequestHandler[] = [];`. Add each feature's default handlers:
 
-```ts
+```ts sketch
 import { todosHandlers } from '@/features/todos/mocks';
 
 export const handlers: RequestHandler[] = [...todosHandlers];
@@ -88,54 +90,51 @@ export const handlers: RequestHandler[] = [...todosHandlers];
 
 ## Overriding in tests
 
-```ts
-import { screen } from '@testing-library/react';
+`server.use(...)` changes what the backend answers for one test; `afterEach` drops it again. From `todo-list.test.tsx`, which renders the component alone: an error first, then working handlers for the retry.
 
-import { server } from '@/mocks/server';
-import { renderRoute } from '@/test/render';
-import { createTodosHandlers, todoFixtures, todosMocks } from '../mocks';
-
-it('shows a loading state before the first response', async () => {
-  server.use(todosMocks.listPending());
-  renderRoute('/todos');
-  expect(await screen.findByRole('status', { name: 'Loading todos' })).toBeInTheDocument();
-});
-
+```tsx
 it('shows an error with a retry that recovers', async () => {
   server.use(todosMocks.listError(500));
-  const { user } = renderRoute('/todos');
+  const { user } = renderWithProviders(<TodoList />);
   expect(await screen.findByText('Could not load todos')).toBeInTheDocument();
 
   server.use(...createTodosHandlers(todoFixtures));
   await user.click(screen.getByRole('button', { name: 'Try again' }));
   expect(await screen.findByRole('list', { name: 'Todos' })).toBeInTheDocument();
 });
+```
 
-it('shows server field errors under the input', async () => {
+From `todos-page.test.tsx`: invalidation proved through the UI. The in-memory handlers start empty, the create goes through them, and the new item shows only because the list refetched.
+
+```tsx
+it('shows a new todo in the list after it is created', async () => {
   server.use(...createTodosHandlers([]));
-  // A later server.use() call takes precedence over earlier ones.
-  server.use(todosMocks.createInvalid({ title: 'Already exists' }));
   const { user } = renderRoute('/todos');
   await screen.findByText(/No todos yet/);
 
-  await user.type(screen.getByLabelText('Title'), 'Duplicate');
+  await user.type(screen.getByLabelText('Title'), '  Ship it  ');
   await user.click(screen.getByRole('button', { name: 'Add todo' }));
 
-  expect(await screen.findByText('Already exists')).toBeInTheDocument();
+  const list = await screen.findByRole('list', { name: 'Todos' });
+  expect(within(list).getByText('Ship it')).toBeInTheDocument();
 });
 ```
 
 ### Precedence trap
 
-A later `server.use()` call wins; **within one call the first matching handler wins**. This silently uses the success handler and the 422 never happens:
+A later `server.use()` call wins; **within one call the first matching handler wins**. A component that loads data and also runs the mutation that should fail (a list whose rows toggle or delete, an edit form that loads its item) needs both in its own test: the working handlers, then the failing one in a later call. In one call the success handler matches first and the error never happens:
 
-```ts
+```ts sketch
 // don't
 server.use(...createTodosHandlers([]), todosMocks.createInvalid({ title: 'x' }));
 // do: two calls
 server.use(...createTodosHandlers([]));
 server.use(todosMocks.createInvalid({ title: 'x' }));
 ```
+
+### Toasts
+
+`renderRoute` and `renderWithProviders` mount the app's `Toaster` (`src/test/render.tsx`), and `src/test/setup.ts` clears sonner's store before each test, so a toast is asserted like any other text: `expect(await screen.findByText('…')).toBeInTheDocument()`. No need to mock `sonner`. In a project scaffolded before the template did this, add the `<Toaster />` to `src/test/render.tsx`, and the `matchMedia` stub and `toast.dismiss()` to `src/test/setup.ts`, as in `.claude/skills/code-skeleton/template/src/test/`. Without the stub the Toaster throws in jsdom; without the dismiss a toast leaks into the next test.
 
 ### Other rules
 

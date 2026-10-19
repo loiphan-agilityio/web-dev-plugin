@@ -1,11 +1,11 @@
 ---
 name: develop-feature
-description: Implements a feature end to end in an existing React + Effect + TanStack Query app, from a ticket, story or issue to a tested UI. Use for "implement this ticket/story/feature", "build the X page/screen", "add a form for X", "develop feature from this issue URL", "create a CRUD screen". It reads the ticket, lists acceptance criteria and open questions, then writes schemas, API calls, queries, the form, the four UI states, routes, and tests, and runs pnpm check. Not for scaffolding a new project and not for wiring one endpoint on its own.
+description: Implements a feature end to end in an existing React + Effect + TanStack Query app, from a ticket, story or issue to a tested UI. Use for "implement this ticket/story/feature", "build the X page/screen", "add a form for X", "develop feature from this issue URL", "create a CRUD screen", including tickets that come with a design (it loads design-to-ui for the UI) or need update, delete or detail endpoints (it loads integrate-api for those). It reads the ticket, lists acceptance criteria and open questions, then writes schemas, API calls, queries, the form, the four UI states, routes, a unit test file for every component plus a page test, and runs pnpm check. Not for scaffolding a new project, wiring one endpoint on its own, or matching a design with no ticket (design-to-ui).
 ---
 
 # develop-feature
 
-Turn a ticket into a tested UI inside an app that already follows `CLAUDE.md` (feature folders under `src/features/<name>/`). Read the project's `CLAUDE.md` first: its commands, layout and version traps are authoritative. `references/` in this skill's directory holds a complete worked feature (todos: list + create form, 9 tests), verified on a fresh scaffold; copy its shape.
+Turn a ticket into a tested UI inside an app that already follows `CLAUDE.md` (feature folders under `src/features/<name>/`). Read the project's `CLAUDE.md` first: its commands, layout and version traps are authoritative. `references/` in this skill's directory holds a complete worked feature (todos: list + create form, a test file per component, 10 tests), verified on a fresh scaffold; copy its shape.
 
 ## Getting library APIs right
 
@@ -25,6 +25,7 @@ The stack is newer than most training data. Do not write these from memory; copy
 ### 0. Understand
 - Read the ticket. A URL plus a matching CLI means read it with the CLI (`glab` for GitLab, `gh` for GitHub); otherwise ask the user to paste the ticket.
 - Write down the acceptance criteria and the open questions.
+- The ticket links or attaches a design (Figma link, screenshot, mockup)? Note it, the frames it covers, and what it does not show (states, mobile, dark); step 4 invokes the `design-to-ui` skill for it.
 - A criterion blocked by an unanswered question is **excluded from scope** and named in the report. Never implement it on a guess: a plausible guess passes review and is wrong in production. Ask the user when the answer is cheap to get; keep going on the unblocked criteria meanwhile.
 
 ### 1. Plan
@@ -36,17 +37,21 @@ The stack is newer than most training data. Do not write these from memory; copy
 ```
 src/features/<name>/
   schemas.ts   api.ts   queries.ts   mocks.ts   routes.tsx
-  components/  <name>-page.tsx, <name>-form.tsx, <name>-list.tsx, *.test.tsx
+  schemas.test.ts
+  components/  <name>-page.tsx, <name>-form.tsx, <name>-list.tsx,
+               and a .test.tsx beside each one
 ```
 
 Plus three registrations outside the folder: see step 5.
 
 ### 2. Schema, API, queries
-Read `references/feature-layout.md` before writing these files; it has each one in full. Endpoint-level details live in the `integrate-api` project skill. The essentials:
+Read `references/feature-layout.md` before writing these files; it has each one in full. The essentials:
 
 - `schemas.ts`: Effect Schemas for API shapes and form input; derive types (`typeof X.Type`, `typeof X.Encoded`).
 - `api.ts`: one `Effect.fn` per call, going through `ApiClient` (never `fetch`; lint rejects it). Retries live in TanStack Query only.
 - `queries.ts`: a key factory, `queryOptions`, and mutation hooks. `runEffect` is the only bridge; pass the query `signal`. Mutations invalidate exactly the keys they change and return the invalidate promise from `onSuccess`.
+
+The todos example covers a list (`GET`) and a create (`POST`) with a 422. When the ticket needs any other endpoint (`PUT` / `PATCH` / `DELETE`, a detail by id, filters or pagination) or an error the UI must handle besides 422 and 500 (404, 409, 401 / 403), invoke the `integrate-api` skill (Skill tool) before writing that endpoint, and follow it for the schema, `api.ts`, keys, invalidation, mocks and error tests. This skill still owns the plan, the UI, the wiring and the one Result block.
 
 ### 3. Form
 React Hook Form with the Effect Schema as resolver: `standardSchemaResolver<Input, unknown, Output>(Schema.toStandardSchemaV1(Schema))`. Read `references/forms.md` before writing the form; it has the full component and edge cases.
@@ -59,6 +64,8 @@ React Hook Form with the Effect Schema as resolver: `standardSchemaResolver<Inpu
 ### 4. UI
 Every data screen renders four distinct states: loading (`isPending`, `role="status"` with an `aria-label`), error (`toUserMessage(error)` plus a retry button), empty (says what to do next, no `role="alert"`), success. Use Tailwind tokens, `cn` from `@/lib/utils`, `type="button"` on non-submit buttons, `aria-label` on icon-only buttons. Files are kebab-case, exports are PascalCase and named. Patterns: `references/ui-states.md`.
 
+When the ticket has a design, invoke the `design-to-ui` skill (Skill tool) before writing UI code and follow it for tokens, component mapping and styling, and run its visual check after step 5 (the page needs its route and mock handlers first). The four states and the ticket's acceptance criteria still apply: a design that shows only the success state does not remove the others. Add its **Design gaps** line to the Result.
+
 ### 5. Routes and wiring
 A feature exposes a lazy route factory (`todoRoutes = (): RouteObject[] => [...]`), spread into the app's route children. It is a function because React Router 8 empties a lazy route object after loading it, so a shared array would break the second router (every test creates one). Then register the feature in three places (the diff is in `references/feature-layout.md`, section Wiring):
 
@@ -67,11 +74,14 @@ A feature exposes a lazy route factory (`todoRoutes = (): RouteObject[] => [...]
 3. `src/app/root-layout.tsx`: add a `<Link>` in the nav.
 
 ### 6. Tests
-- Page: `renderRoute('/path')`. Component: `renderWithProviders(<X />)`. Take `user` from the result.
-- MSW runs with `onUnhandledFrame: 'error'`: an unhandled request fails the test.
+- **Every component file gets a unit test file beside it** (`<name>-form.tsx` → `<name>-form.test.tsx`), including components added later (item row, dialog, edit form). It renders that component alone with `renderWithProviders(<X />)` and covers its own states and interactions.
+- The page test (`renderRoute('/path')`) checks only what needs the parts together: a created item shows up in the list. It does not repeat the component cases.
+- Take `user` from the render result. MSW runs with `onUnhandledFrame: 'error'`: an unhandled request fails the test. Components that own a query or mutation are driven with `server.use(...)`, never by mocking hooks or `api.ts`.
 - `create<Name>Handlers(initial)` gives fresh in-memory state; `<name>Mocks` gives pending (`delay('infinite')`), error and 422 responses.
-- A later `server.use()` call wins; within one call the first matching handler wins. That is why the todos 422 test uses two calls.
-- Minimum set: the four states, client validation (no request made), submit success (item appears, input cleared), server 422 field error. Add schema unit tests with `Schema.decodeUnknownSync`.
+- A later `server.use()` call wins; within one call the first matching handler wins.
+- A toast is asserted as text (`findByText`): the render helpers mount the `Toaster`. Do not mock `sonner`.
+- Minimum set: list test = the four states; form test = client validation, submit success (input cleared), server 422 field error; page test = create flow (item appears); schema unit tests with `Schema.decodeUnknownSync`.
+- Before the gates, check that every `components/*.tsx` has its `.test.tsx`.
 - Query by role and label, never test ids.
 
 Recipes: `references/testing.md`.
@@ -87,7 +97,7 @@ Finish with the Result block below. Name every excluded criterion and the questi
 - `references/feature-layout.md` — read when planning files or writing schemas, api, queries, mocks, routes (naming, wiring, the full contract).
 - `references/forms.md` — read when building any form (full component, edit forms, server errors, the Input/Output split).
 - `references/ui-states.md` — read when building a list or detail screen (loading, error, empty, success code, a11y rules).
-- `references/testing.md` — read when writing tests (state driving, `server.use` order, assertions, schema tests).
+- `references/testing.md` — read when writing tests (one file per component, state driving, `server.use` order, assertions, schema tests).
 
 ## Related skills
 
@@ -99,7 +109,8 @@ Companions installed in projects; priority when they disagree: CLAUDE.md and pro
 - `react-testing` — RTL patterns. Vitest only (use `vitest-axe` if you want axe); its MSW imports are v2-style root `msw`, use `msw/http`; first load is `isPending`. It defines its own `renderWithProviders` (MemoryRouter + a theme provider) with the same name as ours: always import ours from `@/test/render`. Ignore its dead cross-references.
 - `vercel-react-best-practices` — client-side performance (`rerender-*`, `js-*`, `advanced-*`, most `bundle-*`). Skip `server-*`, `async-api-routes`, `async-suspense-boundaries`, `rendering-hydration-*`, `rendering-resource-hints`, `rendering-script-defer-async`. Replace `next/dynamic` with `React.lazy`, `optimizePackageImports` with direct imports, SWR with TanStack Query, and the raw `fetch` / Promise examples (`async-parallel`, `async-defer-await`) with Effect (`Effect.all` with `concurrency`).
 - `vercel-composition-patterns` — compound components, React 19 APIs; its examples use React Native `TextInput`, adapt to DOM / shadcn.
-- `integrate-api` (project skill) — endpoint-level work.
+- `integrate-api` (project skill) — one endpoint end to end (schema, `ApiClient` call, keys, invalidation, MSW, error tests). Step 2 loads it for every endpoint beyond list + create; it hands the UI, wiring and Result back here.
+- `design-to-ui` (project skill) — building a UI that matches a design (screenshot, mockup, Figma). With a ticket, this skill leads and `design-to-ui` does the visual work; it hands data work back here.
 
 ## Result
 
@@ -107,7 +118,7 @@ End every run with:
 
 ```
 ## Result
-**Did:** what was built (files, routes, tests) and the `pnpm check` outcome
+**Did:** what was built (files, routes, the test file for each component and the page) and the `pnpm check` outcome
 **Saw:** facts observed (ticket details, existing code reused, surprises, code/doc mismatches)
 **Not done:** criteria excluded from scope, and anything skipped
 **Blocked by:** the unanswered questions behind each exclusion
