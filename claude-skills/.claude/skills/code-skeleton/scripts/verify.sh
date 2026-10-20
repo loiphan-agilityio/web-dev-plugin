@@ -31,7 +31,7 @@ fi
 # Install the skills inside the project, as teams do: the app's gates must ignore .claude/.
 skills_root="$(cd "$here/../.." && pwd)"
 mkdir -p "$tmp/app/.claude/skills"
-for s in code-skeleton develop-feature integrate-api design-to-ui; do
+for s in build-app code-skeleton develop-feature integrate-api design-to-ui; do
   [[ -d "$skills_root/$s" ]] || continue
   (cd "$skills_root" && tar -cf - --exclude=node_modules --exclude=dist "$s") | (cd "$tmp/app/.claude/skills" && tar -xf -)
 done

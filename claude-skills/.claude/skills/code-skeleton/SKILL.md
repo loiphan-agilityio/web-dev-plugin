@@ -1,6 +1,6 @@
 ---
 name: code-skeleton
-description: Scaffolds a new web app (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query, React Router 8, shadcn/ui on Tailwind 4, Vitest 5 + MSW 3) from a verified template. Use when asked to create, scaffold, bootstrap or set up a new web app, project or frontend, to "start a new React app with our stack", or to make a "new project from the template". Do NOT use for adding features, pages or endpoints to an existing app (use develop-feature, integrate-api or design-to-ui).
+description: Scaffolds a new web app (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query, React Router 8, shadcn/ui on Tailwind 4, Vitest 5 + MSW 3) from a verified template. Use when asked to create, scaffold, bootstrap or set up a new web app, project or frontend, to "start a new React app with our stack", or to make a "new project from the template". Do NOT use when the request also says what the app should do (a topic, features: "build me a library app") - build-app plans that and calls this skill first - or for adding features, pages or endpoints to an existing app (develop-feature, integrate-api or design-to-ui).
 ---
 
 # Code skeleton
@@ -48,9 +48,12 @@ always call the scripts by that full path.
    missing, or if the shadcn companion still calls `shadcn@latest`. Needs network and Node. If it
    fails (e.g. offline), record its error under **Not done** in Result and continue: the project
    skills and `CLAUDE.md` work without companions.
-6. **Gates.** `pnpm check` (lint with a Prettier check, typecheck, test with coverage, build, Storybook build). Report the real output, including
+6. **Gates.** `pnpm check` (lint with a Prettier check, typecheck, test with coverage, build, Storybook build),
+   as a plain command with no pipe or redirect: the tool result holds the output and the exit code,
+   and `.claude/settings.json` allows the plain command only. Report the real output, including
    failures. Optionally offer `git init` and a first commit; ask first, never commit unasked.
-7. **Hand over.** Tell the user:
+7. **Hand over** (skip it when the `build-app` skill invoked this one: it goes on to build the
+   features and reports at the end). Tell the user:
    - `pnpm dev`; `pnpm dev:mock` serves the API from `src/mocks` (MSW), in any shell.
    - Copy `.env.example` to `.env.local` and set `VITE_API_URL` (all `VITE_*` values are public).
    - Conventions live in the project's `CLAUDE.md`.

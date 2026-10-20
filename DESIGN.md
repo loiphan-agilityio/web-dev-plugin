@@ -9,20 +9,24 @@ the user guide is [`claude-skills/README.md`](claude-skills/README.md).
 flowchart LR
   repo["this repository"] --> mkt[".claude-plugin/marketplace.json"]
   mkt --> plugin["claude-skills/<br/>plugin web-app-skills"]
-  plugin --> skills["4 skills<br/>.claude/skills/"]
+  plugin --> skills["5 skills<br/>.claude/skills/"]
   skills -->|code-skeleton copies| app["new app<br/>template + CLAUDE.md"]
   skills -->|install-companions.sh| comp["8 companion skills<br/>pinned by commit"]
   comp --> app
 ```
 
 A developer adds the marketplace once and installs the plugin; the skills then load in every
-project. The plugin is read in place from the clone, so `git pull` updates it. Copying the four
+project. The plugin is read in place from the clone, so `git pull` updates it. Copying the five
 skill folders into a project's `.claude/skills/` works too.
 
-## 2. The four skills and how they hand off
+## 2. The five skills and how they hand off
 
 ```mermaid
 flowchart TD
+  U0["Build me an app for X"] --> BA[build-app]
+  BA -->|"1. plan in docs/plan.md"| CS
+  BA -->|"2. each ticket of the plan"| DF
+  BA -.->|"3. a design in design/"| DU
   U1["Scaffold a new web app"] --> CS[code-skeleton]
   U2["Implement this ticket"] --> DF[develop-feature]
   U3["Add PATCH /todos/:id"] --> IA[integrate-api]
@@ -38,7 +42,8 @@ flowchart TD
 
 | Skill | Leads when | Hands off to |
 |---|---|---|
-| `code-skeleton` | A new project | — (tells the user about the other three) |
+| `build-app` | A description of a whole app, any topic | `code-skeleton`, then `develop-feature` per planned ticket, then `design-to-ui` if there is a design; one Result at the end. Answers open questions itself and records them as Assumptions |
+| `code-skeleton` | A new project with no features described | — (tells the user about the other skills; skipped under `build-app`) |
 | `develop-feature` | A ticket, story or issue | `integrate-api` for endpoint detail, `design-to-ui` for the UI when there is a design |
 | `integrate-api` | One endpoint on its own | — (when loaded by `develop-feature`, it hands the UI and the Result back) |
 | `design-to-ui` | A design with no ticket | — (when loaded by `develop-feature`, it hands data work back) |

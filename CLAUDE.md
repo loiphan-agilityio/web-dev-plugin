@@ -1,6 +1,6 @@
 # web-app-skills
 
-This repository ships the **web-app-skills** Claude Code plugin: four skills that build web apps
+This repository ships the **web-app-skills** Claude Code plugin: five skills that build web apps
 on React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui.
 What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and a proof-of-concept
 app built by the skills themselves in `examples/task-tracker/`.
@@ -12,7 +12,7 @@ app built by the skills themselves in `examples/task-tracker/`.
 .gitlab-ci.yml                    runs verify.sh on merge requests, pushes and schedules
 claude-skills/                    the plugin (its README.md is the user guide)
   .claude-plugin/plugin.json      name, version
-  .claude/skills/                 the product: code-skeleton, develop-feature, integrate-api, design-to-ui
+  .claude/skills/                 the product: build-app, code-skeleton, develop-feature, integrate-api, design-to-ui
     code-skeleton/template/       the reference app every snippet is copied from
     code-skeleton/scripts/        scaffold.sh, verify.sh, install-companions.sh
   .claude/agents/                 helpers for maintaining this repo, never copied into projects

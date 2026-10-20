@@ -24,6 +24,7 @@ Specific to this skill:
 
 ### 0. Understand
 - Read the ticket. A URL plus a matching CLI means read it with the CLI (`glab` for GitLab, `gh` for GitHub); otherwise ask the user to paste the ticket.
+- **Invoked by `build-app`:** the ticket comes from `docs/plan.md`, whose data model, API and Assumptions answer its open questions. A gap the plan does not cover gets a default added to its Assumptions: never stop to ask, never exclude a criterion. Skip the Result block; `build-app` reports once for the whole app.
 - Write down the acceptance criteria and the open questions.
 - The ticket links or attaches a design (Figma link, screenshot, mockup)? Note it, the frames it covers, and what it does not show (states, mobile, dark); step 4 invokes the `design-to-ui` skill for it.
 - Sort every gap in the ticket into one of two kinds before writing code:

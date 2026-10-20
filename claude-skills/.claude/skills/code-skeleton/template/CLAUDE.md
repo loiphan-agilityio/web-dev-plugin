@@ -158,6 +158,8 @@ and concepts that the guide doesn't cover, search through the source code in
 
 Skills (the `web-app-skills` plugin, or copied into `.claude/skills/` or `~/.claude/skills/`):
 
+- `build-app` — one description of an app → a plan (`docs/plan.md`), then the scaffold and every
+  feature through the skills below, gates, and the app running on mocks. Decides instead of asking.
 - `code-skeleton` — scaffold a new app from this template.
 - `develop-feature` — ticket → schema, API, queries, form, UI, tests. Loads `integrate-api` for
   endpoints beyond list + create, and `design-to-ui` when the ticket has a design.
@@ -169,7 +171,7 @@ Companion skills (installed by `install-companions.sh`): `shadcn`, `react-router
 `vite`, `vitest`, `vercel-react-best-practices`, `vercel-composition-patterns`,
 `react-hook-form`, `react-testing`.
 
-**Priority when they disagree:** this file and the four project skills, then
+**Priority when they disagree:** this file and the five project skills, then
 `node_modules/effect/AGENTS.md` and the installed type definitions, then companion skills.
 Companions are generic: ignore their Next.js / SSR / RSC advice, zod resolvers, Jest,
 `react-router-dom`, raw `fetch` examples and loader-first data fetching.

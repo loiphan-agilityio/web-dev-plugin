@@ -8,7 +8,7 @@
     {
       "name": "web-app-skills",
       "source": "./claude-skills",
-      "description": "Web development skills for a React + Effect + TanStack Query stack: code skeleton, develop feature, integrate API, design to UI."
+      "description": "Web development skills for a React + Effect + TanStack Query stack: a whole app from one description, code skeleton, develop feature, integrate API, design to UI."
     }
   ]
 }

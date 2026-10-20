@@ -1,8 +1,9 @@
 # web-app-skills
 
-A Claude Code plugin with four skills that build web apps on React 19, Vite 8, TypeScript 6,
-Effect 4, TanStack Query 5 (React Query), React Hook Form 7 and shadcn/ui: **code skeleton**,
-**develop feature**, **integrate API** and **design to UI**.
+A Claude Code plugin with five skills that build web apps on React 19, Vite 8, TypeScript 6,
+Effect 4, TanStack Query 5 (React Query), React Hook Form 7 and shadcn/ui: **build app** (a whole
+app from one description), **code skeleton**, **develop feature**, **integrate API** and **design
+to UI**.
 
 ## See it work
 
@@ -24,7 +25,8 @@ claude plugin install web-app-skills@claude-training
 ```
 
 `<branch>` is the branch that holds `.claude-plugin/marketplace.json`; leave out `-b` when it is
-the default branch. Then, in an empty folder: `claude "Scaffold a new web app called my-app"`.
+the default branch. Then, in an empty folder, one message builds a whole app:
+`claude "Build me a library management app: books, members and loans"`.
 Other ways to install, the pinned versions and the companion skills are in
 [`claude-skills/README.md`](claude-skills/README.md).
 
@@ -32,7 +34,7 @@ Other ways to install, the pinned versions and the companion skills are in
 
 | Path | What it is |
 |---|---|
-| [`claude-skills/`](claude-skills/) | The plugin: the four skills and the app template they copy from. |
+| [`claude-skills/`](claude-skills/) | The plugin: the five skills and the app template they copy from. |
 | [`examples/task-tracker/`](examples/task-tracker/) | Proof-of-concept app built by the skills. |
 | [`spec.md`](spec.md) | What the skills must do, and the POC steps. |
 | [`DESIGN.md`](DESIGN.md) | How the plugin, the skills and the generated app are built, and why. |

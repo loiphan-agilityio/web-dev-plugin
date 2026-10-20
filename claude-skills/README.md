@@ -8,6 +8,7 @@ shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library
 
 | Skill | Use it for | Example prompt |
 |---|---|---|
+| `build-app` | A whole app from one description, on any topic: plans features, data model, API and mock data in `docs/plan.md`, then runs the four skills below, all gates, and opens the app on a mocked API. Decides instead of asking and lists every assumption | "Build me a library management app: books, members, loans" |
 | `code-skeleton` | A new project: copies a verified template, installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal" |
 | `develop-feature` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `integrate-api` for endpoints beyond list + create and `design-to-ui` for a design | "Implement this ticket: <paste or issue URL>" |
 | `integrate-api` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
@@ -32,17 +33,18 @@ claude plugin install web-app-skills@claude-training
 `<branch>` is the branch that holds `.claude-plugin/marketplace.json` (for a fork, the branch you
 forked); leave out `-b` when it is the default branch. The plugin is read in place from the clone: `git pull` and
 `/reload-plugins` bring the latest skills. Claude still picks a skill from the prompt; typed,
-plugin skills are namespaced (`/web-app-skills:code-skeleton`). Then, in an empty folder:
-`claude "Scaffold a new web app called billing-portal"`.
+plugin skills are namespaced (`/web-app-skills:build-app`). Then, in an empty folder, one message
+builds a whole app: `claude "Build me a library management app: books, members and loans"`, or
+just the skeleton: `claude "Scaffold a new web app called billing-portal"`.
 
-**Or copy the folders.** Copy the four skill folders into the project (or into `~/.claude/skills/`
+**Or copy the folders.** Copy the five skill folders into the project (or into `~/.claude/skills/`
 to have them everywhere), then ask Claude to scaffold. `<plugin-dir>` below is the
 `claude-skills/` folder of your clone:
 
 ```bash
 mkdir billing-portal && cd billing-portal && git init
 mkdir -p .claude/skills
-cp -r <plugin-dir>/.claude/skills/{code-skeleton,develop-feature,integrate-api,design-to-ui} .claude/skills/
+cp -r <plugin-dir>/.claude/skills/{build-app,code-skeleton,develop-feature,integrate-api,design-to-ui} .claude/skills/
 claude "Scaffold a new web app called billing-portal"
 ```
 
@@ -118,11 +120,11 @@ other advisory fails it. Remove the entry once a fixed `braces` is released.
 
 ## Companion skills
 
-Popular third-party skills for parts of the stack, installed next to the four
+Popular third-party skills for parts of the stack, installed next to the five
 skills by `install-companions.sh` and pinned to an audited commit. Each was read in full for security
 and fit; the findings, and what each skill must tell Claude to ignore, are in
 [`docs/companion-audit.md`](docs/companion-audit.md). When a companion disagrees with the project,
-the project's `CLAUDE.md` and the four project skills win. The installer is pinned too:
+the project's `CLAUDE.md` and the five project skills win. The installer is pinned too:
 `install-companions.sh` runs `skills@1.7.2`, not whatever `npx skills` serves that day.
 
 | Skill | Source | Commit | License | What it is for |
