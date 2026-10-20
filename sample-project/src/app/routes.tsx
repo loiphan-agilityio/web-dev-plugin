@@ -1,6 +1,7 @@
 import { data, redirect, type RouteObject } from 'react-router';
 
 import { authRoutes } from '@/features/auth/routes';
+import { linkRoutes } from '@/features/links/routes';
 import { getSession } from '@/lib/session';
 
 import { HomePage } from './home-page';
@@ -24,6 +25,7 @@ export const createRoutes = (): RouteObject[] => [
     loader: () => getSession() ?? redirect('/login'),
     children: [
       { index: true, Component: HomePage },
+      ...linkRoutes(),
       {
         // Unknown URLs render inside the layout, so the sidebar and header stay. The root
         // ErrorBoundary is left for errors thrown by the layout itself.

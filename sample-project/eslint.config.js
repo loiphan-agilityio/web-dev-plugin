@@ -15,7 +15,6 @@ export default defineConfig([
   globalIgnores([
     'dist',
     'coverage',
-    'public/mockServiceWorker.js',
     'src/components/ui',
     'src/hooks/use-mobile.ts',
     '.claude',

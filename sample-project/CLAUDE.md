@@ -8,7 +8,7 @@ Library, MSW 3. Package manager: pnpm. No SSR, no Next.js.
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Dev server. `VITE_API_MOCKING=true pnpm dev` serves the API from `src/mocks` (MSW). |
+| `pnpm dev` | Dev server. `/api` is proxied to the real backend (`vite.config.ts`). |
 | `pnpm lint` | ESLint, `--max-warnings=0`. Also enforces the import rules below. |
 | `pnpm typecheck` | `tsc -b` |
 | `pnpm test` | Vitest, once. `pnpm test:watch` to watch. |
@@ -28,7 +28,7 @@ src/
     queries.ts        key factory todoKeys, todoListQueryOptions(), mutation hooks useCreateTodo()
     mocks.ts          createTodosHandlers(initial) + todosMocks (MSW)
     routes.tsx        todoRoutes() — lazy route objects
-    components/       kebab-case files, PascalCase named exports, *.test.tsx next to them
+    components/       kebab-case files, PascalCase named exports, *.test.tsx in components/__tests__/
   lib/
     config.ts         every env value (VITE_*), read statically
     runtime.ts        AppLayer + the ManagedRuntime
@@ -38,7 +38,7 @@ src/
     api/client.ts     ApiClient: the only way to call the backend
     api/errors.ts     ApiError union + toUserMessage()
     api/run.ts        runEffect(effect, signal): Effect → Promise for TanStack Query
-  mocks/            handlers.ts (all feature handlers), server.ts (Vitest), browser.ts (dev)
+  mocks/            handlers.ts (all feature handlers), server.ts (Vitest only)
   test/             setup.ts, render.tsx (renderRoute, renderWithProviders)
 ```
 
@@ -78,7 +78,9 @@ ApiClient → effect/http`
   within one call the first matching handler wins.
 - Each feature's `mocks.ts` exports `create<Name>Handlers(initial)` (fresh in-memory data per
   call) and `<name>Mocks` (pending / error / validation responses).
-- Every component file has a unit test file beside it (`x.tsx` → `x.test.tsx`) that renders it
+- Tests live in a `__tests__/` folder next to the code they test, never beside the file itself
+  (`components/x.tsx` → `components/__tests__/x.test.tsx`, `schemas.ts` → `__tests__/schemas.test.ts`).
+  Every component file has a unit test file there that renders it
   alone with `renderWithProviders(<X />)`. The page test (`renderRoute`) covers only how the
   parts work together, not each component's cases again.
 - Query by role and label, not test ids. Test all four states and every form error path.

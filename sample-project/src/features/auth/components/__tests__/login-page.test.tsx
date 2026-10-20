@@ -6,7 +6,7 @@ import { config } from '@/lib/config';
 import { server } from '@/mocks/server';
 import { renderRoute } from '@/test/render';
 
-import { authMocks, createAuthHandlers, sessionFixture } from '../mocks';
+import { authMocks, createAuthHandlers, sessionFixture } from '../../mocks';
 
 const fillAndSubmit = async (user: UserEvent, email: string, password: string) => {
   await user.type(await screen.findByLabelText('Email'), email);

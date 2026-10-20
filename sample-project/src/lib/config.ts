@@ -7,5 +7,4 @@
  */
 export const config = {
   apiUrl: import.meta.env.VITE_API_URL ?? '/api',
-  apiMocking: import.meta.env.VITE_API_MOCKING === 'true',
 } as const;

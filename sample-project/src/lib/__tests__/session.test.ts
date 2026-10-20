@@ -1,4 +1,4 @@
-import { clearSession, getSession, type Session, setSession } from './session';
+import { clearSession, getSession, type Session, setSession } from '../session';
 
 const session: Session = {
   token: 'abc',

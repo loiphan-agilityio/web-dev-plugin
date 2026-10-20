@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react';
 import { setSession } from '@/lib/session';
 import { renderRoute } from '@/test/render';
 
-import { sessionFixture } from './mocks';
+import { sessionFixture } from '../mocks';
 
 describe('route guard', () => {
   // '/does-not-exist' matches the app's 404 route: the redirect must win over the 404.
