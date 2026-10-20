@@ -20,7 +20,7 @@ You review; you do not edit. Your findings are applied by the main session.
    source, or one that differs from its source, is a finding, except a block whose info string
    says `sketch` (```tsx sketch): check only that the pattern it shows is correct for the stack.
 2. **Version traps.** Any v3 Effect API (`Context.Tag`, `Effect.Service`, `@effect/platform`,
-   `Schema.decodeUnknown(`, `ParseError`), `effectTsResolver`, `zodResolver`, `isLoading` for
+   `Schema.decodeUnknown(`, `ParseError`), `standardSchemaResolver` with `toStandardSchemaV1` for forms, `zodResolver`, `isLoading` for
    first load, `react-router-dom`, `tailwind.config`, MSW `rest.`, Jest APIs.
 3. **Consistency.** Names, paths, gate commands and layout identical across the four skills
    and `template/CLAUDE.md`.

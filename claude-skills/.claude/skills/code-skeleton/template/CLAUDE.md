@@ -77,9 +77,8 @@ ApiClient → effect/http`
 - **Every data screen renders four distinct states:** loading (`isPending`, not `isLoading`),
   error (with `toUserMessage` and a retry), empty (with the next action), success. Empty and
   error never look the same.
-- **Forms:** `useForm<Input, unknown, Output>` with
-  `standardSchemaResolver<Input, unknown, Output>(Schema.toStandardSchemaV1(Schema))` built
-  once at module level, `Controller` + shadcn `Field` / `FieldLabel` / `FieldError`,
+- **Forms:** `useForm({ resolver, defaultValues })` with `effectTsResolver(Schema)` built once at
+  module level (it infers the form's types from the schema), `Controller` + shadcn `Field` / `FieldLabel` / `FieldError`,
   `data-invalid` on `Field`, `aria-invalid` on the control. Server errors go through
   `setFormErrors(form.setError, error)`.
 - **Routes are factories** (`createRoutes()`, `<name>Routes()`): React Router mutates route
@@ -130,9 +129,9 @@ and concepts that the guide doesn't cover, search through the source code in
   `Schema.decodeUnknownEffect` (failure: `SchemaError`), or `Schema.decodeUnknownSync` in tests.
   Catch-all is `Effect.catch`. Functions are `Effect.fn('name')(function* () { ... })`. Validation
   messages go through `Schema.check(Schema.isMinLength(1, { message }))`.
-- **React Hook Form + Effect:** `@hookform/resolvers`' `effectTsResolver` only supports
-  Effect 3. Use `standardSchemaResolver` with explicit type arguments (TypeScript cannot
-  infer them through `toStandardSchemaV1`'s return type).
+- **React Hook Form + Effect:** `@hookform/resolvers` 6 ships `effectTsResolver` for Effect 4
+  (`@hookform/resolvers/effect-ts`); it takes the Schema itself. Older docs say it is Effect-3
+  only; that was version 5. No `zodResolver`, no `Schema.toStandardSchemaV1` wrapper.
 - **React Router 8:** there is no `react-router-dom`. Import from `react-router`, and
   `RouterProvider` from `react-router/dom`.
 - **MSW 3:** `http` / `HttpResponse` from `msw/http`; `delay` / `bypass` / `passthrough` from

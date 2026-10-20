@@ -70,7 +70,7 @@ build and Storybook build. The parts every feature builds on:
   `ValidationError`, `ServerError`, `InvalidResponseError`). Tested in `client.test.ts`.
 - **`runEffect`** (`src/lib/api/run.ts`): runs an effect for TanStack Query, passes the abort
   signal, rejects with the typed error so `query.error._tag` is safe to switch on.
-- **Forms**: React Hook Form + `standardSchemaResolver(Schema.toStandardSchemaV1(schema))` +
+- **Forms**: React Hook Form + `effectTsResolver(schema)` (`@hookform/resolvers` 6, Effect 4) +
   shadcn `Field`; `setFormErrors` puts server field errors under the right inputs.
 - **MSW worker**: `public/mockServiceWorker.js` is not in the template; the `postinstall` script
   (`msw init`) writes it from the installed msw, so it always matches the msw version. `pnpm dev:mock` (Vite mode `mock`, `.env.mock`) serves the API from those handlers in any shell, Windows included.
@@ -99,12 +99,18 @@ wiring diff for the three files a feature registers in.
 |---|---|---|
 | typescript | ~6.0 | typescript-eslint 8.71 supports `<6.1`, so not 7.x yet. `baseUrl` is deprecated in 6; `paths` only. |
 | eslint | 10 | ESLint 9 is end-of-life. `eslint-plugin-jsx-a11y` 6.10.2 declares `<=9` but works on 10 (checked against a file with a11y violations); allowed in `pnpm-workspace.yaml`. |
-| effect | 4.0.5 | `@hookform/resolvers`' `effectTsResolver` only supports Effect 3, so forms use `standardSchemaResolver`. |
-| react-router | 8.4 | No `react-router-dom`. React Router mutates lazy route objects once loaded, so route trees are factories (`createRoutes()`). |
+| effect | 4.0.5 | Forms use `effectTsResolver` from `@hookform/resolvers` 6, the first version built for Effect 4 (5.x supported Effect 3 only). |
+| react-router | 8.5 | No `react-router-dom`. React Router mutates lazy route objects once loaded, so route trees are factories (`createRoutes()`). |
 | msw | 3.0 | `http`/`HttpResponse` from `msw/http`, `delay` from `msw/utils/delay`, `onUnhandledFrame`. |
 | vitest | 5.0 | `clearMocks` on by default; `vi.mock` top-level only. |
 | shadcn | 4.22 | Style `radix-nova`; `cn` comes from shadcn's `cn` package. |
 | storybook | 10.6 | `@storybook/react-vite` + addon-a11y. No `msw-storybook-addon`: 3.0.3 calls MSW 2's `onUnhandledRequest`, so `.storybook/preview.tsx` starts the app's own worker. Its esbuild dependency is allowed under `allowBuilds` (`esbuild: true`) in `pnpm-workspace.yaml`, because pnpm 11 blocks unreviewed install scripts. |
+
+**Known advisory:** `pnpm audit` reports GHSA-vfj7-8cjw-p6xm (`braces` <=3.0.3, high) through
+the shadcn CLI. It runs at dev time on the project's own glob patterns and nothing of it ships to
+the browser, and no patched `braces` exists yet, so the template lists it under
+`auditConfig.ignoreGhsas` in `pnpm-workspace.yaml`, with that reason. CI runs `pnpm audit`, so any
+other advisory fails it. Remove the entry once a fixed `braces` is released.
 
 ## Companion skills
 

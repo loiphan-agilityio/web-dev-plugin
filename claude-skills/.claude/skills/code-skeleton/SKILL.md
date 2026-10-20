@@ -64,8 +64,8 @@ and `pnpm check`; use it to confirm the template itself still passes.
 ## What the template contains
 
 Stack (majors pinned in `template/package.json`): React 19.3, Vite 8.3, TypeScript ~6.0,
-ESLint 10, Vitest 5 + jsdom, MSW 3, React Router 8.4, Effect 4.0.5, TanStack Query 5, React
-Hook Form 7.90 with `@hookform/resolvers` 5.9 (`standardSchemaResolver`), shadcn 4.22 (style
+ESLint 10, Vitest 5 + jsdom, MSW 3, React Router 8.5, Effect 4.0.5, TanStack Query 5, React
+Hook Form 7.90 with `@hookform/resolvers` 6 (`effectTsResolver`, built for Effect 4), shadcn 4.22 (style
 `radix-nova`; `cn` comes from the `cn` package via `src/lib/utils.ts`), Tailwind 4.3 CSS-first
 (tokens in `src/styles/index.css`, no `tailwind.config.js`). TypeScript stays on 6.0 because
 typescript-eslint 8.71 supports `<6.1`.
@@ -98,8 +98,7 @@ training data"). Read the template files rather than recalling config from memor
 - **TypeScript 6:** `baseUrl` is deprecated; `tsconfig.app.json` uses `paths` only
   (`"@/*": ["./src/*"]`).
 - **ESLint 10:** `eslint-plugin-jsx-a11y` 6.10.2 declares `eslint<=9` but works; it is allowed in
-  `peerDependencyRules` in `pnpm-workspace.yaml`, as is `@hookform/resolvers>effect: 4` (that peer
-  only applies to `effectTsResolver`, which the project does not use).
+  `peerDependencyRules` in `pnpm-workspace.yaml`.
 - **pnpm 11:** reads settings from `pnpm-workspace.yaml`, not `.npmrc` or `package.json`.
 
 If `CLAUDE.md` and the template files ever disagree, trust the files and tell the user.

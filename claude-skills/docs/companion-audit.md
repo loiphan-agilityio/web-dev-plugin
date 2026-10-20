@@ -68,8 +68,8 @@ modules (`features-mocking.md:102,154,240`). Use pnpm, not npm. Use Effect Schem
 **vercel-composition-patterns**: examples use React Native `<TextInput>`; adapt to DOM and
 shadcn. No conflicts.
 
-**react-hook-form**: every resolver example is `zodResolver` → use
-`standardSchemaResolver(Schema.toStandardSchemaV1(schema))`. Skip `integ-shadcn-form-import`
+**react-hook-form**: every resolver example is `zodResolver` → use `effectTsResolver(schema)`
+(`@hookform/resolvers` 6, Effect 4). Skip `integ-shadcn-form-import`
 and `integ-shadcn-select-wiring` (old shadcn `Form` / `FormField`); the project uses `Field`. Raw
 `fetch` + `setError('root.serverError')` becomes the `ValidationError.fields` → `setError`
 mapping; `useQuery({ queryFn: fetchX })` becomes `queryOptions` via `runEffect`.

@@ -17,7 +17,7 @@ section "Library versions newer than most training data": read it before writing
 
 Specific to this skill:
 
-- **React Hook Form.** `effectTsResolver` is Effect-3 only and `zodResolver` does not apply: use `standardSchemaResolver` with explicit type arguments.
+- **React Hook Form.** `effectTsResolver` from `@hookform/resolvers/effect-ts` (version 6) takes the Effect 4 Schema itself. Older answers say it is Effect-3 only or reach for `zodResolver` / `standardSchemaResolver`: neither applies here.
 - **shadcn.** Forms use `FieldGroup` + `Field`; the old `Form` / `FormField` wrapper is gone. `src/components/ui` is generated: re-add with the CLI, never edit.
 
 ## Workflow
@@ -58,10 +58,10 @@ Read `references/feature-layout.md` before writing these files; it has each one 
 The todos example covers exactly two endpoints: a list (`GET /todos`) and a create (`POST /todos`) with a 422. **Every other endpoint goes through `integrate-api`**, reads included: a detail by id, a second `GET` such as `/tasks/stats`, filters or pagination sent to the server, and every `PUT` / `PATCH` / `DELETE`. So does an error the UI must handle besides 422 and 500 (404, 409, 401 / 403). Invoke the `integrate-api` skill (Skill tool) before writing that endpoint, and follow it for the schema, `api.ts`, keys, invalidation, mocks and error tests. This skill still owns the plan, the UI, the wiring and the one Result block.
 
 ### 3. Form
-React Hook Form with the Effect Schema as resolver: `standardSchemaResolver<Input, unknown, Output>(Schema.toStandardSchemaV1(Schema))`. Read `references/forms.md` before writing the form; it has the full component and edge cases.
+React Hook Form with the Effect Schema as resolver: `effectTsResolver(Schema)`. Read `references/forms.md` before writing the form; it has the full component and edge cases.
 
-- Build the resolver **once at module level**. Explicit type arguments are required: TypeScript cannot infer them through the intersection type `toStandardSchemaV1` returns.
-- `useForm` takes Input and Output because `Schema.Trim` makes Encoded (what the user types) differ from Type (what is submitted).
+- Build the resolver **once at module level**. `useForm({ resolver, defaultValues })` infers both sides from it, with no type arguments.
+- The fields hold the schema's Encoded side (what the user types) and `handleSubmit` passes its Type side (what is submitted); `Schema.Trim` makes them differ.
 - `Controller` + `Field` / `FieldLabel` / `FieldError`; `data-invalid` on `Field`, `aria-invalid` on the control; `noValidate` on `<form>`; `onSubmit={(event) => void onSubmit(event)}` (typescript-eslint `no-misused-promises`).
 - Submit with `mutate(values, { onSuccess: reset + toast, onError: setFormErrors(form.setError, error) })`; disable submit while `isPending`; render server errors from `form.formState.errors.root?.server`.
 
@@ -117,7 +117,7 @@ Companions installed in projects; priority when they disagree: CLAUDE.md and pro
 
 - `shadcn` — components, composition, Field layout. Ignore its Tailwind v3 / `tailwind.config.js` branch, its RSC / `"use client"` notes (inert on Vite) and `next-themes`.
 - `react-router-data-mode` — routing and navigation. Written for v7: there is no `react-router-dom` in v8 and `hasErrorBoundary` is gone. Its loader-first data path is not ours (TanStack Query in components; loaders at most prefetch with `queryClient.ensureQueryData`), and its `useFetcher` mutations become `useMutation` + React Hook Form. Ignore `references/ssr.md` and `unstable_MiddlewareContext`.
-- `react-hook-form` — performance (`useWatch`, `useController`, field arrays). Its resolver examples use `zodResolver`: use `standardSchemaResolver`. Skip its `integ-shadcn-*` rules (old `Form` / `FormField`). Its raw `fetch` + `setError('root.serverError')` becomes `setFormErrors(form.setError, error)` (which writes `root.server`; the companion's key would render nothing), and its `useQuery({ queryFn: fetchX })` becomes a `queryOptions` factory with `runEffect`.
+- `react-hook-form` — performance (`useWatch`, `useController`, field arrays). Its resolver examples use `zodResolver`: use `effectTsResolver(Schema)`. Skip its `integ-shadcn-*` rules (old `Form` / `FormField`). Its raw `fetch` + `setError('root.serverError')` becomes `setFormErrors(form.setError, error)` (which writes `root.server`; the companion's key would render nothing), and its `useQuery({ queryFn: fetchX })` becomes a `queryOptions` factory with `runEffect`.
 - `react-testing` — RTL patterns. Vitest only (use `vitest-axe` if you want axe); its MSW imports are v2-style root `msw`, use `msw/http`; first load is `isPending`. It defines its own `renderWithProviders` (MemoryRouter + a theme provider) with the same name as ours: always import ours from `@/test/render`. Ignore its dead cross-references.
 - `vercel-react-best-practices` — client-side performance (`rerender-*`, `js-*`, `advanced-*`, most `bundle-*`). Skip `server-*`, `async-api-routes`, `async-suspense-boundaries`, `rendering-hydration-*`, `rendering-resource-hints`, `rendering-script-defer-async`. Replace `next/dynamic` with `React.lazy`, `optimizePackageImports` with direct imports, SWR with TanStack Query, and the raw `fetch` / Promise examples (`async-parallel`, `async-defer-await`) with Effect (`Effect.all` with `concurrency`).
 - `vercel-composition-patterns` — compound components, React 19 APIs; its examples use React Native `TextInput`, adapt to DOM / shadcn.

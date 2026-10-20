@@ -5,8 +5,7 @@ Source: the todos feature (`components/todo-form.tsx`), `src/lib/forms.ts`, `src
 ## The full form
 
 ```tsx file=src/features/todos/components/todo-form.tsx
-import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { Schema } from 'effect';
+import { effectTsResolver } from '@hookform/resolvers/effect-ts';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -17,20 +16,15 @@ import { Input } from '@/components/ui/input';
 import { setFormErrors } from '@/lib/forms';
 
 import { useCreateTodo } from '../queries';
-import { NewTodo, type NewTodoInput } from '../schemas';
+import { NewTodo } from '../schemas';
 
-// Built once at module level. The explicit type arguments are needed: TypeScript cannot infer
-// Input/Output through the intersection type that Schema.toStandardSchemaV1 returns.
-const resolver = standardSchemaResolver<NewTodoInput, unknown, NewTodo>(
-  Schema.toStandardSchemaV1(NewTodo),
-);
+// Built once at module level. It reads both sides from the schema: the fields hold
+// NewTodo.Encoded (untrimmed), handleSubmit passes NewTodo.Type (trimmed).
+const resolver = effectTsResolver(NewTodo);
 
 export const TodoForm = () => {
   const createTodo = useCreateTodo();
-  const form = useForm<NewTodoInput, unknown, NewTodo>({
-    resolver,
-    defaultValues: { title: '' },
-  });
+  const form = useForm({ resolver, defaultValues: { title: '' } });
 
   const onSubmit = form.handleSubmit((values) => {
     createTodo.mutate(values, {
@@ -82,8 +76,8 @@ export const TodoForm = () => {
 ## Rules, with the reason
 
 - **Resolver at module level**, once. Rebuilding it per render wastes work and changes identity.
-- **Explicit `<Input, unknown, Output>`** on both `standardSchemaResolver` and `useForm`. TypeScript cannot infer them through the intersection type `Schema.toStandardSchemaV1` returns; without them you get `any`-shaped errors or a failed typecheck. Do not use `effectTsResolver` (Effect 3 only) or `zodResolver`.
-- **Input vs Output.** `Input` = `typeof Schema.Encoded` (what fields hold, e.g. untrimmed string); `Output` = `typeof Schema.Type` (what `handleSubmit` passes and what `mutate` takes).
+- **`effectTsResolver(Schema)`** from `@hookform/resolvers/effect-ts` (version 6, built for Effect 4). It takes the Effect Schema itself, decodes with `Schema.decodeUnknownEffect`, and shows each `Schema.check` message under its field. `useForm` infers its types from it: no type arguments, no `Schema.toStandardSchemaV1`. Not `zodResolver`, and not `standardSchemaResolver` (it needs explicit type arguments for the same result).
+- **Input vs Output.** The fields hold `typeof Schema.Encoded` (e.g. an untrimmed string); `handleSubmit` passes `typeof Schema.Type`, which is what `mutate` takes. A `Schema.Trim` makes the two differ.
 - **`noValidate`** turns off the browser's own bubbles so the schema messages are the only ones.
 - **`onSubmit={(event) => void onSubmit(event)}`**: `handleSubmit` returns a Promise and typescript-eslint `no-misused-promises` rejects passing it straight to a handler prop.
 - **`Controller` + `Field`**: `data-invalid={fieldState.invalid}` on `Field` (colors label and error), `aria-invalid={fieldState.invalid}` on the control (what screen readers and tests read). `FieldLabel htmlFor` must match the control `id`, because tests use `getByLabelText`.

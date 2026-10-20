@@ -2,6 +2,8 @@
 # - plugin-manifest: the plugin and marketplace manifests are valid.
 # - claude-skills: the template, and the todos feature the skills quote, pass every gate on a
 #   fresh scaffold.
+# - audit: no known vulnerability in the template's dependencies, apart from the ones listed with
+#   a reason under auditConfig in its pnpm-workspace.yaml.
 # - companions (schedules only): the pinned companion skills still install, and shadcn is pinned.
 # Runs on merge requests and branch pushes that touch the plugin, and on pipeline schedules (set a
 # weekly one in Build > Pipeline schedules) to catch a dependency release that breaks the template.
@@ -43,6 +45,15 @@ claude-skills:
   script:
     - cd claude-skills
     - bash .claude/skills/code-skeleton/scripts/verify.sh
+
+audit:
+  extends: .plugin-changes
+  before_script:
+    - corepack enable
+  script:
+    # Reads the lockfile only; a new advisory fails the job until it is fixed or explicitly ignored.
+    - cd claude-skills/.claude/skills/code-skeleton/template
+    - pnpm audit
 
 companions:
   rules:
