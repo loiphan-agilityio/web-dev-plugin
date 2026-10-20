@@ -1,67 +1,70 @@
 # Evidence
 
-Recorded on 2026-10-20 on Linux with Node 22.22.3, pnpm 11.17.0 (from the template's
-`packageManager`) and Chromium 156 driven by Playwright. Every file here was produced by running
-the code. The logs differ from the terminal output in two ways only: terminal color codes are
-stripped, and local paths are replaced by `<tmp>`.
+Everything here was produced by running the code. Logs differ from the terminal only in two ways:
+color codes are stripped and local paths are replaced by `<tmp>` or `<app>`.
 
-| What | File | Result |
+| What | Where | Result |
 |---|---|---|
-| CI job, run locally: fresh scaffold, all five gates | [`verify-sh.log`](verify-sh.log) | Lint, typecheck, 25 tests (88% lines), build, Storybook build: **pass** |
-| Template + the todos feature quoted by `develop-feature`, all five gates | [`template-todos/pnpm-check.log`](template-todos/pnpm-check.log) | Lint, typecheck, 35 tests (95% lines), build, Storybook build: **pass** |
-| The todos app in a browser, MSW serving the API | `template-todos/*.png`, [`todos-flow.webm`](template-todos/todos-flow.webm) | Screenshots and a recording below |
-| Each component state in Storybook | `template-todos/storybook/*.png` | 7 stories |
-| One-page summary of the delivery | [Summary artifact](https://claude.ai/artifact/WsEMWexLj3kYAuvJ8jrvxX) | Same evidence, with the open items |
+| The template on a fresh scaffold (same script as CI) | [`verify-sh.log`](verify-sh.log) | Lint, typecheck, 25 tests, build, Storybook build: **pass** |
+| A task tracker built by the skills, one session per ticket | [`poc/history.md`](poc/history.md) | 5 sessions, $3.89, 25 minutes |
+| The final app, gates run independently | [`poc/pnpm-check.log`](poc/pnpm-check.log) | Lint, typecheck, 131 tests (97.8% lines), build, Storybook build: **pass** |
+| Live demo | [Task Tracker Demo](https://claude.ai/artifact/Mbff8zeHWzLnjDKVdhmeSA) | Static build, API answered in the browser |
+| Screenshots, a recording, mobile views, 32 Storybook states | [`poc/screens/`](poc/screens/) | Below |
+| One-page summary | [Web App Skills Report](https://claude.ai/artifact/WsEMWexLj3kYAuvJ8jrvxX) | |
 
-The GitLab pipeline for this branch has not run: the project has no runner and shared runners
-are off. `verify-sh.log` is the same script the CI job runs.
+## The design and the result
 
-## The todos app
+`design-to-ui` restyled the app from two mockups (left). The results are on the right, taken from
+the running app.
 
-The worked feature that `develop-feature/references/` (and `api.ts`, `mocks.ts` in
-`integrate-api/references/`) quote: a list and a create form at `/todos`, on a fresh scaffold,
-started with `VITE_API_MOCKING=true pnpm dev`.
-
-| Desktop (1280 px) | Mobile (375 px) |
+| Mockup | Built by the skills |
 |---|---|
-| ![Todos page, desktop](template-todos/todos-desktop.png) | ![Todos page, mobile](template-todos/todos-mobile.png) |
-| ![Home page, desktop](template-todos/home-desktop.png) | ![Home page, mobile](template-todos/home-mobile.png) |
+| ![Dashboard mockup](../../examples/task-tracker/design/dashboard.png) | ![Dashboard](poc/screens/01-dashboard.png) |
+| ![Tasks mockup](../../examples/task-tracker/design/tasks.png) | ![Tasks](poc/screens/02-tasks.png) |
 
-### Create a todo (recording)
+Differences it reported itself (from [its report](poc/steps/5-design/report.md)): colors are
+estimated by eye, "To do" and "Due this week" are not shown on the dashboard because the mockup
+has four cards, and the due date stays a native date input.
 
-[`todos-flow.webm`](template-todos/todos-flow.webm): submit empty, see the validation message,
-type a title, submit, see the new row and the "Todo added" toast.
+## The user journey
 
-![Recording of the create flow](template-todos/todos-flow.webm)
+[`journey.webm`](poc/screens/journey.webm) records the whole journey in one take. The screenshots
+are its steps:
 
-| 1. Empty submit: client-side validation | 2. After submit: new row and toast |
+| | |
 |---|---|
-| ![Validation error](template-todos/todos-flow-1-validation.png) | ![Todo created](template-todos/todos-flow-2-created.png) |
+| ![Filter: in progress](poc/screens/03-tasks-filter-in-progress.png) 3. Status filter, kept in the URL | ![Search](poc/screens/04-tasks-search-report.png) 4. Search by title |
+| ![Validation](poc/screens/05-create-validation.png) 5. Empty submit: field errors | ![Created](poc/screens/06-create-done.png) 6. Created, with a toast |
+| ![Status changed](poc/screens/07-status-changed.png) 7. Status changed from the list | ![Detail](poc/screens/08-detail.png) 8. Task detail and edit form |
+| ![Saved](poc/screens/09-edit-saved.png) 9. Saved | ![Confirm delete](poc/screens/10-delete-confirm.png) 10. Delete asks first |
+| ![Deleted](poc/screens/11-deleted.png) 11. Deleted, back on the list | ![Dashboard after](poc/screens/12-dashboard-after-changes.png) 12. Dashboard numbers updated |
+| ![Not found](poc/screens/13-task-not-found.png) 13. Unknown task id | |
 
-### Every state, from Storybook
+## Mobile (390 px)
+
+| Dashboard | Tasks | Detail |
+|---|---|---|
+| ![Mobile dashboard](poc/screens/mobile-dashboard.png) | ![Mobile tasks](poc/screens/mobile-tasks.png) | ![Mobile detail](poc/screens/mobile-detail.png) |
+
+## Every state, from Storybook
+
+Each component has a story per state; all 32 are in
+[`poc/screens/storybook/`](poc/screens/storybook/). A few:
 
 | Loading | Empty | Error with retry |
 |---|---|---|
-| ![Loading](template-todos/storybook/todos-todolist--loading.png) | ![Empty](template-todos/storybook/todos-todolist--empty.png) | ![Error](template-todos/storybook/todos-todolist--error-state.png) |
+| ![Loading](poc/screens/storybook/tasks-tasklist--loading.png) | ![Empty](poc/screens/storybook/tasks-tasklist--empty.png) | ![Error](poc/screens/storybook/tasks-tasklist--error-state.png) |
 
-| Success | Form | Form with a 422 field error |
+| Server 422 next to the field | Task not found | Stats loading |
 |---|---|---|
-| ![Success](template-todos/storybook/todos-todolist--success.png) | ![Form](template-todos/storybook/todos-todoform--default.png) | ![Server field error](template-todos/storybook/todos-todoform--server-field-error.png) |
+| ![422](poc/screens/storybook/tasks-taskform--server-field-error.png) | ![Not found](poc/screens/storybook/tasks-taskdetail--not-found.png) | ![Stats loading](poc/screens/storybook/dashboard-statscards--loading.png) |
 
-Whole page: [`todos-todospage--default.png`](template-todos/storybook/todos-todospage--default.png).
+## How these were made
 
-## Reproduce
-
-From the repository root:
-
-```bash
-bash claude-skills/.claude/skills/code-skeleton/scripts/verify.sh
-
-# the todos app: its source files were in claude-skills/evals/fixtures/todos/, removed after 5f11771
-git archive 5f11771 claude-skills/evals/fixtures/todos | tar -x -C /tmp
-bash claude-skills/.claude/skills/code-skeleton/scripts/scaffold.sh /tmp/todos-app todos-app
-cp -r /tmp/claude-skills/evals/fixtures/todos/src/. /tmp/todos-app/src/
-cd /tmp/todos-app && git init -q && git apply /tmp/claude-skills/evals/fixtures/todos/wiring.diff
-pnpm install --frozen-lockfile && pnpm check
-VITE_API_MOCKING=true pnpm dev   # then open /todos
-```
+- Each POC session: `claude -p "<prompt>" --model sonnet --effort medium --permission-mode
+  acceptEdits` with the four skills in the project's `.claude/skills/`, and the prompt files in
+  [`poc/steps/`](poc/steps/) as input.
+- Screenshots and the recording: Chromium driven by Playwright against `VITE_API_MOCKING=true
+  pnpm dev`, at 1280 × 860 and 390 × 844; Storybook stories from `pnpm build-storybook`.
+- To check it yourself: `pnpm install && pnpm check` in `examples/task-tracker/`, and
+  `bash claude-skills/.claude/skills/code-skeleton/scripts/verify.sh` from the repository root.

@@ -1,15 +1,15 @@
-# claude-training (branch web-development-skills)
+# web-app-skills
 
-This branch ships the **web-app-skills** Claude Code plugin for ticket
-[granbull/space#5127](https://gitlab.asoft-python.com/granbull/space/-/work_items/5127): four
-skills that build web apps on the team stack. What it must do is in `spec.md`, how it is built in
-`DESIGN.md`, proof that it works in `docs/evidence/`.
+This repository ships the **web-app-skills** Claude Code plugin: four skills that build web apps
+on React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui.
+What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and a proof-of-concept
+app built by the skills themselves in `examples/task-tracker/`.
 
 ## Layout
 
 ```
 .claude-plugin/marketplace.json   marketplace: lists claude-skills/ as the plugin web-app-skills
-.gitlab-ci.yml                    runs verify.sh on MRs, pushes and schedules
+.gitlab-ci.yml                    runs verify.sh on merge requests, pushes and schedules
 claude-skills/                    the plugin (its README.md is the user guide)
   .claude-plugin/plugin.json      name, version
   .claude/skills/                 the product: code-skeleton, develop-feature, integrate-api, design-to-ui
@@ -17,19 +17,21 @@ claude-skills/                    the plugin (its README.md is the user guide)
     code-skeleton/scripts/        scaffold.sh, verify.sh, install-companions.sh
   .claude/agents/                 helpers for maintaining this repo, never copied into projects
   docs/companion-audit.md         security and fit audit of the 8 companion skills
-docs/evidence/                    gate log, screenshots, video and stories of the todos example app
+examples/task-tracker/            POC app, written by the skills from the tickets in docs/evidence/poc/
+docs/evidence/                    gate logs, screenshots, recording and per-step reports of the POC
 ```
 
 ## Commands
 
-| Command (from `claude-skills/`) | What it proves |
+| Command | What it proves |
 |---|---|
-| `bash .claude/skills/code-skeleton/scripts/verify.sh` | A fresh scaffold passes all five gates (lint, typecheck, test, build, Storybook build). Same as CI. |
-| `cd .claude/skills/code-skeleton/template && pnpm check` | The template itself passes the gates. |
-| `claude plugin validate --strict .claude-plugin/plugin.json` | The plugin manifest is valid. |
+| `bash claude-skills/.claude/skills/code-skeleton/scripts/verify.sh` | A fresh scaffold passes all five gates (lint, typecheck, test, build, Storybook build). Same as CI. |
+| `pnpm check` in `claude-skills/.claude/skills/code-skeleton/template/` | The template itself passes the gates. |
+| `pnpm install && pnpm check` in `examples/task-tracker/` | The POC app passes the gates. |
+| `claude plugin validate --strict claude-skills/.claude-plugin/plugin.json` | The plugin manifest is valid. |
 
-The template pins `pnpm@11.17.0` in `packageManager`; run pnpm from inside the template or a
-scaffolded app so corepack picks that version.
+The template pins pnpm in `packageManager`; run pnpm from inside the template or an app so
+corepack picks that version.
 
 ## Rules for changing the skills
 
@@ -44,13 +46,15 @@ scaffolded app so corepack picks that version.
 - **Change the template first, then the skills.** Run `pnpm check` in the template and
   `verify.sh`, then update every snippet that quotes a changed file.
 - **Companion skills are pinned to an audited commit** in `install-companions.sh`. Upgrading one
-  means reading the diff and updating the SHA there and in `claude-skills/README.md`.
+  means reading the diff and updating the SHA there, in `claude-skills/README.md` and in
+  `claude-skills/docs/companion-audit.md`.
 - **Release:** bump `version` in `claude-skills/.claude-plugin/plugin.json`.
-- Keep files LF (`claude-skills/.gitattributes`); the shell scripts fail on CRLF.
+- Keep files LF (`.gitattributes`); the shell scripts fail on CRLF.
+- `examples/task-tracker/` is output of the skills, kept as evidence (only its demo build is
+  hand-written). Fix a problem in it by fixing the skill or the template, not by editing the
+  example by hand.
 
 ## Git
 
-- Work on `web-development-skills`. The repository's default branch (`practice-02`) is another
-  project: do not merge into it.
 - Commit only what the change touches; stage exact paths and read back
   `git diff --cached --name-only` before committing.

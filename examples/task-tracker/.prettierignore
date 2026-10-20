@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+dist
+coverage
+storybook-static
+public/mockServiceWorker.js
+src/components/ui
+.claude
