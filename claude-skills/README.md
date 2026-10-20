@@ -29,10 +29,10 @@ claude plugin marketplace add ./claude-training
 claude plugin install web-app-skills@claude-training
 ```
 
-The plugin lives on the `web-development-skills` branch (the repository's default branch is another
-project), hence `-b`. It is read in place from the clone: `git pull` and `/reload-plugins` bring the latest
-skills. Claude still picks a skill from the prompt; typed, plugin skills are namespaced
-(`/web-app-skills:code-skeleton`). Then, in an empty folder:
+The plugin lives on the `web-development-skills` branch (the repository's default branch is
+another project), hence `-b`. It is read in place from the clone: `git pull` and
+`/reload-plugins` bring the latest skills. Claude still picks a skill from the prompt; typed,
+plugin skills are namespaced (`/web-app-skills:code-skeleton`). Then, in an empty folder:
 `claude "Scaffold a new web app called billing-portal"`.
 
 **Or copy the folders.** Copy the four skill folders into the project (or into `~/.claude/skills/`
