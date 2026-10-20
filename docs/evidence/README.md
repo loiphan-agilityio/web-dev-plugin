@@ -11,6 +11,7 @@ stripped, and local paths are replaced by `<tmp>`.
 | Template + the todos feature quoted by `develop-feature`, all five gates | [`template-todos/pnpm-check.log`](template-todos/pnpm-check.log) | Lint, typecheck, 35 tests (95% lines), build, Storybook build: **pass** |
 | The todos app in a browser, MSW serving the API | `template-todos/*.png`, [`todos-flow.webm`](template-todos/todos-flow.webm) | Screenshots and a recording below |
 | Each component state in Storybook | `template-todos/storybook/*.png` | 7 stories |
+| One-page summary of the delivery | [Summary artifact](https://claude.ai/artifact/WsEMWexLj3kYAuvJ8jrvxX) | Same evidence, with the open items |
 
 The GitLab pipeline for this branch has not run: the project has no runner and shared runners
 are off. `verify-sh.log` is the same script the CI job runs.

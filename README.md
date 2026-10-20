@@ -10,6 +10,7 @@ that build web apps on the team stack (code skeleton, develop feature, integrate
 | [`DESIGN.md`](DESIGN.md) | How the plugin, the skills and the generated app are built, and why. |
 | [`CLAUDE.md`](CLAUDE.md) | Instructions for Claude Code when it works on this repository. |
 | [`docs/evidence/`](docs/evidence/README.md) | Gate logs, screenshots, a recording and Storybook states of the output. |
+| [Summary artifact](https://claude.ai/artifact/WsEMWexLj3kYAuvJ8jrvxX) | One-page summary of the delivery, with the evidence (English / Tiếng Việt). |
 | [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) | Marketplace that lists `claude-skills/` as the plugin `web-app-skills`. |
 | [`.gitlab-ci.yml`](.gitlab-ci.yml) | Checks the plugin on merge requests, pushes and pipeline schedules. |
 
