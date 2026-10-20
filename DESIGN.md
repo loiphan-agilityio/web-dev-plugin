@@ -7,7 +7,7 @@ the user guide is [`claude-skills/README.md`](claude-skills/README.md).
 
 ```mermaid
 flowchart LR
-  repo["claude-training<br/>branch web-development-skills"] --> mkt[".claude-plugin/marketplace.json"]
+  repo["this repository"] --> mkt[".claude-plugin/marketplace.json"]
   mkt --> plugin["claude-skills/<br/>plugin web-app-skills"]
   plugin --> skills["4 skills<br/>.claude/skills/"]
   skills -->|code-skeleton copies| app["new app<br/>template + CLAUDE.md"]
@@ -103,4 +103,4 @@ flowchart LR
 | `standardSchemaResolver` for forms | `@hookform/resolvers`' `effectTsResolver` supports Effect 3 only. |
 | No `msw-storybook-addon`; stories start the app's own worker | Its 3.0.3 release calls MSW 2's `onUnhandledRequest`. |
 | Route trees are factories (`createRoutes()`) | React Router mutates lazy route objects once loaded, so each router needs fresh ones. |
-| CI runs `verify.sh` on every change to the plugin and on a schedule | A dependency release that breaks the template shows up before a teammate hits it. |
+| CI runs `verify.sh` on every change to the plugin and on a schedule | A dependency release that breaks the template shows up before a user hits it. |

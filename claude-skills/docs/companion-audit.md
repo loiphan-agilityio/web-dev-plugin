@@ -29,9 +29,9 @@ Install form: `npx skills add https://github.com/<repo>/tree/<sha>/<path> -a cla
 
 - **shadcn** `SKILL.md:5` pre-approves `Bash(npx|pnpm dlx|bunx --bun shadcn@latest *)`, and
   `SKILL.md:17` runs `` !`npx shadcn@latest info --json` `` automatically when the skill
-  loads. That executes whatever npm serves as `shadcn@latest` at that moment. Accepted
-  knowingly: it is the official CLI the project uses to add components anyway. Documented in
-  the README so teams can strip line 17 if their policy forbids unpinned execution.
+  loads. That executes whatever npm serves as `shadcn@latest` at that moment. Mitigated:
+  `install-companions.sh` rewrites every `shadcn@latest` to `pnpm exec shadcn`, the CLI pinned
+  by the project's lockfile.
 - No other skill has `allowed-tools`, install scripts, network calls or credential access.
 
 ## Override notes (what each skill must tell Claude to ignore or replace)
@@ -44,7 +44,7 @@ and `next-themes` (`customization.md:52-55`). Forms (`FieldGroup` + `Field`,
 **react-router-data-mode**: written for v7. On React Router 8, import DOM-only APIs as the
 installed package requires (see the template), there is no `react-router-dom`, and
 `hasErrorBoundary` is gone. Loaders and `useLoaderData` are its primary data path, and
-`useFetcher` its mutation path. Ours is TanStack Query: loaders only prefetch with
+`useFetcher` its mutation path. The project uses TanStack Query: loaders only prefetch with
 `queryClient.ensureQueryData`, and mutations go through `useMutation` + React Hook Form.
 Ignore `references/ssr.md` and `unstable_MiddlewareContext` (`route-object.md:231-236`).
 
@@ -65,7 +65,7 @@ shadcn. No conflicts.
 
 **react-hook-form**: every resolver example is `zodResolver` → use
 `standardSchemaResolver(Schema.toStandardSchemaV1(schema))`. Skip `integ-shadcn-form-import`
-and `integ-shadcn-select-wiring` (old shadcn `Form` / `FormField`); we use `Field`. Raw
+and `integ-shadcn-select-wiring` (old shadcn `Form` / `FormField`); the project uses `Field`. Raw
 `fetch` + `setError('root.serverError')` becomes the `ValidationError.fields` → `setError`
 mapping; `useQuery({ queryFn: fetchX })` becomes `queryOptions` via `runEffect`.
 

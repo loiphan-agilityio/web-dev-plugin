@@ -1,6 +1,6 @@
 ---
 name: skill-writer
-description: Writes one skill directory (SKILL.md + references) from the verified reference app in .claude/skills/code-skeleton/template. Use for Phases 1–3 of #5127, one invocation per skill.
+description: Writes one skill directory (SKILL.md + references) from the verified reference app in .claude/skills/code-skeleton/template. Use when writing or rewriting one skill, one invocation per skill.
 model: sonnet
 effort: medium
 tools: Read, Grep, Glob, Write, Edit, Bash

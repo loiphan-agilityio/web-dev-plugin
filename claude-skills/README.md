@@ -1,7 +1,7 @@
 # Claude Code skills for web development
 
-Four Claude Code skills that let Claude build web apps on our standard stack and follow its
-conventions on the first try (ticket [granbull/space#5127](https://gitlab.asoft-python.com/granbull/space/-/work_items/5127)).
+Four Claude Code skills that let Claude build web apps on a modern React stack and follow its
+conventions on the first try.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
 shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Storybook 10 · pnpm 11
@@ -9,7 +9,7 @@ shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library
 | Skill | Use it for | Example prompt |
 |---|---|---|
 | `code-skeleton` | A new project: copies a verified template, installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal" |
-| `develop-feature` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `integrate-api` for endpoints beyond list + create and `design-to-ui` for a design | "Implement this ticket: <paste or GitLab URL>" |
+| `develop-feature` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `integrate-api` for endpoints beyond list + create and `design-to-ui` for a design | "Implement this ticket: <paste or issue URL>" |
 | `integrate-api` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `design-to-ui` | A design (screenshot, mockup, Figma frame) → a UI that matches it: theme tokens, shadcn components, states, tests, a visual check in the browser | "Make the settings page look like design/settings.png" |
 
@@ -24,24 +24,25 @@ Requirements: Node ≥ 22.22, pnpm 11, Claude Code.
 Install it once and the skills load in every project:
 
 ```bash
-git clone -b web-development-skills git@gitlab.asoft-python.com:loi.phan/claude-training.git
+git clone -b <branch> <repo-url> claude-training
 claude plugin marketplace add ./claude-training
 claude plugin install web-app-skills@claude-training
 ```
 
-The plugin lives on the `web-development-skills` branch (the repository's default branch is
-another project), hence `-b`. It is read in place from the clone: `git pull` and
+`<branch>` is the branch that holds `.claude-plugin/marketplace.json` (for a fork, the branch you
+forked); leave out `-b` when it is the default branch. The plugin is read in place from the clone: `git pull` and
 `/reload-plugins` bring the latest skills. Claude still picks a skill from the prompt; typed,
 plugin skills are namespaced (`/web-app-skills:code-skeleton`). Then, in an empty folder:
 `claude "Scaffold a new web app called billing-portal"`.
 
 **Or copy the folders.** Copy the four skill folders into the project (or into `~/.claude/skills/`
-to have them everywhere), then ask Claude to scaffold:
+to have them everywhere), then ask Claude to scaffold. `<plugin-dir>` below is the
+`claude-skills/` folder of your clone:
 
 ```bash
 mkdir billing-portal && cd billing-portal && git init
 mkdir -p .claude/skills
-cp -r <this-repo>/.claude/skills/{code-skeleton,develop-feature,integrate-api,design-to-ui} .claude/skills/
+cp -r <plugin-dir>/.claude/skills/{code-skeleton,develop-feature,integrate-api,design-to-ui} .claude/skills/
 claude "Scaffold a new web app called billing-portal"
 ```
 
@@ -49,20 +50,19 @@ claude "Scaffold a new web app called billing-portal"
 `pnpm check`. The generated `CLAUDE.md` holds the project conventions from then on.
 
 **Existing project on this stack.** Install the plugin (or copy the skills) as above and install
-the companions from the project root (`<this-repo>` is the path to `claude-training/claude-skills`;
-the script installs into the current folder):
+the companions from the project root (the script installs into the current folder):
 
 ```bash
-bash <this-repo>/.claude/skills/code-skeleton/scripts/install-companions.sh
+bash <plugin-dir>/.claude/skills/code-skeleton/scripts/install-companions.sh
 ```
 
-With copied folders, commit `.claude/skills/` and `skills-lock.json` so the whole team gets the
-same skills.
+With copied folders, commit `.claude/skills/` and `skills-lock.json` so everyone on the project gets
+the same skills.
 
 ## What the template gives you
 
-`.claude/skills/code-skeleton/template/` is a complete app that passes lint, typecheck, tests and
-build. The parts every feature builds on:
+`.claude/skills/code-skeleton/template/` is a complete app that passes lint, typecheck, tests,
+build and Storybook build. The parts every feature builds on:
 
 - **`ApiClient`** (`src/lib/api/client.ts`): the only way to call the backend. Effect 4
   `HttpClient`, decodes every body with an Effect Schema and maps every failure to a typed
@@ -99,19 +99,19 @@ wiring diff for the three files a feature registers in.
 | msw | 3.0 | `http`/`HttpResponse` from `msw/http`, `delay` from `msw/utils/delay`, `onUnhandledFrame`. |
 | vitest | 5.0 | `clearMocks` on by default; `vi.mock` top-level only. |
 | shadcn | 4.22 | Style `radix-nova`; `cn` comes from shadcn's `cn` package. |
-| storybook | 10.6 | `@storybook/react-vite` + addon-a11y. No `msw-storybook-addon`: 3.0.3 calls MSW 2's `onUnhandledRequest`, so `.storybook/preview.tsx` starts the app's own worker. Its esbuild dependency is listed under `allowBuilds` (false) in `pnpm-workspace.yaml`, or pnpm 11 fails the install. |
+| storybook | 10.6 | `@storybook/react-vite` + addon-a11y. No `msw-storybook-addon`: 3.0.3 calls MSW 2's `onUnhandledRequest`, so `.storybook/preview.tsx` starts the app's own worker. Its esbuild dependency is allowed under `allowBuilds` (`esbuild: true`) in `pnpm-workspace.yaml`, because pnpm 11 blocks unreviewed install scripts. |
 
 ## Companion skills
 
-Popular third-party skills for parts of the stack, installed next to ours by
-`install-companions.sh` and pinned to the commit we audited. Each was read in full for security
+Popular third-party skills for parts of the stack, installed next to the four
+skills by `install-companions.sh` and pinned to an audited commit. Each was read in full for security
 and fit; the full findings are in [`docs/companion-audit.md`](docs/companion-audit.md). When a
-companion disagrees with the project, the project's `CLAUDE.md` and our four skills win.
+companion disagrees with the project, the project's `CLAUDE.md` and the four project skills win.
 
-| Skill | Source | Commit | License | What it is for | What we override |
+| Skill | Source | Commit | License | What it is for | Overridden by the project |
 |---|---|---|---|---|---|
 | `shadcn` | shadcn-ui/ui (official) | `d2fba50` | MIT | Adding and composing components, `Field` forms | Tailwind v3 branch, `next-themes` |
-| `react-router-data-mode` | remix-run/agent-skills (official) | `33578aa` | MIT | Routing and navigation | Written for v7; loader/`useFetcher` data path (we use TanStack Query), SSR file |
+| `react-router-data-mode` | remix-run/agent-skills (official) | `33578aa` | MIT | Routing and navigation | Written for v7; loader/`useFetcher` data path (the project uses TanStack Query), SSR file |
 | `vite` | antfu/skills | `feb0f3a` | MIT | Vite 8 config and plugins | SSR / library mode |
 | `vitest` | antfu/skills | `feb0f3a` | MIT | Vitest 5 API | Network mocking via MSW only |
 | `vercel-react-best-practices` | vercel-labs/agent-skills | `063bee9` | MIT | Client-side React performance | All `server-*` / Next.js rules, SWR |
@@ -166,7 +166,7 @@ training data"). Skills point there and keep only the traps specific to their ow
 **CI** (`../.gitlab-ci.yml`) runs `verify.sh` in `node:24`
 on merge requests and pushes that touch the plugin, and on pipeline schedules. Add a weekly schedule
 in GitLab (Build > Pipeline schedules) so a dependency release that breaks the template shows up
-before a teammate hits it.
+before a user hits it. On another Git host, run `verify.sh` from your own CI.
 
 **Upgrade a companion:** read the diff between the pinned and the new commit, re-check it
 against the conventions, then change the SHA in `install-companions.sh` and in the table above.
