@@ -5,7 +5,8 @@
 #
 # app-name defaults to the target directory's name and must be a valid npm package name.
 # Refuses to overwrite: if any template file already exists in the target, or a file sits where the
-# template has a directory, it lists the conflicts and exits 1 without copying anything. Existing .git/ and .claude/ are left alone.
+# template has a directory, it lists the conflicts and exits 1 without copying anything. Existing
+# .git/ and .claude/ are left alone.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

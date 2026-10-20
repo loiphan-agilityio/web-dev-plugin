@@ -1,6 +1,6 @@
 ---
 name: integrate-api
-description: Add or change one backend endpoint in an app built on the Effect 4 HttpClient + TanStack Query stack (ApiClient, runEffect, MSW 3). Use when asked to "add an endpoint", "call the API", "hook this up to the backend", "fetch X from the server", "add a mutation", "the API returns 422 / handle API errors", "mock this endpoint", "add an ApiError case", or to invalidate/update cached data after a write. Covers the Effect Schema, the Effect.fn in api.ts, queryOptions or mutation hooks, MSW handlers, and tests for success, 404/422/500/network and invalidation. When a ticket needs such an endpoint, develop-feature leads and loads this skill for it. Not for scaffolding a project or building a whole feature (screens, forms, routes) from a ticket.
+description: Adds or changes one backend endpoint in an app built on the Effect 4 HttpClient + TanStack Query stack (ApiClient, runEffect, MSW 3). Use when asked to "add an endpoint", "call the API", "hook this up to the backend", "fetch X from the server", "add a mutation", "the API returns 422 / handle API errors", "mock this endpoint", "add an ApiError case", or to invalidate/update cached data after a write. Covers the Effect Schema, the Effect.fn in api.ts, queryOptions or mutation hooks, MSW handlers, and tests for success, 404/422/500/network and invalidation. When a ticket needs such an endpoint, develop-feature leads and loads this skill for it. Not for scaffolding a project or building a whole feature (screens, forms, routes) from a ticket.
 ---
 
 # Integrate an API endpoint
