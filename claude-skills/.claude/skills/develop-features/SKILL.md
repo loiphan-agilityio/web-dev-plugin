@@ -1,11 +1,11 @@
 ---
 name: develop-feature
-description: Implements a feature end to end in an existing React + Effect + TanStack Query app, from a ticket, story or issue to a tested UI. Use for "implement this ticket/story/feature", "build the X page/screen", "add a form for X", "develop feature from this issue URL", "create a CRUD screen", including tickets that come with a design (it loads design-to-ui for the UI) or need update, delete or detail endpoints (it loads integrate-api for those). It reads the ticket, lists acceptance criteria and open questions, then writes schemas, API calls, queries, the form, the four UI states, routes, a unit test file for every component plus a page test, and runs pnpm check. Not for scaffolding a new project, wiring one endpoint on its own, or matching a design with no ticket (design-to-ui).
+description: Implements a feature end to end in an existing React + Effect + TanStack Query app, from a ticket, story or issue to a tested UI. Use for "implement this ticket/story/feature", "build the X page/screen", "add a form for X", "develop feature from this issue URL", "create a CRUD screen", including tickets that come with a design (it loads design-to-ui for the UI) or need update, delete or detail endpoints (it loads integrate-api for those). It reads the ticket, lists acceptance criteria and open questions, then writes schemas, API calls, queries, the form, the four UI states, routes, a unit test file and a Storybook story file for every component plus a page test, and runs pnpm check. Not for scaffolding a new project, wiring one endpoint on its own, or matching a design with no ticket (design-to-ui).
 ---
 
 # develop-feature
 
-Turn a ticket into a tested UI inside an app that already follows `CLAUDE.md` (feature folders under `src/features/<name>/`). Read the project's `CLAUDE.md` first: its commands, layout and version traps are authoritative. `references/` in this skill's directory holds a complete worked feature (todos: list + create form, a test file per component, 10 tests), verified on a fresh scaffold; copy its shape.
+Turn a ticket into a tested UI inside an app that already follows `CLAUDE.md` (feature folders under `src/features/<name>/`). Read the project's `CLAUDE.md` first: its commands, layout and version traps are authoritative. `references/` in this skill's directory holds a complete worked feature (todos: list + create form, a test file and a story file per component, 10 tests), verified on a fresh scaffold; copy its shape.
 
 ## Getting library APIs right
 
@@ -19,6 +19,7 @@ The stack is newer than most training data. Do not write these from memory; copy
 - **Tailwind 4.** No `tailwind.config.js`; use tokens (`text-muted-foreground`, `bg-background`).
 - **shadcn.** Forms use `FieldGroup` + `Field`; the old `Form` / `FormField` wrapper is gone. `src/components/ui` is generated: re-add with the CLI, never edit.
 - **Vitest 5.** `clearMocks` defaults to true; `vi.mock` only at top level. Never `jest.*`.
+- **Storybook 10.** Types (`Meta`, `StoryObj`) from `@storybook/react-vite`; `@storybook/test` is gone (`play` gets `canvas` and `userEvent` from its context). API mocks go in `parameters.msw.handlers`, served by the template's worker: no `msw-storybook-addon` (it uses MSW 2's `onUnhandledRequest`).
 
 ## Workflow
 
@@ -39,7 +40,7 @@ src/features/<name>/
   schemas.ts   api.ts   queries.ts   mocks.ts   routes.tsx
   schemas.test.ts
   components/  <name>-page.tsx, <name>-form.tsx, <name>-list.tsx,
-               and a .test.tsx beside each one
+               and a .test.tsx and a .stories.tsx beside each one
 ```
 
 Plus three registrations outside the folder: see step 5.
@@ -81,15 +82,22 @@ A feature exposes a lazy route factory (`todoRoutes = (): RouteObject[] => [...]
 - A later `server.use()` call wins; within one call the first matching handler wins.
 - A toast is asserted as text (`findByText`): the render helpers mount the `Toaster`. Do not mock `sonner`.
 - Minimum set: list test = the four states; form test = client validation, submit success (input cleared), server 422 field error; page test = create flow (item appears); schema unit tests with `Schema.decodeUnknownSync`.
-- Before the gates, check that every `components/*.tsx` has its `.test.tsx`.
 - Query by role and label, never test ids.
 
 Recipes: `references/testing.md`.
 
-### 7. Gates
-Run `pnpm check` (lint, typecheck, test, build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
+### 7. Stories
+Read `references/stories.md` before writing stories.
 
-### 8. Report
+- **Every component file gets a story file beside it** (`<name>-list.tsx` → `<name>-list.stories.tsx`), including components added later. `title: '<Feature>/<Component>'`, `const meta = { ... } satisfies Meta<typeof X>`.
+- One story per state the component renders, driven by the feature's `mocks.ts` through `parameters.msw.handlers`: list = `Loading`, `Success`, `Empty`, `ErrorState`; form = `Default` plus a `play` story per server error it shows; page = `Default`.
+- The preview already wraps every story in the query client, a router and the `Toaster`: add no providers in a story.
+- Before the gates, check that every `components/*.tsx` has its `.test.tsx` and its `.stories.tsx`.
+
+### 8. Gates
+Run `pnpm check` (lint, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
+
+### 9. Report
 Finish with the Result block below. Name every excluded criterion and the question that blocked it.
 
 ## References
@@ -98,6 +106,7 @@ Finish with the Result block below. Name every excluded criterion and the questi
 - `references/forms.md` — read when building any form (full component, edit forms, server errors, the Input/Output split).
 - `references/ui-states.md` — read when building a list or detail screen (loading, error, empty, success code, a11y rules).
 - `references/testing.md` — read when writing tests (one file per component, state driving, `server.use` order, assertions, schema tests).
+- `references/stories.md` — read when writing stories (the preview harness, one story per state, `play` for interaction states).
 
 ## Related skills
 
@@ -118,7 +127,7 @@ End every run with:
 
 ```
 ## Result
-**Did:** what was built (files, routes, the test file for each component and the page) and the `pnpm check` outcome
+**Did:** what was built (files, routes, the test file and story file for each component and the page) and the `pnpm check` outcome
 **Saw:** facts observed (ticket details, existing code reused, surprises, code/doc mismatches)
 **Not done:** criteria excluded from scope, and anything skipped
 **Blocked by:** the unanswered questions behind each exclusion

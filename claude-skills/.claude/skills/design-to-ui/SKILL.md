@@ -94,7 +94,7 @@ Follow `references/visual-check.md`: with a browser tool, open the page, compare
 
 ### 6. Gates
 
-Run `pnpm check` (lint, typecheck, test, build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
+Run `pnpm check` (lint, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
 
 ### 7. Report
 

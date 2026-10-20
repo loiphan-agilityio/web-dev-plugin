@@ -4,12 +4,12 @@ Four Claude Code skills that let Claude build web apps on our standard stack and
 conventions on the first try (ticket [granbull/space#5127](https://gitlab.asoft-python.com/granbull/space/-/work_items/5127)).
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
-shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · pnpm 11
+shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Storybook 10 · pnpm 11
 
 | Skill | Use it for | Example prompt |
 |---|---|---|
 | `code-skeleton` | A new project: copies a verified template, installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal" |
-| `develop-feature` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file per component. Loads `integrate-api` for endpoints beyond list + create and `design-to-ui` for a design | "Implement this ticket: <paste or GitLab URL>" |
+| `develop-feature` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `integrate-api` for endpoints beyond list + create and `design-to-ui` for a design | "Implement this ticket: <paste or GitLab URL>" |
 | `integrate-api` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `design-to-ui` | A design (screenshot, mockup, Figma frame) → a UI that matches it: theme tokens, shadcn components, states, tests, a visual check in the browser | "Make the settings page look like design/settings.png" |
 
@@ -76,6 +76,7 @@ out of the skill so installed projects never lint or test it.
 | msw | 3.0 | `http`/`HttpResponse` from `msw/http`, `delay` from `msw/utils/delay`, `onUnhandledFrame`. |
 | vitest | 5.0 | `clearMocks` on by default; `vi.mock` top-level only. |
 | shadcn | 4.22 | Style `radix-nova`; `cn` comes from shadcn's `cn` package. |
+| storybook | 10.6 | `@storybook/react-vite` + addon-a11y. No `msw-storybook-addon`: 3.0.3 calls MSW 2's `onUnhandledRequest`, so `.storybook/preview.tsx` starts the app's own worker. Its esbuild dependency is listed under `allowBuilds` (false) in `pnpm-workspace.yaml`, or pnpm 11 fails the install. |
 
 ## Companion skills
 
