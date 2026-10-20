@@ -1,9 +1,0 @@
-# pnpm settings for this single-package project (pnpm 11 reads them from this file).
-peerDependencyRules:
-  allowedVersions:
-    # The effect peer only applies to effectTsResolver (Effect 3). This project uses
-    # standardSchemaResolver with Effect 4's Schema.toStandardSchemaV1 instead.
-    '@hookform/resolvers>effect': '4'
-    # eslint-plugin-jsx-a11y 6.10.2 (last release 2024-10) declares eslint <=9 but works on
-    # ESLint 10; verified by linting a file with a11y violations.
-    eslint-plugin-jsx-a11y>eslint: '10'
