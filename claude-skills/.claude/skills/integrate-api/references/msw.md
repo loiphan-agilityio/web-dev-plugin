@@ -22,7 +22,7 @@ import { delay } from 'msw/utils/delay';
 
 import { config } from '@/lib/config';
 
-import type { Todo } from './schemas';
+import type { NewTodo, Todo } from './schemas';
 
 const url = (path: string) => `${config.apiUrl}${path}`;
 
@@ -39,9 +39,10 @@ export const createTodosHandlers = (initial: Todo[] = todoFixtures) => {
   const todos = [...initial];
   return [
     http.get(url('/todos'), () => HttpResponse.json(todos)),
-    http.post(url('/todos'), async ({ request }) => {
-      const body = (await request.json()) as { title: string };
-      const todo: Todo = { id: todos.length + 1, title: body.title, completed: false };
+    // The type arguments are path params and request body: `request.json()` is typed, no cast.
+    http.post<never, NewTodo>(url('/todos'), async ({ request }) => {
+      const { title } = await request.json();
+      const todo: Todo = { id: todos.length + 1, title, completed: false };
       todos.push(todo);
       return HttpResponse.json(todo, { status: 201 });
     }),

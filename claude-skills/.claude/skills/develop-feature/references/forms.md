@@ -25,7 +25,7 @@ const resolver = standardSchemaResolver<NewTodoInput, unknown, NewTodo>(
   Schema.toStandardSchemaV1(NewTodo),
 );
 
-export function TodoForm() {
+export const TodoForm = () => {
   const createTodo = useCreateTodo();
   const form = useForm<NewTodoInput, unknown, NewTodo>({
     resolver,
@@ -76,7 +76,7 @@ export function TodoForm() {
       </FieldGroup>
     </form>
   );
-}
+};
 ```
 
 ## Rules, with the reason

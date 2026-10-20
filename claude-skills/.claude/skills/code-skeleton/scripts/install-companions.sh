@@ -36,7 +36,7 @@ done
 # them at the project's own shadcn, pinned by pnpm-lock.yaml. (skills-lock.json keeps the upstream
 # hash, so `npx skills check` reports this skill as modified; re-run this script after an update.)
 # Runs before the failure check below, so a partial install never leaves shadcn unpinned.
-if [ -d .claude/skills/shadcn ]; then
+if [[ -d .claude/skills/shadcn ]]; then
   find .claude/skills/shadcn -name '*.md' -exec sed -i.bak -E 's/(npx|pnpm dlx|bunx --bun) shadcn@latest/pnpm exec shadcn/g' {} +
   find .claude/skills/shadcn -name '*.md.bak' -delete
   # A form the rewrite above does not know (a new flag, another runner) must not slip through.
@@ -46,12 +46,12 @@ if [ -d .claude/skills/shadcn ]; then
   fi
 fi
 
-if [ ${#failed[@]} -gt 0 ]; then
+if (( ${#failed[@]} > 0 )); then
   echo "companions not installed (${#failed[@]}):" >&2
   printf '  %s\n' "${failed[@]}" >&2
   exit 1
 fi
-if [ ! -f skills-lock.json ]; then
+if [[ ! -f skills-lock.json ]]; then
   echo "error: the skills CLI did not write skills-lock.json in $(pwd)" >&2
   exit 1
 fi

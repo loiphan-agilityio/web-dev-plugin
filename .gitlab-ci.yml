@@ -6,11 +6,16 @@
 # weekly one in Build > Pipeline schedules) to catch a dependency release that breaks the template.
 workflow:
   rules:
+    # Schedules first: a scheduled pipeline also has CI_COMMIT_BRANCH, and must not be dropped
+    # by the open-merge-request rule below.
+    - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+default:
+  image: node:24
 
 .plugin-changes:
   rules:
@@ -21,15 +26,15 @@ workflow:
         - .gitlab-ci.yml
 
 plugin-manifest:
-  image: node:24
   extends: .plugin-changes
-  script:
+  variables:
     # Pinned like everything else; validation needs no login.
-    - npx -y @anthropic-ai/claude-code@2.1.304 plugin validate --strict claude-skills/.claude-plugin/plugin.json
-    - npx -y @anthropic-ai/claude-code@2.1.304 plugin validate --strict .
+    CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
+  script:
+    - npx -y "$CLAUDE_CODE" plugin validate --strict claude-skills/.claude-plugin/plugin.json
+    - npx -y "$CLAUDE_CODE" plugin validate --strict .
 
 claude-skills:
-  image: node:24
   extends: .plugin-changes
   before_script:
     # pnpm 11 comes from the template's packageManager field.
@@ -39,7 +44,6 @@ claude-skills:
     - bash .claude/skills/code-skeleton/scripts/verify.sh
 
 companions:
-  image: node:24
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
@@ -48,4 +52,4 @@ companions:
     - bash claude-skills/.claude/skills/code-skeleton/scripts/scaffold.sh /tmp/app companions-app
     - cd /tmp/app
     - bash "$CI_PROJECT_DIR/claude-skills/.claude/skills/code-skeleton/scripts/install-companions.sh"
-    - test "$(ls .claude/skills | wc -l)" -eq 8
+    - test "$(find .claude/skills -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 8

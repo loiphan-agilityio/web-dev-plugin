@@ -66,7 +66,7 @@ React Hook Form with the Effect Schema as resolver: `standardSchemaResolver<Inpu
 - Submit with `mutate(values, { onSuccess: reset + toast, onError: setFormErrors(form.setError, error) })`; disable submit while `isPending`; render server errors from `form.formState.errors.root?.server`.
 
 ### 4. UI
-Every data screen renders four distinct states: loading (`isPending`, `role="status"` with an `aria-label`), error (`toUserMessage(error)` plus a retry button), empty (says what to do next, no `role="alert"`), success. Use Tailwind tokens, `cn` from `@/lib/utils`, `type="button"` on non-submit buttons, `aria-label` on icon-only buttons. Files are kebab-case, exports are PascalCase and named. Patterns: `references/ui-states.md`.
+Every data screen renders four distinct states: loading (`isPending`, `role="status"` with an `aria-label`), error (`toUserMessage(error)` plus a retry button), empty (says what to do next, no `role="alert"`), success. Use Tailwind tokens, `cn` from `@/lib/utils`, `type="button"` on non-submit buttons, `aria-label` on icon-only buttons. Files are kebab-case, exports are PascalCase, named and arrow functions (`export const TodoList = () => ...`; CLAUDE.md, Code style). Patterns: `references/ui-states.md`.
 
 When the ticket has a design, invoke the `design-to-ui` skill (Skill tool) before writing UI code and follow it for tokens, component mapping and styling, and run its visual check after step 5 (the page needs its route and mock handlers first). The four states and the ticket's acceptance criteria still apply: a design that shows only the success state does not remove the others. Add its **Design gaps** line to the Result.
 

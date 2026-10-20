@@ -4,7 +4,8 @@ import { createQueryClient } from '../query-client';
 
 describe('createQueryClient', () => {
   const { queries, mutations } = createQueryClient().getDefaultOptions();
-  const retry = queries?.retry as (count: number, error: unknown) => boolean;
+  const retry = queries?.retry;
+  assert(typeof retry === 'function', 'queries.retry should be a function');
 
   it('retries a transient failure once', () => {
     expect(retry(0, new ServerError({ status: 503 }))).toBe(true);

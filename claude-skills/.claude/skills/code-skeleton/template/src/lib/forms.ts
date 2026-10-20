@@ -9,10 +9,10 @@ import { type ApiError, toUserMessage } from '@/lib/api/errors';
  * (or a validation error without field details) goes to `errors.root.server`, which the form
  * renders above the submit button.
  */
-export function setFormErrors<T extends FieldValues>(
+export const setFormErrors = <T extends FieldValues>(
   setError: UseFormSetError<T>,
   error: ApiError,
-) {
+) => {
   if (error._tag === 'ValidationError' && Object.keys(error.fields).length > 0) {
     for (const [field, message] of Object.entries(error.fields)) {
       // Field names come from the server; they match the form when the API mirrors its schema.
@@ -21,4 +21,4 @@ export function setFormErrors<T extends FieldValues>(
     return;
   }
   setError('root.server', { type: 'server', message: toUserMessage(error) });
-}
+};

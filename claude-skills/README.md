@@ -84,6 +84,7 @@ build and Storybook build. The parts every feature builds on:
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
   helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`); `pnpm lint` also runs `prettier --check`.
+- **Code style in ESLint**: arrow functions only (`func-style`, `prefer-arrow-callback`; `function*` stays for Effect), destructuring, shorthand, template literals, `??` / `?.` and the rest of `typescript-eslint`'s `stylisticTypeChecked`, so code the skills write later reads like the template.
 
 `develop-feature/references/` (with `api.ts` and `mocks.ts` in `integrate-api/references/`) quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
 wiring diff for the three files a feature registers in.

@@ -80,15 +80,15 @@ The todos wiring diff:
 
 ```diff
 diff --git a/src/app/root-layout.tsx b/src/app/root-layout.tsx
-index d3c2306..cddbea5 100644
+index 548b02a..3d7e1e1 100644
 --- a/src/app/root-layout.tsx
 +++ b/src/app/root-layout.tsx
-@@ -10,2 +10,5 @@ export function RootLayout() {
-           </Link>
-+          <Link to="/todos" className="text-sm text-muted-foreground hover:text-foreground">
-+            Todos
-+          </Link>
-         </nav>
+@@ -9,2 +9,5 @@ export const RootLayout = () => (
+         </Link>
++        <Link to="/todos" className="text-sm text-muted-foreground hover:text-foreground">
++          Todos
++        </Link>
+       </nav>
 diff --git a/src/app/routes.tsx b/src/app/routes.tsx
 index e5ca784..716fb95 100644
 --- a/src/app/routes.tsx
@@ -104,7 +104,7 @@ index e5ca784..716fb95 100644
 +    children: [{ index: true, Component: HomePage }, ...todoRoutes()],
    },
 diff --git a/src/mocks/handlers.ts b/src/mocks/handlers.ts
-index 21d1365..894508f 100644
+index 69fcd8a..d83556e 100644
 --- a/src/mocks/handlers.ts
 +++ b/src/mocks/handlers.ts
 @@ -2,2 +2,4 @@ import type { RequestHandler } from 'msw';

@@ -45,6 +45,18 @@ src/
   test/             setup.ts, render.tsx (renderRoute, renderWithProviders)
 ```
 
+## Code style
+
+Lint enforces it, and `func-style` has no autofix, so write it this way from the start:
+
+- Arrow functions only: `export const TodoList = () => { ... };`, `export const useX = () => ...`.
+  `function*` stays only inside `Effect.gen` / `Effect.fn`. A component that only returns markup
+  returns it directly: `export const Page = () => (<section>...</section>);`.
+- Destructure objects (`const { title } = todo`, props, callback arguments), use shorthand
+  properties, template literals instead of `+`, `??` / `?.`, `const` (never `var`), `===`.
+- Inline type imports (`import { type Todo, NewTodo } from './schemas'`); `pnpm lint:fix`
+  fixes most of the rest and formats.
+
 ## How data flows
 
 `component → useQuery(xQueryOptions()) / useXMutation() → runEffect → Effect.fn in api.ts →

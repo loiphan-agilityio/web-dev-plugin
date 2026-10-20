@@ -15,7 +15,7 @@ import { toUserMessage } from '@/lib/api/errors';
 import { todoListQueryOptions } from '../queries';
 
 /** Loading, error, empty and success are four different screens — never one ternary. */
-export function TodoList() {
+export const TodoList = () => {
   const { data, isPending, isError, error, refetch, isRefetching } =
     useQuery(todoListQueryOptions());
 
@@ -57,16 +57,16 @@ export function TodoList() {
 
   return (
     <ul aria-label="Todos" className="divide-y rounded-lg border">
-      {data.map((todo) => (
-        <li key={todo.id} className="flex items-center justify-between px-4 py-3">
-          <span className={todo.completed ? 'text-muted-foreground line-through' : undefined}>
-            {todo.title}
+      {data.map(({ id, title, completed }) => (
+        <li key={id} className="flex items-center justify-between px-4 py-3">
+          <span className={completed ? 'text-muted-foreground line-through' : undefined}>
+            {title}
           </span>
         </li>
       ))}
     </ul>
   );
-}
+};
 ```
 
 ## State by state
@@ -89,15 +89,13 @@ export function TodoList() {
 import { TodoForm } from './todo-form';
 import { TodoList } from './todo-list';
 
-export function TodosPage() {
-  return (
-    <section className="space-y-6">
-      <h1 className="font-heading text-2xl font-semibold">Todos</h1>
-      <TodoForm />
-      <TodoList />
-    </section>
-  );
-}
+export const TodosPage = () => (
+  <section className="space-y-6">
+    <h1 className="font-heading text-2xl font-semibold">Todos</h1>
+    <TodoForm />
+    <TodoList />
+  </section>
+);
 ```
 
 The page only composes; each child owns its own query/mutation. Both use the same `todoListQueryOptions()`, so the cache is shared.
