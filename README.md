@@ -7,6 +7,11 @@ to UI**.
 
 ## See it work
 
+[`examples/library-manager/`](examples/library-manager/) came from **one message**: "Build me a
+library management app…". The `build-app` skill planned it, built four pages with their API
+layer, mocks, tests and stories, and passed every gate, with no question asked
+([how it went](docs/evidence/one-message/README.md)).
+
 [`examples/task-tracker/`](examples/task-tracker/) is a task tracker written entirely by the
 skills, one Claude Code session per ticket: scaffold → tasks list → task detail → dashboard
 → match a design. Every session's prompt and report, screenshots and a recording of the app

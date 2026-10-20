@@ -5,6 +5,7 @@ color codes are stripped and local paths are replaced by `<tmp>` or `<app>`.
 
 | What | Where | Result |
 |---|---|---|
+| **One message, whole app:** a library manager from a single sentence (`build-app`) | [`one-message/`](one-message/README.md) | 1 session, $3.35, 25 minutes; 141 tests (96.5% lines), all five gates: **pass** |
 | The template on a fresh scaffold (same script as CI) | [`verify-sh.log`](verify-sh.log) | Lint, typecheck, 25 tests, build, Storybook build: **pass** |
 | A task tracker built by the skills, one session per ticket | [`poc/history.md`](poc/history.md) | Rebuilt 2026-10-21: 5 sessions, $4.11, 35 minutes |
 | The final app, gates run independently | [`poc/pnpm-check.log`](poc/pnpm-check.log) | Lint, typecheck, 135 tests (97.1% lines), build, Storybook build: **pass** |

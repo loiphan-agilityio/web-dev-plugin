@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+storybook-static/
+*storybook.log
+*.tsbuildinfo
+.env.local
+.env.*.local
+# Written by `msw init` (postinstall) from the installed msw, so it always matches its version.
+public/mockServiceWorker.js

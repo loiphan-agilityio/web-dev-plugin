@@ -18,6 +18,7 @@ claude-skills/                    the plugin (its README.md is the user guide)
   .claude/agents/                 helpers for maintaining this repo, never copied into projects
   docs/companion-audit.md         security and fit audit of the 8 companion skills
 examples/task-tracker/            POC app, written by the skills from the tickets in docs/evidence/poc/
+examples/library-manager/         POC app, written by build-app from one message (docs/evidence/one-message/)
 docs/evidence/                    gate logs, screenshots, recording and per-step reports of the POC
 ```
 
@@ -52,8 +53,8 @@ corepack picks that version.
   `claude-skills/docs/companion-audit.md`.
 - **Release:** bump `version` in `claude-skills/.claude-plugin/plugin.json`.
 - Keep files LF (`.gitattributes`); the shell scripts fail on CRLF.
-- `examples/task-tracker/` is output of the skills, kept as evidence (only its demo build is
-  hand-written). Fix a problem in it by fixing the skill or the template, not by editing the
+- `examples/task-tracker/` and `examples/library-manager/` are output of the skills, kept as
+  evidence (only their READMEs are hand-written). Fix a problem in it by fixing the skill or the template, not by editing the
   example by hand.
 
 ## Git

@@ -1,0 +1,9 @@
+pnpm-lock.yaml
+dist
+coverage
+storybook-static
+public/mockServiceWorker.js
+src/components/ui
+.claude
+# Markdown is prose for people and Claude; table padding would only add diff noise.
+*.md

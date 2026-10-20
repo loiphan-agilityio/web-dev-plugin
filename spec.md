@@ -69,6 +69,10 @@ ticket, in this order:
 The prompts, each session's Result report, screenshots and a recording are in
 [`docs/evidence/`](docs/evidence/README.md).
 
+A second proof, for requirement 4: [`examples/library-manager/`](examples/library-manager/) came from
+one message and no ticket, through `build-app`
+([`docs/evidence/one-message/`](docs/evidence/one-message/README.md)).
+
 ## Out of scope
 
 - SSR and Next.js, backend code, CI/CD pipelines for the generated apps.

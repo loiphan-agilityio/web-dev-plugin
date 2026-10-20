@@ -1,0 +1,16 @@
+# pnpm settings for this single-package project (pnpm 11 reads them from this file).
+peerDependencyRules:
+  allowedVersions:
+    # eslint-plugin-jsx-a11y 6.10.2 (last release 2024-10) declares eslint <=9 but works on
+    # ESLint 10; verified by linting a file with a11y violations.
+    eslint-plugin-jsx-a11y>eslint: '10'
+# Storybook's builder needs esbuild's install script (pnpm 11 blocks unreviewed build scripts).
+allowBuilds:
+  esbuild: true
+auditConfig:
+  ignoreGhsas:
+    # braces <=3.0.3: stack exhaustion on deeply nested glob patterns. Reached only through the
+    # shadcn CLI (fast-glob > micromatch), which runs at dev time on the project's own patterns;
+    # nothing of it ships to the browser. No patched release exists yet (3.0.3 is the latest).
+    # Drop this entry once one does.
+    - GHSA-vfj7-8cjw-p6xm

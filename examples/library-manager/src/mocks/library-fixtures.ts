@@ -1,0 +1,257 @@
+import type { Book } from '@/features/books/schemas';
+import type { Loan } from '@/features/loans/schemas';
+import type { Member } from '@/features/members/schemas';
+import { addDays, today } from '@/lib/dates';
+
+/** An ISO date-time for `days` from now, for `createdAt`. */
+const stamp = (days: number) => `${addDays(today(), days)}T09:00:00.000Z`;
+
+const day = (offset: number) => addDays(today(), offset);
+
+/** 8 books: one with no copies left, one without a category, one with two copies out. */
+export const bookFixtures: Book[] = [
+  {
+    id: 1,
+    title: 'Dune',
+    author: 'Frank Herbert',
+    isbn: '9780441172719',
+    category: 'Science fiction',
+    totalCopies: 3,
+    availableCopies: 1,
+    createdAt: stamp(-200),
+  },
+  {
+    id: 2,
+    title: 'The Hobbit',
+    author: 'J. R. R. Tolkien',
+    isbn: '9780547928227',
+    category: 'Fantasy',
+    totalCopies: 2,
+    availableCopies: 1,
+    createdAt: stamp(-190),
+  },
+  {
+    id: 3,
+    title: 'Neuromancer',
+    author: 'William Gibson',
+    isbn: '9780441569595',
+    category: 'Science fiction',
+    totalCopies: 2,
+    availableCopies: 0,
+    createdAt: stamp(-180),
+  },
+  {
+    id: 4,
+    title: 'Pride and Prejudice',
+    author: 'Jane Austen',
+    isbn: '9780141439518',
+    category: 'Classics',
+    totalCopies: 4,
+    availableCopies: 4,
+    createdAt: stamp(-170),
+  },
+  {
+    id: 5,
+    title: 'Sapiens',
+    author: 'Yuval Noah Harari',
+    isbn: '9780062316110',
+    category: '',
+    totalCopies: 2,
+    availableCopies: 1,
+    createdAt: stamp(-120),
+  },
+  {
+    id: 6,
+    title: 'The Left Hand of Darkness',
+    author: 'Ursula K. Le Guin',
+    isbn: '9780441478125',
+    category: 'Science fiction',
+    totalCopies: 1,
+    availableCopies: 1,
+    createdAt: stamp(-90),
+  },
+  {
+    id: 7,
+    title: 'Educated',
+    author: 'Tara Westover',
+    isbn: '9780399590504',
+    category: 'Memoir',
+    totalCopies: 3,
+    availableCopies: 3,
+    createdAt: stamp(-60),
+  },
+  {
+    id: 8,
+    title: 'Clean Code',
+    author: 'Robert C. Martin',
+    isbn: '9780132350884',
+    category: 'Technology',
+    totalCopies: 2,
+    availableCopies: 2,
+    createdAt: stamp(-30),
+  },
+];
+
+/** 6 members: one suspended, one without a phone number. */
+export const memberFixtures: Member[] = [
+  {
+    id: 1,
+    name: 'Amelia Hart',
+    email: 'amelia.hart@example.com',
+    phone: '555-0101',
+    status: 'active',
+    joinedAt: day(-400),
+  },
+  {
+    id: 2,
+    name: 'Ben Okafor',
+    email: 'ben.okafor@example.com',
+    phone: '555-0102',
+    status: 'active',
+    joinedAt: day(-320),
+  },
+  {
+    id: 3,
+    name: 'Chloe Nguyen',
+    email: 'chloe.nguyen@example.com',
+    phone: '',
+    status: 'active',
+    joinedAt: day(-250),
+  },
+  {
+    id: 4,
+    name: 'Daniel Reyes',
+    email: 'daniel.reyes@example.com',
+    phone: '555-0104',
+    status: 'active',
+    joinedAt: day(-180),
+  },
+  {
+    id: 5,
+    name: 'Elena Petrova',
+    email: 'elena.petrova@example.com',
+    phone: '555-0105',
+    status: 'suspended',
+    joinedAt: day(-150),
+  },
+  {
+    id: 6,
+    name: 'Farid Haddad',
+    email: 'farid.haddad@example.com',
+    phone: '555-0106',
+    status: 'active',
+    joinedAt: day(-60),
+  },
+];
+
+/**
+ * 9 loans, all dates relative to today: 3 overdue (one by 15 days), 3 active (due today, in 3 and in
+ * 6 days) and 3 returned (one of them late). Open loans match the books' `availableCopies`.
+ */
+export const loanFixtures: Loan[] = [
+  {
+    id: 1,
+    bookId: 2,
+    memberId: 2,
+    bookTitle: 'The Hobbit',
+    memberName: 'Ben Okafor',
+    borrowedAt: day(-29),
+    dueDate: day(-15),
+    returnedAt: null,
+    status: 'overdue',
+  },
+  {
+    id: 2,
+    bookId: 3,
+    memberId: 4,
+    bookTitle: 'Neuromancer',
+    memberName: 'Daniel Reyes',
+    borrowedAt: day(-21),
+    dueDate: day(-7),
+    returnedAt: null,
+    status: 'overdue',
+  },
+  {
+    id: 3,
+    bookId: 3,
+    memberId: 1,
+    bookTitle: 'Neuromancer',
+    memberName: 'Amelia Hart',
+    borrowedAt: day(-18),
+    dueDate: day(-4),
+    returnedAt: null,
+    status: 'overdue',
+  },
+  {
+    id: 4,
+    bookId: 1,
+    memberId: 3,
+    bookTitle: 'Dune',
+    memberName: 'Chloe Nguyen',
+    borrowedAt: day(-14),
+    dueDate: day(0),
+    returnedAt: null,
+    status: 'active',
+  },
+  {
+    id: 5,
+    bookId: 5,
+    memberId: 6,
+    bookTitle: 'Sapiens',
+    memberName: 'Farid Haddad',
+    borrowedAt: day(-11),
+    dueDate: day(3),
+    returnedAt: null,
+    status: 'active',
+  },
+  {
+    id: 6,
+    bookId: 1,
+    memberId: 2,
+    bookTitle: 'Dune',
+    memberName: 'Ben Okafor',
+    borrowedAt: day(-8),
+    dueDate: day(6),
+    returnedAt: null,
+    status: 'active',
+  },
+  {
+    id: 7,
+    bookId: 4,
+    memberId: 1,
+    bookTitle: 'Pride and Prejudice',
+    memberName: 'Amelia Hart',
+    borrowedAt: day(-30),
+    dueDate: day(-16),
+    returnedAt: day(-18),
+    status: 'returned',
+  },
+  {
+    id: 8,
+    bookId: 6,
+    memberId: 4,
+    bookTitle: 'The Left Hand of Darkness',
+    memberName: 'Daniel Reyes',
+    borrowedAt: day(-25),
+    dueDate: day(-11),
+    returnedAt: day(-8),
+    status: 'returned',
+  },
+  {
+    id: 9,
+    bookId: 7,
+    memberId: 6,
+    bookTitle: 'Educated',
+    memberName: 'Farid Haddad',
+    borrowedAt: day(-10),
+    dueDate: day(4),
+    returnedAt: day(-3),
+    status: 'returned',
+  },
+];
+
+export const libraryFixtures = {
+  books: bookFixtures,
+  members: memberFixtures,
+  loans: loanFixtures,
+};
