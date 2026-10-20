@@ -39,7 +39,9 @@ Every version is pinned in the template's lockfile.
 - Exclude an acceptance criterion that depends on an unanswered question (data, a business rule,
   what the backend must agree with), and name it in the report instead of guessing. A detail the
   ticket leaves out that only changes presentation gets the simplest default, listed under
-  **Next** for the user to confirm.
+  **Next** for the user to confirm. When the ticket states the rule and leaves only its edges
+  open (inclusive bounds, from today or tomorrow), the skill builds the literal reading, tests it
+  and asks under **Next**.
 
 ### The generated app must
 
