@@ -23,10 +23,19 @@ loaded() { # <skill>
   grep -qE "(^|,|:)$1(,|$)" <<< "$skills" ||
     jq -e --arg f "$1/SKILL.md" 'select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | select((.input.file_path // .input.command // "") | contains($f))' "$dir/events.jsonl" >/dev/null 2>&1
 }
+# Component files of a feature: every components/*.tsx that is not a test or a story.
+components() { ls "$1"/components/*.tsx 2>/dev/null | grep -vE '\.(test|stories)\.tsx$'; }
+each_has() { # <feature dir> <suffix> [<subdir>/]: every component file has <subdir><name><suffix> in its folder
+  local list c
+  list="$(components "$1")"
+  [ -n "$list" ] || return 1
+  while IFS= read -r c; do [ -f "$(dirname "$c")/${3:-}$(basename "${c%.tsx}")$2" ] || return 1; done <<< "$list"
+}
 count_tests() { grep -rhoE '^\s*(it|test)\(' "$@" 2>/dev/null | wc -l; }
 
 printf '%-18s %-6s %-9s %-8s %-7s %-6s %s\n' run gates asserts forbid cost turns skills
 summary=""
+failed_runs=0
 for dir in "$runs"/*/; do
   dir="${dir%/}"; name="$(basename "$dir")"; eval="${name%-*}"; app="$dir/app"
   pass=0; fail=0
@@ -73,7 +82,8 @@ for dir in "$runs"/*/; do
       check "title trimmed in schema" has "$f/schemas.ts" 'Trim'
       check "MSW imports from msw/http" grep -rq "from 'msw/http'" "$f"
       check ">= 7 notes tests" test "$(count_tests "$f")" -ge 7
-      check "every notes component has a test" bash -c 'ls "$1"/components/*.tsx >/dev/null 2>&1 || exit 1; for c in "$1"/components/*.tsx; do test -f "$1/components/__tests__/$(basename "${c%.tsx}").test.tsx" || exit 1; done' _ "$f"
+      check "every notes component has a test" each_has "$f" .test.tsx __tests__/
+      check "every notes component has a story" each_has "$f" .stories.tsx
       if [ "$eval" = design ]; then
         check "no raw colors in UI" test -z "$(grep -rlE "$rawcolor" "$app/src" --include='*.ts' --include='*.tsx' --exclude='*.test.*' --exclude-dir=ui 2>/dev/null)"
         # Against the baseline commit, whether or not the session committed; new shadcn files are fine.
@@ -109,14 +119,20 @@ for dir in "$runs"/*/; do
       check "404 handled via NotFoundError" grep -rq 'NotFoundError' "$f"
       check "404 toast tested" grep -rqi 'no longer exists' --include='*.test.tsx' "$f/components"
       check "sonner not mocked" bash -c '! grep -rqE "vi\.mock\(.sonner" "$1"' _ "$f"
-      check "every todos component has a test" bash -c 'for c in "$1"/components/*.tsx; do test -f "$1/components/__tests__/$(basename "${c%.tsx}").test.tsx" || exit 1; done' _ "$f"
+      check "every todos component has a test" each_has "$f" .test.tsx __tests__/
+      check "every todos component has a story" each_has "$f" .stories.tsx
       # The fixture starts with 10 tests; edit (validation, success, 422, 404) and delete (success, 404) add 6.
       check ">= 16 todos tests" test "$(count_tests "$f")" -ge 16
       ;;
   esac
   [ "$gates" = pass ] && pass=$((pass + 1)) || fail=$((fail + 1))
+  [ "$status" = success ] && pass=$((pass + 1)) || fail=$((fail + 1))
+  [ "$nhits" -eq 0 ] && pass=$((pass + 1)) || fail=$((fail + 1))
+  [ "$fail" -eq 0 ] || failed_runs=$((failed_runs + 1))
   summary+="$(printf '%-18s %-6s %-9s %-8s %-7s %-6s %s' "$name" "$gates" "$pass/$((pass + fail))" "$nhits" "$cost" "$turns" "${skills:-none}")"$'\n'
 done
 echo
 printf '%-18s %-6s %-9s %-8s %-7s %-6s %s\n' run gates asserts forbid cost turns skills
 printf '%s' "$summary"
+# Non-zero when any run failed a gate, a check, hit a forbidden pattern or did not finish, so CI can gate on it.
+[ "$failed_runs" -eq 0 ]

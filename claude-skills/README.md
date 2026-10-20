@@ -57,6 +57,10 @@ build. The parts every feature builds on:
 - **Tests**: MSW 3 for every test (unhandled requests fail), `renderRoute` / `renderWithProviders`.
   Both mount the `Toaster` (with a `matchMedia` stub and a per-test reset in `setup.ts`), so a
   toast is asserted as text.
+- **Storybook 10** (`.storybook/`): stories render inside `story-providers.tsx` (the same
+  providers as a test) with MSW served by the app's worker; `pnpm build-storybook` is a gate.
+- **Config**: `src/lib/config.ts` validates every `VITE_*` value with Effect Schema at startup.
+- **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
   helpers, `clsx`, global `fetch`).
@@ -102,11 +106,16 @@ There is no TanStack Query companion: the most popular one contradicted this sta
 examples, so `integrate-api/references/react-query.md` is the source.
 
 **Security note:** the official `shadcn` skill runs `npx shadcn@latest info --json` automatically
-whenever it loads (line 17 of its `SKILL.md`), which executes whatever npm serves as
-`shadcn@latest` at that moment. We accepted this because it is the same CLI the project uses to
-add components. Delete that line after installing if your policy forbids unpinned execution.
+whenever it loads (line 17 of its `SKILL.md`) and pre-approves `shadcn@latest` commands, which would
+execute whatever npm serves as `shadcn@latest` at that moment. `install-companions.sh` rewrites
+every one of them to `pnpm exec shadcn`, the CLI pinned by the project's lockfile. Because
+`skills-lock.json` keeps the upstream hash, `npx skills check` reports that skill as modified;
+re-run the script after updating it.
 
 ## Maintaining
+
+`.gitattributes` keeps every file LF: `check-quotes.mjs` and `verify-example.sh` compare snippets
+byte for byte, which a CRLF checkout (`core.autocrlf=true`) would otherwise break.
 
 ```
 .claude/skills/          ← the product: what gets copied into projects

@@ -79,13 +79,13 @@ In `@theme inline`:
 | Button heights 24 / 28 / 32 / 36px | `Button` `size` `xs` / `sm` / `default` / `lg` (`h-6` / `h-7` / `h-8` / `h-9`); icon-only: `icon-xs` / `icon-sm` / `icon` / `icon-lg` | yes |
 | Panel with title, description, action, footer | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`, `CardContent`, `CardFooter`; `size="sm"` for tighter padding | yes |
 | Text field with label, hint, error | `Input` inside `Field` with `FieldLabel`, `FieldDescription`, `FieldError` (forms: `develop-feature` skill, `references/forms.md`) | yes |
-| Multi-line text field | `Textarea`: `pnpm dlx shadcn@latest add textarea` | no |
-| Tag, pill, status chip, count | `Badge`: `pnpm dlx shadcn@latest add badge` | no |
+| Multi-line text field | `Textarea`: `pnpm exec shadcn add textarea` | no |
+| Tag, pill, status chip, count | `Badge`: `pnpm exec shadcn add badge` | no |
 | Inline message or banner | `Alert` (`variant` `default` / `destructive`), `AlertTitle`, `AlertDescription`, `AlertAction` | yes |
 | Divider line | `Separator` | yes |
 | Loading placeholder | `Skeleton`, shaped like the content it replaces | yes |
 | Toast | `toast` from `sonner` (`import { toast } from 'sonner';`); `<Toaster richColors />` is already mounted in `src/app/providers.tsx` | yes |
-| Anything else (dialog, dropdown menu, select, checkbox, tabs, table, avatar, tooltip) | `pnpm dlx shadcn@latest add <name>`; the `shadcn` companion skill covers usage | no |
+| Anything else (dialog, dropdown menu, select, checkbox, tabs, table, avatar, tooltip) | `pnpm exec shadcn add <name>`; the `shadcn` companion skill covers usage | no |
 
 - Pick the closest `size`; a design height between two sizes takes the nearer one and goes under **Design gaps**.
 - `Alert` renders `role="alert"`. Never use it for an empty state: empty is not an error, and the state tests check that no alert is shown.

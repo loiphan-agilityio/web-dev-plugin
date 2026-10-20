@@ -55,3 +55,5 @@ for c in "${cases[@]}"; do
   printf '%s %-14s %-16s %s\n' "$mark" "$expected" "$invoked" "${prompt:0:80}"
 done
 echo "trigger-check: $ok/${#cases[@]} as expected, cost \$$total_cost"
+# Non-zero unless every prompt picked the expected skill.
+[ "$ok" -eq "${#cases[@]}" ]

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Scaffolds the template into a temporary directory, copies the skills into its .claude/skills
-# (as a real project has them) and runs all four gates there (lint, typecheck, test, build). Exits non-zero on the first failing gate.
+# (as a real project has them) and runs all five gates there (lint, typecheck, test, build, Storybook build). Exits non-zero on the first failing gate.
 #
 #   verify.sh [--keep]     --keep leaves the temp project in place and prints its path
 set -euo pipefail

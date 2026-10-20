@@ -1,0 +1,4 @@
+# Skills, templates and fixtures are compared byte for byte (check-quotes, verify-example):
+# keep LF everywhere, whatever core.autocrlf says.
+* text=auto eol=lf
+*.png binary

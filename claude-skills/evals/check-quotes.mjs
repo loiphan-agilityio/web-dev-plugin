@@ -25,11 +25,12 @@ const walk = (dir) =>
 const sources = [join(root, 'evals/fixtures/todos'), join(skills, 'code-skeleton/template')]
   .flatMap(walk)
   .filter((path) => sourceExt.test(path))
-  .map((path) => ({ path, lines: readFileSync(path, 'utf8').split('\n').map((l) => l.trimEnd()) }));
+  .map((path) => ({ path, lines: readFileSync(path, 'utf8').split(/\r?\n/).map((l) => l.trimEnd()) }));
 
 /** Code blocks of a markdown file: { line, lang, sketch, lines } with the fence's indent removed. */
 const blocksOf = (text) => {
-  const lines = text.split('\n');
+  // CRLF checkouts (core.autocrlf) would otherwise hide every fence from the regexes below.
+  const lines = text.split(/\r?\n/);
   const blocks = [];
   for (let i = 0; i < lines.length; i++) {
     const open = /^(\s*)```(.*)$/.exec(lines[i]);

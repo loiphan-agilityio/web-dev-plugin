@@ -131,4 +131,4 @@ Seed `defaultValues` from loaded data only after the query has succeeded (render
 
 ## Other controls
 
-Select, checkbox, textarea: add via `pnpm dlx shadcn@latest add <name>` and read the generated file in `src/components/ui/` for its props before wiring it into `Controller`. Pass `aria-invalid` the same way.
+Select, checkbox, textarea: add via `pnpm exec shadcn add <name>` and read the generated file in `src/components/ui/` for its props before wiring it into `Controller`. Pass `aria-invalid` the same way.

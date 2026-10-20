@@ -42,7 +42,7 @@ always call the scripts by that full path.
    CLI writes `skills-lock.json` at the project root; both should be committed. Needs network and
    Node. If it fails (e.g. offline), record it under **Not done** in Result and continue: the
    project skills and `CLAUDE.md` work without companions.
-6. **Gates.** `pnpm check` (lint, typecheck, test, build). Report the real output, including
+6. **Gates.** `pnpm check` (lint, typecheck, test with coverage, build, Storybook build). Report the real output, including
    failures. Optionally offer `git init` and a first commit; ask first, never commit unasked.
 7. **Hand over.** Tell the user:
    - `pnpm dev`; `VITE_API_MOCKING=true pnpm dev` serves the API from `src/mocks` (MSW).
@@ -80,7 +80,7 @@ Wiring worth knowing:
   `delay` / `passthrough` / `bypass`, `clsx`, `tailwind-merge`, global `fetch`.
 - shadcn components vendored in `src/components/ui`: button, input, label, card, field,
   skeleton, alert, sonner, separator. That folder is excluded from ESLint and Prettier; add or
-  refresh components with `pnpm dlx shadcn@latest add <name>`, do not edit them by hand.
+  refresh components with `pnpm exec shadcn add <name>`, do not edit them by hand.
 
 Out of scope: SSR / Next.js, backend, CI/CD, auth flows.
 
@@ -110,8 +110,8 @@ Companions installed by step 5, for setup-time questions:
   snippet.
 - `vitest`: config. Use MSW, not module mocks, for the API; use pnpm, not npm; Effect Schema (via `Schema.toStandardSchemaV1`), not zod, in `expect.schemaMatching`; Browser Mode is not used.
 - `shadcn`: adding components and theming. Ignore the Tailwind v3 / `tailwind.config.js` branch,
-  its RSC / `"use client"` notes (inert on Vite) and `next-themes` advice. When loaded it runs `npx shadcn@latest info --json` automatically
-  (accepted knowingly; teams may strip that line).
+  its RSC / `"use client"` notes (inert on Vite) and `next-themes` advice. Its `shadcn@latest` commands, including the `info --json`
+  it runs when loaded, are rewritten to `pnpm exec shadcn` (the lockfile-pinned CLI) by `install-companions.sh`.
 
 The generated `CLAUDE.md` ("Skills" section) sets the priority when a companion disagrees with
 the project conventions. After scaffolding, hand off to `develop-feature`, `integrate-api` and `design-to-ui`.

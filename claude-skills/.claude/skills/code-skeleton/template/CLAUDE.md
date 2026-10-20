@@ -11,16 +11,18 @@ Library, MSW 3. Package manager: pnpm. No SSR, no Next.js.
 | `pnpm dev` | Dev server. `VITE_API_MOCKING=true pnpm dev` serves the API from `src/mocks` (MSW). |
 | `pnpm lint` | ESLint, `--max-warnings=0`. Also enforces the import rules below. |
 | `pnpm typecheck` | `tsc -b` |
-| `pnpm test` | Vitest, once. `pnpm test:watch` to watch. |
+| `pnpm test` | Vitest once, with coverage (≥ 80% lines in `src/features` and `src/lib`). `pnpm test:watch` to watch. |
 | `pnpm build` | Typecheck + production build. |
-| `pnpm check` | All four gates: lint, typecheck, test, build. **Run before calling work done.** |
+| `pnpm storybook` | Storybook on port 6006 (stories render inside `.storybook/story-providers.tsx`, MSW on). |
+| `pnpm build-storybook` | Static Storybook build; fails when a story does not compile. |
+| `pnpm check` | All five gates: lint, typecheck, test, build, Storybook build. **Run before calling work done.** |
 
 ## Layout
 
 ```
 src/
   app/              routes.tsx (createRoutes), providers.tsx, root-layout.tsx, route-error.tsx
-  components/ui/    shadcn components: add with `pnpm dlx shadcn@latest add <name>`, never edit by hand
+  components/ui/    shadcn components: add with `pnpm exec shadcn add <name>`, never edit by hand
   components/       shared app components
   features/<name>/  one folder per feature (names below are from a `todos` feature):
     schemas.ts        Effect Schemas + derived types: Todo, TodoList, NewTodo / NewTodoInput
@@ -30,7 +32,7 @@ src/
     routes.tsx        todoRoutes() — lazy route objects
     components/       kebab-case files, PascalCase named exports, *.test.tsx in components/__tests__/
   lib/
-    config.ts         every env value (VITE_*), read statically
+    config.ts         every env value (VITE_*), read statically and validated with Effect Schema
     runtime.ts        AppLayer + the ManagedRuntime
     query-client.ts   createQueryClient(); query errors are typed as ApiError
     forms.ts          setFormErrors(): API errors → React Hook Form

@@ -32,7 +32,7 @@ The stack is newer than most training data. Do not write these from memory; copy
 ### 1. Plan
 - List the files to create, using the layout below.
 - Check `src/features/`, `src/components/` and `src/components/ui/` for things to reuse before writing new ones.
-- Need a shadcn component that is not in `src/components/ui/`? `pnpm dlx shadcn@latest add <name>` (the `shadcn` companion skill covers composition).
+- Need a shadcn component that is not in `src/components/ui/`? `pnpm exec shadcn add <name>` (the `shadcn` companion skill covers composition).
 - Starting from the todos feature: rename `todo`/`Todo` consistently (folder, files, exports, keys, URL paths) and replace the fields; keep the structure.
 
 ```

@@ -26,6 +26,16 @@ for c in "${companions[@]}"; do
   fi
 done
 
+# The audited shadcn skill runs `npx shadcn@latest info --json` by itself when it loads, and
+# pre-approves `shadcn@latest` commands: that is whatever npm serves that day. Point every one of
+# them at the project's own shadcn, pinned by pnpm-lock.yaml. (skills-lock.json keeps the upstream
+# hash, so `npx skills check` reports this skill as modified; re-run this script after an update.)
+# Runs before the failure check below, so a partial install never leaves shadcn unpinned.
+if [ -d .claude/skills/shadcn ]; then
+  find .claude/skills/shadcn -name '*.md' -exec sed -i.bak -E 's/(npx|pnpm dlx|bunx --bun) shadcn@latest/pnpm exec shadcn/g' {} +
+  find .claude/skills/shadcn -name '*.md.bak' -delete
+fi
+
 if [ ${#failed[@]} -gt 0 ]; then
   echo "companions not installed (${#failed[@]}):" >&2
   printf '  %s\n' "${failed[@]}" >&2

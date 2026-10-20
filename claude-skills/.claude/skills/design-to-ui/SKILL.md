@@ -1,6 +1,6 @@
 ---
 name: design-to-ui
-description: Builds a screen or component in an existing React + shadcn/ui + Tailwind 4 app so it matches a given design (screenshot, mockup, PNG export or Figma link). It maps the design to theme tokens and shadcn components, writes semantic responsive markup with every data state, tests it, and checks it in a browser when one is available. Use for "implement this design", "make it look like this screenshot", "make it look like this mockup", "build this screen from Figma <url>", "match the design", "turn this mockup into a page". When a ticket comes with a design, develop-feature leads and loads this skill for the UI step. Not for a ticket with no design (develop-feature), a single endpoint (integrate-api), scaffolding a new app (code-skeleton), open-ended "design something for me" requests, or restyling / "make it look nicer" with no reference image to match.
+description: Builds a screen or component in an existing React + shadcn/ui + Tailwind 4 app so it matches a given design (screenshot, mockup, PNG export or Figma link). It maps the design to theme tokens and shadcn components, writes semantic responsive markup with every data state, tests it, and checks it in a browser when one is available. Use for "implement this design", "make it look like this screenshot", "make it look like this mockup", "build this screen from this Figma link", "match the design", "turn this mockup into a page". When a ticket comes with a design, develop-feature leads and loads this skill for the UI step. Not for a ticket with no design (develop-feature), a single endpoint (integrate-api), scaffolding a new app (code-skeleton), open-ended "design something for me" requests, or restyling / "make it look nicer" with no reference image to match.
 ---
 
 # design-to-ui
@@ -19,14 +19,14 @@ The stack is newer than most training data. Copy from the project and the refere
 
 - **Tailwind 4 is CSS-first.** There is no `tailwind.config.js` and you do not create one. Theme tokens live in `src/styles/index.css`: values in `:root` / `.dark`, exposed to utilities by `@theme inline` (`--color-primary: var(--primary);` makes `bg-primary` work).
 - **Tokens only in components.** No hex, no `bg-[#...]`, no raw palette classes (`bg-indigo-600`, `text-gray-500`) in TSX. They bypass the theme, so the next palette change or a dark theme misses them. The design's raw values go in one place: `src/styles/index.css`.
-- **shadcn, style `radix-nova`** (`components.json`). Add a component with `pnpm dlx shadcn@latest add <name>`. Never edit `src/components/ui/`: it is generated, lint ignores it, and re-adding a component overwrites your edits. The template ships only `alert button card field input label separator skeleton sonner`; anything else (Textarea, Badge, Dialog, Select...) is added with the CLI first.
+- **shadcn, style `radix-nova`** (`components.json`). Add a component with `pnpm exec shadcn add <name>`. Never edit `src/components/ui/`: it is generated, lint ignores it, and re-adding a component overwrites your edits. The template ships only `alert button card field input label separator skeleton sonner`; anything else (Textarea, Badge, Dialog, Select...) is added with the CLI first.
 - **`cn` from `@/lib/utils`** for conditional classes. Lint rejects `clsx` and `tailwind-merge`.
 - **Icons are lucide-react** (`components.json`: `"iconLibrary": "lucide"`), as named imports, the way `src/components/ui/sonner.tsx` does it, in the app's quote style:
   ```tsx sketch
   import { CircleCheckIcon, InfoIcon } from 'lucide-react';
   ```
   No other icon package, and no SVG copied out of the design for an icon lucide already has.
-- **Dark mode is not wired.** `index.css` has `@custom-variant dark (&:is(.dark *));` and a `.dark` block, but nothing adds the `.dark` class: there is no ThemeProvider, and `next-themes` is only imported by `src/components/ui/sonner.tsx`. Dark mode is out of scope unless the design shows a dark version; then set only the `.dark` token values. A theme toggle is a separate feature: ask before building one.
+- **Dark mode is not wired.** `index.css` has `@custom-variant dark (&:is(.dark *));` and a `.dark` block, but nothing adds the `.dark` class: there is no ThemeProvider, and `next-themes` is only imported by `src/components/ui/sonner.tsx`. Dark mode is out of scope unless the design shows a dark version; then set the `.dark` token values so the theme is ready, but nothing in the shipped app will show it until something adds the `.dark` class. Switching themes (a toggle, or following `prefers-color-scheme`) is a separate feature: ask before building it, and until it exists report "dark tokens set, dark theme not active in the app" under **Design gaps**.
 - **React Router 8.** Links (`Link`, `NavLink`) come from `react-router`, as `src/app/root-layout.tsx` does; there is no `react-router-dom`.
 - **Vitest 5.** `vi.mock` only at the top level of a file; never `jest.*`.
 - The other version traps (Effect, MSW, TanStack Query, forms) are in `CLAUDE.md`; they apply when the screen needs data (step 3).
@@ -47,7 +47,7 @@ Split the design into regions (app shell, page header, toolbar or filters, list,
 
 - Map each region to what exists: `src/components/ui/`, `src/components/`, then `src/features/*/components/`. Reuse before writing new.
 - The app shell (header and nav around every page) is `src/app/root-layout.tsx`. Change it there, not in each page.
-- A missing shadcn component is added through the CLI (`pnpm dlx shadcn@latest add <name>`). The design-element-to-component table is in `references/design-mapping.md`.
+- A missing shadcn component is added through the CLI (`pnpm exec shadcn add <name>`). The design-element-to-component table is in `references/design-mapping.md`.
 - A look no variant provides: compose the shadcn component inside a small app component in `src/components/` (shared) or the feature's `components/` (local). Never edit `src/components/ui/`.
 - Icons: the closest lucide icon. Name every substitution under **Design gaps**.
 

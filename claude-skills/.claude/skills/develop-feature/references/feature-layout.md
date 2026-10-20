@@ -238,4 +238,4 @@ Forgetting the handlers line is the usual failure: `pnpm dev` with `VITE_API_MOC
 
 1. `src/features/*/` — another feature may already own the schema or query you need; import its `queries.ts`, don't duplicate the call.
 2. `src/components/` — shared app components.
-3. `src/components/ui/` — installed shadcn components. Missing one: `pnpm dlx shadcn@latest add <name>`; never hand-edit this folder (it is generated and lint-ignored).
+3. `src/components/ui/` — installed shadcn components. Missing one: `pnpm exec shadcn add <name>`; never hand-edit this folder (it is generated and lint-ignored).

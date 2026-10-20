@@ -48,7 +48,7 @@ States the design does not show (loading, error, empty) are proven by the tests;
 
 ## 4. Dark mode
 
-Check dark mode only if the design shows a dark version. Nothing in the app adds the `.dark` class, so add it to the root element for the check and remove it afterwards (Claude in Chrome: `javascript_tool`); do not ship a toggle.
+Check dark mode only if the design shows a dark version. Nothing in the app adds the `.dark` class, so add it to the root element for the check and remove it afterwards (Claude in Chrome: `javascript_tool`); do not ship a toggle. The check proves the tokens; the app still shows only the light theme, which the Result reports under **Design gaps** (SKILL.md, Dark mode).
 
 ## 5. Things that end the session
 

@@ -15,7 +15,9 @@ You review; you do not edit. Your findings are applied by the main session.
 1. **Snippets match the reference app.** For every code block in `.claude/skills/*/SKILL.md`
    and `references/`, find the source in `.claude/skills/code-skeleton/template/` (todos snippets: `evals/fixtures/todos/`;
    browser tool calls in `design-to-ui/references/visual-check.md`: the Claude in Chrome skill).
-   A snippet with no source, or one that differs from its source, is a finding.
+   A snippet with no source, or one that differs from its source, is a finding, except a block whose
+   info string says `sketch` (```tsx sketch): `evals/check-quotes.mjs` skips those by design, so check
+   only that the pattern it shows is correct for the stack.
 2. **Version traps.** Any v3 Effect API (`Context.Tag`, `Effect.Service`, `@effect/platform`,
    `Schema.decodeUnknown(`, `ParseError`), `effectTsResolver`, `zodResolver`, `isLoading` for
    first load, `react-router-dom`, `tailwind.config`, MSW `rest.`, Jest APIs.

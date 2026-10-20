@@ -116,7 +116,7 @@ Test the success path plus every error the endpoint can really produce; not all 
 - Write: success plus the visible result (invalidation), 422 with field errors under the right inputs, 500 or network error showing the root error, and that the submit button is not stuck pending.
 - Never assert on error class internals; assert what the user sees (`toUserMessage` text, `role="alert"`).
 
-Test client: no retries (`createTestQueryClient` in `src/test/render.tsx` sets `retry: false`), so a failing request shows its error immediately. The retry policy itself belongs in a `createQueryClient` test, not in endpoint tests.
+Test client: no retries (`createTestQueryClient` in `src/test/query-client.ts`, used by `render.tsx` and Storybook, sets `retry: false`), so a failing request shows its error immediately. The retry policy itself belongs in a `createQueryClient` test, not in endpoint tests.
 
 ## Showing errors
 

@@ -2,7 +2,7 @@
 # Proves the todos fixture that develop-feature's references quote still works on a fresh scaffold:
 # every code block in every skill is copied from the template or the fixture (check-quotes.mjs) →
 # every fixture file is quoted in full → scaffold → copy the feature → apply wiring.diff → install →
-# all four gates.
+# all five gates (lint, typecheck, test with coverage, build, Storybook build).
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
