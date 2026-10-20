@@ -4,35 +4,63 @@ Look at the built page next to the design and fix the differences. This step onl
 
 ## 1. Find a browser tool before starting the dev server
 
-A dev server with nothing to look at it is wasted time and a stray process, so check first.
+A dev server with nothing to look at it is wasted time and a stray process, so check first. Two browsers can do this check; use the first one present.
 
-- **Claude in Chrome** (preferred): tools named `mcp__claude-in-chrome__*`. Before it is turned on, the only one present may be `enable__mcp__claude-in-chrome`; call that first and the others appear. Load what you need in ONE ToolSearch call:
+- **The built-in browser of the Claude desktop app**, only with the `mcp__Claude_Browser__*` prefix and a `preview_start` tool. The pane cannot open a server Claude starts from its shell, but `preview_start` with a `name` makes the desktop app start the server from `.claude/launch.json` itself, and the pane can open that one. Load the tools in ONE ToolSearch call (query `mcp__Claude_Browser__`, `max_results` 64) if they are deferred, and read the built-in browser skill first if it is listed. Follow section 3A.
+  The `mcp__remote-devices__Claude_Browser__*` prefix (a cloud session linked to the user's computer) cannot reach a dev server in Claude's environment: treat it as no browser, and never expose or tunnel the dev server to get around that.
+- **Claude in Chrome**: tools named `mcp__claude-in-chrome__*`. Before it is turned on, the only one present may be `enable__mcp__claude-in-chrome`; call that first and the others appear. Load what you need in ONE ToolSearch call:
   ```
   ToolSearch with query "select:mcp__claude-in-chrome__tabs_context_mcp,mcp__claude-in-chrome__navigate,mcp__claude-in-chrome__computer,mcp__claude-in-chrome__read_page,mcp__claude-in-chrome__tabs_create_mcp,mcp__claude-in-chrome__tabs_close_mcp"
   ```
   Add `mcp__claude-in-chrome__read_console_messages` to the same call if you want to see runtime errors, `mcp__claude-in-chrome__javascript_tool` if the design shows dark mode (section 4), and a window-resize tool if the deferred tool names include one (section 3, step 4).
   Chrome reaches the dev server only when it runs on the same machine as Claude's shell. From a cloud session `localhost` does not resolve: if the URL does not load, go to section 2.
-- **The built-in browser** (`mcp__Claude_Browser__*`, `mcp__remote-devices__Claude_Browser__*`) cannot do this check: its own skill says it cannot open `localhost` servers Claude starts. Treat it as no browser; never expose or tunnel the dev server to get around that.
-- If the Claude in Chrome skill is installed, read it before the first browser call; it has the session rules (tabs, permissions, when to stop).
+  If the Claude in Chrome skill is installed, read it before the first browser call; it has the session rules (tabs, permissions, when to stop). Follow section 3B.
 
 ## 2. No browser tool: skip
 
-No Claude in Chrome, or it cannot load the page (headless and CI runs land here):
+Neither browser, or it cannot load the page (headless and CI runs land here):
 
 - Do not start the dev server. If you already started it, stop it.
-- Ask the user to open the page and compare it with the design: give the route and the command (`VITE_API_MOCKING=true pnpm dev`).
+- Ask the user to open the page and compare it with the design: give the route and the command (`pnpm dev:mock`).
 - Record **"visual check not done"** under **Not done** in the Result, and stop this step.
 
 ## 3. Compare and fix
 
+`pnpm dev:mock` serves the API from `src/mocks` with MSW (CLAUDE.md, Commands), so data screens show their mocked success state without a backend.
+
+### 3A. Built-in browser: open the page
+
+1. **Add the dev server to `.claude/launch.json`** (create the file if it is missing; keep other entries). A fixed port with `--strictPort`, so the preview opens the server it started and not another app on the usual port:
+   ```json sketch
+   {
+     "version": "0.0.1",
+     "configurations": [
+       {
+         "name": "dev-mock",
+         "runtimeExecutable": "pnpm",
+         "runtimeArgs": ["dev:mock", "--port", "5173", "--strictPort"],
+         "port": 5173
+       }
+     ]
+   }
+   ```
+   If port 5173 is taken, pick another free one in both places. Name the file under **Did**: it is a new project file the user may want to commit.
+2. **`preview_start` with `name: "dev-mock"`**, then `navigate` to the page's route on that origin. If the server does not come up, read `preview_logs` and go to section 2.
+3. **Widths:** `resize_window` with the design's width (custom `width` and `height`), then preset `mobile` (375px); `computer` with action `"screenshot"` at each. Reset with preset `desktop` when done.
+4. Continue at step 5 below.
+
+### 3B. Claude in Chrome: open the page
+
 1. **Start the dev server in the background** (Bash with `run_in_background`):
    ```
-   VITE_API_MOCKING=true pnpm dev
+   pnpm dev:mock
    ```
-   MSW then serves the API from `src/mocks` (CLAUDE.md, Commands), so data screens show their mocked success state without a backend.
 2. **Read the real URL and port from Vite's output.** Do not assume one: Vite moves to another port when the usual one is busy.
 3. **Open the page in a NEW tab.** Never reuse or navigate the user's tabs: `tabs_context_mcp` first, then `tabs_create_mcp`, then `navigate`.
 4. **Screenshot at the design's width and at 375px** (`computer` with action `"screenshot"`). For the width, use the window-resize tool you loaded in section 1 if there was one (do not guess a tool name); otherwise ask the user to resize the window or use the browser's device mode, and if that is not possible, record the widths you could not check under **Not done**.
+
+### Both browsers: compare
+
 5. **Compare with the design region by region**, using the inventory from step 1:
    - layout: order, alignment, columns, what wraps where;
    - spacing: padding, gaps, section spacing;

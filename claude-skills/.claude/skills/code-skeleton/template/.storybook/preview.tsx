@@ -13,7 +13,7 @@ interface MswParameters {
 let workerStarted: Promise<unknown> | undefined;
 
 const preview: Preview = {
-  // MSW runs in every story, through the same worker as `VITE_API_MOCKING=true pnpm dev`.
+  // MSW runs in every story, through the same worker as `pnpm dev:mock`.
   async beforeEach({ parameters }) {
     workerStarted ??= worker.start({ onUnhandledFrame: 'bypass', quiet: true });
     await workerStarted;

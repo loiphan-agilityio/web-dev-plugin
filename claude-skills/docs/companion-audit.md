@@ -4,7 +4,12 @@ Source for `install-companions.sh`, the README table and every skill's `## Relat
 section. Audited at the SHAs below by two read-only auditor agents; every file in each skill
 directory was read (except two PNGs in shadcn). No skill was installed during the audit.
 
-Install form: `npx skills add https://github.com/<repo>/tree/<sha>/<path> -a claude-code -y`
+Install form: `npx -y skills@1.7.2 add https://github.com/<repo>/tree/<sha>/<path> -a claude-code -y`
+
+The installer is pinned as well: `skills@1.7.2` (published 2026-10-09, the release current at the
+audit) supports `add <url>/tree/<sha>/<path>`, `-a claude-code` and `-y`, has no install scripts,
+and needs Node >= 22.20. Upgrading it follows the same rule as a companion: read the changelog,
+then change the version in `install-companions.sh` and here.
 
 ## Pinned companions
 
@@ -31,7 +36,7 @@ Install form: `npx skills add https://github.com/<repo>/tree/<sha>/<path> -a cla
   `SKILL.md:17` runs `` !`npx shadcn@latest info --json` `` automatically when the skill
   loads. That executes whatever npm serves as `shadcn@latest` at that moment. Mitigated:
   `install-companions.sh` rewrites every `shadcn@latest` to `pnpm exec shadcn`, the CLI pinned
-  by the project's lockfile.
+  by the project's lockfile, and exits 1 if any `shadcn@latest` is left after the rewrite.
 - No other skill has `allowed-tools`, install scripts, network calls or credential access.
 
 ## Override notes (what each skill must tell Claude to ignore or replace)

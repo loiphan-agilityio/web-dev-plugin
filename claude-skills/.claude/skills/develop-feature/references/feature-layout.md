@@ -17,39 +17,13 @@ Import from `@/...` for anything outside the feature, relative paths inside it. 
 
 ## schemas.ts
 
-Name the value and the type the same. Derive, never hand-write, types. When a schema transforms (`Schema.Trim`), export both sides: `Type` is what the API gets, `Encoded` is what the form holds.
-
-```ts
-import { Schema } from 'effect';
-
-/** A todo as the API returns it. */
-export const Todo = Schema.Struct({
-  id: Schema.Number,
-  title: Schema.String,
-  completed: Schema.Boolean,
-});
-export type Todo = typeof Todo.Type;
-
-export const TodoList = Schema.Array(Todo);
-
-/**
- * What the create form collects and the API accepts. `Schema.Trim` decodes "  milk " to
- * "milk", so the form's input type (`NewTodoInput`, the schema's Encoded side) and its
- * submitted type (`NewTodo`, the Type side) differ — useForm takes both.
- */
-export const NewTodo = Schema.Struct({
-  title: Schema.Trim.pipe(
-    Schema.check(
-      Schema.isMinLength(1, { message: 'Title is required' }),
-      Schema.isMaxLength(100, { message: 'Keep the title under 100 characters' }),
-    ),
-  ),
-});
-export type NewTodo = typeof NewTodo.Type;
-export type NewTodoInput = typeof NewTodo.Encoded;
-```
-
-Validation messages go through `Schema.check(Schema.isMinLength(1, { message }))`; they are what the user sees under the field.
+The full file is in the integrate-api skill, `references/effect-http.md`, section "Schema
+(`features/<name>/schemas.ts`)" (`../integrate-api/references/effect-http.md`). Name the value and
+the type the same, and derive types (`typeof X.Type`), never hand-write them. When a schema
+transforms (`Schema.Trim`), export both sides: `Type` (`NewTodo`) is what the API gets,
+`Encoded` (`NewTodoInput`) is what the form holds, and `useForm` takes both. Validation messages
+go through `Schema.check(Schema.isMinLength(1, { message }))`; they are what the user sees under
+the field.
 
 ## api.ts
 
@@ -62,40 +36,11 @@ does `const api = yield* ApiClient` and returns `api.get(path, Schema)` or `api.
 
 ## queries.ts
 
-```ts
-import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-
-import { runEffect } from '@/lib/api/run';
-
-import { createTodo, listTodos } from './api';
-import type { NewTodo } from './schemas';
-
-/** Every todo query key comes from here, so invalidation can target exactly what changed. */
-export const todoKeys = {
-  all: ['todos'] as const,
-  lists: () => [...todoKeys.all, 'list'] as const,
-};
-
-export const todoListQueryOptions = () =>
-  queryOptions({
-    queryKey: todoKeys.lists(),
-    queryFn: ({ signal }) => runEffect(listTodos(), signal),
-  });
-
-export const useCreateTodo = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: NewTodo) => runEffect(createTodo(input)),
-    // Returning the promise keeps the mutation pending until the list has refetched.
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.lists() }),
-  });
-};
-```
-
-- Keys come only from the factory. A new query adds keys next to `lists`, e.g. `details: () => [...todoKeys.all, 'detail'] as const` and `detail: (id: number) => [...todoKeys.details(), id] as const`.
-- `runEffect` rejects with the typed `ApiError`; `query.error._tag` is safe to switch on.
-- Returning the promise from `onSuccess` keeps the mutation `isPending` until the refetch ends, so the UI never shows a stale list under a re-enabled button.
-- Retries: queries once (network/server errors only), mutations never. Configured in `src/lib/query-client.ts`; do not add more.
+The full file is in the integrate-api skill, `references/react-query.md`, sections "Keys and query
+options" and "Mutation hook" (`../integrate-api/references/react-query.md`). Shape: a key factory
+(`todoKeys`), a `queryOptions` factory per read (`todoListQueryOptions`) whose `queryFn` passes
+`signal` to `runEffect`, and a `use<Action><Name>` hook per write that returns the
+`invalidateQueries` promise from `onSuccess`.
 
 ## mocks.ts
 
@@ -173,7 +118,7 @@ index 21d1365..894508f 100644
 +export const handlers: RequestHandler[] = [...todosHandlers];
 ```
 
-Forgetting the handlers line is the usual failure: `pnpm dev` with `VITE_API_MOCKING=true` returns unhandled requests. Forgetting the route gives a 404 in `renderRoute`.
+Forgetting the handlers line is the usual failure: `pnpm dev:mock` returns unhandled requests. Forgetting the route gives a 404 in `renderRoute`.
 
 ## Reuse checklist before creating anything
 

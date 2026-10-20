@@ -1,17 +1,6 @@
 # ApiError and status mapping
 
-All in `src/lib/api/errors.ts` and `src/lib/api/client.ts`. Every API failure is one member of this union, a `Schema.TaggedError`:
-
-```ts
-export type ApiError =
-  | NetworkError
-  | UnauthorizedError
-  | ForbiddenError
-  | NotFoundError
-  | ValidationError
-  | ServerError
-  | InvalidResponseError;
-```
+All in `src/lib/api/errors.ts` and `src/lib/api/client.ts`. Every API failure is one member of the `ApiError` union in `errors.ts`, each a `Schema.TaggedError`:
 
 ## Status to error
 
@@ -25,72 +14,19 @@ export type ApiError =
 | any other non-2xx | `ServerError { status }` | `{ status: 500 }` |
 | 2xx but body fails the schema | `InvalidResponseError { message }` | a body with a wrong field type |
 
-`ValidationError` reads the 400/422 body with this schema (a malformed error body still yields a `ValidationError`, with the default message and no fields):
-
-```ts
-const ValidationBody = Schema.Struct({
-  message: Schema.optional(Schema.String),
-  errors: Schema.optional(Schema.Record(Schema.String, Schema.String)),
-});
-```
+`ValidationError` reads the 400/422 body with `ValidationBody` in `src/lib/api/client.ts`
+(`{ message?, errors?: Record<string, string> }`); a malformed error body still yields a
+`ValidationError`, with the default message and no fields.
 
 If the real backend uses another error body shape, change `ValidationBody` and the mapping in `fromStatus`, and update `todosMocks`-style mocks to match. Do not parse error bodies in features.
 
 ## The mapping code
 
-```ts
-const fromStatus = (
-  response: HttpClientResponse.HttpClientResponse,
-): Effect.Effect<never, ApiError> => {
-  switch (response.status) {
-    case 401:
-      return Effect.fail(new UnauthorizedError());
-    case 403:
-      return Effect.fail(new ForbiddenError());
-    case 404:
-      return Effect.fail(new NotFoundError());
-    case 400:
-    case 422:
-      return response.json.pipe(
-        Effect.flatMap(Schema.decodeUnknownEffect(ValidationBody)),
-        // A malformed error body still means "invalid input", just without field details.
-        Effect.catch(() => Effect.succeed({ message: undefined, errors: undefined })),
-        Effect.flatMap((body) =>
-          Effect.fail(
-            new ValidationError({
-              message: body.message ?? 'Please check the highlighted fields.',
-              fields: body.errors ?? {},
-            }),
-          ),
-        ),
-      );
-    default:
-      return Effect.fail(new ServerError({ status: response.status }));
-  }
-};
-
-/** Maps Effect's transport-level errors onto the app's `ApiError` union. */
-const toApiError = (
-  error: HttpClientError.HttpClientError | Schema.SchemaError,
-): Effect.Effect<never, ApiError> => {
-  if (error._tag === 'SchemaError') {
-    return Effect.fail(new InvalidResponseError({ message: error.message }));
-  }
-  switch (error.reason._tag) {
-    case 'StatusCodeError':
-      return fromStatus(error.reason.response);
-    case 'DecodeError':
-    case 'EmptyBodyError':
-      return Effect.fail(new InvalidResponseError({ message: error.message }));
-    case 'TransportError':
-    case 'EncodeError':
-    case 'InvalidUrlError':
-      return Effect.fail(new NetworkError());
-  }
-};
-```
-
-`HttpClientError.reason._tag` is exhaustively switched, so a new Effect reason becomes a compile error, not a silent gap.
+`fromStatus` (status → error) and `toApiError` (every `HttpClientError` / `SchemaError` → `ApiError`)
+are in `src/lib/api/client.ts`; read both before changing a mapping. `toApiError` switches
+exhaustively on `HttpClientError.reason._tag` (`TransportError | EncodeError | InvalidUrlError |
+StatusCodeError | DecodeError | EmptyBodyError`), so a new Effect reason becomes a compile error, not
+a silent gap.
 
 ## Changing how a status maps
 

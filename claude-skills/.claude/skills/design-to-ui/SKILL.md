@@ -67,14 +67,14 @@ The verbatim `index.css` lines and how to edit them are in `references/design-ma
 
 - **Layout with flex and grid** (`gap-*`, `space-y-*`), not absolute positioning; absolute is for true overlays only. Fixed pixel widths from the frame become `max-w-*` or responsive widths: the frame is one screen size, the browser is every size.
 - **Semantic HTML:** `src/app/root-layout.tsx` already renders `header`, `nav` and `main` around every page, so a page uses `section` / `article`, never a second `main` or a page-level `header`. `ul` / `li` for lists, one `h1` per page and headings in order. `CardTitle` renders a `div`, so put the real heading inside it, as `src/app/home-page.tsx` does with `<CardTitle><h1>...</h1></CardTitle>`.
-- **Compose small components.** The page lays out regions; each child owns its own query or mutation (`develop-feature` skill, `references/ui-states.md`, section Page composition).
-- **Data screens render the four states** (loading, error, empty, success) from the `develop-feature` skill's `references/ui-states.md`, styled to match the design: skeletons shaped like the design's rows or cards, the empty state in the design's typography with the next action. A design that shows only the success state does not remove the other three.
+- **Compose small components.** The page lays out regions; each child owns its own query or mutation (`../develop-feature/references/ui-states.md`, section Page composition).
+- **Data screens render the four states** (loading, error, empty, success) from `../develop-feature/references/ui-states.md`, styled to match the design: skeletons shaped like the design's rows or cards, the empty state in the design's typography with the next action. A design that shows only the success state does not remove the other three.
 - **Spacing and type** round to the 4px rhythm and the type scale (`references/design-mapping.md`); an exact off-scale value only when it is clearly intentional, and it goes under **Design gaps**.
 - **Mobile-first:** base classes for the narrow layout, `sm:` / `md:` / `lg:` add the wider one. If the design is desktop-only, collapse sensibly below 640px (`sm:`): columns stack, side navigation moves to the top, wide tables stack or scroll horizontally. Report it as an assumption.
 - **Keep interaction states and focus rings.** shadcn variants already carry hover, `focus-visible` and `disabled` styles; do not strip a ring or outline to match a flat mockup. Keyboard users need it, and `jsx-a11y` lint is on.
 - Clearly low-contrast text in the design (light gray on white): keep the token, flag it under **Design gaps**.
 - **Real data, forms or endpoints:** follow the `develop-feature` skill (schemas, api, queries, form, mocks, routes) and `integrate-api` (one endpoint). Do not re-derive them here.
-- **A new page, even with no data,** needs a lazy route factory, its entry in `src/app/routes.tsx` and a nav `<Link>` in `src/app/root-layout.tsx` (`develop-feature` skill, step 5). Wire it before tests and the visual check: both open the page by its URL.
+- **A new page, even with no data,** needs a lazy route factory, its entry in `src/app/routes.tsx` and a nav `<Link>` in `src/app/root-layout.tsx` (`../develop-feature/SKILL.md`, step 5). Wire it before tests and the visual check: both open the page by its URL.
 
 ### 4. Tests
 
@@ -83,8 +83,8 @@ The verbatim `index.css` lines and how to edit them are in `references/design-ma
   renderRoute('/');
   expect(await screen.findByRole('heading', { name: 'app-template' })).toBeInTheDocument();
   ```
-- Every component file you create gets a unit test file in the `__tests__/` folder next to it (`components/x.tsx` → `components/__tests__/x.test.tsx`) that renders it alone with `renderWithProviders(<X />)`; the page test covers only the route and how the parts work together. Layout is in the `develop-feature` skill's `references/testing.md`.
-- Data screens: the four states, in the test of the component that renders them, as in `references/testing.md`.
+- Every component file you create gets a unit test file in the `__tests__/` folder next to it (`components/x.tsx` → `components/__tests__/x.test.tsx`) that renders it alone with `renderWithProviders(<X />)`; the page test covers only the route and how the parts work together. Layout is in `../develop-feature/references/testing.md`.
+- Data screens: the four states, in the test of the component that renders them, as in `../develop-feature/references/testing.md`.
 - Do not assert class names or colors. A screenshot comparison is not a test, and no visual-regression tooling or Playwright is added: the template does not have it.
 
 ### 5. Visual check
@@ -93,7 +93,7 @@ Follow `references/visual-check.md`: with a browser tool, open the page, compare
 
 ### 6. Gates
 
-Run `pnpm check` (lint, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
+Run `pnpm lint:fix` (ESLint fixes and Prettier), then `pnpm check` (lint with a Prettier check, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
 
 ### 7. Report
 
@@ -103,7 +103,7 @@ Finish with the Result block below, including **Design gaps**.
 
 - `references/design-mapping.md`: read in steps 1 and 2, when mapping design colors, spacing, type, radius, elements and icons to tokens and components, or editing `src/styles/index.css`.
 - `references/visual-check.md`: read before step 5, for the browser tools, the dev server and the comparison loop.
-- The `develop-feature` skill's `references/ui-states.md` (four states) and `references/testing.md` (state tests): read when the screen shows server data.
+- `../develop-feature/references/ui-states.md` (four states) and `../develop-feature/references/testing.md` (state tests), paths relative to this skill's directory: read when the screen shows server data.
 
 ## Related skills
 

@@ -16,7 +16,7 @@ component -> useQuery(xQueryOptions()) / useXMutation() -> runEffect(effect, sig
 
 - Add, change or remove a call to a backend endpoint (GET list/detail, POST/PUT/PATCH/DELETE).
 - Handle a new HTTP status, add an `ApiError` case, or change how statuses map to errors.
-- Mock an endpoint (tests and `VITE_API_MOCKING=true pnpm dev`).
+- Mock an endpoint (tests and `pnpm dev:mock`).
 - Decide what a mutation invalidates or writes into the cache.
 
 Do not use for: scaffolding a new app, or building a whole feature (page, form, routes) from a ticket. Those are the `code-skeleton` and `develop-feature` skills.
@@ -38,7 +38,7 @@ Work in `src/features/<name>/` (create the folder files you need; names below ar
 3. **Queries** (`queries.ts`): add keys to the key factory (`todoKeys`), a `queryOptions` factory for reads (`todoListQueryOptions`), a mutation hook for writes (`useCreateTodo`). Always go through `runEffect`; pass `signal` for queries. See [references/react-query.md](references/react-query.md).
 4. **Mocks** (`mocks.ts`): extend the handler factory (`createTodosHandlers(initial)`) and the one-off states (`todosMocks`: pending, error, validation). Register the feature's handlers in `src/mocks/handlers.ts`. See [references/msw.md](references/msw.md).
 5. **Tests**: success, each error tag this endpoint can produce (see [references/errors.md](references/errors.md)), and for mutations the invalidation (the list shows the new data). Use `renderRoute` / `renderWithProviders` and `server.use(...)`. Each test goes in the test file of the component that shows the result (a toggle in the list → `components/__tests__/todo-list.test.tsx`, rendered alone with `renderWithProviders`); a new component gets its own `.test.tsx` in `components/__tests__/`; only flows that span components (invalidation shown in another component) go in the page test. `src/lib/api/__tests__/client.test.ts` already proves every status → `ApiError` mapping, so feature tests check what the UI does with the error, not the mapping again. A toast is asserted as text with `findByText`: the render helpers mount the `Toaster` ([references/msw.md](references/msw.md), Toasts).
-6. **`pnpm check`** (lint, typecheck, test, build, Storybook build). Not done until it passes.
+6. **`pnpm lint:fix`, then `pnpm check`** (lint with a Prettier check, typecheck, test, build, Storybook build). Not done until it passes.
 
 ## Rules that are easy to break
 

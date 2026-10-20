@@ -1,6 +1,6 @@
 # Design mapping
 
-Source: the template's `src/styles/index.css`, `components.json` and `src/components/ui/*.tsx`. Class strings quoted below are copied from those files, except the two page classes (`space-y-6`, the page title), which come from the `develop-feature` skill's `references/ui-states.md`, section Page composition.
+Source: the template's `src/styles/index.css`, `components.json` and `src/components/ui/*.tsx`. Class strings quoted below are copied from those files, except the two page classes (`space-y-6`, the page title), which come from `../../develop-feature/references/ui-states.md`, section Page composition.
 
 ## Colors → semantic tokens
 

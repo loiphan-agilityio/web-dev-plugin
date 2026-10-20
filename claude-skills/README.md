@@ -17,7 +17,7 @@ Out of scope: SSR / Next.js, backend code, CI/CD.
 
 ## Install
 
-Requirements: Node ≥ 22.22, pnpm 11, Claude Code.
+Requirements: Node ≥ 22.22, pnpm 10 or newer (it switches to the pinned pnpm 11.17 by itself), Claude Code.
 
 **As a plugin (recommended).** The repository root is a marketplace
 (`.claude-plugin/marketplace.json`) that lists this folder as the plugin `web-app-skills`.
@@ -73,7 +73,7 @@ build and Storybook build. The parts every feature builds on:
 - **Forms**: React Hook Form + `standardSchemaResolver(Schema.toStandardSchemaV1(schema))` +
   shadcn `Field`; `setFormErrors` puts server field errors under the right inputs.
 - **MSW worker**: `public/mockServiceWorker.js` is not in the template; the `postinstall` script
-  (`msw init`) writes it from the installed msw, so it always matches the msw version.
+  (`msw init`) writes it from the installed msw, so it always matches the msw version. `pnpm dev:mock` (Vite mode `mock`, `.env.mock`) serves the API from those handlers in any shell, Windows included.
 - **Tests**: MSW 3 for every test (unhandled requests fail), `renderRoute` / `renderWithProviders`.
   Both mount the `Toaster` (with a `matchMedia` stub and a per-test reset in `setup.ts`), so a
   toast is asserted as text.
@@ -83,7 +83,7 @@ build and Storybook build. The parts every feature builds on:
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
-  helpers, `clsx`, global `fetch`).
+  helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`); `pnpm lint` also runs `prettier --check`.
 
 `develop-feature/references/` (with `api.ts` and `mocks.ts` in `integrate-api/references/`) quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
 wiring diff for the three files a feature registers in.
@@ -105,19 +105,21 @@ wiring diff for the three files a feature registers in.
 
 Popular third-party skills for parts of the stack, installed next to the four
 skills by `install-companions.sh` and pinned to an audited commit. Each was read in full for security
-and fit; the full findings are in [`docs/companion-audit.md`](docs/companion-audit.md). When a
-companion disagrees with the project, the project's `CLAUDE.md` and the four project skills win.
+and fit; the findings, and what each skill must tell Claude to ignore, are in
+[`docs/companion-audit.md`](docs/companion-audit.md). When a companion disagrees with the project,
+the project's `CLAUDE.md` and the four project skills win. The installer is pinned too:
+`install-companions.sh` runs `skills@1.7.2`, not whatever `npx skills` serves that day.
 
-| Skill | Source | Commit | License | What it is for | Overridden by the project |
-|---|---|---|---|---|---|
-| `shadcn` | shadcn-ui/ui (official) | `d2fba50` | MIT | Adding and composing components, `Field` forms | Tailwind v3 branch, `next-themes` |
-| `react-router-data-mode` | remix-run/agent-skills (official) | `33578aa` | MIT | Routing and navigation | Written for v7; loader/`useFetcher` data path (the project uses TanStack Query), SSR file |
-| `vite` | antfu/skills | `feb0f3a` | MIT | Vite 8 config and plugins | SSR / library mode |
-| `vitest` | antfu/skills | `feb0f3a` | MIT | Vitest 5 API | Network mocking via MSW only |
-| `vercel-react-best-practices` | vercel-labs/agent-skills | `063bee9` | MIT | Client-side React performance | All `server-*` / Next.js rules, SWR |
-| `vercel-composition-patterns` | vercel-labs/agent-skills | `063bee9` | MIT | Component API design, React 19 | React Native examples |
-| `react-hook-form` | pproenca/dot-skills | `cf93c57` | MIT | Form performance | `zodResolver`, old shadcn `Form` |
-| `react-testing` | affaan-m/ecc | `76aaa77` | MIT | RTL patterns | Jest, MSW v2 imports |
+| Skill | Source | Commit | License | What it is for |
+|---|---|---|---|---|
+| `shadcn` | shadcn-ui/ui (official) | `d2fba50` | MIT | Adding and composing components, `Field` forms |
+| `react-router-data-mode` | remix-run/agent-skills (official) | `33578aa` | MIT | Routing and navigation |
+| `vite` | antfu/skills | `feb0f3a` | MIT | Vite 8 config and plugins |
+| `vitest` | antfu/skills | `feb0f3a` | MIT | Vitest 5 API |
+| `vercel-react-best-practices` | vercel-labs/agent-skills | `063bee9` | MIT | Client-side React performance |
+| `vercel-composition-patterns` | vercel-labs/agent-skills | `063bee9` | MIT | Component API design, React 19 |
+| `react-hook-form` | pproenca/dot-skills | `cf93c57` | MIT | Form performance |
+| `react-testing` | affaan-m/ecc | `76aaa77` | MIT | RTL patterns |
 
 Effect has no companion skill: its official guide ships inside the package
 (`node_modules/effect/AGENTS.md`) and the generated `CLAUDE.md` tells Claude to read it first.
@@ -127,13 +129,14 @@ examples, so `integrate-api/references/react-query.md` is the source.
 **Security note:** the official `shadcn` skill runs `npx shadcn@latest info --json` automatically
 whenever it loads (line 17 of its `SKILL.md`) and pre-approves `shadcn@latest` commands, which would
 execute whatever npm serves as `shadcn@latest` at that moment. `install-companions.sh` rewrites
-every one of them to `pnpm exec shadcn`, the CLI pinned by the project's lockfile. Because
+every one of them to `pnpm exec shadcn`, the CLI pinned by the project's lockfile, and fails if
+any `shadcn@latest` is left. Because
 `skills-lock.json` keeps the upstream hash, `npx skills check` reports that skill as modified;
 re-run the script after updating it.
 
 ## Maintaining
 
-`.gitattributes` keeps every file LF, so the shell scripts still run from a CRLF checkout
+`../.gitattributes` (the repository root) keeps every file LF, so the shell scripts still run from a CRLF checkout
 (`core.autocrlf=true`).
 
 ```
@@ -163,10 +166,13 @@ docs/companion-audit.md  ← audit of the companion skills
 Storybook 10) are written once, in the template's `CLAUDE.md` ("Library versions newer than most
 training data"). Skills point there and keep only the traps specific to their own step.
 
-**CI** (`../.gitlab-ci.yml`) runs `verify.sh` in `node:24`
-on merge requests and pushes that touch the plugin, and on pipeline schedules. Add a weekly schedule
-in GitLab (Build > Pipeline schedules) so a dependency release that breaks the template shows up
-before a user hits it. On another Git host, run `verify.sh` from your own CI.
+**CI** (`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
+and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,
+and `verify.sh`. Schedules also run `install-companions.sh` in a fresh scaffold, so a companion
+whose repo moved or deleted the pinned path shows up. Add a weekly schedule in GitLab (Build >
+Pipeline schedules) so a dependency release that breaks the template shows up before a user hits
+it. On another Git host, run the same commands from your own CI.
 
 **Upgrade a companion:** read the diff between the pinned and the new commit, re-check it
-against the conventions, then change the SHA in `install-companions.sh` and in the table above.
+against the conventions, then change the SHA in `install-companions.sh`, in the table above and in
+`docs/companion-audit.md` (with its override notes). The same holds for the `skills` CLI version.

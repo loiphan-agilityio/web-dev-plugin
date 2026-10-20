@@ -8,8 +8,8 @@ Library, MSW 3. Package manager: pnpm. No SSR, no Next.js.
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Dev server. `VITE_API_MOCKING=true pnpm dev` serves the API from `src/mocks` (MSW). |
-| `pnpm lint` | ESLint, `--max-warnings=0`. Also enforces the import rules below. |
+| `pnpm dev` | Dev server. `pnpm dev:mock` (Vite mode `mock`, reads `.env.mock`) serves the API from `src/mocks` (MSW), in any shell. |
+| `pnpm lint` | ESLint (`--max-warnings=0`, also enforces the import rules below) and `prettier --check`. `pnpm lint:fix` fixes what it can and formats; run it before `pnpm check`. |
 | `pnpm typecheck` | `tsc -b` |
 | `pnpm test` | Vitest once, with coverage (≥ 80% lines in `src/features` and `src/lib`). `pnpm test:watch` to watch. |
 | `pnpm build` | Typecheck + production build. |
@@ -30,7 +30,8 @@ src/
     queries.ts        key factory todoKeys, todoListQueryOptions(), mutation hooks useCreateTodo()
     mocks.ts          createTodosHandlers(initial) + todosMocks (MSW)
     routes.tsx        todoRoutes() — lazy route objects
-    components/       kebab-case files, PascalCase named exports, *.test.tsx in components/__tests__/
+    components/       kebab-case files, PascalCase named exports, a .stories.tsx beside each one,
+                      a .test.tsx for each one in components/__tests__/
   lib/
     config.ts         every env value (VITE_*), read statically and validated with Effect Schema
     runtime.ts        AppLayer + the ManagedRuntime
@@ -49,9 +50,10 @@ src/
 `component → useQuery(xQueryOptions()) / useXMutation() → runEffect → Effect.fn in api.ts →
 ApiClient → effect/http`
 
-- **Never call `fetch` (or axios) in app code.** Every request goes through `ApiClient`, which
-  prefixes `config.apiUrl`, decodes the body with the schema you pass, and maps every failure
-  to an `ApiError`. Lint rejects `fetch`.
+- **Never call `fetch` (or axios, or `XMLHttpRequest`) in app code.** Every request goes through
+  `ApiClient`, which prefixes `config.apiUrl`, decodes the body with the schema you pass, and
+  maps every failure to an `ApiError`. Lint rejects `fetch`, `window.fetch`, `globalThis.fetch`,
+  `XMLHttpRequest` and `axios`.
 - **`runEffect` is the only bridge to TanStack Query.** Pass the query's `signal` so
   cancellation aborts the request. It rejects with the typed `ApiError`, so `query.error._tag`
   is safe to switch on.
@@ -79,13 +81,25 @@ ApiClient → effect/http`
   the test. Drive states with `server.use(...)`; **a later `server.use()` call wins**, and
   within one call the first matching handler wins.
 - Each feature's `mocks.ts` exports `create<Name>Handlers(initial)` (fresh in-memory data per
-  call) and `<name>Mocks` (pending / error / validation responses).
+  call) and `<name>Mocks` (pending / error / validation responses). List a fixed path before a
+  path with a parameter (`/tasks/stats` before `/tasks/:id`): the first match wins, and
+  `:id` would match `stats`.
 - Tests live in a `__tests__/` folder next to the code they test, never beside the file itself
   (`components/x.tsx` → `components/__tests__/x.test.tsx`, `schemas.ts` → `__tests__/schemas.test.ts`).
   Every component file has a unit test file there that renders it
   alone with `renderWithProviders(<X />)`. The page test (`renderRoute`) covers only how the
   parts work together, not each component's cases again.
 - Query by role and label, not test ids. Test all four states and every form error path.
+- After a navigation to a lazy route, wait for the new page (`findBy*`) before asserting:
+  until the route loads, the old page is still on screen.
+
+## Stories
+
+- Every component file has a `.stories.tsx` beside it (`components/x.tsx` →
+  `components/x.stories.tsx`), with one story per state it renders, driven by the feature's
+  `mocks.ts` through `parameters.msw.handlers`.
+- The preview (`.storybook/preview.tsx`) wraps every story in the same providers as a test and
+  starts the app's MSW worker: add no providers in a story.
 
 ## Library versions newer than most training data
 

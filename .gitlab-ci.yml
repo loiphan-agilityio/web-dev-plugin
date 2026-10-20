@@ -1,4 +1,7 @@
-# Checks the claude-skills plugin: the template still passes every gate on a fresh scaffold.
+# Checks the claude-skills plugin:
+# - plugin-manifest: the plugin and marketplace manifests are valid.
+# - claude-skills: the template still passes every gate on a fresh scaffold.
+# - companions (schedules only): the pinned companion skills still install, and shadcn is pinned.
 # Runs on merge requests and branch pushes that touch the plugin, and on pipeline schedules (set a
 # weekly one in Build > Pipeline schedules) to catch a dependency release that breaks the template.
 workflow:
@@ -9,17 +12,40 @@ workflow:
     - if: $CI_COMMIT_BRANCH
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
-claude-skills:
-  image: node:24
+.plugin-changes:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - changes:
         - claude-skills/**/*
         - .claude-plugin/**/*
         - .gitlab-ci.yml
+
+plugin-manifest:
+  image: node:24
+  extends: .plugin-changes
+  script:
+    # Pinned like everything else; validation needs no login.
+    - npx -y @anthropic-ai/claude-code@2.1.304 plugin validate --strict claude-skills/.claude-plugin/plugin.json
+    - npx -y @anthropic-ai/claude-code@2.1.304 plugin validate --strict .
+
+claude-skills:
+  image: node:24
+  extends: .plugin-changes
   before_script:
     # pnpm 11 comes from the template's packageManager field.
     - corepack enable
   script:
     - cd claude-skills
     - bash .claude/skills/code-skeleton/scripts/verify.sh
+
+companions:
+  image: node:24
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    # Upstream repos can move or delete a pinned path; the script fails on a missing companion, a
+    # missing skills-lock.json or an unpinned shadcn@latest.
+    - bash claude-skills/.claude/skills/code-skeleton/scripts/scaffold.sh /tmp/app companions-app
+    - cd /tmp/app
+    - bash "$CI_PROJECT_DIR/claude-skills/.claude/skills/code-skeleton/scripts/install-companions.sh"
+    - test "$(ls .claude/skills | wc -l)" -eq 8

@@ -6,20 +6,9 @@ Storybook 10 (`@storybook/react-vite`) shows every component in each state it ca
 
 ## Harness (already in the template)
 
-Every story renders inside the same providers as a test: a fresh `QueryClient` with no retries, a `MemoryRouter` (so `Link` works) and the `Toaster`. MSW runs in every story through the app's browser worker (`src/mocks/browser.ts`), so the default handlers from `src/mocks/handlers.ts` apply and a story overrides them with `parameters.msw.handlers`:
+Every story renders inside the same providers as a test: a fresh `QueryClient` with no retries, a `MemoryRouter` (so `Link` works) and the `Toaster`. MSW runs in every story through the app's browser worker (`src/mocks/browser.ts`), so the default handlers from `src/mocks/handlers.ts` apply and a story overrides them with `parameters.msw.handlers`.
 
-```tsx
-const preview: Preview = {
-  // MSW runs in every story, through the same worker as `VITE_API_MOCKING=true pnpm dev`.
-  async beforeEach({ parameters }) {
-    workerStarted ??= worker.start({ onUnhandledFrame: 'bypass', quiet: true });
-    await workerStarted;
-    worker.use(...((parameters as MswParameters).msw?.handlers ?? []));
-    return () => {
-      worker.resetHandlers();
-    };
-  },
-```
+The worker is started once in `.storybook/preview.tsx` (`beforeEach`, `onUnhandledFrame: 'bypass'`), each story's handlers are added with `worker.use(...)`, and they are reset after it.
 
 There is no `msw-storybook-addon`: it calls MSW 2's `onUnhandledRequest`, and the template's own worker does the job. Do not install it, and do not add providers or a router inside a story.
 

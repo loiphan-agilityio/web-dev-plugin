@@ -71,6 +71,19 @@ export default defineConfig([
           name: 'fetch',
           message: 'Call the API through ApiClient + runEffect, never fetch directly.',
         },
+        {
+          name: 'XMLHttpRequest',
+          message: 'Call the API through ApiClient + runEffect, never XMLHttpRequest.',
+        },
+      ],
+      // `no-restricted-globals` only sees a bare `fetch`; these are the same call by another name.
+      'no-restricted-properties': [
+        'error',
+        ...['window', 'globalThis', 'self'].map((object) => ({
+          object,
+          property: 'fetch',
+          message: 'Call the API through ApiClient + runEffect, never fetch directly.',
+        })),
       ],
     },
   },

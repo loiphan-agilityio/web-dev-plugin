@@ -1,6 +1,6 @@
 ---
 name: develop-feature
-description: Implements a feature end to end in an existing React + Effect + TanStack Query app, from a ticket, story or issue to a tested UI. Use for "implement this ticket/story/feature", "build the X page/screen", "add a form for X", "develop feature from this issue URL", "create a CRUD screen", including tickets that come with a design (it loads design-to-ui for the UI) or need update, delete or detail endpoints (it loads integrate-api for those). It reads the ticket, lists acceptance criteria and open questions, then writes schemas, API calls, queries, the form, the four UI states, routes, a unit test file and a Storybook story file for every component plus a page test, and runs pnpm check. Not for scaffolding a new project, wiring one endpoint on its own, or matching a design with no ticket (design-to-ui).
+description: Implements a feature end to end in an existing React + Effect + TanStack Query app, from a ticket, story or issue to a tested UI. Use for "implement this ticket/story/feature", "build the X page/screen", "add a form for X", "develop feature from this issue URL", "create a CRUD screen", including tickets that come with a design (it loads design-to-ui for the UI) or need any endpoint besides one list and one create (it loads integrate-api for those). It reads the ticket, lists acceptance criteria and open questions, then writes schemas, API calls, queries, the form, the four UI states, routes, a unit test file and a Storybook story file for every component plus a page test, and runs pnpm check. Not for scaffolding a new project, wiring one endpoint on its own, or matching a design with no ticket (design-to-ui).
 ---
 
 # develop-feature
@@ -26,12 +26,15 @@ Specific to this skill:
 - Read the ticket. A URL plus a matching CLI means read it with the CLI (`glab` for GitLab, `gh` for GitHub); otherwise ask the user to paste the ticket.
 - Write down the acceptance criteria and the open questions.
 - The ticket links or attaches a design (Figma link, screenshot, mockup)? Note it, the frames it covers, and what it does not show (states, mobile, dark); step 4 invokes the `design-to-ui` skill for it.
-- A criterion blocked by an unanswered question is **excluded from scope** and named in the report. Never implement it on a guess: a plausible guess passes review and is wrong in production. Ask the user when the answer is cheap to get; keep going on the unblocked criteria meanwhile.
+- Sort every gap in the ticket into one of two kinds before writing code:
+  - **Open question**: the answer changes data, a business rule or what the backend must agree with (which tasks count as "due soon", whether a delete is soft, what a filter includes). The criterion that depends on it is **excluded from scope** and named in the report with its question. Never implement it on a guess: a plausible guess passes review and is wrong in production. Ask the user when the answer is cheap to get; keep going on the unblocked criteria meanwhile.
+  - **Unstated detail**: the answer only changes presentation or interaction and is easy to change later (a label, a sort order on screen, where a button sits). Choose the simplest option that fits the existing screens, build it, and list each choice under **Next** for the user to confirm.
+  - When unsure which kind a gap is, treat it as an open question.
 
 ### 1. Plan
 - List the files to create, using the layout below.
 - Check `src/features/`, `src/components/` and `src/components/ui/` for things to reuse before writing new ones.
-- Need a shadcn component that is not in `src/components/ui/`? `pnpm exec shadcn add <name>` (the `shadcn` companion skill covers composition).
+- Need a shadcn component that is not in `src/components/ui/`? `pnpm exec shadcn add <name>` (the `shadcn` companion skill covers composition). The CLI can add components the one you asked for depends on, or a sibling you did not ask for (`toggle-group` brings `toggle`): read its output, and delete any file it added that nothing imports.
 - Starting from the todos feature: rename `todo`/`Todo` consistently (folder, files, exports, keys, URL paths) and replace the fields; keep the structure.
 
 ```
@@ -52,7 +55,7 @@ Read `references/feature-layout.md` before writing these files; it has each one 
 - `api.ts`: one `Effect.fn` per call, going through `ApiClient` (never `fetch`; lint rejects it). Retries live in TanStack Query only.
 - `queries.ts`: a key factory, `queryOptions`, and mutation hooks. `runEffect` is the only bridge; pass the query `signal`. Mutations invalidate exactly the keys they change and return the invalidate promise from `onSuccess`.
 
-The todos example covers a list (`GET`) and a create (`POST`) with a 422. When the ticket needs any other endpoint (`PUT` / `PATCH` / `DELETE`, a detail by id, filters or pagination) or an error the UI must handle besides 422 and 500 (404, 409, 401 / 403), invoke the `integrate-api` skill (Skill tool) before writing that endpoint, and follow it for the schema, `api.ts`, keys, invalidation, mocks and error tests. This skill still owns the plan, the UI, the wiring and the one Result block.
+The todos example covers exactly two endpoints: a list (`GET /todos`) and a create (`POST /todos`) with a 422. **Every other endpoint goes through `integrate-api`**, reads included: a detail by id, a second `GET` such as `/tasks/stats`, filters or pagination sent to the server, and every `PUT` / `PATCH` / `DELETE`. So does an error the UI must handle besides 422 and 500 (404, 409, 401 / 403). Invoke the `integrate-api` skill (Skill tool) before writing that endpoint, and follow it for the schema, `api.ts`, keys, invalidation, mocks and error tests. This skill still owns the plan, the UI, the wiring and the one Result block.
 
 ### 3. Form
 React Hook Form with the Effect Schema as resolver: `standardSchemaResolver<Input, unknown, Output>(Schema.toStandardSchemaV1(Schema))`. Read `references/forms.md` before writing the form; it has the full component and edge cases.
@@ -95,7 +98,7 @@ Read `references/stories.md` before writing stories.
 - Before the gates, check that every `components/*.tsx` has its `components/__tests__/*.test.tsx` and its `.stories.tsx` beside it.
 
 ### 8. Gates
-Run `pnpm check` (lint, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
+Run `pnpm lint:fix` (ESLint fixes and Prettier), then `pnpm check` (lint with a Prettier check, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
 
 ### 9. Report
 Finish with the Result block below. Name every excluded criterion and the question that blocked it.
@@ -131,5 +134,5 @@ End every run with:
 **Saw:** facts observed (ticket details, existing code reused, surprises, code/doc mismatches)
 **Not done:** criteria excluded from scope, and anything skipped
 **Blocked by:** the unanswered questions behind each exclusion
-**Next:** what the user should answer or do
+**Next:** what the user should answer or do, including each unstated detail you chose and should be confirmed
 ```

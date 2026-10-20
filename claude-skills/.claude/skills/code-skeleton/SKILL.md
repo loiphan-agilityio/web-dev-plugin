@@ -23,14 +23,16 @@ project-level install, `.claude/skills/code-skeleton`). Commands run from wherev
 always call the scripts by that full path.
 
 1. **Preconditions.** Run `node --version` and `pnpm --version`. Need Node >= 22.22 (React
-   Router 8 engines; `package.json` `engines`) and pnpm 11 (`packageManager` pins
-   `pnpm@11.17.0`). If either is missing or too old, stop and tell the user; do not install
-   system tools unasked.
+   Router 8 engines; `package.json` `engines`) and pnpm 10 or newer: `packageManager` pins
+   `pnpm@11.17.0`, and pnpm 10+ switches to that version by itself inside the project (the
+   install output ends with `using pnpm v11.17.0`). If Node or pnpm is missing or too old, stop
+   and tell the user; do not install system tools unasked.
 2. **Target and name.** Use what the user gave. Ask only if they gave neither a directory nor a
    name and the current directory is not an obviously empty project directory. The name must
    match `^[a-z0-9][a-z0-9._-]*$` (defaults to the directory's name).
 3. **Scaffold.** `bash <skill-dir>/scripts/scaffold.sh <target-dir> [app-name]`. It copies the template
-   (not `node_modules`, `dist`, `coverage`) and renames `app-template` in `package.json`,
+   (not its local output: `node_modules`, `dist`, `coverage`, `storybook-static`,
+   `public/mockServiceWorker.js`, `.env.local`) and renames `app-template` in `package.json`,
    `index.html`, `CLAUDE.md`, `root-layout.tsx`, `home-page.tsx` and its test. It leaves an
    existing `.git/` and `.claude/` alone. On conflict it lists the existing files, exits 1 and
    copies nothing: show the list and ask the user how to proceed. Never delete or overwrite
@@ -38,14 +40,16 @@ always call the scripts by that full path.
 4. **Install.** In the target: `pnpm install` (the lockfile is included, so
    `--frozen-lockfile` also works).
 5. **Companion skills.** From the target root: `bash <skill-dir>/scripts/install-companions.sh`.
-   It runs `npx skills add` for 8 companions pinned by commit SHA into `.claude/skills/` and the
-   CLI writes `skills-lock.json` at the project root; both should be committed. Needs network and
-   Node. If it fails (e.g. offline), record it under **Not done** in Result and continue: the
-   project skills and `CLAUDE.md` work without companions.
-6. **Gates.** `pnpm check` (lint, typecheck, test with coverage, build, Storybook build). Report the real output, including
+   It runs the pinned `skills` CLI (`npx skills@<version> add`) for 8 companions pinned by commit
+   SHA into `.claude/skills/`, and the CLI writes `skills-lock.json` at the project root; both
+   should be committed. The script exits 1 if a companion failed, if `skills-lock.json` is
+   missing, or if the shadcn companion still calls `shadcn@latest`. Needs network and Node. If it
+   fails (e.g. offline), record its error under **Not done** in Result and continue: the project
+   skills and `CLAUDE.md` work without companions.
+6. **Gates.** `pnpm check` (lint with a Prettier check, typecheck, test with coverage, build, Storybook build). Report the real output, including
    failures. Optionally offer `git init` and a first commit; ask first, never commit unasked.
 7. **Hand over.** Tell the user:
-   - `pnpm dev`; `VITE_API_MOCKING=true pnpm dev` serves the API from `src/mocks` (MSW).
+   - `pnpm dev`; `pnpm dev:mock` serves the API from `src/mocks` (MSW), in any shell.
    - Copy `.env.example` to `.env.local` and set `VITE_API_URL` (all `VITE_*` values are public).
    - Conventions live in the project's `CLAUDE.md`.
    - Next steps: the `develop-feature` skill (ticket to working feature), the
@@ -77,7 +81,7 @@ Wiring worth knowing:
   `onUnhandledFrame: 'error'`; `renderRoute` / `renderWithProviders` in `src/test/render.tsx`.
 - ESLint `no-restricted-imports` / `no-restricted-globals` enforce the version traps:
   `react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw` `http` / `HttpResponse` /
-  `delay` / `passthrough` / `bypass`, `clsx`, `tailwind-merge`, global `fetch`.
+  `delay` / `passthrough` / `bypass`, `clsx`, `tailwind-merge`, `fetch` (bare, `window.` or `globalThis.`) and `XMLHttpRequest`. Prettier runs inside `pnpm lint`.
 - shadcn components vendored in `src/components/ui`: button, input, label, card, field,
   skeleton, alert, sonner, separator. That folder is excluded from ESLint and Prettier; add or
   refresh components with `pnpm exec shadcn add <name>`, do not edit them by hand.

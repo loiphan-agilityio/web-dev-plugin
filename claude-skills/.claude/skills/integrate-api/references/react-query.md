@@ -6,19 +6,8 @@ Code blocks are copied from the template or the verified todos feature; blocks m
 
 ## `runEffect`: the bridge
 
-```ts
-export const runEffect = async <A, E extends ApiError>(
-  effect: Effect.Effect<A, E, AppServices>,
-  signal?: AbortSignal,
-): Promise<A> => {
-  const exit = await runtime.runPromiseExit(effect, { signal });
-  if (Exit.isSuccess(exit)) return exit.value;
-  const failure = Cause.findErrorOption(exit.cause);
-  if (Option.isSome(failure)) throw failure.value;
-  // Defects (bugs) and interruptions: rethrow as-is so they surface instead of hiding.
-  throw Cause.squash(exit.cause);
-};
-```
+`runEffect(effect, signal?)` in `src/lib/api/run.ts` runs an effect on the app runtime and returns a
+Promise for `queryFn` / `mutationFn`.
 
 - A typed failure is thrown as the `ApiError` itself, so `query.error._tag` is safe to switch on.
 - Pass the query's `signal` so cancellation interrupts the fiber and aborts the fetch. Mutations have no signal.
@@ -26,33 +15,10 @@ export const runEffect = async <A, E extends ApiError>(
 
 ## Query client policy (`src/lib/query-client.ts`)
 
-```ts
-declare module '@tanstack/react-query' {
-  interface Register {
-    /** `runEffect` rejects with an `ApiError`, so that is the type of every `query.error`. */
-    defaultError: ApiError;
-  }
-}
-
-/** Only failures that can succeed on a second try are retried; 4xx answers will not change. */
-const isTransient = (error: ApiError) =>
-  error._tag === 'NetworkError' || error._tag === 'ServerError';
-
-export const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: {
-        // Avoid refetching the same data on every route change.
-        staleTime: 30_000,
-        retry: (failureCount, error) => failureCount < 1 && isTransient(error),
-      },
-      // Mutations are not idempotent: never retry them automatically.
-      mutations: { retry: 0 },
-    },
-  });
-```
-
-Do not set per-query `retry` or add `HttpClient.retryTransient`.
+`createQueryClient` registers `ApiError` as TanStack Query's `defaultError` (so `query.error` is
+typed), sets `staleTime: 30_000`, retries a query once and only for `NetworkError` /
+`ServerError`, and never retries a mutation. Do not set per-query `retry` or add
+`HttpClient.retryTransient`.
 
 ## Keys and query options (`features/<name>/queries.ts`)
 
@@ -107,21 +73,10 @@ export const useCreateTodo = () => {
 
 Name `use<Action><Name>`. Invalidate exactly the keys the write changes: the lists the item can appear in, and the detail key of that item for update/delete. Return the promise.
 
-Call-site error handling (from `todo-form.tsx`):
-
-```ts
-const onSubmit = form.handleSubmit((values) => {
-  createTodo.mutate(values, {
-    onSuccess: () => {
-      form.reset();
-      toast.success('Todo added');
-    },
-    onError: (error) => {
-      setFormErrors(form.setError, error);
-    },
-  });
-});
-```
+Call-site error handling: `todo-form.tsx` (the develop-feature skill's `references/forms.md`,
+`../../develop-feature/references/forms.md`) calls `createTodo.mutate(values, { onSuccess, onError })`,
+with `form.reset()` and `toast.success(...)` in `onSuccess` and `setFormErrors(form.setError, error)`
+in `onError`.
 
 Callbacks that touch the component (form reset, toast) go to `mutate`; the hook's own `onSuccess` only invalidates. A mutation outside a form (a row's toggle or delete button) handles its errors the same way, at the call site: `onError: (error) => { if (error._tag === 'NotFoundError') … else toast.error(toUserMessage(error)); }`.
 
@@ -140,4 +95,4 @@ Callbacks that touch the component (form reset, toast) go to `mutate`; the hook'
 
 ## Testing invalidation
 
-Drive it through the UI with in-memory handlers: render the list with `createTodosHandlers([])`, perform the mutation, and `await screen.findByRole('list', ...)`; if the new item shows, the list refetched. The `todos-page.test.tsx` test in [msw.md](msw.md) does exactly this. Each test gets a fresh `QueryClient` from `renderRoute` / `renderWithProviders` (returned as `queryClient` when you need to inspect the cache).
+Drive it through the UI with in-memory handlers: render the list with `createTodosHandlers([])`, perform the mutation, and `await screen.findByRole('list', ...)`; if the new item shows, the list refetched. The `todos-page.test.tsx` test (the develop-feature skill's `references/testing.md`, "The page test") does exactly this. Each test gets a fresh `QueryClient` from `renderRoute` / `renderWithProviders` (returned as `queryClient` when you need to inspect the cache).

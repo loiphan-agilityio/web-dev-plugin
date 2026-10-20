@@ -75,6 +75,7 @@ Conventions:
 - Mock bodies must satisfy the response schema, otherwise tests get `InvalidResponseError`. Reuse the schema types for fixtures.
 - Keep error bodies in the shape `ValidationBody` reads: `{ message, errors: { field: 'text' } }`.
 - Infinite loading state: `await delay('infinite')` inside the handler.
+- **A fixed path goes before a path with a parameter.** In `create<Name>Handlers`, put `http.get(url('/tasks/stats'), ...)` above `http.get(url('/tasks/:id'), ...)`: the first matching handler wins, and `:id` matches `stats`, so the stats request would get a task (or a 404) and fail to decode. The same holds across features in `src/mocks/handlers.ts`.
 
 ## Registering (`src/mocks/handlers.ts`)
 
@@ -86,39 +87,18 @@ import { todosHandlers } from '@/features/todos/mocks';
 export const handlers: RequestHandler[] = [...todosHandlers];
 ```
 
-(This is the `src/mocks/handlers.ts` hunk of the wiring diff in develop-feature's `references/feature-layout.md`.) The same list feeds the Vitest server and the browser worker (`VITE_API_MOCKING=true pnpm dev`, started in `src/main.tsx`). Default handlers keep unrelated tests from failing on unhandled requests.
+(This is the `src/mocks/handlers.ts` hunk of the wiring diff in develop-feature's `references/feature-layout.md`.) The same list feeds the Vitest server and the browser worker (`pnpm dev:mock`, started in `src/main.tsx`). Default handlers keep unrelated tests from failing on unhandled requests.
 
 ## Overriding in tests
 
-`server.use(...)` changes what the backend answers for one test; `afterEach` drops it again. From `todo-list.test.tsx`, which renders the component alone: an error first, then working handlers for the retry.
+`server.use(...)` changes what the backend answers for one test; `afterEach` drops it again. The
+todos tests show both uses, in the develop-feature skill's `references/testing.md`
+(`../../develop-feature/references/testing.md`):
 
-```tsx
-it('shows an error with a retry that recovers', async () => {
-  server.use(todosMocks.listError(500));
-  const { user } = renderWithProviders(<TodoList />);
-  expect(await screen.findByText('Could not load todos')).toBeInTheDocument();
-
-  server.use(...createTodosHandlers(todoFixtures));
-  await user.click(screen.getByRole('button', { name: 'Try again' }));
-  expect(await screen.findByRole('list', { name: 'Todos' })).toBeInTheDocument();
-});
-```
-
-From `todos-page.test.tsx`: invalidation proved through the UI. The in-memory handlers start empty, the create goes through them, and the new item shows only because the list refetched.
-
-```tsx
-it('shows a new todo in the list after it is created', async () => {
-  server.use(...createTodosHandlers([]));
-  const { user } = renderRoute('/todos');
-  await screen.findByText(/No todos yet/);
-
-  await user.type(screen.getByLabelText('Title'), '  Ship it  ');
-  await user.click(screen.getByRole('button', { name: 'Add todo' }));
-
-  const list = await screen.findByRole('list', { name: 'Todos' });
-  expect(within(list).getByText('Ship it')).toBeInTheDocument();
-});
-```
+- "The list component", test `shows an error with a retry that recovers`: `server.use(todosMocks.listError(500))`
+  first, then `server.use(...createTodosHandlers(todoFixtures))` for the retry.
+- "The page test": invalidation proved through the UI. The in-memory handlers start empty, the
+  create goes through them, and the new item shows only because the list refetched.
 
 ### Precedence trap
 
@@ -134,7 +114,9 @@ server.use(todosMocks.createInvalid({ title: 'x' }));
 
 ### Toasts
 
-`renderRoute` and `renderWithProviders` mount the app's `Toaster` (`src/test/render.tsx`), and `src/test/setup.ts` clears sonner's store before each test, so a toast is asserted like any other text: `expect(await screen.findByText('…')).toBeInTheDocument()`. No need to mock `sonner`. In a project scaffolded before the template did this, add the `<Toaster />` to `src/test/render.tsx`, and the `matchMedia` stub and `toast.dismiss()` to `src/test/setup.ts`, as in `.claude/skills/code-skeleton/template/src/test/`. Without the stub the Toaster throws in jsdom; without the dismiss a toast leaks into the next test.
+A toast is asserted as text (`findByText`): the render helpers mount the `Toaster`. Never mock
+`sonner`. Details, and what to add in a project scaffolded before the template did this:
+`../../develop-feature/references/testing.md`, section Rules.
 
 ### Other rules
 

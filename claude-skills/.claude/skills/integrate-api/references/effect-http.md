@@ -63,29 +63,9 @@ No try/catch and no status handling here. The error channel is already `ApiError
 
 ## ApiClient surface (`src/lib/api/client.ts`)
 
-```ts
-readonly get: <S extends Schema.Constraint>(
-  path: string,
-  schema: S,
-  options?: { readonly urlParams?: Record<string, string> },
-) => Effect.Effect<S['Type'], ApiError, S['DecodingServices']>;
-readonly post: <S extends Schema.Constraint>(
-  path: string,
-  body: unknown,
-  schema: S,
-) => Effect.Effect<S['Type'], ApiError, S['DecodingServices']>;
-readonly put: <S extends Schema.Constraint>(
-  path: string,
-  body: unknown,
-  schema: S,
-) => Effect.Effect<S['Type'], ApiError, S['DecodingServices']>;
-readonly patch: <S extends Schema.Constraint>(
-  path: string,
-  body: unknown,
-  schema: S,
-) => Effect.Effect<S['Type'], ApiError, S['DecodingServices']>;
-readonly delete: (path: string) => Effect.Effect<void, ApiError>;
-```
+`get(path, schema, { urlParams? })`, `post(path, body, schema)`, `put(path, body, schema)`,
+`patch(path, body, schema)` return `Effect<schema Type, ApiError>`; `delete(path)` returns
+`Effect<void, ApiError>`. The exact signatures are the `ApiClient` service interface in that file.
 
 - Query string: `api.get('/todos', TodoList, { urlParams: { status: 'open' } })` (values are strings; convert numbers yourself).
 - Path params: interpolate into the path (`` `/todos/${id}` ``). Ids from user input should be validated first; use `encodeURIComponent` for free text.
@@ -94,31 +74,12 @@ readonly delete: (path: string) => Effect.Effect<void, ApiError>;
 
 ## How ApiClient works inside
 
-```ts
-const client = (yield* HttpClient.HttpClient).pipe(
-  HttpClient.mapRequest(
-    flow(
-      HttpClientRequest.prependUrl(config.apiUrl),
-      HttpClientRequest.acceptJson,
-      // Auth goes here when the app has it, e.g. HttpClientRequest.bearerToken(token).
-    ),
-  ),
-  HttpClient.filterStatusOk,
-);
-
-const send = <S extends Schema.Constraint>(
-  request: HttpClientRequest.HttpClientRequest,
-  schema: S,
-) =>
-  client
-    .execute(request)
-    .pipe(
-      Effect.flatMap(HttpClientResponse.schemaBodyJson(schema)),
-      Effect.catch(toApiError),
-    );
-```
-
-and for bodies: `HttpClientRequest.post(path).pipe(HttpClientRequest.bodyJsonUnsafe(body))`. `bodyJsonUnsafe` serialises with `JSON.stringify`; it does not validate. That is why callers pass already-decoded values.
+Read `ApiClient.layer` in `src/lib/api/client.ts`. It takes Effect's `HttpClient`, maps every
+request (`prependUrl(config.apiUrl)`, `acceptJson`, and the commented hook point for auth), applies
+`filterStatusOk`, decodes the body with `HttpClientResponse.schemaBodyJson(schema)` and turns every
+failure into an `ApiError` with `Effect.catch(toApiError)`. Bodies are sent with
+`HttpClientRequest.bodyJsonUnsafe(body)`, which serialises with `JSON.stringify` and does not
+validate. That is why callers pass already-decoded values.
 
 Failure mapping is in [errors.md](errors.md). The layer is `.pipe(Layer.provide(FetchHttpClient.layer))`: the one place `fetch` is used, inside Effect.
 
@@ -128,4 +89,4 @@ Edit `src/lib/api/client.ts` only when an endpoint cannot be expressed with the 
 
 ## Auth header hook point
 
-Not implemented. The commented line inside `mapRequest` above is where `HttpClientRequest.bearerToken(token)` would go. Reading a token that changes over time needs an Effect service for it; design that with `node_modules/effect/AGENTS.md` open and tell the user, since it touches every request.
+Not implemented. The commented line inside `mapRequest` in `client.ts` is where `HttpClientRequest.bearerToken(token)` would go. Reading a token that changes over time needs an Effect service for it; design that with `node_modules/effect/AGENTS.md` open and tell the user, since it touches every request.

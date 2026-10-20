@@ -21,10 +21,14 @@ if [[ ! "$name" =~ ^[a-z0-9][a-z0-9._-]*$ ]]; then
   exit 1
 fi
 
-# Local build output of the template itself; never part of a new project.
-skip=(node_modules dist coverage storybook-static)
+# Local output of the template itself (what its .gitignore lists); never part of a new project.
+# public/mockServiceWorker.js is written by `msw init` on install; .env.local may hold a
+# maintainer's own settings.
+skip=(node_modules dist coverage storybook-static public/mockServiceWorker.js)
+skip_names=('*storybook.log' '*.tsbuildinfo' '.env.local' '.env.*.local')
 prune=(); for d in "${skip[@]}"; do prune+=(-path "./$d" -prune -o); done
-files="$(cd "$template" && find . "${prune[@]}" -name '*storybook.log' -prune -o -type f -print | sed 's#^\./##' | sort)"
+for n in "${skip_names[@]}"; do prune+=(-name "$n" -prune -o); done
+files="$(cd "$template" && find . "${prune[@]}" -type f -print | sed 's#^\./##' | sort)"
 dirs="$(cd "$template" && find . "${prune[@]}" -mindepth 1 -type d -print | sed 's#^\./##' | sort)"
 
 conflicts=""
@@ -41,7 +45,8 @@ if [ -n "$conflicts" ]; then
   exit 1
 fi
 
-excludes=(--exclude='*storybook.log'); for d in "${skip[@]}"; do excludes+=("--exclude=./$d"); done
+excludes=(); for d in "${skip[@]}"; do excludes+=("--exclude=./$d"); done
+for n in "${skip_names[@]}"; do excludes+=("--exclude=$n"); done
 (cd "$template" && tar -cf - "${excludes[@]}" .) | (cd "$target" && tar -xf -)
 
 for f in package.json index.html CLAUDE.md src/app/root-layout.tsx src/app/home-page.tsx src/app/__tests__/home-page.test.tsx; do

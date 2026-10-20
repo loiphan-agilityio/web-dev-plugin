@@ -1,3 +1,0 @@
-# Keep LF everywhere, whatever core.autocrlf says: the shell scripts fail on CRLF.
-* text=auto eol=lf
-*.png binary

@@ -6,7 +6,11 @@
     "allow": [
       "Bash(pnpm *)",
       "Bash(npx skills *)",
-      "Bash(curl -s *)",
+      "Bash(curl -s https://registry.npmjs.org/*)",
+      "Bash(curl -s https://cdn.jsdelivr.net/npm/*)",
+      "Bash(curl -s https://data.jsdelivr.com/*)",
+      "Bash(curl -s https://api.github.com/repos/*)",
+      "Bash(curl -s https://raw.githubusercontent.com/*)",
       "Bash(git ls-remote *)"
     ]
   }

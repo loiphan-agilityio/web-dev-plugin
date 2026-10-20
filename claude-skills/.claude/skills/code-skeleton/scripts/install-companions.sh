@@ -7,6 +7,11 @@
 # To upgrade one: read the diff between the old and new SHA, then change the SHA here.
 set -euo pipefail
 
+# The installer is pinned too: a pinned skill fetched by whatever `skills` npm serves today is
+# only as safe as that release. To upgrade, read its changelog and check `add <url> -a -y` still
+# behaves the same, then change the version here and in the README.
+skills_cli="skills@1.7.2"
+
 companions=(
   "shadcn-ui/ui/tree/d2fba50ee5b9113008b5bb908563527b7efd2f27/skills/shadcn"
   "remix-run/agent-skills/tree/33578aae4aa36a90c9f8f602105a1ccb0f4efe45/skills/react-router-data-mode"
@@ -21,7 +26,7 @@ companions=(
 failed=()
 for c in "${companions[@]}"; do
   echo "→ $c"
-  if ! npx -y skills add "https://github.com/$c" -a claude-code -y; then
+  if ! npx -y "$skills_cli" add "https://github.com/$c" -a claude-code -y; then
     failed+=("$c")
   fi
 done
@@ -34,6 +39,11 @@ done
 if [ -d .claude/skills/shadcn ]; then
   find .claude/skills/shadcn -name '*.md' -exec sed -i.bak -E 's/(npx|pnpm dlx|bunx --bun) shadcn@latest/pnpm exec shadcn/g' {} +
   find .claude/skills/shadcn -name '*.md.bak' -delete
+  # A form the rewrite above does not know (a new flag, another runner) must not slip through.
+  if grep -rn 'shadcn@latest' .claude/skills/shadcn; then
+    echo "error: .claude/skills/shadcn still runs shadcn@latest (lines above); extend the rewrite" >&2
+    exit 1
+  fi
 fi
 
 if [ ${#failed[@]} -gt 0 ]; then
@@ -41,4 +51,8 @@ if [ ${#failed[@]} -gt 0 ]; then
   printf '  %s\n' "${failed[@]}" >&2
   exit 1
 fi
-echo "installed ${#companions[@]} companion skills into .claude/skills/"
+if [ ! -f skills-lock.json ]; then
+  echo "error: the skills CLI did not write skills-lock.json in $(pwd)" >&2
+  exit 1
+fi
+echo "installed ${#companions[@]} companion skills into .claude/skills/ (lock: skills-lock.json)"

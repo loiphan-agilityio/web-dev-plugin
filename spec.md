@@ -34,14 +34,17 @@ Every version is pinned in the template's lockfile.
   ticket", "Add PATCH /todos/:id", "Make it look like this screenshot"), and not trigger on
   requests that belong to another skill.
 - Copy every code example from the verified template or the worked feature, never from memory.
-- Run `pnpm check` (all five gates) before reporting done.
+- Run `pnpm check` (all five gates; lint includes a Prettier check) before reporting done.
 - End with a `## Result` block: Did / Saw / Not done / Blocked by / Next.
-- Exclude an acceptance criterion that depends on an unanswered question, and name it in the
-  report instead of guessing.
+- Exclude an acceptance criterion that depends on an unanswered question (data, a business rule,
+  what the backend must agree with), and name it in the report instead of guessing. A detail the
+  ticket leaves out that only changes presentation gets the simplest default, listed under
+  **Next** for the user to confirm.
 
 ### The generated app must
 
-- Call the backend only through `ApiClient` (lint rejects `fetch` and `axios`).
+- Call the backend only through `ApiClient` (lint rejects `fetch` in any form, `XMLHttpRequest`
+  and `axios`).
 - Render four distinct states on every data screen: loading, error with retry, empty, success.
 - Show server validation errors (422) next to the matching form fields.
 - Mock every request with MSW in tests; an unhandled request fails the test.

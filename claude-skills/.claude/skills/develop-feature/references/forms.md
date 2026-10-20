@@ -93,34 +93,9 @@ export function TodoForm() {
 
 ## Server errors
 
-`setFormErrors` (template `src/lib/forms.ts`):
+`setFormErrors` (template `src/lib/forms.ts`), in short:
 
-```ts
-import type { FieldValues, Path, UseFormSetError } from 'react-hook-form';
-
-import { type ApiError, toUserMessage } from '@/lib/api/errors';
-
-/**
- * Shows an API failure on a React Hook Form form.
- *
- * A `ValidationError` with field messages puts each message under its input. Anything else
- * (or a validation error without field details) goes to `errors.root.server`, which the form
- * renders above the submit button.
- */
-export function setFormErrors<T extends FieldValues>(
-  setError: UseFormSetError<T>,
-  error: ApiError,
-) {
-  if (error._tag === 'ValidationError' && Object.keys(error.fields).length > 0) {
-    for (const [field, message] of Object.entries(error.fields)) {
-      // Field names come from the server; they match the form when the API mirrors its schema.
-      setError(field as Path<T>, { type: 'server', message });
-    }
-    return;
-  }
-  setError('root.server', { type: 'server', message: toUserMessage(error) });
-}
-```
+A `ValidationError` with field messages puts each one under its input with `setError(field, { type: 'server', message })`; anything else goes to `errors.root.server` with `toUserMessage(error)`. Read the file in the project for the code.
 
 - A `ValidationError` with `fields` puts each message under the field named by the server key. Those keys must equal your form field names; if the API names them differently, map before calling `setError`, or tell the user the contract mismatches.
 - Everything else (network, 500, 403, a 422 with no fields) lands in `errors.root.server`; render it above the submit button as in the example (`Alert variant="destructive"`).
@@ -132,3 +107,5 @@ Seed `defaultValues` from loaded data only after the query has succeeded (render
 ## Other controls
 
 Select, checkbox, textarea: add via `pnpm exec shadcn add <name>` and read the generated file in `src/components/ui/` for its props before wiring it into `Controller`. Pass `aria-invalid` the same way.
+
+For a choice from a short list, prefer `native-select` (`pnpm exec shadcn add native-select`) over the Radix `select`. The Radix one opens a portal and relies on pointer capture and `scrollIntoView`, which jsdom does not implement, so its tests need stubs and are fragile; a native `<select>` is driven with `user.selectOptions(...)` and works on phones out of the box. Use the Radix `select` only when the design needs what a native one cannot show (icons or rich content in the options), and say so in the Result.
