@@ -1,6 +1,6 @@
 # Testing
 
-Source: the todos feature (`components/todo-list.test.tsx`, `components/todo-form.test.tsx`, `components/todos-page.test.tsx`, `schemas.test.ts`, `mocks.ts`); template `src/test/render.tsx`, `src/test/setup.ts`.
+Source: the todos feature (`components/__tests__/todo-list.test.tsx`, `components/__tests__/todo-form.test.tsx`, `components/__tests__/todos-page.test.tsx`, `__tests__/schemas.test.ts`, `mocks.ts`); template `src/test/render.tsx`, `src/test/setup.ts`.
 
 ## Harness (already in the template)
 
@@ -51,7 +51,7 @@ afterAll(() => {
 
 ## One test file per component
 
-Every file in `components/` has a test file beside it: `todo-list.tsx` → `todo-list.test.tsx`. It renders that component alone with `renderWithProviders(<X />)` and covers the component's own states and interactions. The page test renders the route with `renderRoute('/path')` and checks only what needs the parts together (a created item showing up in the list). Do not repeat a component's cases in the page test.
+Every file in `components/` has a test file in `components/__tests__/`: `todo-list.tsx` → `__tests__/todo-list.test.tsx`. Tests never sit next to the file they test; a test in `__tests__/` imports it from `../`. It renders that component alone with `renderWithProviders(<X />)` and covers the component's own states and interactions. The page test renders the route with `renderRoute('/path')` and checks only what needs the parts together (a created item showing up in the list). Do not repeat a component's cases in the page test.
 
 - A component that owns a query or mutation still goes through `ApiClient` → MSW: drive it with `server.use(...)`, never by mocking hooks or `api.ts`.
 - A presentational component (props in, markup out) gets its props from the `mocks.ts` fixtures and callback props as `vi.fn()`; assert the markup and `toHaveBeenCalledWith(...)`.
@@ -64,8 +64,8 @@ import { screen, within } from '@testing-library/react';
 import { server } from '@/mocks/server';
 import { renderWithProviders } from '@/test/render';
 
-import { createTodosHandlers, todoFixtures, todosMocks } from '../mocks';
-import { TodoList } from './todo-list';
+import { createTodosHandlers, todoFixtures, todosMocks } from '../../mocks';
+import { TodoList } from '../todo-list';
 
 describe('TodoList', () => {
   it('shows a loading state before the first response', async () => {
@@ -108,8 +108,8 @@ import { screen, waitFor } from '@testing-library/react';
 import { server } from '@/mocks/server';
 import { renderWithProviders } from '@/test/render';
 
-import { createTodosHandlers, todosMocks } from '../mocks';
-import { TodoForm } from './todo-form';
+import { createTodosHandlers, todosMocks } from '../../mocks';
+import { TodoForm } from '../todo-form';
 
 describe('TodoForm', () => {
   it('validates on the client', async () => {
@@ -155,7 +155,7 @@ import { screen, within } from '@testing-library/react';
 import { server } from '@/mocks/server';
 import { renderRoute } from '@/test/render';
 
-import { createTodosHandlers } from '../mocks';
+import { createTodosHandlers } from '../../mocks';
 
 // TodoList and TodoForm test their own states; this checks they work together on the route.
 describe('TodosPage', () => {
@@ -175,26 +175,26 @@ describe('TodosPage', () => {
 
 ## Minimum test set per feature
 
-`<name>-list.test.tsx`:
+`components/__tests__/<name>-list.test.tsx`:
 
 - Loading: `server.use(<name>Mocks.listPending())`, `findByRole('status', { name })`.
 - Success: `server.use(...create<Name>Handlers(fixtures))`, assert the rows by role.
 - Empty: `create<Name>Handlers([])`, assert the text **and** `queryByRole('alert')` is absent.
 - Error + retry: `<name>Mocks.listError(500)`, then a second `server.use()` with working handlers, click the retry button, assert recovery.
 
-`<name>-form.test.tsx`:
+`components/__tests__/<name>-form.test.tsx`:
 
 - Client validation: submit empty, assert the message and `aria-invalid="true"`. One test per field rule the user can trip (required, max length).
 - Submit success: type, click, the input is `toHaveValue('')` inside `waitFor`.
 - Server 422: `<name>Mocks.createInvalid({ field: 'message' })`, assert the message shows.
 
-`<name>-page.test.tsx`:
+`components/__tests__/<name>-page.test.tsx`:
 
 - The create flow on the route: the new item appears in the list (proves the mutation invalidates the list query).
 
-Every other component (detail, item row, dialog, edit form): its own test file with its states, each interaction, and each error it shows.
+Every other component (detail, item row, dialog, edit form): its own test file in `components/__tests__/` with its states, each interaction, and each error it shows.
 
-`schemas.test.ts`: schema unit tests, below.
+`__tests__/schemas.test.ts`: schema unit tests, below.
 
 ## server.use ordering
 
@@ -208,7 +208,7 @@ Every other component (detail, item row, dialog, edit form): its own test file w
 ```ts
 import { Schema } from 'effect';
 
-import { NewTodo } from './schemas';
+import { NewTodo } from '../schemas';
 
 const decode = Schema.decodeUnknownSync(NewTodo);
 

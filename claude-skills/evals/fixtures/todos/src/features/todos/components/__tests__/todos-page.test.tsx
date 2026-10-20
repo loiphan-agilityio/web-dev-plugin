@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react';
 import { server } from '@/mocks/server';
 import { renderRoute } from '@/test/render';
 
-import { createTodosHandlers } from '../mocks';
+import { createTodosHandlers } from '../../mocks';
 
 // TodoList and TodoForm test their own states; this checks they work together on the route.
 describe('TodosPage', () => {

@@ -73,7 +73,7 @@ for dir in "$runs"/*/; do
       check "title trimmed in schema" has "$f/schemas.ts" 'Trim'
       check "MSW imports from msw/http" grep -rq "from 'msw/http'" "$f"
       check ">= 7 notes tests" test "$(count_tests "$f")" -ge 7
-      check "every notes component has a test" bash -c 'ls "$1"/components/*.tsx >/dev/null 2>&1 || exit 1; for c in "$1"/components/*.tsx; do case "$c" in *.test.tsx) ;; *) test -f "${c%.tsx}.test.tsx" || exit 1;; esac; done' _ "$f"
+      check "every notes component has a test" bash -c 'ls "$1"/components/*.tsx >/dev/null 2>&1 || exit 1; for c in "$1"/components/*.tsx; do test -f "$1/components/__tests__/$(basename "${c%.tsx}").test.tsx" || exit 1; done' _ "$f"
       if [ "$eval" = design ]; then
         check "no raw colors in UI" test -z "$(grep -rlE "$rawcolor" "$app/src" --include='*.ts' --include='*.tsx' --exclude='*.test.*' --exclude-dir=ui 2>/dev/null)"
         # Against the baseline commit, whether or not the session committed; new shadcn files are fine.
@@ -109,7 +109,7 @@ for dir in "$runs"/*/; do
       check "404 handled via NotFoundError" grep -rq 'NotFoundError' "$f"
       check "404 toast tested" grep -rqi 'no longer exists' --include='*.test.tsx' "$f/components"
       check "sonner not mocked" bash -c '! grep -rqE "vi\.mock\(.sonner" "$1"' _ "$f"
-      check "every todos component has a test" bash -c 'for c in "$1"/components/*.tsx; do case "$c" in *.test.tsx) ;; *) test -f "${c%.tsx}.test.tsx" || exit 1;; esac; done' _ "$f"
+      check "every todos component has a test" bash -c 'for c in "$1"/components/*.tsx; do test -f "$1/components/__tests__/$(basename "${c%.tsx}").test.tsx" || exit 1; done' _ "$f"
       # The fixture starts with 10 tests; edit (validation, success, 422, 404) and delete (success, 404) add 6.
       check ">= 16 todos tests" test "$(count_tests "$f")" -ge 16
       ;;

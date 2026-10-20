@@ -4,8 +4,8 @@ import { http, HttpResponse } from 'msw/http';
 import { config } from '@/lib/config';
 import { server } from '@/mocks/server';
 
-import { ApiClient } from './client';
-import { runEffect } from './run';
+import { ApiClient } from '../client';
+import { runEffect } from '../run';
 
 const Item = Schema.Struct({ id: Schema.Number });
 const url = `${config.apiUrl}/items/1`;

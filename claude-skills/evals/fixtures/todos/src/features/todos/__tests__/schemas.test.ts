@@ -1,6 +1,6 @@
 import { Schema } from 'effect';
 
-import { NewTodo } from './schemas';
+import { NewTodo } from '../schemas';
 
 const decode = Schema.decodeUnknownSync(NewTodo);
 

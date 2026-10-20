@@ -34,7 +34,7 @@ fi
 
 (cd "$template" && tar -cf - --exclude=./node_modules --exclude=./dist --exclude=./coverage .) | (cd "$target" && tar -xf -)
 
-for f in package.json index.html CLAUDE.md src/app/root-layout.tsx src/app/home-page.tsx src/app/home-page.test.tsx; do
+for f in package.json index.html CLAUDE.md src/app/root-layout.tsx src/app/home-page.tsx src/app/__tests__/home-page.test.tsx; do
   sed -i.bak "s/app-template/$name/g" "$target/$f" && rm -f "$target/$f.bak"
 done
 

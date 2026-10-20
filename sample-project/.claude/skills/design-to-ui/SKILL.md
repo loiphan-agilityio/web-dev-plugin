@@ -79,12 +79,12 @@ The verbatim `index.css` lines and how to edit them are in `references/design-ma
 
 ### 4. Tests
 
-- React Testing Library, by role and label, for the visible content of the design: the heading, landmarks, lists, buttons, form labels. `renderRoute('/path')` for a page, `renderWithProviders(<X />)` for a component, both from `@/test/render`. The shape, from `src/app/home-page.test.tsx`:
+- React Testing Library, by role and label, for the visible content of the design: the heading, landmarks, lists, buttons, form labels. `renderRoute('/path')` for a page, `renderWithProviders(<X />)` for a component, both from `@/test/render`. The shape, from `src/app/__tests__/home-page.test.tsx`:
   ```tsx
   renderRoute('/');
   expect(await screen.findByRole('heading', { name: 'app-template' })).toBeInTheDocument();
   ```
-- Every component file you create gets a unit test file beside it (`x.tsx` → `x.test.tsx`) that renders it alone with `renderWithProviders(<X />)`; the page test covers only the route and how the parts work together. Layout is in the `develop-feature` skill's `references/testing.md`.
+- Every component file you create gets a unit test file in the `__tests__/` folder next to it (`components/x.tsx` → `components/__tests__/x.test.tsx`) that renders it alone with `renderWithProviders(<X />)`; the page test covers only the route and how the parts work together. Layout is in the `develop-feature` skill's `references/testing.md`.
 - Data screens: the four states, in the test of the component that renders them, as in `references/testing.md`.
 - Do not assert class names or colors. A screenshot comparison is not a test, and no visual-regression tooling or Playwright is added: the template does not have it.
 

@@ -3,8 +3,8 @@ import { screen, waitFor } from '@testing-library/react';
 import { server } from '@/mocks/server';
 import { renderWithProviders } from '@/test/render';
 
-import { createTodosHandlers, todosMocks } from '../mocks';
-import { TodoForm } from './todo-form';
+import { createTodosHandlers, todosMocks } from '../../mocks';
+import { TodoForm } from '../todo-form';
 
 describe('TodoForm', () => {
   it('validates on the client', async () => {

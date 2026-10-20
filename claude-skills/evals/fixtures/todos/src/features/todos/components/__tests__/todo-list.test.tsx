@@ -3,8 +3,8 @@ import { screen, within } from '@testing-library/react';
 import { server } from '@/mocks/server';
 import { renderWithProviders } from '@/test/render';
 
-import { createTodosHandlers, todoFixtures, todosMocks } from '../mocks';
-import { TodoList } from './todo-list';
+import { createTodosHandlers, todoFixtures, todosMocks } from '../../mocks';
+import { TodoList } from '../todo-list';
 
 describe('TodoList', () => {
   it('shows a loading state before the first response', async () => {

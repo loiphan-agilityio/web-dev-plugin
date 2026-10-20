@@ -37,9 +37,9 @@ The stack is newer than most training data. Do not write these from memory; copy
 ```
 src/features/<name>/
   schemas.ts   api.ts   queries.ts   mocks.ts   routes.tsx
-  schemas.test.ts
-  components/  <name>-page.tsx, <name>-form.tsx, <name>-list.tsx,
-               and a .test.tsx beside each one
+  __tests__/   schemas.test.ts
+  components/  <name>-page.tsx, <name>-form.tsx, <name>-list.tsx
+    __tests__/ <name>-page.test.tsx, <name>-form.test.tsx, <name>-list.test.tsx
 ```
 
 Plus three registrations outside the folder: see step 5.
@@ -74,14 +74,14 @@ A feature exposes a lazy route factory (`todoRoutes = (): RouteObject[] => [...]
 3. `src/app/root-layout.tsx`: add a `<Link>` in the nav.
 
 ### 6. Tests
-- **Every component file gets a unit test file beside it** (`<name>-form.tsx` → `<name>-form.test.tsx`), including components added later (item row, dialog, edit form). It renders that component alone with `renderWithProviders(<X />)` and covers its own states and interactions.
+- **Every component file gets a unit test file in `components/__tests__/`** (`components/<name>-form.tsx` → `components/__tests__/<name>-form.test.tsx`), never next to the source file, including components added later (item row, dialog, edit form). It renders that component alone with `renderWithProviders(<X />)` and covers its own states and interactions.
 - The page test (`renderRoute('/path')`) checks only what needs the parts together: a created item shows up in the list. It does not repeat the component cases.
 - Take `user` from the render result. MSW runs with `onUnhandledFrame: 'error'`: an unhandled request fails the test. Components that own a query or mutation are driven with `server.use(...)`, never by mocking hooks or `api.ts`.
 - `create<Name>Handlers(initial)` gives fresh in-memory state; `<name>Mocks` gives pending (`delay('infinite')`), error and 422 responses.
 - A later `server.use()` call wins; within one call the first matching handler wins.
 - A toast is asserted as text (`findByText`): the render helpers mount the `Toaster`. Do not mock `sonner`.
 - Minimum set: list test = the four states; form test = client validation, submit success (input cleared), server 422 field error; page test = create flow (item appears); schema unit tests with `Schema.decodeUnknownSync`.
-- Before the gates, check that every `components/*.tsx` has its `.test.tsx`.
+- Before the gates, check that every `components/*.tsx` has its `components/__tests__/*.test.tsx`.
 - Query by role and label, never test ids.
 
 Recipes: `references/testing.md`.

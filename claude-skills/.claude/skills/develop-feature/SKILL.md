@@ -38,9 +38,10 @@ The stack is newer than most training data. Do not write these from memory; copy
 ```
 src/features/<name>/
   schemas.ts   api.ts   queries.ts   mocks.ts   routes.tsx
-  schemas.test.ts
+  __tests__/   schemas.test.ts
   components/  <name>-page.tsx, <name>-form.tsx, <name>-list.tsx,
-               and a .test.tsx and a .stories.tsx beside each one
+               and a .stories.tsx beside each one
+    __tests__/ <name>-page.test.tsx, <name>-form.test.tsx, <name>-list.test.tsx
 ```
 
 Plus three registrations outside the folder: see step 5.
@@ -75,7 +76,7 @@ A feature exposes a lazy route factory (`todoRoutes = (): RouteObject[] => [...]
 3. `src/app/root-layout.tsx`: add a `<Link>` in the nav.
 
 ### 6. Tests
-- **Every component file gets a unit test file beside it** (`<name>-form.tsx` → `<name>-form.test.tsx`), including components added later (item row, dialog, edit form). It renders that component alone with `renderWithProviders(<X />)` and covers its own states and interactions.
+- **Every component file gets a unit test file in `components/__tests__/`** (`components/<name>-form.tsx` → `components/__tests__/<name>-form.test.tsx`), never next to the source file, including components added later (item row, dialog, edit form). It renders that component alone with `renderWithProviders(<X />)` and covers its own states and interactions.
 - The page test (`renderRoute('/path')`) checks only what needs the parts together: a created item shows up in the list. It does not repeat the component cases.
 - Take `user` from the render result. MSW runs with `onUnhandledFrame: 'error'`: an unhandled request fails the test. Components that own a query or mutation are driven with `server.use(...)`, never by mocking hooks or `api.ts`.
 - `create<Name>Handlers(initial)` gives fresh in-memory state; `<name>Mocks` gives pending (`delay('infinite')`), error and 422 responses.
@@ -92,7 +93,7 @@ Read `references/stories.md` before writing stories.
 - **Every component file gets a story file beside it** (`<name>-list.tsx` → `<name>-list.stories.tsx`), including components added later. `title: '<Feature>/<Component>'`, `const meta = { ... } satisfies Meta<typeof X>`.
 - One story per state the component renders, driven by the feature's `mocks.ts` through `parameters.msw.handlers`: list = `Loading`, `Success`, `Empty`, `ErrorState`; form = `Default` plus a `play` story per server error it shows; page = `Default`.
 - The preview already wraps every story in the query client, a router and the `Toaster`: add no providers in a story.
-- Before the gates, check that every `components/*.tsx` has its `.test.tsx` and its `.stories.tsx`.
+- Before the gates, check that every `components/*.tsx` has its `components/__tests__/*.test.tsx` and its `.stories.tsx` beside it.
 
 ### 8. Gates
 Run `pnpm check` (lint, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.

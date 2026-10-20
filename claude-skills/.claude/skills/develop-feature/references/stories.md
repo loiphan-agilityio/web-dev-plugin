@@ -25,7 +25,7 @@ There is no `msw-storybook-addon`: it calls MSW 2's `onUnhandledRequest`, and th
 
 ## One story file per component
 
-Every file in `components/` has a `.stories.tsx` beside it (`todo-list.tsx` → `todo-list.stories.tsx`), next to its `.test.tsx`. The stories show the states; the tests prove them. Drive each state with the feature's `mocks.ts` (the same `create<Name>Handlers` and `<name>Mocks` the tests use), never with new inline data or by mocking hooks.
+Every file in `components/` has a `.stories.tsx` beside it (`todo-list.tsx` → `todo-list.stories.tsx`); its `.test.tsx` is in `components/__tests__/`. The stories show the states; the tests prove them. Drive each state with the feature's `mocks.ts` (the same `create<Name>Handlers` and `<name>Mocks` the tests use), never with new inline data or by mocking hooks.
 
 ### The list component
 
@@ -127,4 +127,4 @@ export const Default: Story = {};
 - Minimum set: list = `Loading`, `Success`, `Empty`, `ErrorState`; form = `Default` plus one `play` story per server error the form shows; page = `Default`. Any other component (item row, dialog, edit form): a story per state it renders.
 - Do not name a story `Error`: it shadows the global `Error` in that module. Use `ErrorState`.
 - Handlers set on `meta.parameters` apply to every story in the file; a story's own `parameters.msw.handlers` replaces them.
-- Stories are not tests: the `.test.tsx` beside each component still covers every state and error path. Do not delete or thin a test because a story shows the same state.
+- Stories are not tests: the `.test.tsx` in `components/__tests__/` for each component still covers every state and error path. Do not delete or thin a test because a story shows the same state.
