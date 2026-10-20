@@ -86,8 +86,7 @@ build. The parts every feature builds on:
   helpers, `clsx`, global `fetch`).
 
 `develop-feature/references/` (with `api.ts` and `mocks.ts` in `integrate-api/references/`) quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
-wiring diff for the three files a feature registers in. Its source is `evals/fixtures/todos/`, kept
-out of the skill so installed projects never lint or test it.
+wiring diff for the three files a feature registers in.
 
 ## Pinned versions and why
 
@@ -134,8 +133,8 @@ re-run the script after updating it.
 
 ## Maintaining
 
-`.gitattributes` keeps every file LF: `check-quotes.mjs` and `verify-example.sh` compare snippets
-byte for byte, which a CRLF checkout (`core.autocrlf=true`) would otherwise break.
+`.gitattributes` keeps every file LF, so the shell scripts still run from a CRLF checkout
+(`core.autocrlf=true`).
 
 ```
 .claude-plugin/          ← plugin.json (name web-app-skills, version); ../.claude-plugin/ is the marketplace
@@ -146,23 +145,17 @@ byte for byte, which a CRLF checkout (`core.autocrlf=true`) would otherwise brea
   design-to-ui/  SKILL.md, references/
 .claude/agents/          ← build tooling for this repo only (not copied into projects)
 docs/companion-audit.md  ← audit of the companion skills
-evals/                   ← end-to-end evals of the skills; fixtures/todos/ is the feature develop-feature quotes,
-                           fixtures/designs/ the mockup the design eval builds from
 ```
 
 **Change the template or bump a dependency:**
 
 1. Edit `.claude/skills/code-skeleton/template/` and run `pnpm check` inside it.
 2. `bash .claude/skills/code-skeleton/scripts/verify.sh` — fresh scaffold, all gates.
-3. `bash evals/verify-example.sh` — every code block in every skill is copied verbatim from the
-   template or the fixture (`evals/check-quotes.mjs`), every todos fixture file is quoted in full
-   in some skill's references (each block lives in one place: `api.ts` and `mocks.ts` in
-   integrate-api's, the rest in develop-feature's), and it passes all gates on a fresh scaffold.
-4. Update every snippet `check-quotes.mjs` names. Snippets are copied from the template, never
-   written from memory; keep it that way. A block that shows a pattern found in neither (a detail
-   key, `setQueryData`) is marked ` ```ts sketch ` and says so in the text.
-5. Run the evals.
-6. Release: bump `version` in `.claude-plugin/plugin.json` and run
+3. Update every snippet in the skills that quotes a changed file. Snippets are copied from the
+   template, never written from memory; keep it that way. A block that shows a pattern found in
+   neither the template nor the todos feature (a detail key, `setQueryData`) is marked
+   ` ```ts sketch ` and says so in the text.
+4. Release: bump `version` in `.claude-plugin/plugin.json` and run
    `claude plugin validate --strict .claude-plugin/plugin.json` (and `claude plugin validate --strict ..`
    for the marketplace).
 
@@ -170,25 +163,10 @@ evals/                   ← end-to-end evals of the skills; fixtures/todos/ is 
 Storybook 10) are written once, in the template's `CLAUDE.md` ("Library versions newer than most
 training data"). Skills point there and keep only the traps specific to their own step.
 
-**CI** (`../.gitlab-ci.yml`) runs `check-quotes`, `verify.sh` and `verify-example.sh` in `node:24`
+**CI** (`../.gitlab-ci.yml`) runs `verify.sh` in `node:24`
 on merge requests and pushes that touch the plugin, and on pipeline schedules. Add a weekly schedule
 in GitLab (Build > Pipeline schedules) so a dependency release that breaks the template shows up
 before a teammate hits it.
 
 **Upgrade a companion:** read the diff between the pinned and the new commit, re-check it
 against the conventions, then change the SHA in `install-companions.sh` and in the table above.
-
-**Evals** run real headless Claude Code sessions in temp projects and grade them with a script
-(gates, forbidden-pattern grep, file and registration checks, which skills were invoked, cost):
-
-```bash
-evals/run-evals.sh full skeleton feature api   # our skills + companions
-evals/run-evals.sh skills feature design       # our skills only
-evals/run-evals.sh skills feature-api          # a ticket that needs PATCH/DELETE/404: develop-feature must load integrate-api
-evals/run-evals.sh none feature                # baseline without skills
-evals/grade.sh evals/runs/<timestamp>
-evals/trigger-check.sh                         # which skill fires for 14 short prompts (about $2)
-```
-
-Latest results and what they showed: [`evals/RESULTS.md`](evals/RESULTS.md). Each run is capped by `EVAL_BUDGET` (USD, default 3; a feature run cost about $0.42 on Sonnet) and `EVAL_MAX_TURNS`; the model defaults to
-Sonnet (`EVAL_MODEL`). Results stay in `evals/runs/` (git-ignored).
