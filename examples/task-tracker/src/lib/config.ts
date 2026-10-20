@@ -14,10 +14,10 @@ const Env = Schema.Struct({
 
 /** Throws a SchemaError naming the bad variable, so a misconfigured app fails at startup. */
 export const parseConfig = (raw: unknown) => {
-  const env = Schema.decodeUnknownSync(Env)(raw);
+  const { VITE_API_URL, VITE_API_MOCKING } = Schema.decodeUnknownSync(Env)(raw);
   return {
-    apiUrl: env.VITE_API_URL ?? '/api',
-    apiMocking: env.VITE_API_MOCKING === 'true',
+    apiUrl: VITE_API_URL ?? '/api',
+    apiMocking: VITE_API_MOCKING === 'true',
   } as const;
 };
 

@@ -1,4 +1,4 @@
-import { Schema } from 'effect';
+import { Schema, SchemaTransformation } from 'effect';
 
 export const TaskStatus = Schema.Literals(['todo', 'in_progress', 'done']);
 export type TaskStatus = typeof TaskStatus.Type;
@@ -6,7 +6,7 @@ export type TaskStatus = typeof TaskStatus.Type;
 export const TaskPriority = Schema.Literals(['low', 'medium', 'high']);
 export type TaskPriority = typeof TaskPriority.Type;
 
-/** A task as the API returns it. `dueDate` is `YYYY-MM-DD`, `createdAt` an ISO date-time. */
+/** A task as the API returns it. `dueDate` is `YYYY-MM-DD` or `null`; `createdAt` is ISO date-time. */
 export const Task = Schema.Struct({
   id: Schema.Number,
   title: Schema.String,
@@ -20,22 +20,18 @@ export type Task = typeof Task.Type;
 
 export const TaskList = Schema.Array(Task);
 
-/** `GET /tasks/stats`: counts per status, plus the unfinished tasks overdue / due within 7 days. */
-export const TaskStats = Schema.Struct({
-  total: Schema.Number,
-  todo: Schema.Number,
-  inProgress: Schema.Number,
-  done: Schema.Number,
-  overdue: Schema.Number,
-  dueThisWeek: Schema.Number,
-});
-export type TaskStats = typeof TaskStats.Type;
+/** The date input holds '' when empty; the API wants `null`. */
+const DueDate = Schema.String.pipe(
+  Schema.decodeTo(
+    Schema.NullOr(Schema.String),
+    SchemaTransformation.transform({
+      decode: (value) => (value === '' ? null : value),
+      encode: (value) => value ?? '',
+    }),
+  ),
+);
 
-/**
- * What the create form collects. `Schema.Trim` decodes "  report " to "report", so the form's
- * input type (`NewTaskInput`) and its submitted type (`NewTask`) differ — useForm takes both.
- * An empty `dueDate` means "no due date"; api.ts turns it into `null`.
- */
+/** The create request. `Type` is the body the API gets, `Encoded` is what the form holds. */
 export const NewTask = Schema.Struct({
   title: Schema.Trim.pipe(
     Schema.check(
@@ -49,51 +45,26 @@ export const NewTask = Schema.Struct({
     ),
   ),
   priority: TaskPriority,
-  dueDate: Schema.String,
+  dueDate: DueDate,
 });
 export type NewTask = typeof NewTask.Type;
 export type NewTaskInput = typeof NewTask.Encoded;
 
-/** The edit form: the create fields plus the status. Same validation as creating. */
-export const EditTask = Schema.Struct({ ...NewTask.fields, status: TaskStatus });
-export type EditTask = typeof EditTask.Type;
-export type EditTaskInput = typeof EditTask.Encoded;
+/** The edit form: every field of a task the user can change, status included. */
+export const TaskEdit = Schema.Struct({ ...NewTask.fields, status: TaskStatus });
+export type TaskEdit = typeof TaskEdit.Type;
+export type TaskEditInput = typeof TaskEdit.Encoded;
 
-/** The body of `PATCH /tasks/:id`: only the fields that changed. `dueDate: null` clears it. */
-export type TaskPatch = Partial<Omit<Task, 'id' | 'createdAt'>>;
+/** The PATCH body: only the fields that changed. */
+export type TaskPatch = Partial<TaskEdit>;
 
-/** What the edit form shows for a task. */
-export const toEditInput = (task: Task): EditTaskInput => ({
-  title: task.title,
-  description: task.description,
-  status: task.status,
-  priority: task.priority,
-  dueDate: task.dueDate ?? '',
+/** `GET /tasks/stats`: counts the server computes over all tasks. */
+export const TaskStats = Schema.Struct({
+  total: Schema.Number,
+  todo: Schema.Number,
+  inProgress: Schema.Number,
+  done: Schema.Number,
+  overdue: Schema.Number,
+  dueThisWeek: Schema.Number,
 });
-
-/** The fields of `values` that differ from `task`; empty when nothing changed. */
-export const toTaskPatch = (task: Task, values: EditTask): TaskPatch => {
-  const dueDate = values.dueDate || null;
-  return {
-    ...(values.title !== task.title && { title: values.title }),
-    ...(values.description !== task.description && { description: values.description }),
-    ...(values.status !== task.status && { status: values.status }),
-    ...(values.priority !== task.priority && { priority: values.priority }),
-    ...(dueDate !== task.dueDate && { dueDate }),
-  };
-};
-
-export const statusFilters = ['all', 'todo', 'in_progress', 'done'] as const;
-export type StatusFilter = (typeof statusFilters)[number];
-
-export const statusLabels: Record<TaskStatus, string> = {
-  todo: 'To do',
-  in_progress: 'In progress',
-  done: 'Done',
-};
-
-export const priorityLabels: Record<TaskPriority, string> = {
-  low: 'Low',
-  medium: 'Medium',
-  high: 'High',
-};
+export type TaskStats = typeof TaskStats.Type;

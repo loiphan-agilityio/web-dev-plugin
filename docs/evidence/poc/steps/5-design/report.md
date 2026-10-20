@@ -1,47 +1,40 @@
-I restyled the shell, dashboard and tasks page to match the two designs. `pnpm check` passes, but I haven't compared the result with the PNGs in a browser. The brand colors are also estimates, because I couldn't read exact pixel values from the PNGs.
+The dashboard and tasks page now follow the two designs, and `pnpm check` passes. That covers lint, typecheck, 135 tests, build and the Storybook build. I did not open the app in a browser, so I never compared it against the PNGs side by side.
 
 ## Result
 **Did:**
-- **Colors and radius** (`src/styles/index.css`):
-  - Set `:root` brand colors by role: indigo primary, tinted page background, white cards, muted track, destructive red, matching border, input and ring.
-  - Added new roles `warning`, `success` and `priority-high`/`-medium`/`-low`, wired through `@theme inline`.
-  - Raised `--radius` to `0.7rem`.
-- **Shell** (`root-layout.tsx`): white header with the indigo logo mark, `NavLink` tabs with an active underline, and a wider content column.
+- **Brand colors (`src/styles/index.css`):**
+  - Mapped by role: primary indigo, a soft gray page background, white cards, muted and border grays, a red for destructive, and a radius of 0.75rem.
+  - Added tokens for the status pills and the medium-priority dot: success, warning and warning-indicator.
+- **Header (`root-layout.tsx`):** logo square, `NavLink` tabs with an active underline, content width 1024px.
 - **Dashboard:**
-  - Four stat cards: Total tasks, In progress, Done, and Overdue in red.
-  - A Completion card showing "2 of 8 done · 25%" with a thicker progress bar.
-  - A "Due soon" card with "Next 7 days", "Due Oct 22" dates and status badges. Loading, error and empty states render inside the same card.
+  - Four stat cards (Total tasks, In progress, Done, Overdue in red).
+  - A Completion card with the "2 of 8 done · 25%" text and a thicker progress bar.
+  - A Due soon card with "Next 7 days", "Due Oct 22" dates and status pills.
+  - I dropped the To do and Due this week cards and the "Where your work stands" heading, because the design doesn't show them.
 - **Tasks page:**
-  - A "New task" card with a Title / Priority / Due date row, a Description box and an Add task button with a plus icon.
-  - A segmented status filter and a search field with an icon.
-  - Task rows with a priority dot, "Overdue · Oct 17" in bold red, and the status select styled as a colored pill.
-- **New files:** `task-status-badge.tsx` with its test and story, and `formatDueDate` in `dates.ts` with a test.
-- **Tests:** I updated the ones that asserted the old structure (stat labels, status select, "Priority:" text, the "Overdue" badge).
-- **Gates:** `pnpm check` passes (lint, typecheck, tests, build, Storybook build).
+  - "New task" card with the title, priority and due date row plus the description and a "+ Add task" button.
+  - Status filter as a pill-style toggle group with a search box.
+  - Rows with the description, a priority dot, a "Due Oct 22" or red "Overdue · Oct 17" date, and the status as a colored select. Changing the status in place still works.
+- **New files:** `status-badge.tsx`, `status-classes.ts` and a `formatDueDate` helper in `filters.ts`.
+- **Tests and stories:** I updated the affected tests, since the status filter is now buttons instead of a select and several labels and dates changed. I added a test and a story for `StatusBadge`.
 
-**Saw:**
-- The dashboard, tasks page and shell already existed, so this was a restyle rather than new screens.
-- Both designs are drawn at 1280px wide.
-- Two label differences from the app: the design says "Description" and "Due date" without "(optional)". I kept "(optional)" as screen-reader-only text so the accessible names and existing tests still work.
+**Saw:** `design/` has only the dashboard and tasks frames, both at 1280px wide and drawn at 1x. The design shows only the loaded state, so the loading, error and empty states keep their existing behavior, restyled to fit.
 
 **Not done:**
-- **Visual check:** there is no browser tool in this session, so I never compared the running app with the PNGs. Remaining pixel differences are unknown.
-- **Colors:** pixel sampling was denied, so I estimated each hex value by eye from the PNGs. Treat them as approximate and replace them with exact values if you have them.
+- The visual check, because no browser tool was available.
+- The brand colors are eyeballed from the PNGs, not sampled. Reading pixels needed a Python or .NET command that was blocked here. Primary is `#3347c9`, and the rest are close guesses.
 
 **Blocked by:** nothing.
 
 **Next:**
-- Run `VITE_API_MOCKING=true pnpm dev` and compare both pages with the designs.
-- Send the exact brand hex values if my estimates look off; they are all in `:root` in `index.css`.
+- Open the app with `pnpm dev:mock` and compare it to the PNGs.
+- If you have exact brand hex values, change them in the `:root` block of `src/styles/index.css`. That is the only place they live.
 
 **Design gaps:**
-- **Mobile:** the designs show desktop only. Below `sm` the stat cards go two per row, the form and task rows stack, and the filters stack.
-- **Dark mode:** not shown, so the `.dark` tokens are untouched, and dark mode isn't active in the app anyway.
-- **Due date field:** the design shows a text placeholder `yyyy-mm-dd`. I kept the native date input, which works better and keeps the existing tests.
-- **Priority control:** it is a native select, so its open dropdown uses browser styling.
-- **Dashboard stats:** the design shows four, so "To do" and "Due this week" are no longer displayed.
-- **"Your tasks" heading:** the design has none, so I removed it.
-- **Icons and fonts:** lucide `PlusIcon` and `SearchIcon` stand in for the design's glyphs. The design's font looks like a system sans, so I kept Geist.
-- **Card radius:** it follows the app's derived scale (about 1.4× the control radius), so it may differ from the design by a couple of pixels.
-
-<!-- session: success, turns 81, cost $0.98, duration 5.2 min -->
+- No mobile layout in the design. Below `md`, the form fields stack, task rows wrap, and the stat cards sit two per row.
+- The page-wide palette change also restyles the task detail page, which has no design.
+- Dark mode is not shown or wired, so `.dark` tokens are unchanged.
+- The font is still Geist; the design looks like a system sans, and a different font would need a new dependency.
+- The Priority field is a native select, so its dropdown chevron is the icon. The design shows a "▾" glyph.
+- The search icon is lucide `SearchIcon`.
+- Hover and focus states are the existing shadcn ones.

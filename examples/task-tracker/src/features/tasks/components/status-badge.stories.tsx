@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { TaskStatusBadge } from './task-status-badge';
+import { StatusBadge } from './status-badge';
 
 const meta = {
-  title: 'Tasks/TaskStatusBadge',
-  component: TaskStatusBadge,
-} satisfies Meta<typeof TaskStatusBadge>;
+  title: 'Tasks/StatusBadge',
+  component: StatusBadge,
+} satisfies Meta<typeof StatusBadge>;
 
 export default meta;
 

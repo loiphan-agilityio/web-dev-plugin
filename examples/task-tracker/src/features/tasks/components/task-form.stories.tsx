@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** A state reached by interaction: `play` submits an empty form, so the story opens on it. */
+/** A state reached by interaction: `play` submits the empty form, so the story opens on it. */
 export const ValidationError: Story = {
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Add task' }));

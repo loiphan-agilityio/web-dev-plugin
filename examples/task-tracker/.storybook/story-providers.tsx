@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { createTestQueryClient } from '@/test/query-client';
 
 /** The providers a test gets (src/test/render.tsx): a fresh client without retries, a router, the Toaster. */
-export function StoryProviders({ children }: { readonly children: ReactNode }) {
+export const StoryProviders = ({ children }: { readonly children: ReactNode }) => {
   const [queryClient] = useState(createTestQueryClient);
   return (
     <QueryClientProvider client={queryClient}>
@@ -14,4 +14,4 @@ export function StoryProviders({ children }: { readonly children: ReactNode }) {
       <Toaster richColors />
     </QueryClientProvider>
   );
-}
+};

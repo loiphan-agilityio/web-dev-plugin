@@ -1,62 +1,61 @@
-import { act, screen } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 
 import { renderWithProviders } from '@/test/render';
 
 import { TaskFilters } from '../task-filters';
 
-const statusButton = (name: string) => screen.getByRole('button', { name });
+const statusButtons = () => within(screen.getByRole('group', { name: 'Status' }));
 
 describe('TaskFilters', () => {
-  it('starts on all tasks with an empty search', () => {
+  it('starts on All with an empty search', () => {
     renderWithProviders(<TaskFilters />);
-    expect(statusButton('All')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByLabelText('Search by title')).toHaveValue('');
+    expect(statusButtons().getByRole('button', { name: 'All' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByLabelText('Search')).toHaveValue('');
   });
 
-  it('offers every status', () => {
+  it('offers All, To do, In progress and Done', () => {
     renderWithProviders(<TaskFilters />);
-    const group = screen.getByRole('group', { name: 'Status' });
-    const labels = Array.from(group.querySelectorAll('button')).map((button) => button.textContent);
-    expect(labels).toEqual(['All', 'To do', 'In progress', 'Done']);
+    const names = statusButtons()
+      .getAllByRole('button')
+      .map(({ textContent }) => textContent);
+    expect(names).toEqual(['All', 'To do', 'In progress', 'Done']);
   });
 
-  it('writes the status to the URL, and drops it for All', async () => {
+  it('writes the status to the URL and removes it for All', async () => {
     const { user, router } = renderWithProviders(<TaskFilters />);
 
-    await user.click(statusButton('In progress'));
+    await user.click(statusButtons().getByRole('button', { name: 'In progress' }));
     expect(router.state.location.search).toBe('?status=in_progress');
-    expect(statusButton('In progress')).toHaveAttribute('aria-pressed', 'true');
-    expect(statusButton('All')).toHaveAttribute('aria-pressed', 'false');
+    expect(statusButtons().getByRole('button', { name: 'In progress' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
 
-    await user.click(statusButton('All'));
+    await user.click(statusButtons().getByRole('button', { name: 'All' }));
     expect(router.state.location.search).toBe('');
   });
 
-  it('writes the search to the URL without adding history entries', async () => {
-    const { user, router } = renderWithProviders(<TaskFilters />);
-    const historyLength = window.history.length;
-
-    await user.type(screen.getByLabelText('Search by title'), 'report');
-
-    expect(router.state.location.search).toBe('?q=report');
-    expect(window.history.length).toBe(historyLength);
-  });
-
-  it('keeps the other filter when one changes', async () => {
+  it('writes the search to the URL and keeps the status', async () => {
     const { user, router } = renderWithProviders(<TaskFilters />);
 
-    await user.click(statusButton('Done'));
-    await user.type(screen.getByLabelText('Search by title'), 'a');
+    await user.click(statusButtons().getByRole('button', { name: 'Done' }));
+    await user.type(screen.getByLabelText('Search'), 'report');
 
-    expect(new URLSearchParams(router.state.location.search).toString()).toBe('status=done&q=a');
+    expect(router.state.location.search).toBe('?status=done&q=report');
   });
 
-  it('shows the filters from the URL', async () => {
+  it('shows the filters that are already in the URL', async () => {
     const { router } = renderWithProviders(<TaskFilters />);
 
     await act(() => router.navigate('/?status=in_progress&q=report'));
 
-    expect(statusButton('In progress')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByLabelText('Search by title')).toHaveValue('report');
+    expect(statusButtons().getByRole('button', { name: 'In progress' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByLabelText('Search')).toHaveValue('report');
   });
 });

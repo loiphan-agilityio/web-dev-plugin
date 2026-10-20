@@ -13,10 +13,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** A state reached by interaction: `play` fills both filters. */
+/** A state reached by interaction: `play` picks a status and types a search. */
 export const Filled: Story = {
   play: async ({ canvas, userEvent }) => {
     await userEvent.selectOptions(canvas.getByLabelText('Status'), 'In progress');
-    await userEvent.type(canvas.getByLabelText('Search by title'), 'report');
+    await userEvent.type(canvas.getByLabelText('Search'), 'report');
   },
 };

@@ -17,23 +17,25 @@ import { toUserMessage } from '@/lib/api/errors';
 
 import { useDeleteTask } from '../queries';
 import type { Task } from '../schemas';
-import { useTaskGone } from '../use-task-gone';
 
-/** Deleting asks first; only the dialog's confirm button sends `DELETE`. */
-export function TaskDeleteButton({ task }: { task: Task }) {
-  const deleteTask = useDeleteTask(task.id);
+/** Asks for confirmation, deletes, then goes back to the list. */
+export const DeleteTaskButton = ({ task }: { readonly task: Task }) => {
+  const deleteTask = useDeleteTask();
   const navigate = useNavigate();
-  const onTaskGone = useTaskGone();
 
   const confirm = () => {
-    deleteTask.mutate(undefined, {
+    deleteTask.mutate(task.id, {
       onSuccess: () => {
-        void navigate('/tasks');
         toast.success('Task deleted');
+        void navigate('/tasks');
       },
       onError: (error) => {
-        if (error._tag === 'NotFoundError') onTaskGone(task.id);
-        else toast.error(toUserMessage(error));
+        if (error._tag === 'NotFoundError') {
+          // Already toasted and refreshed the list (see useTaskGone).
+          void navigate('/tasks');
+          return;
+        }
+        toast.error(toUserMessage(error));
       },
     });
   };
@@ -54,11 +56,9 @@ export function TaskDeleteButton({ task }: { task: Task }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={confirm}>
-            Delete task
-          </AlertDialogAction>
+          <AlertDialogAction onClick={confirm}>Delete task</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
-}
+};

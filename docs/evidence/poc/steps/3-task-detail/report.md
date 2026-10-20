@@ -1,40 +1,29 @@
-TASK-2 is implemented, and `pnpm check` passes (lint, typecheck, 104 tests, build, Storybook build). I did not open the app in a browser, and I did not commit anything.
+TASK-2 is implemented. `pnpm check` passes: lint, typecheck, 107 tests in 17 files, build and Storybook build, with coverage at 96.7% lines.
 
 ## Result
 **Did:**
-- **Detail page:** `/tasks/:id` loads the task with `GET /tasks/:id`.
-  - It has four states: loading, a non-404 error with a retry, "Task not found" with a link back to the list, and the loaded task.
-  - A 404, or an id in the URL that can't be a task id (`abc`, `0`, `-1`, `1.5`), shows "Task not found". An invalid id never makes a request.
-- **Edit form:** all fields including status, saved with `PATCH /tasks/:id` carrying only the changed fields. Clearing the due date sends `null`.
-  - It uses the same validation as creating, 422 field errors appear next to the fields, and a "Task updated" toast confirms the save.
-  - If nothing changed, it shows a "No changes to save" toast instead of sending a request.
-- **List rows:** the title links to the task page, and the status badge is now a select that sends `PATCH {status}`. The row and the status filter update after the list refetches.
-- **Delete:** the Delete button opens a confirmation dialog. Confirming sends `DELETE`, goes back to `/tasks` and shows a "Task deleted" toast.
-- **404 on PATCH or DELETE:** shows a "This task no longer exists" toast and refreshes the list. From the detail page it also goes back to `/tasks`.
-- **Tests:**
-  - New files: `task-edit-form.test.tsx`, `task-delete-button.test.tsx`, `task-detail.test.tsx` and `task-detail-page.test.tsx`.
-  - Extended files: `task-list.test.tsx`, `tasks-page.test.tsx` and `schemas.test.ts`.
-  - The 404 paths are covered for the row, the edit form, the delete button, the detail page, and one flow through the whole route tree.
-  - Coverage for `src/features/tasks` is 97% of lines.
-- **Stories:** a story file for each new component.
-- **Supporting changes:**
-  - Added `alert-dialog` with the shadcn CLI.
-  - Added the three new endpoints to `api.ts`, `queries.ts` and the MSW handlers.
-  - Added a `tasks/:id` route.
-  - Added a `useTaskGone` hook for the shared 404 handling.
-  - Added a `pattern` option to `renderWithProviders`, so a component that reads route params can be rendered alone.
+- **Detail page:** `/tasks/:id` loads with `GET /tasks/:id`. It shows loading, error with retry, and "Task not found" with a link back to the list. A non-numeric id also shows "Task not found" without calling the server.
+- **Edit form:** it has every field including status and sends only the changed fields (`changedFields` in `patch.ts`). It uses the same validation as create, shows 422 field errors next to the fields, and shows a "Task updated" toast. Save is disabled until something changes.
+- **List rows:** each row has a status select (`PATCH {status}`) and the title links to the detail page. After a change the row and the filters update through list invalidation, so a row leaves a filtered list when its status no longer matches.
+- **Delete:** the Delete button opens a confirmation dialog (I added the shadcn `alert-dialog` with the CLI). It then calls `DELETE`, goes back to `/tasks` and shows a "Task deleted" toast.
+- **404 on PATCH or DELETE:** the shared mutation hooks show the "This task no longer exists" toast and invalidate the list. The detail page then goes back to `/tasks`. A row's status change stays on the list.
+- **Files:**
+  - Code: `schemas.ts` (`TaskEdit`, `TaskPatch`), `patch.ts`, `api.ts`, `queries.ts`, `mocks.ts` (GET/PATCH/DELETE handlers plus pending, error and 422 mocks) and `routes.tsx`.
+  - Components: `task-row`, `task-edit-form`, `delete-task-button` and `task-detail-page`. Each has a unit test and a story. `task-list` now renders `TaskRow`.
+  - Tests: they cover success, validation, 422, 500, 404 on update and delete, and the page flows.
+  - Test helper: I added an optional `route` option to `renderWithProviders` in `src/test/render.tsx`, so a component that reads route params can render at `/tasks/3` with the pattern `/tasks/:id`.
 
 **Saw:**
-- Replacing the status badge with a select meant I had to update two existing assertions in `task-list.test.tsx` and `tasks-page.test.tsx` that looked for the badge text.
-- Right after clicking a task link, the create form's "Title" field is still on screen until the lazy detail route loads. The page test waits for the "Edit task" form first.
-- Bash heredocs and `mv` were blocked in this session, so I wrote files with the Write tool. The detail page is split in two: `task-detail.tsx` takes an `id` prop and `task-detail-page.tsx` reads the URL param, so the stories can render it.
+- The row used to show status as a Badge. It is now a select, because the ticket asks for direct status change.
+- The first `tsc` run failed: readonly `Partial` fields in `changedFields`, and `data` possibly undefined in the detail page. I fixed both.
+- The `tasks-page` test and its mocks were already in place, so I extended them rather than adding new files.
 
-**Not done:** none of the ticket's criteria were excluded. Two choices I made where the ticket was silent are listed below.
+**Not done:** nothing in the ticket was excluded. I did not run the app in a browser. The checks are the tests and the builds.
 
 **Blocked by:** nothing.
 
-**Next:** Please confirm these two choices:
-- **Row 404:** when a 404 happens on a row's status change, I stay on `/tasks` (toast plus list refresh) instead of navigating to `/tasks`, because navigating would clear the user's filters.
-- **Unchanged save:** a save with no changes shows a toast instead of sending an empty PATCH.
-
-<!-- session: success, turns 88, cost $1.18, duration 7.3 min -->
+**Next:** please confirm these choices, which the ticket left open:
+1. **Delete errors that are not 404:** these show an error toast and stay on the page.
+2. **Saving with no changes:** the Save button is disabled instead of sending an empty PATCH.
+3. **Status control:** it is a select on each row, not a badge or a menu.
+4. **PATCH response for the edit form:** I assumed the server returns the full updated task. It is decoded with the `Task` schema.

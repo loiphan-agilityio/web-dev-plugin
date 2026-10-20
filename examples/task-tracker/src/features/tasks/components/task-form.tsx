@@ -1,5 +1,4 @@
-import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { Schema } from 'effect';
+import { effectTsResolver } from '@hookform/resolvers/effect-ts';
 import { PlusIcon } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -13,14 +12,13 @@ import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea';
 import { setFormErrors } from '@/lib/forms';
 
+import { priorityLabels } from '../filters';
 import { useCreateTask } from '../queries';
-import { NewTask, type NewTaskInput, priorityLabels, TaskPriority } from '../schemas';
+import { NewTask, type NewTaskInput, TaskPriority } from '../schemas';
 
-// Built once at module level. The explicit type arguments are needed: TypeScript cannot infer
-// Input/Output through the intersection type that Schema.toStandardSchemaV1 returns.
-const resolver = standardSchemaResolver<NewTaskInput, unknown, NewTask>(
-  Schema.toStandardSchemaV1(NewTask),
-);
+// Built once at module level. The fields hold NewTask.Encoded (untrimmed title, '' for no
+// date), handleSubmit passes NewTask.Type (trimmed title, null for no date).
+const resolver = effectTsResolver(NewTask);
 
 const defaultValues: NewTaskInput = {
   title: '',
@@ -29,10 +27,9 @@ const defaultValues: NewTaskInput = {
   dueDate: '',
 };
 
-const priorities = TaskPriority.literals;
-
-export function TaskForm() {
+export const TaskForm = () => {
   const createTask = useCreateTask();
+  // Type arguments, so `priority` stays a literal union instead of widening to string.
   const form = useForm<NewTaskInput, unknown, NewTask>({ resolver, defaultValues });
 
   const onSubmit = form.handleSubmit((values) => {
@@ -50,7 +47,7 @@ export function TaskForm() {
   const serverError = form.formState.errors.root?.server;
 
   return (
-    <form noValidate aria-label="New task" onSubmit={(event) => void onSubmit(event)}>
+    <form noValidate onSubmit={(event) => void onSubmit(event)}>
       <Card>
         <CardHeader>
           <CardTitle>
@@ -58,75 +55,67 @@ export function TaskForm() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <FieldGroup>
-            <div className="grid items-start gap-4 sm:grid-cols-[1fr_14rem_14rem]">
-              <Controller
-                name="title"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="task-title">Title</FieldLabel>
-                    <Input
-                      {...field}
-                      id="task-title"
-                      placeholder="What needs to be done?"
-                      className="h-10"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="priority"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="task-priority">Priority</FieldLabel>
-                    <NativeSelect
-                      {...field}
-                      id="task-priority"
-                      className="w-full [&_select]:h-10"
-                      aria-invalid={fieldState.invalid}
-                    >
-                      {priorities.map((priority) => (
-                        <NativeSelectOption key={priority} value={priority}>
-                          {priorityLabels[priority]}
-                        </NativeSelectOption>
-                      ))}
-                    </NativeSelect>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="dueDate"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="task-due-date">
-                      Due date<span className="sr-only"> (optional)</span>
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="task-due-date"
-                      type="date"
-                      className="h-10"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
-            </div>
+          <FieldGroup className="grid gap-4 md:grid-cols-[2fr_1fr_1fr]">
+            <Controller
+              name="title"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="task-title">Title</FieldLabel>
+                  <Input
+                    {...field}
+                    id="task-title"
+                    placeholder="What needs to be done?"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+            <Controller
+              name="priority"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="task-priority">Priority</FieldLabel>
+                  <NativeSelect
+                    {...field}
+                    id="task-priority"
+                    className="w-full"
+                    aria-invalid={fieldState.invalid}
+                  >
+                    {TaskPriority.literals.map((value) => (
+                      <NativeSelectOption key={value} value={value}>
+                        {priorityLabels[value]}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+            <Controller
+              name="dueDate"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="task-due-date">Due date</FieldLabel>
+                  <Input
+                    {...field}
+                    id="task-due-date"
+                    type="date"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
             <Controller
               name="description"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="task-description">
-                    Description<span className="sr-only"> (optional)</span>
-                  </FieldLabel>
+                <Field data-invalid={fieldState.invalid} className="md:col-span-3">
+                  <FieldLabel htmlFor="task-description">Description</FieldLabel>
                   <Textarea
                     {...field}
                     id="task-description"
@@ -138,11 +127,11 @@ export function TaskForm() {
               )}
             />
             {serverError && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="md:col-span-3">
                 <AlertDescription>{serverError.message}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" size="lg" className="h-10 w-fit px-4" disabled={createTask.isPending}>
+            <Button type="submit" className="w-fit md:col-span-3" disabled={createTask.isPending}>
               <PlusIcon />
               {createTask.isPending ? 'Adding…' : 'Add task'}
             </Button>
@@ -151,4 +140,4 @@ export function TaskForm() {
       </Card>
     </form>
   );
-}
+};

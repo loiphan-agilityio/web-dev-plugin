@@ -4,41 +4,38 @@ import { Link } from 'react-router';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toUserMessage } from '@/lib/api/errors';
-import { formatDueDate } from '@/features/tasks/dates';
+import { formatDueDate, todayIso } from '@/features/tasks/filters';
 import { taskListQueryOptions } from '@/features/tasks/queries';
-import { TaskStatusBadge } from '@/features/tasks/components/task-status-badge';
+import { StatusBadge } from '@/features/tasks/components/status-badge';
+import { toUserMessage } from '@/lib/api/errors';
 
-import { selectDueSoon } from '../due-soon';
+import { dueSoon } from '../due-soon';
 
-function DueSoonCard({ children }: { children: ReactNode }) {
-  return (
-    <Card>
-      <CardHeader className="grid-cols-[1fr_auto] items-center">
-        <CardTitle>
-          <h2 className="text-lg font-semibold">Due soon</h2>
-        </CardTitle>
-        <CardDescription>Next 7 days</CardDescription>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
-  );
-}
+const DueSoonCard = ({ children }: { readonly children: ReactNode }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle>
+        <h2 className="text-lg font-semibold">Due soon</h2>
+      </CardTitle>
+      <CardAction className="text-sm text-muted-foreground">Next 7 days</CardAction>
+    </CardHeader>
+    <CardContent>{children}</CardContent>
+  </Card>
+);
 
-/** The unfinished tasks due in the next 7 days, soonest first, from the cached task list. */
-export function DueSoonList() {
-  const { data, isPending, isError, error, refetch, isRefetching } = useQuery(
-    taskListQueryOptions(),
-  );
+/** Loading, error, empty ("Nothing due this week") and success are different screens. */
+export const DueSoonList = () => {
+  const { data, isPending, isError, error, refetch, isRefetching } =
+    useQuery(taskListQueryOptions());
 
   if (isPending) {
     return (
       <DueSoonCard>
-        <div role="status" aria-label="Loading due tasks" className="space-y-2">
-          <Skeleton className="h-14" />
-          <Skeleton className="h-14" />
+        <div role="status" aria-label="Loading due soon" className="space-y-2">
+          <Skeleton className="h-12" />
+          <Skeleton className="h-12" />
         </div>
       </DueSoonCard>
     );
@@ -48,7 +45,7 @@ export function DueSoonList() {
     return (
       <DueSoonCard>
         <Alert variant="destructive">
-          <AlertTitle>Could not load due tasks</AlertTitle>
+          <AlertTitle>Could not load the due soon list</AlertTitle>
           <AlertDescription>
             <p>{toUserMessage(error)}</p>
             <Button
@@ -67,13 +64,17 @@ export function DueSoonList() {
     );
   }
 
-  const tasks = selectDueSoon(data);
+  const tasks = dueSoon(data, todayIso());
 
   if (tasks.length === 0) {
     return (
       <DueSoonCard>
         <p className="text-muted-foreground">
-          Nothing due this week. <Link to="/tasks" className="underline">Plan the next task</Link>.
+          Nothing due this week.{' '}
+          <Link to="/tasks" className="underline hover:text-foreground">
+            Go to the tasks
+          </Link>{' '}
+          to plan the next one.
         </p>
       </DueSoonCard>
     );
@@ -82,20 +83,22 @@ export function DueSoonList() {
   return (
     <DueSoonCard>
       <ul aria-label="Due soon" className="divide-y border-t">
-        {tasks.map((task) => (
-          <li key={task.id} className="flex items-center justify-between gap-4 py-3.5">
+        {tasks.map(({ id, title, status, dueDate }) => (
+          <li key={id} className="flex items-center justify-between gap-4 py-3">
             <div className="min-w-0">
-              <Link to={`/tasks/${task.id}`} className="font-semibold hover:underline">
-                {task.title}
+              <Link to={`/tasks/${String(id)}`} className="font-semibold hover:underline">
+                {title}
               </Link>
-              <p className="text-sm text-muted-foreground">
-                Due {task.dueDate === null ? '' : formatDueDate(task.dueDate)}
-              </p>
+              {dueDate !== null && (
+                <p className="text-sm text-muted-foreground">
+                  Due <time dateTime={dueDate}>{formatDueDate(dueDate)}</time>
+                </p>
+              )}
             </div>
-            <TaskStatusBadge status={task.status} />
+            <StatusBadge status={status} />
           </li>
         ))}
       </ul>
     </DueSoonCard>
   );
-}
+};

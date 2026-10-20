@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw/http';
 
 import { config } from '@/lib/config';
@@ -6,54 +6,38 @@ import { server } from '@/mocks/server';
 import { renderWithProviders } from '@/test/render';
 
 import { createTasksHandlers, taskFixtures, tasksMocks } from '../../mocks';
-import type { Task } from '../../schemas';
+import { taskKeys } from '../../queries';
 import { TaskEditForm } from '../task-edit-form';
 
-const task: Task = {
-  id: 1,
-  title: 'Write the Q3 report',
-  description: 'Summarise delivery metrics.',
-  status: 'in_progress',
-  priority: 'high',
-  dueDate: '2030-05-17',
-  createdAt: '2026-01-01T09:00:00.000Z',
-};
+const task = taskFixtures[3];
+if (!task) {
+  throw new Error('missing fixture');
+}
 
+const renderForm = () => renderWithProviders(<TaskEditForm task={task} />);
 const save = () => screen.getByRole('button', { name: 'Save changes' });
 
-/** Records the PATCH body and answers with the task merged with it. */
-const capturePatch = () => {
-  const captured: { body?: unknown } = {};
-  server.use(
-    http.patch(`${config.apiUrl}/tasks/:id`, async ({ request }) => {
-      captured.body = await request.json();
-      return HttpResponse.json({ ...task, ...(captured.body as object) });
-    }),
-    ...createTasksHandlers(taskFixtures),
-  );
-  return captured;
-};
-
 describe('TaskEditForm', () => {
-  it('starts with every field of the task', () => {
-    renderWithProviders(<TaskEditForm task={task} />);
-
-    expect(screen.getByLabelText('Title')).toHaveValue('Write the Q3 report');
-    expect(screen.getByLabelText('Description (optional)')).toHaveValue(
-      'Summarise delivery metrics.',
-    );
+  it('shows every field of the task, status included', () => {
+    renderForm();
+    expect(screen.getByLabelText('Title')).toHaveValue(task.title);
+    expect(screen.getByLabelText('Description')).toHaveValue(task.description);
     expect(screen.getByLabelText('Status')).toHaveValue('in_progress');
     expect(screen.getByLabelText('Priority')).toHaveValue('high');
-    expect(screen.getByLabelText('Due date (optional)')).toHaveValue('2030-05-17');
+    expect(screen.getByLabelText('Due date')).toHaveValue(task.dueDate);
   });
 
-  it('shows an empty due date for a task without one', () => {
-    renderWithProviders(<TaskEditForm task={{ ...task, dueDate: null }} />);
-    expect(screen.getByLabelText('Due date (optional)')).toHaveValue('');
+  it('keeps Save disabled until something changes', async () => {
+    const { user } = renderForm();
+    expect(save()).toBeDisabled();
+
+    await user.type(screen.getByLabelText('Title'), '!');
+
+    expect(save()).toBeEnabled();
   });
 
   it('requires a title', async () => {
-    const { user } = renderWithProviders(<TaskEditForm task={task} />);
+    const { user } = renderForm();
 
     await user.clear(screen.getByLabelText('Title'));
     await user.click(save());
@@ -62,20 +46,20 @@ describe('TaskEditForm', () => {
     expect(screen.getByLabelText('Title')).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('rejects a title over 120 characters', async () => {
-    const { user } = renderWithProviders(<TaskEditForm task={task} />);
+  it('rejects a title longer than 120 characters', async () => {
+    const { user } = renderForm();
 
-    await user.click(screen.getByLabelText('Title'));
+    await user.clear(screen.getByLabelText('Title'));
     await user.paste('a'.repeat(121));
     await user.click(save());
 
     expect(await screen.findByText('Keep the title under 120 characters')).toBeInTheDocument();
   });
 
-  it('rejects a description over 1000 characters', async () => {
-    const { user } = renderWithProviders(<TaskEditForm task={task} />);
+  it('rejects a description longer than 1000 characters', async () => {
+    const { user } = renderForm();
 
-    await user.click(screen.getByLabelText('Description (optional)'));
+    await user.clear(screen.getByLabelText('Description'));
     await user.paste('a'.repeat(1001));
     await user.click(save());
 
@@ -85,83 +69,85 @@ describe('TaskEditForm', () => {
   });
 
   it('sends only the changed fields and confirms with a toast', async () => {
-    const captured = capturePatch();
-    const { user } = renderWithProviders(<TaskEditForm task={task} />);
+    let body: unknown;
+    server.use(
+      http.patch(`${config.apiUrl}/tasks/:id`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json({ ...task, status: 'done', title: 'Renamed' });
+      }),
+      ...createTasksHandlers(taskFixtures),
+    );
+    const { user } = renderForm();
 
-    await user.selectOptions(screen.getByLabelText('Status'), 'Done');
     await user.clear(screen.getByLabelText('Title'));
-    await user.type(screen.getByLabelText('Title'), '  Q3 report, final  ');
+    await user.type(screen.getByLabelText('Title'), '  Renamed  ');
+    await user.selectOptions(screen.getByLabelText('Status'), 'Done');
     await user.click(save());
 
     expect(await screen.findByText('Task updated')).toBeInTheDocument();
-    expect(captured.body).toEqual({ title: 'Q3 report, final', status: 'done' });
+    expect(body).toEqual({ title: 'Renamed', status: 'done' });
   });
 
-  it('sends a null due date when it is cleared', async () => {
-    const captured = capturePatch();
-    const { user } = renderWithProviders(<TaskEditForm task={task} />);
-
-    await user.clear(screen.getByLabelText('Due date (optional)'));
-    await user.click(save());
-
-    await waitFor(() => {
-      expect(captured.body).toEqual({ dueDate: null });
-    });
-  });
-
-  it('sends nothing when nothing changed', async () => {
-    const captured = capturePatch();
-    const { user } = renderWithProviders(<TaskEditForm task={task} />);
-
-    await user.click(save());
-
-    expect(await screen.findByText('No changes to save')).toBeInTheDocument();
-    expect(captured.body).toBeUndefined();
-  });
-
-  it('shows server field errors next to the fields and keeps the input', async () => {
+  it('sends a null due date when the date is cleared', async () => {
+    let body: unknown;
     server.use(
-      tasksMocks.updateInvalid({
-        title: 'A task with this title already exists',
-        dueDate: 'Due date must not be in the past',
+      http.patch(`${config.apiUrl}/tasks/:id`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json({ ...task, dueDate: null });
       }),
     );
-    const { user } = renderWithProviders(<TaskEditForm task={task} />);
+    const { user } = renderForm();
 
-    await user.type(screen.getByLabelText('Title'), ' v2');
+    await user.clear(screen.getByLabelText('Due date'));
     await user.click(save());
 
-    expect(await screen.findByText('A task with this title already exists')).toBeInTheDocument();
-    expect(screen.getByText('Due date must not be in the past')).toBeInTheDocument();
-    expect(screen.getByLabelText('Title')).toHaveValue('Write the Q3 report v2');
-    expect(screen.getByLabelText('Title')).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.queryByText('Task updated')).not.toBeInTheDocument();
+    await screen.findByText('Task updated');
+    expect(body).toEqual({ dueDate: null });
   });
 
-  it('shows a general error when the server fails', async () => {
-    server.use(tasksMocks.updateError(500));
-    const { user } = renderWithProviders(<TaskEditForm task={task} />);
+  it('puts the saved task in the cache and disables Save again', async () => {
+    server.use(...createTasksHandlers(taskFixtures));
+    const { user, queryClient } = renderForm();
+
+    await user.selectOptions(screen.getByLabelText('Priority'), 'Low');
+    await user.click(save());
+
+    await screen.findByText('Task updated');
+    expect(queryClient.getQueryData(taskKeys.detail(task.id))).toMatchObject({ priority: 'low' });
+    expect(save()).toBeDisabled();
+  });
+
+  it('shows server field errors next to the fields', async () => {
+    server.use(tasksMocks.updateInvalid({ title: 'A task with this title already exists' }));
+    const { user } = renderForm();
 
     await user.type(screen.getByLabelText('Title'), '!');
     await user.click(save());
 
-    expect(
-      await screen.findByText('Something went wrong on our side. Please try again.'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('A task with this title already exists')).toBeInTheDocument();
+    expect(screen.getByLabelText('Title')).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('reports a task deleted by someone else and leaves for the list', async () => {
-    server.use(tasksMocks.updateNotFound(), ...createTasksHandlers(taskFixtures));
-    const { user, router } = renderWithProviders(<TaskEditForm task={task} />, {
-      path: '/tasks/1',
-    });
+  it('shows a server failure without field details above the button', async () => {
+    server.use(tasksMocks.updateError(500));
+    const { user } = renderForm();
+
+    await user.type(screen.getByLabelText('Title'), '!');
+    await user.click(save());
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+  });
+
+  it('says the task no longer exists, refreshes the list and goes back to /tasks on a 404', async () => {
+    server.use(tasksMocks.updateError(404));
+    const { user, router, queryClient } = renderForm();
+    queryClient.setQueryData(taskKeys.lists(), [task]);
 
     await user.type(screen.getByLabelText('Title'), '!');
     await user.click(save());
 
     expect(await screen.findByText('This task no longer exists')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/tasks');
-    });
+    expect(queryClient.getQueryState(taskKeys.lists())?.isInvalidated).toBe(true);
+    expect(router.state.location.pathname).toBe('/tasks');
   });
 });

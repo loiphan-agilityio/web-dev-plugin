@@ -28,10 +28,10 @@ const renderRouter = (routes: RouteObject[], path: string) => {
 export const renderRoute = (path: string) => renderRouter(createRoutes(), path);
 
 /**
- * Renders one component inside the app's providers and a router (so `Link` works). `pattern` is
- * the route pattern when it differs from the URL, e.g. `{ path: '/tasks/1', pattern: '/tasks/:id' }`.
+ * Renders one component inside the app's providers and a router (so `Link` works). A component
+ * that reads route params passes `route` (the pattern, `/tasks/:id`) besides `path` (`/tasks/3`).
  */
 export const renderWithProviders = (
   ui: ReactElement,
-  { path = '/', pattern }: { path?: string; pattern?: string } = {},
-) => renderRouter([{ path: pattern ?? path, element: ui }], path);
+  { path = '/', route }: { path?: string; route?: string } = {},
+) => renderRouter([{ path: route ?? path, element: ui }], path);

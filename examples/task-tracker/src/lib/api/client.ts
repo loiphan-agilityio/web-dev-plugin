@@ -42,11 +42,11 @@ const fromStatus = (
         Effect.flatMap(Schema.decodeUnknownEffect(ValidationBody)),
         // A malformed error body still means "invalid input", just without field details.
         Effect.catch(() => Effect.succeed({ message: undefined, errors: undefined })),
-        Effect.flatMap((body) =>
+        Effect.flatMap(({ message, errors }) =>
           Effect.fail(
             new ValidationError({
-              message: body.message ?? 'Please check the highlighted fields.',
-              fields: body.errors ?? {},
+              message: message ?? 'Please check the highlighted fields.',
+              fields: errors ?? {},
             }),
           ),
         ),
@@ -135,8 +135,8 @@ export class ApiClient extends Context.Service<
           );
 
       return ApiClient.of({
-        get: (path, schema, options) =>
-          send(HttpClientRequest.get(path, { urlParams: options?.urlParams ?? {} }), schema),
+        get: (path, schema, { urlParams = {} } = {}) =>
+          send(HttpClientRequest.get(path, { urlParams }), schema),
         post: (path, body, schema) =>
           send(HttpClientRequest.post(path).pipe(HttpClientRequest.bodyJsonUnsafe(body)), schema),
         put: (path, body, schema) =>

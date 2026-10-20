@@ -1,6 +1,6 @@
-import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { Schema } from 'effect';
+import { effectTsResolver } from '@hookform/resolvers/effect-ts';
 import { Controller, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,53 +11,44 @@ import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea';
 import { setFormErrors } from '@/lib/forms';
 
+import { priorityLabels, statusLabels } from '../filters';
+import { changedFields, toEditInput } from '../patch';
 import { useUpdateTask } from '../queries';
-import {
-  EditTask,
-  type EditTaskInput,
-  priorityLabels,
-  statusLabels,
-  type Task,
-  TaskPriority,
-  TaskStatus,
-  toEditInput,
-  toTaskPatch,
-} from '../schemas';
-import { useTaskGone } from '../use-task-gone';
+import { type Task, TaskEdit, type TaskEditInput, TaskPriority, TaskStatus } from '../schemas';
 
-// Built once at module level. The explicit type arguments are needed: TypeScript cannot infer
-// Input/Output through the intersection type that Schema.toStandardSchemaV1 returns.
-const resolver = standardSchemaResolver<EditTaskInput, unknown, EditTask>(
-  Schema.toStandardSchemaV1(EditTask),
-);
+// Built once at module level. The fields hold TaskEdit.Encoded (untrimmed title, '' for no
+// date), handleSubmit passes TaskEdit.Type (trimmed title, null for no date).
+const resolver = effectTsResolver(TaskEdit);
 
-const priorities = TaskPriority.literals;
-const statuses = TaskStatus.literals;
-
-export function TaskEditForm({ task }: { task: Task }) {
-  const updateTask = useUpdateTask(task.id);
-  const onTaskGone = useTaskGone();
-  const form = useForm<EditTaskInput, unknown, EditTask>({
+export const TaskEditForm = ({ task }: { readonly task: Task }) => {
+  const updateTask = useUpdateTask();
+  const navigate = useNavigate();
+  const form = useForm<TaskEditInput, unknown, TaskEdit>({
     resolver,
     defaultValues: toEditInput(task),
   });
 
   const onSubmit = form.handleSubmit((values) => {
-    const patch = toTaskPatch(task, values);
+    const patch = changedFields(task, values);
     if (Object.keys(patch).length === 0) {
-      toast.info('No changes to save');
       return;
     }
-    updateTask.mutate(patch, {
-      onSuccess: (updated) => {
-        form.reset(toEditInput(updated));
-        toast.success('Task updated');
+    updateTask.mutate(
+      { id: task.id, patch },
+      {
+        onSuccess: (updated) => {
+          form.reset(toEditInput(updated));
+          toast.success('Task updated');
+        },
+        onError: (error) => {
+          if (error._tag === 'NotFoundError') {
+            void navigate('/tasks');
+            return;
+          }
+          setFormErrors(form.setError, error);
+        },
       },
-      onError: (error) => {
-        if (error._tag === 'NotFoundError') onTaskGone(task.id);
-        else setFormErrors(form.setError, error);
-      },
-    });
+    );
   });
 
   const serverError = form.formState.errors.root?.server;
@@ -81,83 +72,72 @@ export function TaskEditForm({ task }: { task: Task }) {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="edit-task-description">Description (optional)</FieldLabel>
+              <FieldLabel htmlFor="edit-task-description">Description</FieldLabel>
               <Textarea {...field} id="edit-task-description" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Controller
-            name="status"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="edit-task-status">Status</FieldLabel>
-                <NativeSelect
-                  {...field}
-                  id="edit-task-status"
-                  className="w-full"
-                  aria-invalid={fieldState.invalid}
-                >
-                  {statuses.map((status) => (
-                    <NativeSelectOption key={status} value={status}>
-                      {statusLabels[status]}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-          <Controller
-            name="priority"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="edit-task-priority">Priority</FieldLabel>
-                <NativeSelect
-                  {...field}
-                  id="edit-task-priority"
-                  className="w-full"
-                  aria-invalid={fieldState.invalid}
-                >
-                  {priorities.map((priority) => (
-                    <NativeSelectOption key={priority} value={priority}>
-                      {priorityLabels[priority]}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-          <Controller
-            name="dueDate"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="edit-task-due-date">Due date (optional)</FieldLabel>
-                <Input
-                  {...field}
-                  id="edit-task-due-date"
-                  type="date"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-        </div>
+        <Controller
+          name="status"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="edit-task-status">Status</FieldLabel>
+              <NativeSelect {...field} id="edit-task-status" aria-invalid={fieldState.invalid}>
+                {TaskStatus.literals.map((value) => (
+                  <NativeSelectOption key={value} value={value}>
+                    {statusLabels[value]}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          name="priority"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="edit-task-priority">Priority</FieldLabel>
+              <NativeSelect {...field} id="edit-task-priority" aria-invalid={fieldState.invalid}>
+                {TaskPriority.literals.map((value) => (
+                  <NativeSelectOption key={value} value={value}>
+                    {priorityLabels[value]}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          name="dueDate"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="edit-task-due-date">Due date</FieldLabel>
+              <Input
+                {...field}
+                id="edit-task-due-date"
+                type="date"
+                className="w-fit"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
         {serverError && (
           <Alert variant="destructive">
             <AlertDescription>{serverError.message}</AlertDescription>
           </Alert>
         )}
-        <Button type="submit" disabled={updateTask.isPending}>
+        <Button type="submit" disabled={updateTask.isPending || !form.formState.isDirty}>
           {updateTask.isPending ? 'Saving…' : 'Save changes'}
         </Button>
       </FieldGroup>
     </form>
   );
-}
+};

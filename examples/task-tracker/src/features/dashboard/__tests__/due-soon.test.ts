@@ -1,59 +1,63 @@
-import { daysFromToday } from '@/features/tasks/dates';
-import { taskFixtures } from '@/features/tasks/mocks';
 import type { Task } from '@/features/tasks/schemas';
 
-import { completionRate, selectDueSoon } from '../due-soon';
+import { addDays, completionRate, dueSoon } from '../due-soon';
 
-const task = (id: number, overrides: Partial<Task>): Task => ({
+const today = '2026-10-21';
+
+const task = (id: number, dueDate: string | null, status: Task['status'] = 'todo'): Task => ({
   id,
   title: `Task ${String(id)}`,
   description: '',
-  status: 'todo',
-  priority: 'low',
-  dueDate: null,
-  createdAt: '2026-01-01T00:00:00.000Z',
-  ...overrides,
+  status,
+  priority: 'medium',
+  dueDate,
+  createdAt: '2026-01-05T09:00:00.000Z',
 });
 
-describe('selectDueSoon', () => {
-  it('keeps unfinished tasks due today through day 7, soonest first', () => {
+describe('addDays', () => {
+  it('adds days across a month and a year boundary', () => {
+    expect(addDays('2026-10-21', 7)).toBe('2026-10-28');
+    expect(addDays('2026-10-28', 7)).toBe('2026-11-04');
+    expect(addDays('2026-12-30', 7)).toBe('2027-01-06');
+  });
+});
+
+describe('dueSoon', () => {
+  it('keeps today and today + 7 days, drops yesterday and today + 8 days', () => {
     const tasks = [
-      task(1, { dueDate: daysFromToday(7) }),
-      task(2, { dueDate: daysFromToday(0) }),
-      task(3, { dueDate: daysFromToday(3), status: 'in_progress' }),
+      task(1, addDays(today, -1)),
+      task(2, today),
+      task(3, addDays(today, 7)),
+      task(4, addDays(today, 8)),
     ];
-    expect(selectDueSoon(tasks).map((t) => t.id)).toEqual([2, 3, 1]);
+    expect(dueSoon(tasks, today).map(({ id }) => id)).toEqual([2, 3]);
   });
 
-  it('drops done, overdue, undated and later-than-a-week tasks', () => {
-    const tasks = [
-      task(1, { dueDate: daysFromToday(2), status: 'done' }),
-      task(2, { dueDate: daysFromToday(-1) }),
-      task(3, { dueDate: null }),
-      task(4, { dueDate: daysFromToday(8) }),
-    ];
-    expect(selectDueSoon(tasks)).toEqual([]);
+  it('drops done tasks and tasks without a due date', () => {
+    const tasks = [task(1, today, 'done'), task(2, null), task(3, today, 'in_progress')];
+    expect(dueSoon(tasks, today).map(({ id }) => id)).toEqual([3]);
   });
 
-  it('orders tasks due the same day by id', () => {
-    const due = daysFromToday(1);
-    const tasks = [task(5, { dueDate: due }), task(4, { dueDate: due })];
-    expect(selectDueSoon(tasks).map((t) => t.id)).toEqual([4, 5]);
+  it('sorts soonest first', () => {
+    const tasks = [task(1, addDays(today, 5)), task(2, addDays(today, 1)), task(3, today)];
+    expect(dueSoon(tasks, today).map(({ id }) => id)).toEqual([3, 2, 1]);
   });
 
-  it('selects tasks 3 and 4 from the fixtures', () => {
-    expect(selectDueSoon(taskFixtures).map((t) => t.id)).toEqual([3, 4]);
+  it('does not reorder the list it is given', () => {
+    const tasks = [task(1, addDays(today, 5)), task(2, today)];
+    dueSoon(tasks, today);
+    expect(tasks.map(({ id }) => id)).toEqual([1, 2]);
   });
 });
 
 describe('completionRate', () => {
-  it('rounds done / total to a whole percentage', () => {
-    expect(completionRate(1, 3)).toBe(33);
-    expect(completionRate(2, 8)).toBe(25);
-    expect(completionRate(4, 4)).toBe(100);
+  it('is done / total as a rounded percentage', () => {
+    expect(completionRate({ done: 2, total: 8 })).toBe(25);
+    expect(completionRate({ done: 1, total: 3 })).toBe(33);
+    expect(completionRate({ done: 3, total: 3 })).toBe(100);
   });
 
-  it('is 0 with no tasks', () => {
-    expect(completionRate(0, 0)).toBe(0);
+  it('is 0 when there are no tasks', () => {
+    expect(completionRate({ done: 0, total: 0 })).toBe(0);
   });
 });

@@ -6,10 +6,10 @@ color codes are stripped and local paths are replaced by `<tmp>` or `<app>`.
 | What | Where | Result |
 |---|---|---|
 | The template on a fresh scaffold (same script as CI) | [`verify-sh.log`](verify-sh.log) | Lint, typecheck, 25 tests, build, Storybook build: **pass** |
-| A task tracker built by the skills, one session per ticket | [`poc/history.md`](poc/history.md) | 5 sessions, $3.89, 25 minutes |
-| The final app, gates run independently | [`poc/pnpm-check.log`](poc/pnpm-check.log) | Lint, typecheck, 131 tests (97.8% lines), build, Storybook build: **pass** |
-| Live demo | [Task Tracker Demo](https://claude.ai/artifact/Mbff8zeHWzLnjDKVdhmeSA) | Static build, API answered in the browser |
-| Screenshots, a recording, mobile views, 32 Storybook states | [`poc/screens/`](poc/screens/) | Below |
+| A task tracker built by the skills, one session per ticket | [`poc/history.md`](poc/history.md) | Rebuilt 2026-10-21: 5 sessions, $4.11, 35 minutes |
+| The final app, gates run independently | [`poc/pnpm-check.log`](poc/pnpm-check.log) | Lint, typecheck, 135 tests (97.1% lines), build, Storybook build: **pass** |
+| Live demo | [Task Tracker Demo](https://claude.ai/artifact/Mbff8zeHWzLnjDKVdhmeSA) | Static build of the first version (2026-10-20), API answered in the browser |
+| Screenshots, a recording, mobile views, 32 Storybook states | [`poc/screens/`](poc/screens/) | Below; taken from the first version |
 | One-page summary | [Web App Skills Report](https://claude.ai/artifact/WsEMWexLj3kYAuvJ8jrvxX) | |
 
 ## The design and the result

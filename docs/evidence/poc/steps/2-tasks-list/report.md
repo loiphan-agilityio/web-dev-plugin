@@ -1,30 +1,40 @@
-## Result
-**Did:** The `/tasks` page is built and linked from the header as "Tasks". `pnpm check` passed: lint, typecheck, tests (12 files, 65 tests, `features/tasks` at 97% line coverage), build and Storybook build. One caveat on how I know: I ran the full chain once and it ended with "Storybook build completed successfully", but the lint and typecheck output had scrolled off. My attempt to rerun it with the output saved to a file was denied by the session's permission rules, so I reran only `pnpm test`.
+`/tasks` is built as specified and `pnpm check` passes. Lint, typecheck, build and the Storybook build are clean, and all 71 tests pass (about 96% line coverage). I didn't open the page in a browser, so the layout hasn't been checked by eye.
 
-- **Data layer** in `src/features/tasks/`: `schemas.ts`, `api.ts`, `queries.ts`, `mocks.ts`, `routes.tsx`, plus `dates.ts` for the overdue logic and `filters.ts` for the URL-backed filters.
-- **Components** in `src/features/tasks/components/`:
-  - `TasksPage` composes the other three.
-  - `TaskForm` is the create form.
-  - `TaskFilters` holds the status select and the title search.
-  - `TaskList` shows loading, error with "Try again", "No tasks yet", "No tasks match your filters" with a "Clear filters" button, and the success list.
-  - Each has a unit test in `components/__tests__/` and a `.stories.tsx` beside it.
-- **Other tests:** `__tests__/schemas.test.ts` and `dates.test.ts`. The page test covers the header link, create-then-appears with the "Task created" toast, and opening and using the URL filters.
-- **Wiring:** `src/app/routes.tsx`, `src/mocks/handlers.ts` and `src/app/root-layout.tsx` are edited. I added the shadcn components `badge`, `textarea` and `native-select`.
+## Result
+**Did:**
+- **Feature code:** the new `src/features/tasks/` folder holds the schemas, API calls, queries, mocks, a lazy `/tasks` route, and the filter and overdue helpers.
+- **Components:** `TasksPage`, `TaskForm`, `TaskFilters` and `TaskList`. Each has a unit test in `components/__tests__/` and a story beside it. The page has a `renderRoute` test and a story too, and there are separate schema and filter tests.
+- **Wiring:** the route is registered in `src/app/routes.tsx`, the mock handlers in `src/mocks/handlers.ts`, and a "Tasks" link is in the header.
+- **shadcn:** I added `badge`, `native-select` and `textarea` with the CLI. I didn't edit them.
+- **Filtering:** the URL query `?status=…&q=…` drives the list.
+  - The status select and the search box write to it with `replace`.
+  - "Clear filters" removes it.
+  - An unknown status value is treated as All.
+  - Filtering happens in the browser, on the list from `GET /tasks`.
+- **Form:**
+  - **Title:** required, trimmed, at most 120 characters.
+  - **Description:** optional, at most 1000 characters.
+  - **Priority:** defaults to medium.
+  - **Due date:** empty is sent as `null`.
+  - **On success:** the list refetches, the form clears, and a "Task created" toast appears.
+  - **On a 422:** field errors show next to their fields. Any other failure shows an alert above the button.
+- **States:** loading, error with "Try again", "No tasks yet", and "No tasks match these filters." with "Clear filters".
+- **Rows and mocks:**
+  - **Row:** title, status badge, priority, due date or "No due date", and an "Overdue" badge when the due date is before today and the task isn't done.
+  - **Mock backend:** eight tasks cover every status and priority. Three are overdue, and a fourth is past due but done. Their dates are relative to today, so the overdue ones stay overdue.
 
 **Saw:**
-- Filtering happens in the browser. The ticket specifies only `GET /tasks`, so the page fetches the whole list once and filters it by the URL's `status` and `q`. An unknown `status` in the URL is treated as "All", and typing in the search box replaces the history entry instead of adding one.
-- The mock tasks' dates are computed relative to today, so the "overdue" rows stay overdue whenever the tests or the mock backend run. The eight tasks cover every status and priority, and four are overdue.
-- A due date that has passed counts as overdue only for tasks that aren't done. A task due today is not overdue.
-- The empty due-date input is sent to the server as `null`. The conversion happens in `api.ts`.
-- The status filter and priority use native selects (shadcn `native-select`) rather than the Radix select, because Radix selects are hard to test in jsdom.
-- The first shell command I tried was blocked by the session's permission rules, so I wrote the files with the Write/Edit tools instead. `shadcn add` had also generated `toggle` and `toggle-group`, which the feature doesn't use, so I deleted them.
+- `shadcn add` generated files that import `cn` from `"cn"`; lint and the build accept it.
+- A freshly created task is hidden if it doesn't match the active status filter. One page test covers this.
 
-**Not done:** Nothing from the ticket is excluded. I didn't check the page in a real browser, only through tests and the Storybook build.
+**Not done:** nothing from the ticket was excluded.
 
-**Blocked by:** Nothing.
+**Blocked by:** nothing.
 
-**Next:**
-- Confirm that filtering in the browser is acceptable. If the real backend filters on the server (`?status=`, `?q=`), the query keys and `api.ts` need to change.
-- Confirm the 422 field names are `title`, `description`, `priority` and `dueDate`. Errors under any other key land in the general error box above the submit button instead of next to a field.
-
-<!-- session: success, turns 40, cost $0.78, duration 4.4 min -->
+**Next:** please confirm these choices, which the ticket left open:
+- Does "today" for overdue mean the browser's local date? A task due today is not overdue. Does the backend agree?
+- Is the title search a case-insensitive substring match, filtered in the browser? If the backend should filter, that needs a new contract.
+- Due dates show as the raw `YYYY-MM-DD`, not a locale format.
+- Priority is plain text ("Priority: High"), the status is a badge, and rows are in the order the API returns them.
+- The filter labels read "Status" and "Search". Is that the wording you want?
+- The 422 field keys are assumed to be the form's field names (`title`, `description`, `priority`, `dueDate`).

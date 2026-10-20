@@ -8,4 +8,3 @@ storybook-static/
 .env.*.local
 # Written by `msw init` (postinstall) from the installed msw, so it always matches its version.
 public/mockServiceWorker.js
-dist-demo/

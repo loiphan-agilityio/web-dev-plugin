@@ -2,24 +2,30 @@ import { useQuery } from '@tanstack/react-query';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { taskStatsQueryOptions } from '@/features/tasks/queries';
 import { toUserMessage } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
-import { taskStatsQueryOptions } from '@/features/tasks/queries';
 
 import { completionRate } from '../due-soon';
 
-/** Loading, error and success. There is no empty state: zero tasks is just a row of zeros. */
-export function StatsCards() {
-  const { data, isPending, isError, error, refetch, isRefetching } = useQuery(
-    taskStatsQueryOptions(),
-  );
+/** Loading, error and success. There is no empty state: with no tasks every count is 0. */
+export const StatsCards = () => {
+  const { data, isPending, isError, error, refetch, isRefetching } =
+    useQuery(taskStatsQueryOptions());
 
   if (isPending) {
     return (
-      <div role="status" aria-label="Loading statistics" className="space-y-6">
+      <div role="status" aria-label="Loading stats" className="space-y-6">
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <Skeleton className="h-27" />
           <Skeleton className="h-27" />
@@ -34,7 +40,7 @@ export function StatsCards() {
   if (isError) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Could not load statistics</AlertTitle>
+        <AlertTitle>Could not load the stats</AlertTitle>
         <AlertDescription>
           <p>{toUserMessage(error)}</p>
           <Button
@@ -52,23 +58,23 @@ export function StatsCards() {
     );
   }
 
-  const rate = completionRate(data.done, data.total);
+  const rate = completionRate(data);
   const counts = [
-    { label: 'Total tasks', value: data.total, className: '' },
-    { label: 'In progress', value: data.inProgress, className: '' },
-    { label: 'Done', value: data.done, className: '' },
-    { label: 'Overdue', value: data.overdue, className: 'text-destructive' },
+    { label: 'Total tasks', value: data.total, valueClass: '' },
+    { label: 'In progress', value: data.inProgress, valueClass: '' },
+    { label: 'Done', value: data.done, valueClass: '' },
+    { label: 'Overdue', value: data.overdue, valueClass: 'text-destructive' },
   ];
 
   return (
     <div className="space-y-6">
       <ul aria-label="Task counts" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {counts.map(({ label, value, className }) => (
-          <li key={label} aria-label={label}>
-            <Card className="h-full gap-2 py-6">
-              <CardHeader className="gap-2">
+        {counts.map(({ label, value, valueClass }) => (
+          <li key={label}>
+            <Card>
+              <CardHeader>
                 <CardDescription>{label}</CardDescription>
-                <CardTitle className={cn('text-3xl font-semibold tabular-nums', className)}>
+                <CardTitle className={cn('text-3xl font-bold tabular-nums', valueClass)}>
                   {value}
                 </CardTitle>
               </CardHeader>
@@ -76,15 +82,15 @@ export function StatsCards() {
           </li>
         ))}
       </ul>
-      <Card className="gap-3">
-        <CardHeader className="grid-cols-[1fr_auto] items-center">
-          <CardTitle className="font-semibold">Completion</CardTitle>
-          <CardDescription className="text-right">
+      <Card>
+        <CardHeader>
+          <CardTitle>Completion</CardTitle>
+          <CardAction className="text-sm text-muted-foreground">
             {data.done} of {data.total} done · {rate}%
-          </CardDescription>
+          </CardAction>
         </CardHeader>
         <CardContent>
-          {/* The generated Progress keeps `value` for itself, so the value is announced explicitly. */}
+          {/* The shadcn Progress keeps `value` to itself, so the ARIA value is set here. */}
           <Progress
             value={rate}
             aria-valuenow={rate}
@@ -95,4 +101,4 @@ export function StatsCards() {
       </Card>
     </div>
   );
-}
+};

@@ -16,20 +16,20 @@ export const getTaskStats = Effect.fn('tasks.stats')(function* () {
 
 export const createTask = Effect.fn('tasks.create')(function* (input: NewTask) {
   const api = yield* ApiClient;
-  return yield* api.post('/tasks', { ...input, dueDate: input.dueDate || null }, Task);
+  return yield* api.post('/tasks', input, Task);
 });
 
 export const getTask = Effect.fn('tasks.get')(function* (id: number) {
   const api = yield* ApiClient;
-  return yield* api.get(`/tasks/${id}`, Task);
+  return yield* api.get(`/tasks/${String(id)}`, Task);
 });
 
 export const updateTask = Effect.fn('tasks.update')(function* (id: number, patch: TaskPatch) {
   const api = yield* ApiClient;
-  return yield* api.patch(`/tasks/${id}`, patch, Task);
+  return yield* api.patch(`/tasks/${String(id)}`, patch, Task);
 });
 
 export const deleteTask = Effect.fn('tasks.delete')(function* (id: number) {
   const api = yield* ApiClient;
-  return yield* api.delete(`/tasks/${id}`);
+  return yield* api.delete(`/tasks/${String(id)}`);
 });

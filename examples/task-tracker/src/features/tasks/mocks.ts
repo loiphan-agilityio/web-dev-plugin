@@ -3,117 +3,111 @@ import { delay } from 'msw/utils/delay';
 
 import { config } from '@/lib/config';
 
-import { daysFromToday, isOverdue, todayIso } from './dates';
 import type { NewTask, Task, TaskPatch, TaskStats } from './schemas';
 
 const url = (path: string) => `${config.apiUrl}${path}`;
 
-const notFound = () => HttpResponse.json({ message: 'Not found' }, { status: 404 });
-
-const createdAt = (daysAgo: number) => `${daysFromToday(-daysAgo)}T09:00:00.000Z`;
-
-/** A task for component stories and tests that need one (it is fixture 3, due tomorrow). */
-export const sampleTask: Task = {
-  id: 3,
-  title: 'Review pull request 142',
-  description: '',
-  status: 'todo',
-  priority: 'medium',
-  dueDate: daysFromToday(1),
-  createdAt: createdAt(3),
+/** `YYYY-MM-DD` for today plus `days` (negative = past), in local time like the app. */
+export const dateFromToday = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${String(date.getFullYear())}-${month}-${day}`;
 };
 
-/** Realistic tasks relative to today: every status and priority, four of them overdue. */
+const createdAt = '2026-01-05T09:00:00.000Z';
+
+/** Eight tasks covering every status and priority; three are overdue (past due, not done; #5 is past due but done). */
 export const taskFixtures: Task[] = [
   {
     id: 1,
-    title: 'Write the Q3 report',
-    description: 'Summarise delivery metrics and open risks for the leadership review.',
-    status: 'in_progress',
+    title: 'Send the Q3 report to finance',
+    description: 'Include the revenue breakdown by region.',
+    status: 'todo',
     priority: 'high',
-    dueDate: daysFromToday(-2),
-    createdAt: createdAt(10),
+    dueDate: dateFromToday(-3),
+    createdAt,
   },
   {
     id: 2,
-    title: 'Fix login redirect bug',
-    description: 'Users land on a blank page after signing in from a deep link.',
-    status: 'todo',
-    priority: 'high',
-    dueDate: daysFromToday(-5),
-    createdAt: createdAt(8),
+    title: 'Review pull request for the billing page',
+    description: 'Check the rounding of invoice totals.',
+    status: 'in_progress',
+    priority: 'medium',
+    dueDate: dateFromToday(-1),
+    createdAt,
   },
   {
     id: 3,
-    title: 'Review pull request 142',
+    title: 'Book the team offsite venue',
     description: '',
     status: 'todo',
-    priority: 'medium',
-    dueDate: daysFromToday(1),
-    createdAt: createdAt(3),
+    priority: 'low',
+    dueDate: dateFromToday(21),
+    createdAt,
   },
   {
     id: 4,
-    title: 'Update onboarding docs',
-    description: 'Add the new SSO steps and refresh the screenshots.',
+    title: 'Write release notes for v2.4',
+    description: 'Highlight the new export feature.',
     status: 'in_progress',
-    priority: 'medium',
-    dueDate: daysFromToday(7),
-    createdAt: createdAt(6),
+    priority: 'high',
+    dueDate: dateFromToday(2),
+    createdAt,
   },
   {
     id: 5,
-    title: 'Book team offsite venue',
-    description: 'Shortlist three venues for 12 people.',
-    status: 'todo',
-    priority: 'low',
-    dueDate: null,
-    createdAt: createdAt(12),
-  },
-  {
-    id: 6,
-    title: 'Renew SSL certificate',
+    title: 'Renew the SSL certificate',
     description: 'Expires at the end of the month.',
     status: 'done',
     priority: 'high',
-    dueDate: daysFromToday(-1),
-    createdAt: createdAt(20),
+    dueDate: dateFromToday(-10),
+    createdAt,
+  },
+  {
+    id: 6,
+    title: 'Update onboarding checklist',
+    description: 'Add the security training step.',
+    status: 'done',
+    priority: 'low',
+    dueDate: null,
+    createdAt,
   },
   {
     id: 7,
-    title: 'Clean up old feature flags',
-    description: 'Remove the flags that shipped to 100% in spring.',
+    title: 'Plan the customer interview round',
+    description: 'Five interviews, two weeks.',
     status: 'todo',
-    priority: 'low',
-    dueDate: daysFromToday(-9),
-    createdAt: createdAt(30),
+    priority: 'medium',
+    dueDate: null,
+    createdAt,
   },
   {
     id: 8,
-    title: 'Plan sprint retrospective',
-    description: 'Prepare the board and send the invite.',
-    status: 'done',
+    title: 'Fix the flaky checkout test',
+    description: 'Fails about one run in ten on CI.',
+    status: 'todo',
     priority: 'medium',
-    dueDate: daysFromToday(-3),
-    createdAt: createdAt(5),
+    dueDate: dateFromToday(-7),
+    createdAt,
   },
 ];
 
-/** What the backend computes for `GET /tasks/stats`; `dueThisWeek` is unfinished, today..+7 days. */
-export const computeStats = (tasks: readonly Task[]): TaskStats => {
-  const today = todayIso();
-  const weekEnd = daysFromToday(7);
-  const count = (predicate: (task: Task) => boolean) => tasks.filter(predicate).length;
+/** What the real `GET /tasks/stats` computes: overdue = past due, not done; this week = today..+7, not done. */
+const statsOf = (tasks: readonly Task[]): TaskStats => {
+  const today = dateFromToday(0);
+  const weekEnd = dateFromToday(7);
+  const open = tasks.filter(({ status }) => status !== 'done');
   return {
     total: tasks.length,
-    todo: count((t) => t.status === 'todo'),
-    inProgress: count((t) => t.status === 'in_progress'),
-    done: count((t) => t.status === 'done'),
-    overdue: count((t) => isOverdue(t, today)),
-    dueThisWeek: count(
-      (t) =>
-        t.status !== 'done' && t.dueDate !== null && t.dueDate >= today && t.dueDate <= weekEnd,
-    ),
+    todo: tasks.filter(({ status }) => status === 'todo').length,
+    inProgress: tasks.filter(({ status }) => status === 'in_progress').length,
+    done: tasks.length - open.length,
+    overdue: open.filter(({ dueDate }) => dueDate !== null && dueDate < today).length,
+    dueThisWeek: open.filter(
+      ({ dueDate }) => dueDate !== null && dueDate >= today && dueDate <= weekEnd,
+    ).length,
   };
 };
 
@@ -122,41 +116,46 @@ export const computeStats = (tasks: readonly Task[]): TaskStats => {
  * `server.use(...createTasksHandlers())` never see state left over from another test.
  */
 export const createTasksHandlers = (initial: Task[] = taskFixtures) => {
-  const tasks = [...initial];
+  let tasks = [...initial];
+  const notFound = () => HttpResponse.json({ message: 'Not found' }, { status: 404 });
   return [
     http.get(url('/tasks'), () => HttpResponse.json(tasks)),
-    // Before '/tasks/:id', or "stats" would be taken for an id (the first match wins).
-    http.get(url('/tasks/stats'), () => HttpResponse.json(computeStats(tasks))),
-    http.post(url('/tasks'), async ({ request }) => {
-      const body = (await request.json()) as Omit<NewTask, 'dueDate'> & {
-        dueDate: string | null;
-      };
+    // A fixed path goes before `/tasks/:id`: the first match wins and `:id` would match `stats`.
+    http.get(url('/tasks/stats'), () => HttpResponse.json(statsOf(tasks))),
+    http.get<{ id: string }>(url('/tasks/:id'), ({ params }) => {
+      const task = tasks.find(({ id }) => id === Number(params.id));
+      return task ? HttpResponse.json(task) : notFound();
+    }),
+    http.patch<{ id: string }, TaskPatch>(url('/tasks/:id'), async ({ params, request }) => {
+      const index = tasks.findIndex(({ id }) => id === Number(params.id));
+      const current = tasks[index];
+      if (!current) {
+        return notFound();
+      }
+      const updated: Task = { ...current, ...(await request.json()) };
+      tasks = tasks.map((task, position) => (position === index ? updated : task));
+      return HttpResponse.json(updated);
+    }),
+    http.delete<{ id: string }>(url('/tasks/:id'), ({ params }) => {
+      if (!tasks.some(({ id }) => id === Number(params.id))) {
+        return notFound();
+      }
+      tasks = tasks.filter(({ id }) => id !== Number(params.id));
+      return new HttpResponse(null, { status: 204 });
+    }),
+    http.post<never, NewTask>(url('/tasks'), async ({ request }) => {
+      const { title, description, priority, dueDate } = await request.json();
       const task: Task = {
-        ...body,
-        id: Math.max(0, ...tasks.map((t) => t.id)) + 1,
+        id: Math.max(0, ...tasks.map(({ id }) => id)) + 1,
+        title,
+        description,
         status: 'todo',
+        priority,
+        dueDate,
         createdAt: new Date().toISOString(),
       };
       tasks.push(task);
       return HttpResponse.json(task, { status: 201 });
-    }),
-    http.get(url('/tasks/:id'), ({ params }) => {
-      const task = tasks.find((t) => t.id === Number(params.id));
-      return task ? HttpResponse.json(task) : notFound();
-    }),
-    http.patch(url('/tasks/:id'), async ({ params, request }) => {
-      const index = tasks.findIndex((t) => t.id === Number(params.id));
-      const current = tasks[index];
-      if (!current) return notFound();
-      const updated: Task = { ...current, ...((await request.json()) as TaskPatch) };
-      tasks[index] = updated;
-      return HttpResponse.json(updated);
-    }),
-    http.delete(url('/tasks/:id'), ({ params }) => {
-      const index = tasks.findIndex((t) => t.id === Number(params.id));
-      if (index === -1) return notFound();
-      tasks.splice(index, 1);
-      return new HttpResponse(null, { status: 204 });
     }),
   ];
 };
@@ -180,10 +179,6 @@ export const tasksMocks = {
     }),
   statsError: (status = 500) =>
     http.get(url('/tasks/stats'), () => HttpResponse.json({ message: 'Boom' }, { status })),
-  createInvalid: (errors: Record<string, string>) =>
-    http.post(url('/tasks'), () =>
-      HttpResponse.json({ message: 'Validation failed', errors }, { status: 422 }),
-    ),
   detailPending: () =>
     http.get(url('/tasks/:id'), async () => {
       await delay('infinite');
@@ -191,15 +186,16 @@ export const tasksMocks = {
     }),
   detailError: (status = 500) =>
     http.get(url('/tasks/:id'), () => HttpResponse.json({ message: 'Boom' }, { status })),
-  detailNotFound: () => http.get(url('/tasks/:id'), () => notFound()),
+  updateError: (status = 500) =>
+    http.patch(url('/tasks/:id'), () => HttpResponse.json({ message: 'Boom' }, { status })),
   updateInvalid: (errors: Record<string, string>) =>
     http.patch(url('/tasks/:id'), () =>
       HttpResponse.json({ message: 'Validation failed', errors }, { status: 422 }),
     ),
-  updateError: (status = 500) =>
-    http.patch(url('/tasks/:id'), () => HttpResponse.json({ message: 'Boom' }, { status })),
-  updateNotFound: () => http.patch(url('/tasks/:id'), () => notFound()),
   deleteError: (status = 500) =>
     http.delete(url('/tasks/:id'), () => HttpResponse.json({ message: 'Boom' }, { status })),
-  deleteNotFound: () => http.delete(url('/tasks/:id'), () => notFound()),
+  createInvalid: (errors: Record<string, string>) =>
+    http.post(url('/tasks'), () =>
+      HttpResponse.json({ message: 'Validation failed', errors }, { status: 422 }),
+    ),
 };
