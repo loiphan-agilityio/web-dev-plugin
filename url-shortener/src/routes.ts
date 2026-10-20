@@ -15,16 +15,16 @@ declare module 'fastify' {
 const RESERVED = new Set(['api', 'docs']);
 const SQLITE_CONSTRAINT_PRIMARYKEY = 1555;
 const SQLITE_CONSTRAINT_UNIQUE = 2067;
+const SESSION_401 = 'Missing, invalid or expired session';
+const NOT_YOURS_404 = 'No such link among yours';
 
-const HttpError = Type.Object({
-  statusCode: Type.Integer(),
-  error: Type.String(),
-  message: Type.String(),
-});
+// The description becomes the response description in the OpenAPI spec: say when this status happens.
+const HttpError = (description: string) =>
+  Type.Object({ statusCode: Type.Integer(), error: Type.String(), message: Type.String() }, { description });
 
 const Link = Type.Object({
   code: Type.String({ examples: ['aB3_x9Qz'] }),
-  shortUrl: Type.String({ format: 'uri' }),
+  shortUrl: Type.String({ format: 'uri', description: 'BASE_URL + "/" + code; opening it redirects and counts a click' }),
   url: Type.String({ format: 'uri' }),
   clicks: Type.Integer(),
   createdAt: Type.String({ format: 'date-time' }),
@@ -34,7 +34,7 @@ const Link = Type.Object({
 const CreateLink = Type.Object({
   // The pattern blocks javascript:, data: and other schemes we would otherwise redirect to.
   url: Type.String({ format: 'uri', pattern: '^https?://', maxLength: 2048, examples: ['https://example.com/a/very/long/path'] }),
-  alias: Type.Optional(Type.String({ pattern: '^[A-Za-z0-9_-]{3,32}$', description: '3–32 chars: letters, digits, _ or -', examples: ['my-link'] })),
+  alias: Type.Optional(Type.String({ pattern: '^[A-Za-z0-9_-]{3,32}$', description: '3–32 chars: letters, digits, _ or -. "api" and "docs" are reserved', examples: ['my-link'] })),
   expiresAt: Type.Optional(Type.String({ format: 'date-time', description: 'Must be in the future' })),
 });
 
@@ -89,7 +89,11 @@ export const routes: FastifyPluginAsyncTypebox<{ db: DatabaseSync; baseUrl: stri
       summary: 'Create an account and log in',
       security: [],
       body: Credentials,
-      response: { 201: Session, 400: HttpError, 409: HttpError },
+      response: {
+        201: Session,
+        400: HttpError('Email or password fails validation'),
+        409: HttpError('Email is already registered'),
+      },
     },
   }, async (req, reply) => {
     const passwordHash = await hashPassword(req.body.password);
@@ -109,7 +113,11 @@ export const routes: FastifyPluginAsyncTypebox<{ db: DatabaseSync; baseUrl: stri
       summary: 'Log in and get a session token',
       security: [],
       body: Credentials,
-      response: { 200: Session, 400: HttpError, 401: HttpError },
+      response: {
+        200: Session,
+        400: HttpError('Body fails validation'),
+        401: HttpError('Wrong email or password'),
+      },
     },
   }, async (req) => {
     const user = findUser.get(req.body.email) as { id: number; passwordHash: string } | undefined;
@@ -124,7 +132,7 @@ export const routes: FastifyPluginAsyncTypebox<{ db: DatabaseSync; baseUrl: stri
     schema: {
       tags: ['auth'],
       summary: 'End this session; its token stops working',
-      response: { 204: Type.Null({ description: 'Logged out' }), 401: HttpError },
+      response: { 204: Type.Null({ description: 'Logged out' }), 401: HttpError(SESSION_401) },
     },
   }, async (req, reply) => {
     deleteSession.run(hashToken(bearer(req)!));
@@ -145,7 +153,12 @@ export const routes: FastifyPluginAsyncTypebox<{ db: DatabaseSync; baseUrl: stri
       tags: ['links'],
       summary: 'Create a short link',
       body: CreateLink,
-      response: { 201: Link, 400: HttpError, 401: HttpError, 409: HttpError },
+      response: {
+        201: Link,
+        400: HttpError('Invalid `url`, `alias` or `expiresAt`, a reserved alias, or `expiresAt` not in the future'),
+        401: HttpError(SESSION_401),
+        409: HttpError('Alias is already taken'),
+      },
     },
   }, async (req, reply) => {
     const { url, alias } = req.body;
@@ -177,7 +190,11 @@ export const routes: FastifyPluginAsyncTypebox<{ db: DatabaseSync; baseUrl: stri
         limit: Type.Integer({ minimum: 1, maximum: 100, default: 20 }),
         offset: Type.Integer({ minimum: 0, default: 0 }),
       }),
-      response: { 200: Type.Object({ items: Type.Array(Link), total: Type.Integer() }), 400: HttpError, 401: HttpError },
+      response: {
+        200: Type.Object({ items: Type.Array(Link), total: Type.Integer() }),
+        400: HttpError('`limit` or `offset` out of range'),
+        401: HttpError(SESSION_401),
+      },
     },
   }, async (req) => {
     const rows = list.all(req.userId, req.query.limit, req.query.offset) as Row[];
@@ -191,7 +208,7 @@ export const routes: FastifyPluginAsyncTypebox<{ db: DatabaseSync; baseUrl: stri
       tags: ['links'],
       summary: 'Get one of your links and its click count',
       params: CodeParams,
-      response: { 200: Link, 401: HttpError, 404: HttpError },
+      response: { 200: Link, 401: HttpError(SESSION_401), 404: HttpError(NOT_YOURS_404) },
     },
   }, async (req) => toLink(find(req.params.code, req.userId)));
 
@@ -201,7 +218,7 @@ export const routes: FastifyPluginAsyncTypebox<{ db: DatabaseSync; baseUrl: stri
       tags: ['links'],
       summary: 'Delete one of your links',
       params: CodeParams,
-      response: { 204: Type.Null({ description: 'Deleted' }), 401: HttpError, 404: HttpError },
+      response: { 204: Type.Null({ description: 'Deleted' }), 401: HttpError(SESSION_401), 404: HttpError(NOT_YOURS_404) },
     },
   }, async (req, reply) => {
     if (!remove.run(req.params.code, req.userId).changes) throw httpError(404, 'Link not found');
@@ -216,8 +233,8 @@ export const routes: FastifyPluginAsyncTypebox<{ db: DatabaseSync; baseUrl: stri
       params: CodeParams,
       response: {
         302: Type.Null({ description: 'Redirect; the target is in the Location header' }),
-        404: HttpError,
-        410: HttpError,
+        404: HttpError('No link with this code'),
+        410: HttpError('Link has expired'),
       },
     },
   }, async (req, reply) => {
