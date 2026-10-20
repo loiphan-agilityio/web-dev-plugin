@@ -24,12 +24,13 @@ Requirements: Node ≥ 22.22, pnpm 11, Claude Code.
 Install it once and the skills load in every project:
 
 ```bash
-git clone git@gitlab.asoft-python.com:loi.phan/claude-training.git
+git clone -b web-development-skills git@gitlab.asoft-python.com:loi.phan/claude-training.git
 claude plugin marketplace add ./claude-training
 claude plugin install web-app-skills@claude-training
 ```
 
-The plugin is read in place from the clone: `git pull` and `/reload-plugins` bring the latest
+The plugin lives on the `web-development-skills` branch (the repository's default branch is another
+project), hence `-b`. It is read in place from the clone: `git pull` and `/reload-plugins` bring the latest
 skills. Claude still picks a skill from the prompt; typed, plugin skills are namespaced
 (`/web-app-skills:code-skeleton`). Then, in an empty folder:
 `claude "Scaffold a new web app called billing-portal"`.
@@ -48,10 +49,11 @@ claude "Scaffold a new web app called billing-portal"
 `pnpm check`. The generated `CLAUDE.md` holds the project conventions from then on.
 
 **Existing project on this stack.** Install the plugin (or copy the skills) as above and install
-the companions from the project root:
+the companions from the project root (`<this-repo>` is the path to `claude-training/claude-skills`;
+the script installs into the current folder):
 
 ```bash
-bash .claude/skills/code-skeleton/scripts/install-companions.sh
+bash <this-repo>/.claude/skills/code-skeleton/scripts/install-companions.sh
 ```
 
 With copied folders, commit `.claude/skills/` and `skills-lock.json` so the whole team gets the
