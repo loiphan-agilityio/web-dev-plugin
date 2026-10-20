@@ -9,17 +9,16 @@ Turn a ticket into a tested UI inside an app that already follows `CLAUDE.md` (f
 
 ## Getting library APIs right
 
-The stack is newer than most training data. Do not write these from memory; copy from `references/` or the installed types.
+The stack is newer than most training data. The version traps (Effect 4, React Router 8, MSW 3,
+TanStack Query 5, Tailwind 4, Vitest 5, Storybook 10) are listed once, in the project's `CLAUDE.md`,
+section "Library versions newer than most training data": read it before writing code, and read
+`node_modules/effect/AGENTS.md` completely before writing Effect code. Copy shapes from
+`references/` or the installed types, not from memory.
 
-- **Effect 4.** Before writing Effect code, read `node_modules/effect/AGENTS.md` completely. Services are `Context.Service` (not `Context.Tag` or `Effect.Service`); HTTP is `effect/http` (not `@effect/platform`); errors are `Schema.TaggedError`; decode with `Schema.decodeUnknownEffect` / `Schema.decodeUnknownSync` (not `Schema.decodeUnknown(`); catch-all is `Effect.catch`; messages go through `Schema.check(Schema.isMinLength(1, { message }))`.
+Specific to this skill:
+
 - **React Hook Form.** `effectTsResolver` is Effect-3 only and `zodResolver` does not apply: use `standardSchemaResolver` with explicit type arguments.
-- **React Router 8.** No `react-router-dom`; import from `react-router`, and `RouterProvider` from `react-router/dom`.
-- **MSW 3.** `http` / `HttpResponse` from `msw/http`, `delay` from `msw/utils/delay`, option `onUnhandledFrame` (not `onUnhandledRequest`). No `rest.get`.
-- **TanStack Query 5.** `isPending` for the first load (not `isLoading`); object syntax; return the invalidate promise from `onSuccess`.
-- **Tailwind 4.** No `tailwind.config.js`; use tokens (`text-muted-foreground`, `bg-background`).
 - **shadcn.** Forms use `FieldGroup` + `Field`; the old `Form` / `FormField` wrapper is gone. `src/components/ui` is generated: re-add with the CLI, never edit.
-- **Vitest 5.** `clearMocks` defaults to true; `vi.mock` only at top level. Never `jest.*`.
-- **Storybook 10.** Types (`Meta`, `StoryObj`) from `@storybook/react-vite`; `@storybook/test` is gone (`play` gets `canvas` and `userEvent` from its context). API mocks go in `parameters.msw.handlers`, served by the template's worker: no `msw-storybook-addon` (it uses MSW 2's `onUnhandledRequest`).
 
 ## Workflow
 
@@ -47,7 +46,7 @@ src/features/<name>/
 Plus three registrations outside the folder: see step 5.
 
 ### 2. Schema, API, queries
-Read `references/feature-layout.md` before writing these files; it has each one in full. The essentials:
+Read `references/feature-layout.md` before writing these files; it has each one in full, or points to the integrate-api reference that does. The essentials:
 
 - `schemas.ts`: Effect Schemas for API shapes and form input; derive types (`typeof X.Type`, `typeof X.Encoded`).
 - `api.ts`: one `Effect.fn` per call, going through `ApiClient` (never `fetch`; lint rejects it). Retries live in TanStack Query only.

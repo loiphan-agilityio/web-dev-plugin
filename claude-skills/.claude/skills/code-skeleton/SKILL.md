@@ -94,10 +94,6 @@ training data"). Read the template files rather than recalling config from memor
 - **ESLint 10:** `eslint-plugin-jsx-a11y` 6.10.2 declares `eslint<=9` but works; it is allowed in
   `peerDependencyRules` in `pnpm-workspace.yaml`, as is `@hookform/resolvers>effect: 4` (that peer
   only applies to `effectTsResolver`, which the project does not use).
-- **React Router 8:** no `react-router-dom`; import from `react-router`, `RouterProvider` from
-  `react-router/dom`.
-- **MSW 3:** `http` / `HttpResponse` from `msw/http`, `delay` / `bypass` / `passthrough` from
-  `msw/utils/<name>`; the option is `onUnhandledFrame`, not `onUnhandledRequest`.
 - **pnpm 11:** reads settings from `pnpm-workspace.yaml`, not `.npmrc` or `package.json`.
 
 If `CLAUDE.md` and the template files ever disagree, trust the files and tell the user.

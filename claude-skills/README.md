@@ -19,8 +19,23 @@ Out of scope: SSR / Next.js, backend code, CI/CD.
 
 Requirements: Node ≥ 22.22, pnpm 11, Claude Code.
 
-**New project.** Copy the four skill folders into the project (or into `~/.claude/skills/` to
-have them everywhere), then ask Claude to scaffold:
+**As a plugin (recommended).** The repository root is a marketplace
+(`.claude-plugin/marketplace.json`) that lists this folder as the plugin `web-app-skills`.
+Install it once and the skills load in every project:
+
+```bash
+git clone git@gitlab.asoft-python.com:loi.phan/claude-training.git
+claude plugin marketplace add ./claude-training
+claude plugin install web-app-skills@claude-training
+```
+
+The plugin is read in place from the clone: `git pull` and `/reload-plugins` bring the latest
+skills. Claude still picks a skill from the prompt; typed, plugin skills are namespaced
+(`/web-app-skills:code-skeleton`). Then, in an empty folder:
+`claude "Scaffold a new web app called billing-portal"`.
+
+**Or copy the folders.** Copy the four skill folders into the project (or into `~/.claude/skills/`
+to have them everywhere), then ask Claude to scaffold:
 
 ```bash
 mkdir billing-portal && cd billing-portal && git init
@@ -32,14 +47,15 @@ claude "Scaffold a new web app called billing-portal"
 `code-skeleton` copies the template, runs `pnpm install`, installs the companion skills and runs
 `pnpm check`. The generated `CLAUDE.md` holds the project conventions from then on.
 
-**Existing project on this stack.** Copy the skills as above and install the companions from the
-project root:
+**Existing project on this stack.** Install the plugin (or copy the skills) as above and install
+the companions from the project root:
 
 ```bash
 bash .claude/skills/code-skeleton/scripts/install-companions.sh
 ```
 
-Commit `.claude/skills/` and `skills-lock.json` so the whole team gets the same skills.
+With copied folders, commit `.claude/skills/` and `skills-lock.json` so the whole team gets the
+same skills.
 
 ## What the template gives you
 
@@ -54,6 +70,8 @@ build. The parts every feature builds on:
   signal, rejects with the typed error so `query.error._tag` is safe to switch on.
 - **Forms**: React Hook Form + `standardSchemaResolver(Schema.toStandardSchemaV1(schema))` +
   shadcn `Field`; `setFormErrors` puts server field errors under the right inputs.
+- **MSW worker**: `public/mockServiceWorker.js` is not in the template; the `postinstall` script
+  (`msw init`) writes it from the installed msw, so it always matches the msw version.
 - **Tests**: MSW 3 for every test (unhandled requests fail), `renderRoute` / `renderWithProviders`.
   Both mount the `Toaster` (with a `matchMedia` stub and a per-test reset in `setup.ts`), so a
   toast is asserted as text.
@@ -65,7 +83,7 @@ build. The parts every feature builds on:
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
   helpers, `clsx`, global `fetch`).
 
-`develop-feature/references/` quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
+`develop-feature/references/` (with `api.ts` and `mocks.ts` in `integrate-api/references/`) quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
 wiring diff for the three files a feature registers in. Its source is `evals/fixtures/todos/`, kept
 out of the skill so installed projects never lint or test it.
 
@@ -118,6 +136,7 @@ re-run the script after updating it.
 byte for byte, which a CRLF checkout (`core.autocrlf=true`) would otherwise break.
 
 ```
+.claude-plugin/          ← plugin.json (name web-app-skills, version); ../.claude-plugin/ is the marketplace
 .claude/skills/          ← the product: what gets copied into projects
   code-skeleton/  template/ (the app), scripts/ (scaffold, verify, install-companions), SKILL.md
   develop-feature/  SKILL.md, references/
@@ -134,12 +153,25 @@ evals/                   ← end-to-end evals of the skills; fixtures/todos/ is 
 1. Edit `.claude/skills/code-skeleton/template/` and run `pnpm check` inside it.
 2. `bash .claude/skills/code-skeleton/scripts/verify.sh` — fresh scaffold, all gates.
 3. `bash evals/verify-example.sh` — every code block in every skill is copied verbatim from the
-   template or the fixture (`evals/check-quotes.mjs`), the todos fixture is quoted in full in
-   develop-feature's references, and it passes all gates on a fresh scaffold.
+   template or the fixture (`evals/check-quotes.mjs`), every todos fixture file is quoted in full
+   in some skill's references (each block lives in one place: `api.ts` and `mocks.ts` in
+   integrate-api's, the rest in develop-feature's), and it passes all gates on a fresh scaffold.
 4. Update every snippet `check-quotes.mjs` names. Snippets are copied from the template, never
    written from memory; keep it that way. A block that shows a pattern found in neither (a detail
    key, `setQueryData`) is marked ` ```ts sketch ` and says so in the text.
 5. Run the evals.
+6. Release: bump `version` in `.claude-plugin/plugin.json` and run
+   `claude plugin validate --strict .claude-plugin/plugin.json` (and `claude plugin validate --strict ..`
+   for the marketplace).
+
+**Version traps** (Effect 4, React Router 8, MSW 3, TanStack Query 5, Tailwind 4, Vitest 5,
+Storybook 10) are written once, in the template's `CLAUDE.md` ("Library versions newer than most
+training data"). Skills point there and keep only the traps specific to their own step.
+
+**CI** (`../.gitlab-ci.yml`) runs `check-quotes`, `verify.sh` and `verify-example.sh` in `node:24`
+on merge requests and pushes that touch the plugin, and on pipeline schedules. Add a weekly schedule
+in GitLab (Build > Pipeline schedules) so a dependency release that breaks the template shows up
+before a teammate hits it.
 
 **Upgrade a companion:** read the diff between the pinned and the new commit, re-check it
 against the conventions, then change the SHA in `install-companions.sh` and in the table above.

@@ -11,6 +11,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "postinstall": "msw init",
     "typecheck": "tsc -b",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --max-warnings=0 --fix",

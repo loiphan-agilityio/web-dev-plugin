@@ -27,9 +27,8 @@ The stack is newer than most training data. Copy from the project and the refere
   ```
   No other icon package, and no SVG copied out of the design for an icon lucide already has.
 - **Dark mode is not wired.** `index.css` has `@custom-variant dark (&:is(.dark *));` and a `.dark` block, but nothing adds the `.dark` class: there is no ThemeProvider, and `next-themes` is only imported by `src/components/ui/sonner.tsx`. Dark mode is out of scope unless the design shows a dark version; then set the `.dark` token values so the theme is ready, but nothing in the shipped app will show it until something adds the `.dark` class. Switching themes (a toggle, or following `prefers-color-scheme`) is a separate feature: ask before building it, and until it exists report "dark tokens set, dark theme not active in the app" under **Design gaps**.
-- **React Router 8.** Links (`Link`, `NavLink`) come from `react-router`, as `src/app/root-layout.tsx` does; there is no `react-router-dom`.
-- **Vitest 5.** `vi.mock` only at the top level of a file; never `jest.*`.
-- The other version traps (Effect, MSW, TanStack Query, forms) are in `CLAUDE.md`; they apply when the screen needs data (step 3).
+- **Links** (`Link`, `NavLink`) come from `react-router`, as `src/app/root-layout.tsx` does.
+- The other version traps (React Router 8, Vitest 5, Effect, MSW, TanStack Query, forms) are listed once, in the project's `CLAUDE.md`, section "Library versions newer than most training data".
 
 ## Workflow
 

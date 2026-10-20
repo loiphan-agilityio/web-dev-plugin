@@ -1,0 +1,28 @@
+# Checks the claude-skills plugin: the quoted snippets still match their source, the template still
+# passes every gate on a fresh scaffold, and the todos example still passes them on top of it.
+# Runs on merge requests and branch pushes that touch the plugin, and on pipeline schedules (set a
+# weekly one in Build > Pipeline schedules) to catch a dependency release that breaks the template.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+claude-skills:
+  image: node:24
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - changes:
+        - claude-skills/**/*
+        - .claude-plugin/**/*
+        - .gitlab-ci.yml
+  before_script:
+    # pnpm 11 comes from the template's packageManager field.
+    - corepack enable
+  script:
+    - cd claude-skills
+    - node evals/check-quotes.mjs
+    - bash .claude/skills/code-skeleton/scripts/verify.sh
+    - bash evals/verify-example.sh

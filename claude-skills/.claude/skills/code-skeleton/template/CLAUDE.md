@@ -100,24 +100,32 @@ and concepts that the guide doesn't cover, search through the source code in
 
 - **Effect 4:** services are `Context.Service`, not `Context.Tag` / `Effect.Service`. HTTP is
   `effect/http`, not `@effect/platform`. Errors are `Schema.TaggedError`. Decode with
-  `Schema.decodeUnknownEffect` (failure: `SchemaError`). Catch-all is `Effect.catch`.
+  `Schema.decodeUnknownEffect` (failure: `SchemaError`), or `Schema.decodeUnknownSync` in tests.
+  Catch-all is `Effect.catch`. Functions are `Effect.fn('name')(function* () { ... })`. Validation
+  messages go through `Schema.check(Schema.isMinLength(1, { message }))`.
 - **React Hook Form + Effect:** `@hookform/resolvers`' `effectTsResolver` only supports
   Effect 3. Use `standardSchemaResolver` with explicit type arguments (TypeScript cannot
   infer them through `toStandardSchemaV1`'s return type).
 - **React Router 8:** there is no `react-router-dom`. Import from `react-router`, and
   `RouterProvider` from `react-router/dom`.
 - **MSW 3:** `http` / `HttpResponse` from `msw/http`; `delay` / `bypass` / `passthrough` from
-  `msw/utils/<name>`; `onUnhandledRequest` is now `onUnhandledFrame`.
+  `msw/utils/<name>`; `setupServer` from `msw/node`, `setupWorker` from `msw/browser`; no
+  `rest.get`; `onUnhandledRequest` is now `onUnhandledFrame`. Precedence: a later `server.use()`
+  call wins; within one call the first matching handler wins.
 - **TanStack Query 5:** `isPending` for the first load; object syntax only; `queryOptions()`.
 - **Tailwind 4:** CSS-first. Theme tokens live in `src/styles/index.css` (`@theme inline`);
   there is no `tailwind.config.js`. Use tokens (`bg-background`, `text-muted-foreground`),
   not raw colors.
-- **Vitest 5:** `clearMocks` is on by default; `vi.mock` must be at the top level of a file.
+- **Vitest 5:** `clearMocks` is on by default; `vi.mock` must be at the top level of a file; never
+  `jest.*`. Mock the API with MSW, never `vi.stubGlobal('fetch')` or `vi.mock` of an `api.ts`.
+- **Storybook 10:** `Meta` / `StoryObj` from `@storybook/react-vite`; `@storybook/test` is gone
+  (`play` gets `canvas` and `userEvent` from its context). API mocks go in
+  `parameters.msw.handlers`; there is no `msw-storybook-addon`.
 - **TypeScript 6:** `baseUrl` is deprecated; `paths` works without it.
 
 ## Skills
 
-Project skills (in `.claude/skills/` or `~/.claude/skills/`):
+Skills (the `web-app-skills` plugin, or copied into `.claude/skills/` or `~/.claude/skills/`):
 
 - `code-skeleton` — scaffold a new app from this template.
 - `develop-feature` — ticket → schema, API, queries, form, UI, tests. Loads `integrate-api` for

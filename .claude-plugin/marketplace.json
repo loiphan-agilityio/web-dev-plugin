@@ -1,0 +1,12 @@
+{
+  "name": "claude-training",
+  "description": "Team marketplace for the web-app-skills plugin (folder claude-skills/).",
+  "owner": { "name": "loi.phan" },
+  "plugins": [
+    {
+      "name": "web-app-skills",
+      "source": "./claude-skills",
+      "description": "Web development skills for the team stack: code skeleton, develop feature, integrate API, design to UI."
+    }
+  ]
+}

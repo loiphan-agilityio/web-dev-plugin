@@ -52,14 +52,15 @@ Work in `src/features/<name>/` (create the folder files you need; names below ar
 
 ## Getting library APIs right
 
-These compile or read plausibly in older versions and fail here.
+The stack is newer than most training data. The version traps (Effect 4, React Router 8, MSW 3,
+TanStack Query 5, Tailwind 4, Vitest 5, Storybook 10) are listed once, in the project's `CLAUDE.md`,
+section "Library versions newer than most training data": read it before writing code, and read
+`node_modules/effect/AGENTS.md` completely before writing Effect code. Copy shapes from
+`references/` or the installed types, not from memory.
 
-- **Effect 4**: services are `Context.Service` (not `Context.Tag` / `Effect.Service`); HTTP is `effect/http` (not `@effect/platform`, which lint rejects); errors are `Schema.TaggedError`; decode with `Schema.decodeUnknownEffect` (failure type `SchemaError`); catch-all is `Effect.catch`; functions are `Effect.fn('name')(function* () { ... })`.
+Specific to this skill:
+
 - **`HttpClientError` has a `reason`** whose `_tag` is `TransportError | EncodeError | InvalidUrlError | StatusCodeError | DecodeError | EmptyBodyError`. That is why the app's schema-mismatch error is named `InvalidResponseError`: Effect already owns `DecodeError`.
-- **MSW 3**: `http` and `HttpResponse` from `msw/http`; `delay`, `bypass`, `passthrough` from `msw/utils/<name>` (e.g. `msw/utils/delay`); `setupServer` from `msw/node`, `setupWorker` from `msw/browser`. `onUnhandledRequest` was renamed `onUnhandledFrame`; the test server uses `'error'`, so a request without a handler fails the test.
-- **MSW precedence**: a later `server.use()` call wins; within one call the first matching handler wins. `server.use(...createXHandlers([]), xMocks.createInvalid(...))` silently uses the success handler. Use two calls.
-- **TanStack Query 5**: object syntax only, `isPending` for first load (not `isLoading`), `queryOptions()` helper.
-- **Vitest 5**: globals are on; `vi.mock` only at top level. For the API, mock the network with MSW, never `vi.stubGlobal('fetch')` and never `vi.mock` of an `api.ts` module.
 
 ## Related skills
 

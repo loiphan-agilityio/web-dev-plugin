@@ -53,23 +53,10 @@ Validation messages go through `Schema.check(Schema.isMinLength(1, { message }))
 
 ## api.ts
 
-```ts
-import { Effect } from 'effect';
-
-import { ApiClient } from '@/lib/api/client';
-
-import { type NewTodo, Todo, TodoList } from './schemas';
-
-export const listTodos = Effect.fn('todos.list')(function* () {
-  const api = yield* ApiClient;
-  return yield* api.get('/todos', TodoList);
-});
-
-export const createTodo = Effect.fn('todos.create')(function* (input: NewTodo) {
-  const api = yield* ApiClient;
-  return yield* api.post('/todos', input, Todo);
-});
-```
+The full file is in the integrate-api skill, `references/effect-http.md`, section "Effect.fn
+(`features/<name>/api.ts`)" (installed next to this skill: `../integrate-api/references/effect-http.md`).
+It is kept in one place for both skills. Shape: one `Effect.fn('<name>.<action>')` per call that
+does `const api = yield* ApiClient` and returns `api.get(path, Schema)` or `api.post(path, input, Schema)`.
 
 `ApiClient` prefixes `config.apiUrl`, decodes the body with the schema you pass, and maps every failure to an `ApiError`. No `fetch`, no axios, no `HttpClient.retryTransient`. Methods used in the example: `api.get(path, schema)` and `api.post(path, body, schema)`; read `src/lib/api/client.ts` for the rest (put, patch, delete) before using them.
 
@@ -112,56 +99,10 @@ export const useCreateTodo = () => {
 
 ## mocks.ts
 
-```ts
-import { http, HttpResponse } from 'msw/http';
-import { delay } from 'msw/utils/delay';
-
-import { config } from '@/lib/config';
-
-import type { Todo } from './schemas';
-
-const url = (path: string) => `${config.apiUrl}${path}`;
-
-export const todoFixtures: Todo[] = [
-  { id: 1, title: 'Read the Effect AGENTS.md', completed: true },
-  { id: 2, title: 'Write the first feature', completed: false },
-];
-
-/**
- * A small in-memory backend. Each call gets its own copy of the data, so tests that call
- * `server.use(...createTodosHandlers())` never see state left over from another test.
- */
-export const createTodosHandlers = (initial: Todo[] = todoFixtures) => {
-  const todos = [...initial];
-  return [
-    http.get(url('/todos'), () => HttpResponse.json(todos)),
-    http.post(url('/todos'), async ({ request }) => {
-      const body = (await request.json()) as { title: string };
-      const todo: Todo = { id: todos.length + 1, title: body.title, completed: false };
-      todos.push(todo);
-      return HttpResponse.json(todo, { status: 201 });
-    }),
-  ];
-};
-
-/** Default handlers, registered in src/mocks/handlers.ts. */
-export const todosHandlers = createTodosHandlers();
-
-/** One-off responses for the states a test needs to drive. */
-export const todosMocks = {
-  listPending: () =>
-    http.get(url('/todos'), async () => {
-      await delay('infinite');
-      return HttpResponse.json([]);
-    }),
-  listError: (status = 500) =>
-    http.get(url('/todos'), () => HttpResponse.json({ message: 'Boom' }, { status })),
-  createInvalid: (errors: Record<string, string>) =>
-    http.post(url('/todos'), () =>
-      HttpResponse.json({ message: 'Validation failed', errors }, { status: 422 }),
-    ),
-};
-```
+The full file is in the integrate-api skill, `references/msw.md`, section "Feature mocks
+(`features/<name>/mocks.ts`)" (`../integrate-api/references/msw.md`). Shape: `create<Name>Handlers(initial)`
+with in-memory state per call, `<name>Handlers` for the default list, and `<name>Mocks` for one-off states
+(pending with `delay('infinite')`, error status, 422 with field errors).
 
 - `create<Name>Handlers(initial)` copies its input, so each call has private state.
 - `<name>Handlers` (default data) is registered globally; tests override with `server.use(...)`.
