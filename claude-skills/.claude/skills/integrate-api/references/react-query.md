@@ -22,7 +22,7 @@ typed), sets `staleTime: 30_000`, retries a query once and only for `NetworkErro
 
 ## Keys and query options (`features/<name>/queries.ts`)
 
-```ts
+```ts file=src/features/todos/queries.ts
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { runEffect } from '@/lib/api/run';
@@ -60,7 +60,7 @@ Filters and pagination go into the key (`[...todoKeys.lists(), { status }]`) and
 
 ## Mutation hook
 
-```ts
+```ts file=src/features/todos/queries.ts
 export const useCreateTodo = () => {
   const queryClient = useQueryClient();
   return useMutation({

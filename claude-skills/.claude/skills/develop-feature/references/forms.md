@@ -4,7 +4,7 @@ Source: the todos feature (`components/todo-form.tsx`), `src/lib/forms.ts`, `src
 
 ## The full form
 
-```tsx
+```tsx file=src/features/todos/components/todo-form.tsx
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { Schema } from 'effect';
 import { Controller, useForm } from 'react-hook-form';

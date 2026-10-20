@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
-# Scaffolds the template into a temporary directory, copies the skills into its .claude/skills
-# (as a real project has them) and runs all five gates there (lint, typecheck, test, build, Storybook build). Exits non-zero on the first failing gate.
+# Proves the template and the code the skills quote still pass every gate. Exits non-zero on the
+# first failure.
+#
+# 1. Scaffolds the template into a temporary directory, copies the skills into its .claude/skills
+#    (as a real project has them) and runs all five gates (lint, typecheck, test, build,
+#    Storybook build).
+# 2. Writes the todos feature quoted in the skills' markdown into that app (every block marked
+#    `file=...`, see extract-snippets.mjs), applies its wiring diff and runs all five gates again.
 #
 #   verify.sh [--keep]     --keep leaves the temp project in place and prints its path
 set -euo pipefail
@@ -32,8 +38,15 @@ done
 cd "$tmp/app"
 pnpm install --frozen-lockfile
 pnpm check
+echo "verify: fresh scaffold passed all gates"
+
+node "$here/extract-snippets.mjs" "$skills_root" "$tmp/app"
+# core.autocrlf would turn the patched files to CRLF on Windows, and Prettier rejects that.
+git -c core.autocrlf=false apply wiring.diff
+rm wiring.diff
+pnpm check
 if [[ "$keep" == true ]]; then
-  echo "verify: all gates passed (kept at $tmp/app)"
+  echo "verify: the quoted todos feature passed all gates too (kept at $tmp/app)"
 else
-  echo "verify: all gates passed"
+  echo "verify: the quoted todos feature passed all gates too"
 fi

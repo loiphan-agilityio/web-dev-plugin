@@ -16,7 +16,7 @@ import type { RequestHandler } from 'msw';      // types may still come from the
 
 ## Feature mocks (`features/<name>/mocks.ts`)
 
-```ts
+```ts file=src/features/todos/mocks.ts
 import { http, HttpResponse } from 'msw/http';
 import { delay } from 'msw/utils/delay';
 

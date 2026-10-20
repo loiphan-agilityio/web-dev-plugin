@@ -13,9 +13,9 @@ You review; you do not edit. Your findings are applied by the main session.
 ## Check, in this order
 
 1. **Snippets match the reference app.** For every code block in `.claude/skills/*/SKILL.md`
-   and `references/`, find the source in `.claude/skills/code-skeleton/template/` (todos snippets
-   have no source file in this repo: check them against the template's patterns and against the
-   other references that quote the same todos file; browser tool calls in
+   and `references/`, find the source in `.claude/skills/code-skeleton/template/` (todos blocks
+   carry `file=src/features/todos/...` and `verify.sh` compiles and tests them: check that every
+   todos block has one and that the ones naming the same file agree; browser tool calls in
    `design-to-ui/references/visual-check.md`: the Claude in Chrome skill). A snippet with no
    source, or one that differs from its source, is a finding, except a block whose info string
    says `sketch` (```tsx sketch): check only that the pattern it shows is correct for the stack.

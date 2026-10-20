@@ -20,7 +20,7 @@ Every file in `components/` has a `.stories.tsx` beside it (`todo-list.tsx` → 
 
 One story per state: the four states of a data screen are four stories.
 
-```tsx
+```tsx file=src/features/todos/components/todo-list.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { createTodosHandlers, todoFixtures, todosMocks } from '../mocks';
@@ -57,7 +57,7 @@ export const ErrorState: Story = {
 
 A state the form reaches only by interaction (a server field error, client validation) gets a `play` function. `canvas` and `userEvent` come from the story context; nothing is imported for them.
 
-```tsx
+```tsx file=src/features/todos/components/todo-form.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { createTodosHandlers, todosMocks } from '../mocks';
@@ -89,7 +89,7 @@ export const ServerFieldError: Story = {
 
 One `Default` story with working handlers: the parts together. The states are already in the component stories.
 
-```tsx
+```tsx file=src/features/todos/components/todos-page.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { createTodosHandlers } from '../mocks';

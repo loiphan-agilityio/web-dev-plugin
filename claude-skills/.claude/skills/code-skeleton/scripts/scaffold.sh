@@ -6,7 +6,8 @@
 # app-name defaults to the target directory's name and must be a valid npm package name.
 # Refuses to overwrite: if any template file already exists in the target, or a file sits where the
 # template has a directory, it lists the conflicts and exits 1 without copying anything. Existing
-# .git/ and .claude/ are left alone.
+# .git/ and .claude/ are left alone: the template's .claude/settings.json (the commands the skills
+# run, allowed without a prompt) is copied only when the target has none.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -26,6 +27,9 @@ fi
 # maintainer's own settings.
 skip=(node_modules dist coverage storybook-static public/mockServiceWorker.js)
 skip_names=('*storybook.log' '*.tsbuildinfo' '.env.local' '.env.*.local')
+# Copied on its own below, so an existing one is neither a conflict nor overwritten.
+settings=.claude/settings.json
+skip+=("$settings")
 prune=()
 excludes=()
 for d in "${skip[@]}"; do
@@ -58,6 +62,13 @@ if [[ -n "$conflicts" ]]; then
 fi
 
 (cd "$template" && tar -cf - "${excludes[@]}" .) | (cd "$target" && tar -xf -)
+
+if [[ -e "$target/$settings" ]]; then
+  echo "kept the existing $settings; the template's command allow-list was not copied"
+else
+  mkdir -p "$target/.claude"
+  cp "$template/$settings" "$target/$settings"
+fi
 
 named=(package.json index.html CLAUDE.md src/app/root-layout.tsx src/app/home-page.tsx
   src/app/__tests__/home-page.test.tsx)

@@ -1,8 +1,13 @@
 import '@testing-library/jest-dom/vitest';
 
+import { configure } from '@testing-library/react';
 import { toast } from 'sonner';
 
 import { server } from '@/mocks/server';
+
+// Feature routes are lazy, and coverage instrumentation slows their first load: the default 1s
+// for findBy* / waitFor times out now and then on a page test. A real failure still fails.
+configure({ asyncUtilTimeout: 3000 });
 
 // jsdom has no matchMedia; sonner's Toaster (mounted by src/test/render.tsx) reads it for the
 // system theme.

@@ -43,6 +43,7 @@ src/
     api/run.ts        runEffect(effect, signal): Effect → Promise for TanStack Query
   mocks/            handlers.ts (all feature handlers), server.ts (Vitest), browser.ts (dev)
   test/             setup.ts, render.tsx (renderRoute, renderWithProviders)
+.claude/settings.json  the pnpm commands the skills run, allowed without a permission prompt
 ```
 
 ## Code style

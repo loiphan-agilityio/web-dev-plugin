@@ -4,7 +4,7 @@ Source: the todos feature (`components/todo-list.tsx` and `todos-page.tsx`).
 
 Four states are four different screens. Never fold them into one ternary, and never let empty and error look the same.
 
-```tsx
+```tsx file=src/features/todos/components/todo-list.tsx
 import { useQuery } from '@tanstack/react-query';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -85,7 +85,7 @@ export const TodoList = () => {
 
 ## Page composition
 
-```tsx
+```tsx file=src/features/todos/components/todos-page.tsx
 import { TodoForm } from './todo-form';
 import { TodoList } from './todo-list';
 

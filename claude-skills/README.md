@@ -80,6 +80,10 @@ build and Storybook build. The parts every feature builds on:
 - **Storybook 10** (`.storybook/`): stories render inside `story-providers.tsx` (the same
   providers as a test) with MSW served by the app's worker; `pnpm build-storybook` is a gate.
 - **Config**: `src/lib/config.ts` validates every `VITE_*` value with Effect Schema at startup.
+- **Permissions**: `.claude/settings.json` allows exactly the pnpm commands the skills run
+  (`install`, `lint`, `lint:fix`, `typecheck`, `test`, `build`, `build-storybook`, `check`,
+  `dev:mock`, `exec shadcn add` / `info`), so a feature runs end to end without a prompt.
+  `scaffold.sh` copies it only when the project has no `.claude/settings.json`.
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
@@ -154,11 +158,14 @@ docs/companion-audit.md  ← audit of the companion skills
 **Change the template or bump a dependency:**
 
 1. Edit `.claude/skills/code-skeleton/template/` and run `pnpm check` inside it.
-2. `bash .claude/skills/code-skeleton/scripts/verify.sh` — fresh scaffold, all gates.
+2. `bash .claude/skills/code-skeleton/scripts/verify.sh` — fresh scaffold, all gates; then the
+   todos feature quoted in the skills (every ` ```tsx file=... ` block, written out by
+   `extract-snippets.mjs`) wired into it, all gates again.
 3. Update every snippet in the skills that quotes a changed file. Snippets are copied from the
    template, never written from memory; keep it that way. A block that shows a pattern found in
    neither the template nor the todos feature (a detail key, `setQueryData`) is marked
-   ` ```ts sketch ` and says so in the text.
+   ` ```ts sketch ` and says so in the text. A todos block keeps its `file=` path; a new todos
+   file gets a block with its own `file=` path, or `verify.sh` never tests it.
 4. Release: bump `version` in `.claude-plugin/plugin.json` and run
    `claude plugin validate --strict .claude-plugin/plugin.json` (and `claude plugin validate --strict ..`
    for the marketplace).

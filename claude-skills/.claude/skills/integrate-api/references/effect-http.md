@@ -6,7 +6,7 @@ Read `node_modules/effect/AGENTS.md` completely before writing Effect code. Ever
 
 Response shapes and the request body, with derived types:
 
-```ts
+```ts file=src/features/todos/schemas.ts
 import { Schema } from 'effect';
 
 /** A todo as the API returns it. */
@@ -22,7 +22,7 @@ export const TodoList = Schema.Array(Todo);
 
 A request schema with a transform (`Schema.Trim`) has different Encoded (what a form collects) and Type (what the API gets):
 
-```ts
+```ts file=src/features/todos/schemas.ts
 export const NewTodo = Schema.Struct({
   title: Schema.Trim.pipe(
     Schema.check(
@@ -41,7 +41,7 @@ The response schema is the contract. If the backend sends an extra field the app
 
 One function per endpoint, named `'<name>.<action>'` for tracing:
 
-```ts
+```ts file=src/features/todos/api.ts
 import { Effect } from 'effect';
 
 import { ApiClient } from '@/lib/api/client';

@@ -34,7 +34,9 @@ always call the scripts by that full path.
    (not its local output: `node_modules`, `dist`, `coverage`, `storybook-static`,
    `public/mockServiceWorker.js`, `.env.local`) and renames `app-template` in `package.json`,
    `index.html`, `CLAUDE.md`, `root-layout.tsx`, `home-page.tsx` and its test. It leaves an
-   existing `.git/` and `.claude/` alone. On conflict it lists the existing files, exits 1 and
+   existing `.git/` and `.claude/` alone, and writes `.claude/settings.json` (an allow-list of the
+   pnpm commands the skills run, so later sessions run them without a prompt) only when the
+   project has none; say which happened under **Did**. On conflict it lists the existing files, exits 1 and
    copies nothing: show the list and ask the user how to proceed. Never delete or overwrite
    their files.
 4. **Install.** In the target: `pnpm install` (the lockfile is included, so

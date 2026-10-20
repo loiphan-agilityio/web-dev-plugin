@@ -19,7 +19,7 @@ Every file in `components/` has a test file in `components/__tests__/`: `todo-li
 
 ### The list component
 
-```tsx
+```tsx file=src/features/todos/components/__tests__/todo-list.test.tsx
 import { screen, within } from '@testing-library/react';
 
 import { server } from '@/mocks/server';
@@ -63,7 +63,7 @@ describe('TodoList', () => {
 
 ### The form component
 
-```tsx
+```tsx file=src/features/todos/components/__tests__/todo-form.test.tsx
 import { screen, waitFor } from '@testing-library/react';
 
 import { server } from '@/mocks/server';
@@ -110,7 +110,7 @@ The form alone makes no `GET`, so the 422 override is one `server.use()` call. T
 
 ### The page test
 
-```tsx
+```tsx file=src/features/todos/components/__tests__/todos-page.test.tsx
 import { screen, within } from '@testing-library/react';
 
 import { server } from '@/mocks/server';
@@ -166,7 +166,7 @@ Every other component (detail, item row, dialog, edit form): its own test file i
 
 ## Schema tests
 
-```ts
+```ts file=src/features/todos/__tests__/schemas.test.ts
 import { Schema } from 'effect';
 
 import { NewTodo } from '../schemas';

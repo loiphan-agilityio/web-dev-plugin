@@ -37,9 +37,11 @@ corepack picks that version.
 
 - **Never write library code from memory.** Effect 4, React Router 8, MSW 3, Vitest 5, Storybook 10
   and TypeScript 6 are newer than most training data. Every code block in a skill is copied from
-  `code-skeleton/template/` or from the todos feature already quoted in
-  `develop-feature/references/`. A block that shows a pattern found in neither is marked
-  ` ```ts sketch ` and says so.
+  `code-skeleton/template/` or from the todos feature already quoted in the references. Each
+  todos block names its file in the fence (` ```tsx file=src/features/todos/... `), and
+  `verify.sh` writes those blocks into a fresh scaffold and runs every gate on them, so the
+  markdown is the todos feature's only source. A block that shows a pattern found in neither is
+  marked ` ```ts sketch ` and says so.
 - **Version traps live in one place:** `code-skeleton/template/CLAUDE.md`, section "Library
   versions newer than most training data". Skills point there and keep only the traps of their
   own step.

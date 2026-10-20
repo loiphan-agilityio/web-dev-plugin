@@ -23,7 +23,7 @@ Every version is pinned in the template's lockfile.
 
 | # | Requirement | Delivered by | Done when |
 |---|---|---|---|
-| 1 | **Code skeleton:** scaffold a working project (providers, Effect runtime, query client, path alias, lint, tests) | `code-skeleton` skill + `template/` (56 files) + `scaffold.sh` | A fresh scaffold passes lint, typecheck, test, build and Storybook build (`verify.sh`, also run by CI) |
+| 1 | **Code skeleton:** scaffold a working project (providers, Effect runtime, query client, path alias, lint, tests) | `code-skeleton` skill + `template/` (57 files) + `scaffold.sh` | A fresh scaffold passes lint, typecheck, test, build and Storybook build (`verify.sh`, also run by CI) |
 | 2 | **Develop feature:** ticket → tested UI (schema, API layer, queries/mutations, form, UI, tests) | `develop-feature` skill + a worked todos feature in its `references/` | A ticket becomes a page with the four data states, a test file and a story per component, and `pnpm check` passes |
 | 3 | **Integrate API:** Effect Schema + HttpClient with typed errors, `queryOptions` / mutations, MSW mocks | `integrate-api` skill + `ApiClient`, `runEffect`, `ApiError` in the template | Every backend failure maps to one of 7 typed `ApiError` cases; 404, 422 and 500 paths are tested |
 | + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma) | `design-to-ui` skill | Theme tokens, shadcn components and the four data states, no raw colors |

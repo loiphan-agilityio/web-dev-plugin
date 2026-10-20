@@ -55,7 +55,7 @@ with in-memory state per call, `<name>Handlers` for the default list, and `<name
 
 ## routes.tsx
 
-```tsx
+```tsx file=src/features/todos/routes.tsx
 import type { RouteObject } from 'react-router';
 
 /**
@@ -78,7 +78,7 @@ Factory, because React Router 8 empties a lazy route object once loaded. A modul
 
 The todos wiring diff:
 
-```diff
+```diff file=wiring.diff
 diff --git a/src/app/root-layout.tsx b/src/app/root-layout.tsx
 index 548b02a..3d7e1e1 100644
 --- a/src/app/root-layout.tsx
