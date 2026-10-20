@@ -84,6 +84,10 @@ build and Storybook build. The parts every feature builds on:
   (`install`, `lint`, `lint:fix`, `typecheck`, `test`, `build`, `build-storybook`, `check`,
   `dev:mock`, `exec shadcn add` / `info`), so a feature runs end to end without a prompt.
   `scaffold.sh` copies it only when the project has no `.claude/settings.json`.
+  A headless run (`claude -p`, CI) did not apply these project rules in the POC rebuild: every
+  `pnpm` command needed approval. Passing the same file with
+  `claude -p "..." --settings .claude/settings.json` did apply them. Interactive sessions have
+  not been checked yet.
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`

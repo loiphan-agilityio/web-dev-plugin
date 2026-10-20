@@ -100,7 +100,7 @@ flowchart LR
 | Exclude criteria that depend on an unanswered question | A plausible guess passes review and is wrong in production. The Result block names each exclusion and its question. |
 | Pin companion skills to an audited commit | Third-party skills change without notice. Each was read in full for security and fit ([`companion-audit.md`](claude-skills/docs/companion-audit.md)). |
 | Rewrite the `shadcn` companion's `npx shadcn@latest` to `pnpm exec shadcn` | The upstream skill runs `shadcn@latest` automatically when it loads, which would run whatever npm serves at that moment. |
-| `effectTsResolver` for forms (`@hookform/resolvers` 6) | It takes the Effect 4 Schema itself and infers the form's types, so forms need no `Schema.toStandardSchemaV1` wrapper and no type arguments. Version 5 supported Effect 3 only. |
+| `effectTsResolver` for forms (`@hookform/resolvers` 6) | It takes the Effect 4 Schema itself, so forms need no `Schema.toStandardSchemaV1` wrapper. `useForm` keeps explicit `<Input, unknown, Output>`: inferred from `defaultValues`, a literal union widens to `string` (the POC rebuild hit this). Version 5 supported Effect 3 only. |
 | No `msw-storybook-addon`; stories start the app's own worker | Its 3.0.3 release calls MSW 2's `onUnhandledRequest`. |
 | Route trees are factories (`createRoutes()`) | React Router mutates lazy route objects once loaded, so each router needs fresh ones. |
 | CI runs `verify.sh` on every change to the plugin and on a schedule | A dependency release that breaks the template shows up before a user hits it. |

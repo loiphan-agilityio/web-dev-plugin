@@ -17,6 +17,8 @@ Library, MSW 3. Package manager: pnpm. No SSR, no Next.js.
 | `pnpm build-storybook` | Static Storybook build; fails when a story does not compile. |
 | `pnpm check` | All five gates: lint, typecheck, test, build, Storybook build. **Run before calling work done.** |
 
+Run each command on its own, exactly as written (`pnpm check`, not `pnpm check 2>&1 | tail` or `pnpm check > log; echo $?`): the project's `.claude/settings.json` allows the plain commands only, and the tool result already holds the output and the exit code.
+
 ## Layout
 
 ```
@@ -55,6 +57,8 @@ Lint enforces it, and `func-style` has no autofix, so write it this way from the
   returns it directly: `export const Page = () => (<section>...</section>);`.
 - Destructure objects (`const { title } = todo`, props, callback arguments), use shorthand
   properties, template literals instead of `+`, `??` / `?.`, `const` (never `var`), `===`.
+- A handler that returns nothing gets braces: `onClick={() => { setOpen(true); }}`, not
+  `onClick={() => setOpen(true)}` (`no-confusing-void-expression`).
 - Inline type imports (`import { type Todo, NewTodo } from './schemas'`); `pnpm lint:fix`
   fixes most of the rest and formats.
 
@@ -77,8 +81,9 @@ ApiClient → effect/http`
 - **Every data screen renders four distinct states:** loading (`isPending`, not `isLoading`),
   error (with `toUserMessage` and a retry), empty (with the next action), success. Empty and
   error never look the same.
-- **Forms:** `useForm({ resolver, defaultValues })` with `effectTsResolver(Schema)` built once at
-  module level (it infers the form's types from the schema), `Controller` + shadcn `Field` / `FieldLabel` / `FieldError`,
+- **Forms:** `useForm<Input, unknown, Output>({ resolver, defaultValues })` with
+  `effectTsResolver(Schema)` built once at module level (`Input`/`Output` are the schema's
+  Encoded/Type: inferred from `defaultValues`, a literal union widens to `string`), `Controller` + shadcn `Field` / `FieldLabel` / `FieldError`,
   `data-invalid` on `Field`, `aria-invalid` on the control. Server errors go through
   `setFormErrors(form.setError, error)`.
 - **Routes are factories** (`createRoutes()`, `<name>Routes()`): React Router mutates route

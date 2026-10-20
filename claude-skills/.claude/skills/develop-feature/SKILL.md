@@ -60,7 +60,7 @@ The todos example covers exactly two endpoints: a list (`GET /todos`) and a crea
 ### 3. Form
 React Hook Form with the Effect Schema as resolver: `effectTsResolver(Schema)`. Read `references/forms.md` before writing the form; it has the full component and edge cases.
 
-- Build the resolver **once at module level**. `useForm({ resolver, defaultValues })` infers both sides from it, with no type arguments.
+- Build the resolver **once at module level**, and give `useForm` its type arguments: `useForm<Input, unknown, Output>` (`typeof Schema.Encoded`, `typeof Schema.Type`). Inferred from `defaultValues`, a literal union field (`priority: 'medium'`) widens to `string` and the resolver no longer typechecks.
 - The fields hold the schema's Encoded side (what the user types) and `handleSubmit` passes its Type side (what is submitted); `Schema.Trim` makes them differ.
 - `Controller` + `Field` / `FieldLabel` / `FieldError`; `data-invalid` on `Field`, `aria-invalid` on the control; `noValidate` on `<form>`; `onSubmit={(event) => void onSubmit(event)}` (typescript-eslint `no-misused-promises`).
 - Submit with `mutate(values, { onSuccess: reset + toast, onError: setFormErrors(form.setError, error) })`; disable submit while `isPending`; render server errors from `form.formState.errors.root?.server`.
@@ -98,7 +98,7 @@ Read `references/stories.md` before writing stories.
 - Before the gates, check that every `components/*.tsx` has its `components/__tests__/*.test.tsx` and its `.stories.tsx` beside it.
 
 ### 8. Gates
-Run `pnpm lint:fix` (ESLint fixes and Prettier), then `pnpm check` (lint with a Prettier check, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
+Run `pnpm lint:fix` (ESLint fixes and Prettier), then `pnpm check` (lint with a Prettier check, typecheck, test, build, Storybook build), each as a plain command with no pipe or redirect (the project allows exactly those commands without a prompt), and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
 
 ### 9. Report
 Finish with the Result block below. Name every excluded criterion and the question that blocked it.

@@ -16,15 +16,20 @@ import { Input } from '@/components/ui/input';
 import { setFormErrors } from '@/lib/forms';
 
 import { useCreateTodo } from '../queries';
-import { NewTodo } from '../schemas';
+import { NewTodo, type NewTodoInput } from '../schemas';
 
-// Built once at module level. It reads both sides from the schema: the fields hold
-// NewTodo.Encoded (untrimmed), handleSubmit passes NewTodo.Type (trimmed).
+// Built once at module level. The fields hold NewTodo.Encoded (untrimmed), handleSubmit
+// passes NewTodo.Type (trimmed).
 const resolver = effectTsResolver(NewTodo);
 
 export const TodoForm = () => {
   const createTodo = useCreateTodo();
-  const form = useForm({ resolver, defaultValues: { title: '' } });
+  // Type arguments, so the field types come from the schema: inferred from defaultValues, a
+  // literal union such as 'low' | 'medium' | 'high' would widen to string and break the resolver.
+  const form = useForm<NewTodoInput, unknown, NewTodo>({
+    resolver,
+    defaultValues: { title: '' },
+  });
 
   const onSubmit = form.handleSubmit((values) => {
     createTodo.mutate(values, {
@@ -76,7 +81,8 @@ export const TodoForm = () => {
 ## Rules, with the reason
 
 - **Resolver at module level**, once. Rebuilding it per render wastes work and changes identity.
-- **`effectTsResolver(Schema)`** from `@hookform/resolvers/effect-ts` (version 6, built for Effect 4). It takes the Effect Schema itself, decodes with `Schema.decodeUnknownEffect`, and shows each `Schema.check` message under its field. `useForm` infers its types from it: no type arguments, no `Schema.toStandardSchemaV1`. Not `zodResolver`, and not `standardSchemaResolver` (it needs explicit type arguments for the same result).
+- **`effectTsResolver(Schema)`** from `@hookform/resolvers/effect-ts` (version 6, built for Effect 4). It takes the Effect Schema itself, decodes with `Schema.decodeUnknownEffect`, and shows each `Schema.check` message under its field. No `Schema.toStandardSchemaV1` wrapper. Not `zodResolver`, and not `standardSchemaResolver`.
+- **`useForm<Input, unknown, Output>`** with `Input = typeof Schema.Encoded` and `Output = typeof Schema.Type`. Without them TypeScript infers the field types from `defaultValues`, where `priority: 'medium'` widens to `string` and no longer matches the resolver: a typecheck error on `resolver`.
 - **Input vs Output.** The fields hold `typeof Schema.Encoded` (e.g. an untrimmed string); `handleSubmit` passes `typeof Schema.Type`, which is what `mutate` takes. A `Schema.Trim` makes the two differ.
 - **`noValidate`** turns off the browser's own bubbles so the schema messages are the only ones.
 - **`onSubmit={(event) => void onSubmit(event)}`**: `handleSubmit` returns a Promise and typescript-eslint `no-misused-promises` rejects passing it straight to a handler prop.

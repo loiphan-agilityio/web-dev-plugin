@@ -93,7 +93,7 @@ Follow `references/visual-check.md`: with a browser tool, open the page, compare
 
 ### 6. Gates
 
-Run `pnpm lint:fix` (ESLint fixes and Prettier), then `pnpm check` (lint with a Prettier check, typecheck, test, build, Storybook build) and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
+Run `pnpm lint:fix` (ESLint fixes and Prettier), then `pnpm check` (lint with a Prettier check, typecheck, test, build, Storybook build), each as a plain command with no pipe or redirect (the project allows exactly those commands without a prompt), and read the real output. Fix the cause. Never disable a lint rule, loosen a type, or delete an assertion to get green. If a gate cannot pass, say so in the report.
 
 ### 7. Report
 
