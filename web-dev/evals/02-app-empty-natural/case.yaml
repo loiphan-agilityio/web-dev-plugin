@@ -1,0 +1,23 @@
+schema_version: "1.0"
+name: app-empty-natural
+description: A whole app described in plain words, no command, in an empty folder.
+tags: [routing, workflow-a]
+execution:
+  prompt: "I need a small CRM for our sales team: contacts, companies and deals moving through stages. Can you build it?"
+  max_turns: 15
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: develop-fires
+    tool: Skill
+    input_match: "develop([^m]|$)"
+  - type: tool_used
+    name: inspects-the-folder
+    tool: Bash
+    input_match: "detect-project\\.mjs"
+    arm: both
+  - type: regex
+    name: writes-the-plan
+    target: files
+    pattern: "docs/plan\\.md"

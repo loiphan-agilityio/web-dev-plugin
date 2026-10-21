@@ -1,0 +1,30 @@
+schema_version: "1.0"
+name: api-same-stack
+description: An endpoint in a project on the same stack but another layout maps the project first (workflow B).
+tags: [routing, workflow-b, existing-project]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "Add a PATCH /orders/:id call that changes an order's status, and a button on the orders page that uses it."
+  max_turns: 15
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: maps-the-project
+    tool: Agent
+    input_match: "codebase-explorer"
+    arm: both
+  - type: tool_used
+    name: no-scaffold
+    tool: Bash
+    input_match: "scaffold\\.sh"
+    min: 0
+    max: 0
+    arm: both
+  - type: llm
+    name: builds-on-the-project
+    focus: trace
+    criteria: |
+      - The new call goes through src/api/http.ts (or a function added beside getJson there), not a new client and not src/lib/api/client.ts.
+      - The agent did not create src/lib/api/, src/test/render.tsx or other template files the project does not have.

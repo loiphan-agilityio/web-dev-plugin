@@ -1,0 +1,10 @@
+# Outside the template
+
+For a project `develop` sorted as `same-stack` or `other-stack` (its Workflow B), with the project map it passes. The template's files do not exist here; the project's own files do the same jobs, and its conventions win over the skill's.
+
+- **Still holds:** step 1 (sort the gaps; exclude a criterion that rests on an open question), four distinct states on every data screen, a server validation error next to its field when the API returns field errors, accessible markup (labels, roles, `type="button"`, `aria-label` on icon buttons), business rules as pure, tested functions beside the feature (in the project's own place for them when it has one), and a test for each new component and each criterion.
+- **The map's file for each role** replaces the template's: its HTTP client instead of `ApiClient` and `runEffect`, its query hooks or key factory, its form library and validation, its render helper and network mocking, its loading, empty and error components. Copy the shape of the feature the map names; read `references/` only for a library the project uses the same way (TanStack Query 5, React Hook Form 7, Effect Schema).
+- **Layout and names follow the project** (folders, file names, test placement). Register the feature where the map found the route table, the nav and the mock handlers.
+- **Stories** only when the project has Storybook.
+- **New libraries** (Effect, MSW, shadcn/ui, anything the project lacks) are a question for the user. Read `node_modules/effect/AGENTS.md` only when the project uses Effect.
+- **Gates:** run the project's formatter if it has one (`lint:fix`, `format`), then stop: `develop` runs `verify-project.sh` once over the whole suite after the change (Workflow B, step 5), and reports.

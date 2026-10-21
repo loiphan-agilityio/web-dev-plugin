@@ -1,0 +1,28 @@
+schema_version: "1.0"
+name: feature-direct-template
+description: A ticket typed without the command, in a template app. develop and feature-development both cover it; the case records whether develop fired at all and checks that the work lands in feature-development without a new scaffold.
+tags: [routing, overlap]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "Implement this ticket: TASK-7, a /customers page that lists customers from GET /customers (id, name, email) with a search box, and a form to add one with POST /customers."
+  max_turns: 12
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: reaches-feature-development
+    tool: Skill
+    input_match: "feature-development"
+    arm: both
+  - type: tool_used
+    name: fired-develop
+    tool: Skill
+    input_match: "develop([^m]|$)"
+  - type: tool_used
+    name: no-new-scaffold
+    tool: Bash
+    input_match: "scaffold\\.sh"
+    min: 0
+    max: 0
+    arm: both

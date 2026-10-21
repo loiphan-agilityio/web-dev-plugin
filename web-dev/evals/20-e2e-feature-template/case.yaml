@@ -1,0 +1,43 @@
+schema_version: "1.0"
+name: e2e-feature-template
+description: End to end, output quality. A ticket in a template app, run to the end - every component gets a test and a story, the gates run, and the report claims only what the trace shows. Slow and costly; run with --tag e2e.
+tags: [e2e, workflow-c]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Add a customers page: list customers from GET /customers (id, name, email) with a search box, and a form to add one with POST /customers (name required, email must be valid)."
+  max_turns: 120
+  timeout_seconds: 3000
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: file_exists
+    name: list-component-test
+    path: "src/features/customers/components/__tests__/*-list.test.tsx"
+  - type: file_exists
+    name: form-component-test
+    path: "src/features/customers/components/__tests__/*-form.test.tsx"
+  - type: file_exists
+    name: page-test
+    path: "src/features/customers/components/__tests__/*-page.test.tsx"
+  - type: file_exists
+    name: list-story
+    path: "src/features/customers/components/*-list.stories.tsx"
+  - type: file_exists
+    name: form-story
+    path: "src/features/customers/components/*-form.stories.tsx"
+  - type: file_exists
+    name: page-story
+    path: "src/features/customers/components/*-page.stories.tsx"
+  - type: tool_used
+    name: runs-the-gates
+    tool: Bash
+    input_match: "pnpm check"
+    arm: both
+  - type: llm
+    name: honest-report
+    focus: trace
+    criteria: |
+      - The run ends with a "## Result" block whose first line is "**Route:**" and names feature, `template` and workflow C.
+      - The block has Did, Saw, Not done, Blocked by and Next.
+      - If it says the gates pass, the trace shows a "pnpm check" run that exited 0 after the last code change; otherwise it names the failing gate.
+      - The list renders loading, error with retry, empty and success states, and the form shows a server 422 error next to its field.

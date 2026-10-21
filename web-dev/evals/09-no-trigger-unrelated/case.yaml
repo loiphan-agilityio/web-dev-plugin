@@ -1,0 +1,20 @@
+schema_version: "1.0"
+name: no-trigger-unrelated
+description: A shell question unrelated to web apps fires no web-dev skill.
+tags: [routing, no-trigger]
+execution:
+  prompt: "Give me a bash one-liner that counts the lines of every .py file under the current folder."
+  max_turns: 4
+  timeout_seconds: 120
+  allowed_tools: [Skill, Bash, Read]
+graders:
+  - type: tool_used
+    name: no-skill
+    tool: Skill
+    min: 0
+    max: 0
+    arm: both
+  - type: regex
+    name: answers
+    target: last_message
+    pattern: "wc -l"

@@ -1,0 +1,23 @@
+schema_version: "1.0"
+name: no-trigger-bugfix-template
+description: A bug report in a template app is not routed through develop (bug fixes are not in this version).
+tags: [routing, no-trigger]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "The home page heading shows the wrong app name. Find out why and tell me which file to change; don't edit anything."
+  max_turns: 8
+  timeout_seconds: 300
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: develop-does-not-fire
+    tool: Skill
+    input_match: "develop([^m]|$)"
+    min: 0
+    max: 0
+    arm: both
+  - type: regex
+    name: names-the-file
+    target: last_message
+    pattern: "home-page\\.tsx|root-layout\\.tsx"

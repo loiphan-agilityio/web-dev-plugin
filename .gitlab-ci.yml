@@ -1,10 +1,13 @@
-# Checks the claude-skills plugin:
+# Checks the web-dev plugin:
 # - plugin-manifest: the plugin and marketplace manifests are valid.
-# - claude-skills: the template, and the todos feature the skills quote, pass every gate on a
+# - web-dev: the template, and the todos feature the skills quote, pass every gate on a
 #   fresh scaffold.
+# - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator.
 # - audit: no known vulnerability in the template's dependencies, apart from the ones listed with
 #   a reason under auditConfig in its pnpm-workspace.yaml.
 # - companions (schedules only): the pinned companion skills still install, and shadcn is pinned.
+# - evals (schedules only, when the ANTHROPIC_API_KEY variable is set): the routing evals, with a
+#   baseline arm without the plugin; costs API credits, capped by --max-cost-usd.
 # Runs on merge requests and branch pushes that touch the plugin, and on pipeline schedules (set a
 # weekly one in Build > Pipeline schedules) to catch a dependency release that breaks the template.
 workflow:
@@ -24,7 +27,8 @@ default:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - changes:
-        - claude-skills/**/*
+        - web-dev/**/*
+        - tools/**/*
         - .claude-plugin/**/*
         - .gitlab-ci.yml
 
@@ -34,17 +38,24 @@ plugin-manifest:
     # Pinned like everything else; validation needs no login.
     CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
   script:
-    - npx -y "$CLAUDE_CODE" plugin validate --strict claude-skills/.claude-plugin/plugin.json
+    - npx -y "$CLAUDE_CODE" plugin validate --strict web-dev/.claude-plugin/plugin.json
     - npx -y "$CLAUDE_CODE" plugin validate --strict .
 
-claude-skills:
+web-dev:
   extends: .plugin-changes
   before_script:
     # pnpm 11 comes from the template's packageManager field.
     - corepack enable
   script:
-    - cd claude-skills
-    - bash .claude/skills/code-skeleton/scripts/verify.sh
+    - bash tools/verify-template.sh
+
+skills-spec:
+  extends: .plugin-changes
+  image: python:3.13-slim
+  script:
+    # The Agent Skills reference validator, pinned like every other tool here.
+    - pip install --quiet skills-ref==0.1.1
+    - bash tools/validate-skills.sh
 
 audit:
   extends: .plugin-changes
@@ -52,7 +63,7 @@ audit:
     - corepack enable
   script:
     # Reads the lockfile only; a new advisory fails the job until it is fixed or explicitly ignored.
-    - cd claude-skills/.claude/skills/code-skeleton/template
+    - cd web-dev/skills/project-setup/assets/app-template
     - pnpm audit
 
 companions:
@@ -61,7 +72,25 @@ companions:
   script:
     # Upstream repos can move or delete a pinned path; the script fails on a missing companion, a
     # missing skills-lock.json or an unpinned shadcn@latest.
-    - bash claude-skills/.claude/skills/code-skeleton/scripts/scaffold.sh /tmp/app companions-app
+    - bash web-dev/skills/project-setup/scripts/scaffold.sh /tmp/app companions-app
     - cd /tmp/app
-    - bash "$CI_PROJECT_DIR/claude-skills/.claude/skills/code-skeleton/scripts/install-companions.sh"
+    - bash "$CI_PROJECT_DIR/web-dev/skills/project-setup/scripts/install-companions.sh"
     - test "$(find .claude/skills -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 8
+
+evals:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $ANTHROPIC_API_KEY
+  variables:
+    CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
+  before_script:
+    - corepack enable
+    - npm install -g "$CLAUDE_CODE"
+  script:
+    # Three runs per case. A run scores the share of its graders that pass, and a case the mean of
+    # its runs; a case below 0.66 fails the job. Model runs vary, so the bar is not 1.0.
+    - cd web-dev
+    - bash evals/run.sh --tag routing --runs 3 --threshold 0.66 --max-cost-usd 25 --trust-plugin --no-publish
+  artifacts:
+    when: always
+    paths:
+      - web-dev/evals/results/

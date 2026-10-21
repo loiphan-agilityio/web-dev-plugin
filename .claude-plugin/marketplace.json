@@ -1,14 +1,14 @@
 {
   "name": "claude-training",
-  "description": "Marketplace for the web-app-skills plugin (folder claude-skills/).",
+  "description": "Marketplace for the web-dev plugin (folder web-dev/).",
   "owner": {
-    "name": "web-app-skills"
+    "name": "web-dev"
   },
   "plugins": [
     {
-      "name": "web-app-skills",
-      "source": "./claude-skills",
-      "description": "Web development skills for a React + Effect + TanStack Query stack: a whole app from one description, code skeleton, develop feature, integrate API, design to UI."
+      "name": "web-dev",
+      "source": "./web-dev",
+      "description": "Web development for a React + Effect + TanStack Query stack: one entry point (/web-dev:develop) for new and existing projects, with project setup, feature development, API integration and UI development."
     }
   ]
 }

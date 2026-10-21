@@ -1,0 +1,38 @@
+schema_version: "1.0"
+name: feature-other-stack
+description: A feature in a React app on another stack (axios, zod, React Router 6) maps the project first and keeps its stack (workflow B).
+tags: [routing, workflow-b, existing-project]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Add a department filter to the employees list."
+  max_turns: 15
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: maps-the-project
+    tool: Agent
+    input_match: "codebase-explorer"
+    arm: both
+  - type: tool_used
+    name: no-scaffold
+    tool: Bash
+    input_match: "scaffold\\.sh"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: keeps-the-stack
+    tool: Bash
+    input_match: "(add|install) .*(effect|msw|shadcn)"
+    min: 0
+    max: 0
+    arm: both
+  - type: llm
+    name: uses-the-project-code
+    focus: trace
+    criteria: |
+      - Before writing code, the agent identified the project's own HTTP client (src/lib/http.ts, axios) and zod schemas as the code to build on.
+      - Any code it wrote for the filter uses axios/zod/React Query the way src/features/employees does, not Effect, ApiClient or runEffect.
+      - It did not copy the web-dev template into the project.

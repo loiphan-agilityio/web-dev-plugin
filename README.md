@@ -1,49 +1,49 @@
-# web-app-skills
+# web-dev
 
-A Claude Code plugin with five skills that build web apps on React 19, Vite 8, TypeScript 6,
-Effect 4, TanStack Query 5 (React Query), React Hook Form 7 and shadcn/ui: **build app** (a whole
-app from one description), **code skeleton**, **develop feature**, **integrate API** and **design
-to UI**.
+A Claude Code plugin for web apps on React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5
+(React Query), React Hook Form 7 and shadcn/ui. One entry point, `/web-dev:develop <request>`,
+inspects the folder (empty, an app from the plugin's template, or another React project), picks
+the workflow and runs the skills that do the work: **project setup**, **feature development**,
+**API integration** and **UI development**.
 
-## See it work
+## Demo
 
-[`examples/library-manager/`](examples/library-manager/) came from **one message**: "Build me a
-library management app…". The `build-app` skill planned it, built four pages with their API
-layer, mocks, tests and stories, and passed every gate, with no question asked
-([how it went](docs/evidence/one-message/README.md)).
+One message builds a whole app. After installing the plugin (below), in an empty folder:
 
-[`examples/task-tracker/`](examples/task-tracker/) is a task tracker written entirely by the
-skills, one Claude Code session per ticket: scaffold → tasks list → task detail → dashboard
-→ match a design. Every session's prompt and report, screenshots and a recording of the app
-are in [`docs/evidence/`](docs/evidence/README.md).
+```bash
+mkdir -p examples/library-manager && cd examples/library-manager
+claude "/web-dev:develop Build me a library management app. Librarians manage the book catalogue and the members, lend books to members and record returns, and need to see which loans are overdue."
+```
 
-- **Live demo:** [Task Tracker Demo](https://claude.ai/artifact/Mbff8zeHWzLnjDKVdhmeSA), running
-  in the browser with a mocked API
-- **Summary:** [Web App Skills Report](https://claude.ai/artifact/WsEMWexLj3kYAuvJ8jrvxX)
+The output is the app in `examples/library-manager/`: `docs/plan.md` (the data model, API,
+tickets and assumptions the skill chose), every planned page with its API layer, mocks, tests and
+stories, and all gates green. The run opens the app on a mocked API, or tells you to run
+`pnpm dev:mock`. `examples/` stays on your machine: `.gitignore` lists it, and `docs/evidence/`
+for the reports, logs and screenshots you collect from a run.
 
 ## Install
 
 ```bash
 git clone -b <branch> <repo-url> claude-training
 claude plugin marketplace add ./claude-training
-claude plugin install web-app-skills@claude-training
+claude plugin install web-dev@claude-training
 ```
 
 `<branch>` is the branch that holds `.claude-plugin/marketplace.json`; leave out `-b` when it is
 the default branch. Then, in an empty folder, one message builds a whole app:
-`claude "Build me a library management app: books, members and loans"`.
+`claude "/web-dev:develop Build me a library management app: books, members and loans"`; in an
+existing React project, the same command adds a feature or an endpoint.
 Other ways to install, the pinned versions and the companion skills are in
-[`claude-skills/README.md`](claude-skills/README.md).
+[`web-dev/README.md`](web-dev/README.md).
 
 ## Repository
 
 | Path | What it is |
 |---|---|
-| [`claude-skills/`](claude-skills/) | The plugin: the five skills and the app template they copy from. |
-| [`examples/task-tracker/`](examples/task-tracker/) | Proof-of-concept app built by the skills. |
+| [`web-dev/`](web-dev/) | The plugin: the `develop` entry skill, four skills, the app template they copy from, shared references, scripts and evals. |
+| `examples/`, `docs/evidence/` | Demo output and what a run collected (reports, logs, screenshots), local only: not in the repository. |
 | [`spec.md`](spec.md) | What the skills must do, and the POC steps. |
 | [`DESIGN.md`](DESIGN.md) | How the plugin, the skills and the generated app are built, and why. |
 | [`CLAUDE.md`](CLAUDE.md) | Instructions for Claude Code when it works on this repository. |
-| [`docs/evidence/`](docs/evidence/README.md) | Gate logs, per-step reports, screenshots and a recording. |
-| [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) | Marketplace that lists `claude-skills/` as the plugin `web-app-skills`. |
-| [`.gitlab-ci.yml`](.gitlab-ci.yml) | Runs the template check on merge requests, pushes and schedules. On another host, run `claude-skills/.claude/skills/code-skeleton/scripts/verify.sh` in your own CI. |
+| [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) | Marketplace that lists `web-dev/` as the plugin `web-dev`. |
+| [`.gitlab-ci.yml`](.gitlab-ci.yml) | Runs the template check on merge requests, pushes and schedules. On another host, run `tools/verify-template.sh` in your own CI. |

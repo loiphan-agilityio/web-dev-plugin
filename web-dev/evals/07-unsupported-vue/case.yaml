@@ -1,0 +1,29 @@
+schema_version: "1.0"
+name: unsupported-vue
+description: A Vue project is reported unsupported and left untouched.
+tags: [routing, edge]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Add a login form to this app."
+  max_turns: 8
+  timeout_seconds: 300
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: regex
+    name: says-unsupported
+    target: last_message
+    pattern: "(not supported|unsupported|does not support|doesn't support)"
+    flags: i
+  - type: tool_used
+    name: no-edit
+    tool: Edit
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-write
+    tool: Write
+    min: 0
+    max: 0
+    arm: both

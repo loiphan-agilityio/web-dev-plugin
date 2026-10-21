@@ -1,9 +1,0 @@
-{
-  "name": "web-app-skills",
-  "version": "0.2.0",
-  "description": "Skills that build web apps on a modern React stack (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7, shadcn/ui, Storybook 10): build a whole app from one description, scaffold, develop a feature, integrate an API, build UI from a design.",
-  "author": {
-    "name": "web-app-skills contributors"
-  },
-  "skills": "./.claude/skills"
-}

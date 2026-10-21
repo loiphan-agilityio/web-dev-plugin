@@ -1,0 +1,24 @@
+schema_version: "1.0"
+name: feature-template
+description: A feature in an app scaffolded from the template goes straight to feature-development (workflow C).
+tags: [routing, workflow-c]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Add an invoices page: a list from GET /invoices with a status filter (draft, sent, paid)."
+  max_turns: 12
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: runs-feature-development
+    tool: Skill
+    input_match: "feature-development"
+    arm: both
+  - type: tool_used
+    name: no-new-scaffold
+    tool: Bash
+    input_match: "scaffold\\.sh"
+    min: 0
+    max: 0
+    arm: both

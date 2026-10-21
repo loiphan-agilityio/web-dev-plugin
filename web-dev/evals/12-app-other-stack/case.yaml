@@ -1,0 +1,35 @@
+schema_version: "1.0"
+name: app-other-stack
+description: A whole app described in a React project on another stack is planned and built inside that project, on its stack.
+tags: [routing, existing-project, edge]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Build an employee management app here: employees, departments and leave requests, with CRUD, search and forms."
+  max_turns: 15
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: maps-the-project
+    tool: Agent
+    input_match: "codebase-explorer"
+    arm: both
+  - type: regex
+    name: writes-the-plan
+    target: files
+    pattern: "docs/plan(-[a-z0-9-]+)?\\.md"
+  - type: tool_used
+    name: no-scaffold
+    tool: Bash
+    input_match: "scaffold\\.sh"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: keeps-the-stack
+    tool: Bash
+    input_match: "(add|install) .*(effect|msw|shadcn)"
+    min: 0
+    max: 0
+    arm: both

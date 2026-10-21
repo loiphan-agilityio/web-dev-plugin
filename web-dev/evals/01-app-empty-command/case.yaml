@@ -1,0 +1,24 @@
+schema_version: "1.0"
+name: app-empty-command
+description: The plan's own example input, typed as the command, in an empty folder.
+tags: [routing, workflow-a]
+execution:
+  prompt: "/web-dev:develop Build an employee management app with CRUD, search, filters, forms, and REST API integration."
+  max_turns: 15
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: inspects-the-folder
+    tool: Bash
+    input_match: "detect-project\\.mjs"
+    arm: both
+  - type: regex
+    name: writes-the-plan
+    target: files
+    pattern: "docs/plan\\.md"
+  - type: tool_used
+    name: runs-project-setup
+    tool: Skill
+    input_match: "project-setup"
+    arm: both

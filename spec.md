@@ -23,11 +23,13 @@ Every version is pinned in the template's lockfile.
 
 | # | Requirement | Delivered by | Done when |
 |---|---|---|---|
-| 1 | **Code skeleton:** scaffold a working project (providers, Effect runtime, query client, path alias, lint, tests) | `code-skeleton` skill + `template/` (57 files) + `scaffold.sh` | A fresh scaffold passes lint, typecheck, test, build and Storybook build (`verify.sh`, also run by CI) |
-| 2 | **Develop feature:** ticket → tested UI (schema, API layer, queries/mutations, form, UI, tests) | `develop-feature` skill + a worked todos feature in its `references/` | A ticket becomes a page with the four data states, a test file and a story per component, and `pnpm check` passes |
-| 3 | **Integrate API:** Effect Schema + HttpClient with typed errors, `queryOptions` / mutations, MSW mocks | `integrate-api` skill + `ApiClient`, `runEffect`, `ApiError` in the template | Every backend failure maps to one of 7 typed `ApiError` cases; 404, 422 and 500 paths are tested |
-| 4 | **One message, whole app:** a description on any topic becomes a running POC without further input | `build-app` skill: plans `docs/plan.md`, then drives the other four, runs the gates and opens the app on mocks | One prompt yields a scaffold, every planned feature, five green gates and an app that runs with `pnpm dev:mock`; every decision made for the user is listed |
-| + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma, DESIGN.md; all optional) | `design-to-ui` skill | Theme tokens, shadcn components and the four data states, no raw colors |
+| 0 | **One entry point:** `/web-dev:develop <request>` sorts the request and the project, and runs the right workflow; the user never picks a skill | `develop` skill + `scripts/detect-project.mjs` | Each folder gets its tier (`fixtures/check-detect.sh`, run by `verify-template.sh`), and the routing evals in `web-dev/evals/` pass |
+| 1 | **Code skeleton:** scaffold a working project (providers, Effect runtime, query client, path alias, lint, tests) | `project-setup` skill + `assets/app-template/` + `scaffold.sh` | A fresh scaffold passes lint, typecheck, test, build and Storybook build (`verify-template.sh`, also run by CI) |
+| 2 | **Develop feature:** ticket → tested UI (schema, API layer, queries/mutations, form, UI, tests) | `feature-development` skill + a worked todos feature in its `references/` | A ticket becomes a page with the four data states, a test file and a story per component, and `pnpm check` passes |
+| 3 | **Integrate API:** Effect Schema + HttpClient with typed errors, `queryOptions` / mutations, MSW mocks | `api-integration` skill + `ApiClient`, `runEffect`, `ApiError` in the template | Every backend failure maps to one of 7 typed `ApiError` cases; 404, 422 and 500 paths are tested |
+| 4 | **One message, whole app:** a description on any topic becomes a running POC without further input | `develop` skill, Workflow A: plans `docs/plan.md`, then drives the other four, runs the gates and opens the app on mocks | One prompt yields a scaffold, every planned feature, five green gates and an app that runs with `pnpm dev:mock`; every decision made for the user is listed |
+| 5 | **Existing project:** a feature, endpoint or screen in a React project not made from the template, built on its own code and conventions | `develop` skill, Workflow B + `codebase-explorer` agent + `scripts/verify-project.sh`; `references/outside-template.md` in each building skill | The change reuses the project's HTTP client, query layer and tests, adds no library unasked, and the project's own gates pass |
+| + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma, DESIGN.md; all optional) | `ui-development` skill | Theme tokens, shadcn components and the four data states, no raw colors |
 
 ### Each skill must
 
@@ -35,14 +37,18 @@ Every version is pinned in the template's lockfile.
   ticket", "Add PATCH /todos/:id", "Make it look like this screenshot"), and not trigger on
   requests that belong to another skill.
 - Copy every code example from the verified template or the worked feature, never from memory.
-- Run `pnpm check` (all five gates; lint includes a Prettier check) before reporting done.
+- Run `pnpm check` (all five gates; lint includes a Prettier check) before reporting done; in a
+  project not made from the template, `scripts/verify-project.sh`, which runs the gates the
+  project has and names the ones it lacks.
 - End with a `## Result` block: Did / Saw / Not done / Blocked by / Next.
 - Exclude an acceptance criterion that depends on an unanswered question (data, a business rule,
   what the backend must agree with), and name it in the report instead of guessing. A detail the
   ticket leaves out that only changes presentation gets the simplest default, listed under
   **Next** for the user to confirm. When the ticket states the rule and leaves only its edges
   open (inclusive bounds, from today or tomorrow), the skill builds the literal reading, tests it
-  and asks under **Next**.
+  and asks under **Next**. The one exception is a whole app from one message (`develop`,
+  Workflow A): there the plan answers every open question with a default listed under
+  Assumptions, and every criterion stays in scope.
 
 ### The generated app must
 
@@ -55,35 +61,23 @@ Every version is pinned in the template's lockfile.
 
 ## Proof of concept
 
-`examples/task-tracker/` is a task tracker built only by the skills, one Claude Code session per
-ticket, in this order:
-
-| Step | Prompt | Skills the session invoked |
-|---|---|---|
-| 1 | Scaffold a new web app called task-tracker | `code-skeleton` |
-| 2 | TASK-1: tasks list with status filter, search and a create form | `develop-feature` |
-| 3 | TASK-2: task detail, edit, inline status change, delete, 404 handling | `develop-feature` → `integrate-api` |
-| 4 | TASK-3: dashboard with stats from a new endpoint and a "Due soon" list | `develop-feature` |
-| 5 | Match the two mockups in `examples/task-tracker/design/` | `design-to-ui` |
-
-The prompts, each session's Result report, screenshots and a recording are in
-[`docs/evidence/`](docs/evidence/README.md).
-
-A second proof, for requirement 4: [`examples/library-manager/`](examples/library-manager/) came from
-one message and no ticket, through `build-app`
-([`docs/evidence/one-message/`](docs/evidence/one-message/README.md)).
+Requirement 4, one message to a whole app: the demo in `README.md` ("Demo") gives
+`/web-dev:develop` one sentence about a library manager in an empty folder. Its output,
+`examples/library-manager/`, is demo output kept locally, not in the repository.
 
 ## Out of scope
 
 - SSR and Next.js, backend code, CI/CD pipelines for the generated apps.
 - End-to-end browser tests (Playwright): the template has unit and component tests only.
 - Applying the skeleton to an existing project: `scaffold.sh` refuses a folder with
-  conflicting files.
+  conflicting files. An existing project gets features through Workflow B instead.
+- Not yet: bug fixes, review without edits, commits, PR/MR and CI work (`develop` reports them as
+  not covered and changes nothing), and projects that are not React or use Next.js / SSR.
 
 ## Distribution
 
-The skills ship as the Claude Code plugin `web-app-skills`, listed by the marketplace at the
-repository root. Install steps are in [`claude-skills/README.md`](claude-skills/README.md#install).
+The skills ship as the Claude Code plugin `web-dev`, listed by the marketplace at the
+repository root. Install steps are in [`web-dev/README.md`](web-dev/README.md#install).
 Eight third-party companion skills (shadcn, React Router, Vite, Vitest, React performance,
 composition, React Hook Form, React Testing) are installed next to them, pinned to audited
 commits.
