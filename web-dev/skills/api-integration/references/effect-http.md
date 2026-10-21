@@ -75,7 +75,8 @@ No try/catch and no status handling here. The error channel is already `ApiError
 ## How ApiClient works inside
 
 Read `ApiClient.layer` in `src/lib/api/client.ts`. It takes Effect's `HttpClient`, maps every
-request (`prependUrl(config.apiUrl)`, `acceptJson`, and the commented hook point for auth), applies
+request (`prependUrl(apiUrl)` with `apiUrl` from `AppConfig`, `acceptJson`, then the `AuthToken`
+bearer token through `HttpClient.mapRequestEffect`), applies
 `filterStatusOk`, decodes the body with `HttpClientResponse.schemaBodyJson(schema)` and turns every
 failure into an `ApiError` with `Effect.catch(toApiError)`. Bodies are sent with
 `HttpClientRequest.bodyJsonUnsafe(body)`, which serialises with `JSON.stringify` and does not
@@ -85,8 +86,8 @@ Failure mapping is in [errors.md](errors.md). The layer is `.pipe(Layer.provide(
 
 ## Changing ApiClient
 
-Edit `src/lib/api/client.ts` only when an endpoint cannot be expressed with the current methods or when asked (auth). Keep the change minimal, keep `toApiError` as the only error mapper, and re-run `pnpm check`. `ApiClient` is registered in `AppLayer` in `src/lib/runtime.ts`; a new service layer is added there with `Layer.mergeAll`, and `AppServices` (the requirement type `runEffect` accepts) follows automatically.
+Edit `src/lib/api/client.ts` only when an endpoint cannot be expressed with the current methods. Keep the change minimal, keep `toApiError` as the only error mapper, and re-run `pnpm check`. `ApiClient.layer` needs `AppConfig` and `AuthToken`; `AppLayer` in `src/lib/runtime.ts` provides them (`AppConfig.layer`, `AuthToken.none`). A new service layer is added there with `Layer.mergeAll`, and `AppServices` (the requirement type `runEffect` accepts) follows automatically.
 
-## Auth header hook point
+## Auth
 
-Not implemented. The commented line inside `mapRequest` in `client.ts` is where `HttpClientRequest.bearerToken(token)` would go. Reading a token that changes over time needs an Effect service for it; design that with `node_modules/effect/AGENTS.md` open and tell the user, since it touches every request.
+`AuthToken` (`src/lib/api/auth.ts`) holds where the bearer token comes from, read again for every request. The template sends none (`AuthToken.none`). For an app with sign-in, change one line in `src/lib/runtime.ts`: `AuthToken.none` becomes `AuthToken.fromGetter(() => <the token the session holds>)`; `ApiClient` then sends `Authorization: Bearer <token>`, and a 401 still reaches the UI as `UnauthorizedError` (route it to the sign-in page). How the session stores the token, and the sign-in screen and its endpoint, are the app's; build them as a feature, ask the user where the token lives, and name `runtime.ts` in the Result since every request changes. `client.test.ts` shows how to test with other layers (`Layer.succeed(AppConfig, ...)`, `AuthToken.fromGetter`).

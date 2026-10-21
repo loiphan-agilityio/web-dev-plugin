@@ -48,7 +48,7 @@ The full file is in the api-integration skill, `references/effect-http.md`, sect
 It is kept in one place for both skills. Shape: one `Effect.fn('<name>.<action>')` per call that
 does `const api = yield* ApiClient` and returns `api.get(path, Schema)` or `api.post(path, input, Schema)`.
 
-`ApiClient` prefixes `config.apiUrl`, decodes the body with the schema you pass, and maps every failure to an `ApiError`. No `fetch`, no axios, no `HttpClient.retryTransient`. Methods used in the example: `api.get(path, schema)` and `api.post(path, body, schema)`; read `src/lib/api/client.ts` for the rest (put, patch, delete) before using them.
+`ApiClient` prefixes `apiUrl` from `AppConfig`, decodes the body with the schema you pass, and maps every failure to an `ApiError`. No `fetch`, no axios, no `HttpClient.retryTransient`. Methods used in the example: `api.get(path, schema)` and `api.post(path, body, schema)`; read `src/lib/api/client.ts` for the rest (put, patch, delete) before using them.
 
 ## queries.ts
 

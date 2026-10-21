@@ -1,4 +1,4 @@
-import { Schema } from 'effect';
+import { Context, Layer, Schema } from 'effect';
 
 /**
  * Every environment value the app reads, in one place, validated at startup.
@@ -21,7 +21,18 @@ export const parseConfig = (raw: unknown) => {
   } as const;
 };
 
-export const config = parseConfig({
+export type Config = ReturnType<typeof parseConfig>;
+
+/**
+ * The parsed values, for code outside Effect: `main.tsx` (start MSW or not) and MSW handlers
+ * (their URLs). Effect code reads `AppConfig` instead, so a test can provide other values.
+ */
+export const config: Config = parseConfig({
   VITE_API_URL: import.meta.env.VITE_API_URL,
   VITE_API_MOCKING: import.meta.env.VITE_API_MOCKING,
 });
+
+/** The config as a service: `const { apiUrl } = yield* AppConfig`. */
+export class AppConfig extends Context.Service<AppConfig, Config>()('app/lib/AppConfig') {
+  static readonly layer = Layer.succeed(AppConfig, config);
+}

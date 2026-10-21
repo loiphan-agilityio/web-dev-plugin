@@ -8,7 +8,7 @@ The project's architecture and conventions win over the template's. Change only 
 2. **Reuse.** Name the existing file or component each part of the request builds on. A missing role gets the smallest addition that fits the project, never the template's whole layer.
 3. **Plan.** List the files to change and to create, and nothing else: no refactor, rename, reformat or upgrade outside the request.
 4. **Implement.** Invoke the skill for the kind (`feature-development`, `api-integration` or `ui-development`; Skill tool) with the project map. Its `references/outside-template.md` says which of its rules hold here.
-5. **Regression checks.** Run `bash ../../scripts/verify-project.sh <project-dir>` by its full path: the project's own `check`, or lint, typecheck, test and build, over the whole suite; it names the gates the project lacks. Fix what the change broke. A failure in code the change does not touch is reported: call it pre-existing only after showing it fails without the change, else call it unproven.
+5. **Regression checks.** Run the regression-gates command from `develop`'s `SKILL.md`, exactly as written there: the project's own `check`, or lint, typecheck, test and build, over the whole suite; it names the gates the project lacks. Fix what the change broke. A failure in code the change does not touch is reported: call it pre-existing only after showing it fails without the change, else call it unproven.
 
 ## B2. A whole app in an existing project
 

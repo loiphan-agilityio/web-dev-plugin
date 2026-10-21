@@ -2,14 +2,17 @@
 # - plugin-manifest: the plugin and marketplace manifests are valid.
 # - web-dev: the template, and the todos feature the skills quote, pass every gate on a
 #   fresh scaffold.
-# - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator.
+# - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
+#   every eval case.yaml parses.
 # - audit: no known vulnerability in the template's dependencies, apart from the ones listed with
 #   a reason under auditConfig in its pnpm-workspace.yaml.
 # - companions (schedules only): the pinned companion skills still install, and shadcn is pinned.
-# - evals (schedules only, when the ANTHROPIC_API_KEY variable is set): the routing evals, with a
-#   baseline arm without the plugin; costs API credits, capped by --max-cost-usd.
-# Runs on merge requests and branch pushes that touch the plugin, and on pipeline schedules (set a
-# weekly one in Build > Pipeline schedules) to catch a dependency release that breaks the template.
+# - evals-routing, evals-e2e (manual jobs on release tags web-dev--v*, when the ANTHROPIC_API_KEY
+#   variable is set): the model evals. They cost API credits, so nothing starts them: they run only
+#   when the maintainer presses them, after every free job passed, each capped by --max-cost-usd.
+# Runs on merge requests and branch pushes that touch the plugin, on release tags, and on pipeline
+# schedules (set a weekly one in Build > Pipeline schedules) to catch a dependency release that
+# breaks the template; schedules run only the free jobs.
 workflow:
   rules:
     # Schedules first: a scheduled pipeline also has CI_COMMIT_BRANCH, and must not be dropped
@@ -19,6 +22,7 @@ workflow:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG =~ /^web-dev--v/
 
 default:
   image: node:24
@@ -54,7 +58,7 @@ skills-spec:
   image: python:3.13-slim
   script:
     # The Agent Skills reference validator, pinned like every other tool here.
-    - pip install --quiet skills-ref==0.1.1
+    - pip install --quiet skills-ref==0.1.1 pyyaml==6.0.3
     - bash tools/validate-skills.sh
 
 audit:
@@ -77,20 +81,42 @@ companions:
     - bash "$CI_PROJECT_DIR/web-dev/skills/project-setup/scripts/install-companions.sh"
     - test "$(find .claude/skills -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 8
 
-evals:
+# The model evals run only when the maintainer asks: manual jobs on a release tag, after the free
+# jobs passed (needs). Nothing starts them automatically, and a tag pipeline passes without them.
+.evals:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule" && $ANTHROPIC_API_KEY
+    - if: $CI_COMMIT_TAG =~ /^web-dev--v/ && $ANTHROPIC_API_KEY
+      when: manual
+      # Without this, a manual job from rules blocks the tag pipeline until someone presses it.
+      allow_failure: true
+  needs: [plugin-manifest, web-dev, skills-spec]
   variables:
     CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
+    # The needs above already ran tools/verify-template.sh and the validators.
+    EVALS_CHECKS_DONE: '1'
+    # One arm by default (half the cost). When starting the job for a release that changes a
+    # skill's description or develop's routing, set EVALS_ARGS to "--ablation with-without" to
+    # get the no-plugin baseline and its delta.
+    EVALS_ARGS: ''
   before_script:
     - corepack enable
     - npm install -g "$CLAUDE_CODE"
-  script:
-    # Three runs per case. A run scores the share of its graders that pass, and a case the mean of
-    # its runs; a case below 0.66 fails the job. Model runs vary, so the bar is not 1.0.
-    - cd web-dev
-    - bash evals/run.sh --tag routing --runs 3 --threshold 0.66 --max-cost-usd 25 --trust-plugin --no-publish
   artifacts:
     when: always
     paths:
       - web-dev/evals/results/
+
+evals-routing:
+  extends: .evals
+  script:
+    # Three runs per case. A run scores the share of its graders that pass, and a case the mean of
+    # its runs; a case below 0.66 fails the job. Model runs vary, so the bar is not 1.0.
+    - cd web-dev
+    - bash evals/run.sh --tag routing --runs 3 --threshold 0.66 --max-cost-usd 25 --trust-plugin --no-publish $EVALS_ARGS
+
+evals-e2e:
+  extends: .evals
+  script:
+    # One run each: a whole feature (20) and a whole app (21), the costliest cases.
+    - cd web-dev
+    - bash evals/run.sh --tag e2e --runs 1 --max-cost-usd 40 --trust-plugin --no-publish $EVALS_ARGS

@@ -2,13 +2,14 @@
 name: project-setup
 description: This skill should be used when the user asks to "scaffold a new web app", "create a new React project with our stack", "bootstrap a frontend" or "start a new project from the template", with no features described. It copies the verified web-dev template (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query, shadcn/ui, Vitest, MSW), installs it, adds the companion skills and runs every gate. Not for an app described by its features (develop plans that), or for features, endpoints or screens in an existing app.
 compatibility: "Claude Code, as part of the web-dev plugin only (reads the plugin's references/). Needs Node 22.22 or newer, pnpm 10 or newer, and network access for pnpm install and the companion skills."
+allowed-tools: Bash(node --version) Bash(pnpm --version) Bash(bash ${CLAUDE_SKILL_DIR}/scripts/scaffold.sh *) Bash(bash ${CLAUDE_SKILL_DIR}/scripts/install-companions.sh) Bash(pnpm install) Bash(pnpm check)
 ---
 
 # project-setup
 
 Copy the pinned template in `assets/app-template/` into a new project and leave it green. A copied template, lockfile included, starts identical every time, where `create vite` and `shadcn init` drift between versions and `shadcn init` needs an interactive choice. The new project's `CLAUDE.md` is its convention source from then on.
 
-`<skill-dir>` below is this skill's base directory, shown when it loads; call the scripts by that full path.
+Run the scripts exactly as written below, each as one plain command: `allowed-tools` approves these exact forms, so the setup runs without a permission prompt, headless included.
 
 ## 1. Preconditions
 
@@ -20,7 +21,7 @@ Use what the user gave. Ask only when they gave neither a folder nor a name and 
 
 ## 3. Scaffold
 
-`bash <skill-dir>/scripts/scaffold.sh <target-dir> [app-name]`. It copies the template without its local output, renames `app-template` in the files that carry it, keeps an existing `.git/` and `.claude/`, and writes `.claude/settings.json` (the allow-list of the commands the skills run, and a hook that runs Prettier on each file Claude writes) only when the project has none; say which under **Did**. On a conflict it lists the existing files, exits 1 and copies nothing: show the list and ask how to proceed; the user's files stay as they are.
+`bash ${CLAUDE_SKILL_DIR}/scripts/scaffold.sh <target-dir> [app-name]`. It copies the template without its local output, renames `app-template` in the files that carry it, keeps an existing `.git/` and `.claude/`, and writes `.claude/settings.json` (the allow-list of the commands the skills run, and a hook that runs Prettier on each file Claude writes) only when the project has none; say which under **Did**. On a conflict it lists the existing files, exits 1 and copies nothing: show the list and ask how to proceed; the user's files stay as they are.
 
 ## 4. Install
 
@@ -28,11 +29,11 @@ Use what the user gave. Ask only when they gave neither a folder nor a name and 
 
 ## 5. Companion skills
 
-`bash <skill-dir>/scripts/install-companions.sh` from the target root. It installs 8 companions pinned by commit into `.claude/skills/` and writes `skills-lock.json` (both belong in git), and exits 1 if a companion failed, the lock is missing, or the shadcn companion still calls `shadcn@latest`. It needs network; a failure goes under **Not done** and the run continues, since the project skills and `CLAUDE.md` work without companions. What each companion gets wrong for this stack: `../../references/companions.md`.
+`bash ${CLAUDE_SKILL_DIR}/scripts/install-companions.sh` from the target root. It installs 8 companions pinned by commit into `.claude/skills/` and writes `skills-lock.json` (both belong in git), and exits 1 if a companion failed, the lock is missing, or the shadcn companion still calls `shadcn@latest`. It needs network; a failure goes under **Not done** and the run continues, since the project skills and `CLAUDE.md` work without companions. What each companion gets wrong for this stack: `../../references/companions.md`.
 
 ## 6. Gates
 
-`pnpm check` (lint with Prettier, typecheck, tests with coverage, build, Storybook build) as a plain command with no pipe or redirect: the allow-list covers exactly that. Report the real output, failures included.
+`pnpm check` (lint with Prettier, typecheck, tests with coverage, build, Storybook build) as a plain command with no pipe or redirect: the skill's `allowed-tools` and the project's allow-list cover exactly that. Report the real output, failures included.
 
 Offer `git init` and a first commit; commit only on a yes. After `git init`, run `pnpm install` again so husky turns the hooks on, and write the message as a Conventional Commit (`chore: scaffold <app-name>`), since commitlint rejects anything else.
 

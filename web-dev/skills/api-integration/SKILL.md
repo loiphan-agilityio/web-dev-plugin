@@ -2,6 +2,7 @@
 name: api-integration
 description: This skill should be used when the user asks to "add an endpoint", "call the API", "hook this up to the backend", "add a mutation", "handle the 404/422 from the API", "mock this endpoint", "add an ApiError case" or "invalidate the cache after a write" in an app built from the web-dev template (Effect HttpClient, TanStack Query, MSW). It wires one endpoint with its schema, Effect.fn, query or mutation, MSW handlers and error tests. Not for a new project (project-setup) or a whole feature with screens and routes (feature-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm."
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm check)
 ---
 
 # api-integration
@@ -23,7 +24,7 @@ Method, path, request body, response body, error statuses: from the request, `do
 
 ## 2. Schema and API function
 
-In `schemas.ts`, an Effect Schema for the response and for a sent body, with `typeof X.Type` types ([references/effect-http.md](references/effect-http.md)). In `api.ts`, one `Effect.fn('<name>.<action>')` per endpoint: `const api = yield* ApiClient`, then `api.get` / `post` / `put` / `patch` / `delete` with the schema. `ApiClient` prefixes `config.apiUrl`, decodes, and maps every failure to an `ApiError`, so `api.ts` has no `fetch` and no error handling. It sends bodies with `bodyJsonUnsafe`, which skips the schema: pass the already decoded `Type` side (the form resolver decodes).
+In `schemas.ts`, an Effect Schema for the response and for a sent body, with `typeof X.Type` types ([references/effect-http.md](references/effect-http.md)). In `api.ts`, one `Effect.fn('<name>.<action>')` per endpoint: `const api = yield* ApiClient`, then `api.get` / `post` / `put` / `patch` / `delete` with the schema. `ApiClient` prefixes `apiUrl` from `AppConfig`, sends the `AuthToken` bearer token, decodes, and maps every failure to an `ApiError`, so `api.ts` has no `fetch` and no error handling. It sends bodies with `bodyJsonUnsafe`, which skips the schema: pass the already decoded `Type` side (the form resolver decodes).
 
 ## 3. Queries
 
@@ -41,7 +42,7 @@ Extend `createTodosHandlers(initial)` and `todosMocks` (pending, error, validati
 
 `pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. Fix the cause until green; a rule, a type and an assertion stay as strict as they are.
 
-Auth is not wired: the hook point is the commented `HttpClientRequest.bearerToken(token)` line in `ApiClient.layer`'s `mapRequest`. Add it only when asked, and name the shared file in the Result.
+Auth: `ApiClient` sends the bearer token `AuthToken` gives, and the template provides `AuthToken.none`. For an app with sign-in, provide `AuthToken.fromGetter(...)` in `src/lib/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
 
 ## Result
 

@@ -23,49 +23,68 @@ the plugin alone.
 | `13-feature-direct-template` | `template` | a ticket without the command reaches `feature-development`; records whether `develop` fired too (the two overlap on purpose) |
 | `14-app-other-folder` | files, no `package.json` | the app goes into a subfolder; `notes.md` stays as it is |
 | `20-e2e-feature-template` | `template` | **output quality**, run to the end: a test and a story per component, `pnpm check` runs, the Result has a Route line and claims only what the trace shows |
+| `21-e2e-app-empty` | empty | **the main promise**, run to the end: one message gives `docs/plan.md`, the scaffold, every planned feature with a page test and story, `pnpm check`, and a Result that asks nothing and claims only what the trace shows |
 
 `fixtures/` builds the folders; each case's `setup.sh` calls one. `fixtures/check-detect.sh`
 checks the tier `scripts/detect-project.mjs` gives each fixture, without a model; `verify-template.sh`
 runs it.
 
-Tags: `routing` (cases 01 to 14, short runs that stop once the route is clear), `e2e` (case 20,
-a full feature with install and gates: slow and several dollars a run), and finer tags within
+Tags: `routing` (cases 01 to 14, short runs that stop once the route is clear), `e2e` (cases 20 and 21,
+a full feature, or a whole app, with install and gates: slow, several dollars a run for 20 and more for 21), and finer tags within
 them: `workflow-a`, `workflow-b`, `workflow-c`, `existing-project`, `no-trigger` (the plugin
 must not fire), `edge`, `failure`, `overlap`.
 
+## When evals run: only when the maintainer asks
+
+Every eval run is paid model time, a whole app (case 21) several dollars a run. Nothing runs them
+automatically: no hook, schedule, push, merge request or tag starts an eval, the CI jobs are
+manual buttons, and Claude never starts one unless the maintainer asks for an eval run in so many
+words. A release does not need one. When a run is asked for:
+
+1. **While building or changing a skill, never.** Write or update the case that covers the
+   change (a routing change gets one, see `CLAUDE.md`), and check it with the free tools only:
+   `pnpm lint`, `bash tools/verify-template.sh` (which runs `fixtures/check-detect.sh`), and
+   `bash tools/validate-skills.sh`.
+2. **Only on finished work:** every skill change committed and the free checks and CI green.
+   Then one routing run and, when the change touched a workflow, one e2e run.
+3. **Never for a single case**, to try a fix, or to check a case that is not a real request.
+   `run.sh` refuses `--case`; a fixed case is checked by the next requested run with all the others.
+
+`run.sh` enforces this before it spends anything: it refuses `--case`, uncommitted changes under
+`web-dev/` or `tools/`, and plugin content already evaluated with the same options (delete that
+`results/` folder to rerun after an infrastructure failure); it runs `tools/verify-template.sh`
+first, and caps the run at `--max-cost-usd 30` when no cap is given. "Already evaluated" is keyed
+on the committed content of `skills/`, `agents/`, `references/`, `scripts/` and `evals/`
+(READMEs excluded), so a commit that only edits docs or bumps the version reuses the last result.
+
+Each run uses one arm (`--ablation none`), half the cost of two. The no-plugin baseline and its Δ
+(`--ablation with-without`) answer a different question, whether the plugin still adds anything,
+so ask for it only when a release changes a skill's description or `develop`'s routing (in CI:
+start the job with `EVALS_ARGS` set to `--ablation with-without`). The CI jobs are `evals-routing`
+and `evals-e2e`, offered on release tags (`web-dev--v<version>`) once the free jobs pass.
+
 ## Run
 
-From `web-dev/`, with `evals/run.sh`. It copies the plugin without `node_modules` (on the plugin
-folder itself, once the root `pnpm install` has filled the template's `node_modules`, `claude
-plugin eval` fails with `E2BIG`) and runs `claude plugin eval` on the copy with `--scaffold`
-(each case's `setup.sh` only writes fixture files), the tools the skills need (`Bash`, `Write`,
-`Edit`) and a baseline arm without the plugin (`--ablation with-without`). Other options pass
-through:
+From `web-dev/`, when the maintainer asks for a run, with `evals/run.sh`. It copies the plugin without
+`node_modules` (on the plugin folder itself, once the root `pnpm install` has filled the
+template's `node_modules`, `claude plugin eval` fails with `E2BIG`) and runs `claude plugin
+eval` on the copy with `--scaffold` (each case's `setup.sh` only writes fixture files), the tools
+the skills need (`Bash`, `Write`, `Edit`), one arm unless `--ablation with-without` is passed.
+Other options pass through:
 
 ```bash
-bash evals/run.sh --tag routing --runs 1 --no-publish
+bash evals/run.sh --tag routing --runs 3 --threshold 0.66 --max-cost-usd 25 --no-publish
 ```
 
 ```bash
-bash evals/run.sh --tag routing --max-cost-usd 20
+bash evals/run.sh --tag e2e --runs 1 --max-cost-usd 40 --no-publish
 ```
 
-```bash
-bash evals/run.sh --tag e2e --runs 1 --max-cost-usd 15
-```
-
-The first is a pilot, the second the full routing suite (3 runs per case), the third the
-output-quality case. Results and the HTML report go to `evals/results/<timestamp>/` (ignored by
-git). Every run is a full Claude session on your account.
-
-## When to run
-
-- After any change to a skill's description, `develop`'s tables or rules, an agent, or
-  `scripts/detect-project.mjs`: the routing suite. The headline number is Δ, the score with the
-  plugin minus the score without it.
-- Before a release (`version` in `plugin.json`): routing and e2e.
-- CI runs the routing suite on pipeline schedules when the `ANTHROPIC_API_KEY` variable is set
-  (job `evals` in `.gitlab-ci.yml`).
+The first is the routing suite, the second the output-quality cases (20 and 21), the same
+commands as CI. With `--ablation with-without`, the headline number is Δ, the score with the
+plugin minus the score without it.
+Results and the HTML report go to `evals/results/<timestamp>/` (ignored by git). Every run is a
+full Claude session on your account.
 
 ## When a case fails
 
@@ -74,7 +93,8 @@ git). Every run is a full Claude session on your account.
    skill's own text, a regex too strict), or the run hit its turn or time limit before the step
    the grader checks.
 2. A skill fault: fix the rule in the skill (the description for a wrong trigger, `develop`'s
-   tables for a wrong route), then rerun that case with `--case <name> --runs 3`.
+   tables for a wrong route), commit it, and let the next requested run check it with every
+   other case. Do not rerun the case alone.
 3. A grader fault: fix the grader and say why in the commit message; never loosen a grader only
    to turn a case green.
 4. A limit: raise `max_turns` or `timeout_seconds` in the case, not the grader.

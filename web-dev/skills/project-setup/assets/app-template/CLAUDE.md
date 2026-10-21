@@ -37,12 +37,14 @@ src/
     components/       kebab-case files, PascalCase named exports, a .stories.tsx beside each one,
                       a .test.tsx for each one in components/__tests__/
   lib/
-    config.ts         every env value (VITE_*), read statically and validated with Effect Schema
+    config.ts         every env value (VITE_*), read statically and validated with Effect Schema;
+                      `config` outside Effect, the `AppConfig` service inside it
     runtime.ts        AppLayer + the ManagedRuntime
     query-client.ts   createQueryClient(); query errors are typed as ApiError
     forms.ts          setFormErrors(): API errors → React Hook Form
     utils.ts          cn()
     api/client.ts     ApiClient: the only way to call the backend
+    api/auth.ts       AuthToken: the bearer token ApiClient sends (none until the app has sign-in)
     api/errors.ts     ApiError union + toUserMessage()
     api/run.ts        runEffect(effect, signal): Effect → Promise for TanStack Query
   mocks/            handlers.ts (all feature handlers), server.ts (Vitest), browser.ts (dev)
@@ -72,7 +74,8 @@ Lint enforces it, and `func-style` has no autofix, so write it this way from the
 ApiClient → effect/http`
 
 - **Never call `fetch` (or axios, or `XMLHttpRequest`) in app code.** Every request goes through
-  `ApiClient`, which prefixes `config.apiUrl`, decodes the body with the schema you pass, and
+  `ApiClient`, which prefixes `apiUrl` from `AppConfig`, adds the `AuthToken` bearer token
+  when there is one, decodes the body with the schema you pass, and
   maps every failure to an `ApiError`. Lint rejects `fetch`, `window.fetch`, `globalThis.fetch`,
   `XMLHttpRequest` and `axios`.
 - **`runEffect` is the only bridge to TanStack Query.** Pass the query's `signal` so

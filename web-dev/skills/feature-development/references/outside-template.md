@@ -7,4 +7,4 @@ For a project `develop` sorted as `same-stack` or `other-stack` (its Workflow B)
 - **Layout and names follow the project** (folders, file names, test placement). Register the feature where the map found the route table, the nav and the mock handlers.
 - **Stories** only when the project has Storybook.
 - **New libraries** (Effect, MSW, shadcn/ui, anything the project lacks) are a question for the user. Read `node_modules/effect/AGENTS.md` only when the project uses Effect.
-- **Gates:** run the project's formatter if it has one (`lint:fix`, `format`), then stop: `develop` runs `verify-project.sh` once over the whole suite after the change (Workflow B, step 5), and reports.
+- **Gates:** run the project's formatter if it has one, as one plain command with its package manager (`pnpm lint:fix`, `npm run format`, `yarn format`, `bun run lint:fix`; the skill's `allowed-tools` covers these forms), then stop: `develop` runs `verify-project.sh` once over the whole suite after the change (Workflow B, step 5), and reports.

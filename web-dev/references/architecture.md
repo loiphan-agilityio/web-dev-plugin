@@ -15,7 +15,8 @@ two differ.
 ApiClient → effect/http`
 
 - **Never call `fetch` (or axios, or `XMLHttpRequest`) in app code.** Every request goes through
-  `ApiClient`, which prefixes `config.apiUrl`, decodes the body with the schema you pass, and
+  `ApiClient`, which prefixes `apiUrl` from `AppConfig`, adds the `AuthToken` bearer token
+  when there is one, decodes the body with the schema you pass, and
   maps every failure to an `ApiError`. Lint rejects `fetch`, `window.fetch`, `globalThis.fetch`,
   `XMLHttpRequest` and `axios`.
 - **`runEffect` is the only bridge to TanStack Query.** Pass the query's `signal` so

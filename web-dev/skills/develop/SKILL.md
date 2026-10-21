@@ -2,15 +2,21 @@
 name: develop
 description: This skill should be used when the user types "/web-dev:develop", describes a whole web app, POC or MVP to build ("build an employee management app with CRUD and search"), or asks for a feature, endpoint or screen in an existing React project that is not built on the web-dev stack (axios, zod, Redux). It detects the project, picks the workflow and runs the other web-dev skills. Not for non-React projects, Next.js or SSR, bug fixes, code review or PR/MR work.
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's scripts/, references/ and agents/ beside skills/ and runs the other web-dev skills. Needs Node 22.22 or newer."
+allowed-tools: Bash(node --version) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/detect-project.mjs *) Bash(bash ${CLAUDE_SKILL_DIR}/../../scripts/verify-project.sh *) Bash(mkdir -p *) Bash(pnpm install) Bash(pnpm lint:fix) Bash(pnpm check)
 ---
 
 # develop
 
 Route one request to the workflow that fits the project, run it, and report once. Paths are relative to this skill's directory; the plugin's shared files are in `../../scripts/`, `../../references/` and `../../agents/`.
 
+Run the plugin's scripts exactly as written below, each as one plain command with no pipe or redirect: `allowed-tools` approves these exact forms for the run, so one message runs to the end without a permission prompt, headless included.
+
+- detect: `node ${CLAUDE_SKILL_DIR}/../../scripts/detect-project.mjs <target>`
+- regression gates (Workflow B): `bash ${CLAUDE_SKILL_DIR}/../../scripts/verify-project.sh <project-dir>`
+
 ## 1. Detect the project
 
-Run `node ../../scripts/detect-project.mjs <target>` by its full path (`<target>`: the folder the request names, else the current directory). Done when the JSON is read, or a failure below is handled.
+Run detect (`<target>`: the folder the request names, else the current directory). Done when the JSON is read, or a failure below is handled.
 
 | `tier` | The folder holds | Workflow |
 |---|---|---|

@@ -23,18 +23,8 @@ for the reports, logs and screenshots you collect from a run.
 
 ## Install
 
-```bash
-git clone -b <branch> <repo-url> claude-training
-claude plugin marketplace add ./claude-training
-claude plugin install web-dev@claude-training
-```
-
-`<branch>` is the branch that holds `.claude-plugin/marketplace.json`; leave out `-b` when it is
-the default branch. Then, in an empty folder, one message builds a whole app:
-`claude "/web-dev:develop Build me a library management app: books, members and loans"`; in an
-existing React project, the same command adds a feature or an endpoint.
-Other ways to install, the pinned versions and the companion skills are in
-[`web-dev/README.md`](web-dev/README.md).
+See [`web-dev/README.md`](web-dev/README.md#install): install from the git host, updates, headless
+runs, the pinned versions and the companion skills.
 
 ## Repository
 

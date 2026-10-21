@@ -17,6 +17,7 @@ tools/                            maintainer scripts, not shipped: verify-templa
                                   extract-snippets.mjs, check-guidelines.mjs
 web-dev/                          the plugin (its README.md is the user guide)
   .claude-plugin/plugin.json      name, version
+  CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
   skills/                         the product: develop (entry), project-setup, feature-development,
                                   api-integration, ui-development
     project-setup/assets/app-template/   the reference app every snippet is copied from
@@ -37,7 +38,7 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the template's dependencies, which the hooks and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts, `node --check` on the `.mjs` scripts, `check-guidelines.mjs`, and the template's ESLint, Prettier and TypeScript. |
 | `bash tools/verify-template.sh` | `references/` match the template's `CLAUDE.md`, each eval fixture gets its tier, and a fresh scaffold passes all five gates (lint, typecheck, test, build, Storybook build), with and without the quoted todos feature. Same as CI. |
-| `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals with a baseline arm without the plugin (`web-dev/evals/README.md`; `--tag e2e` for output quality). Runs Claude sessions on your account. |
+| `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
 | `pnpm check` in `web-dev/skills/project-setup/assets/app-template/` | The template itself passes the gates. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` | The plugin manifest is valid. |
@@ -67,9 +68,19 @@ corepack picks that version.
 - **Companion skills are pinned to an audited commit** in `install-companions.sh`. Upgrading one
   means reading the diff and updating the SHA there, in `web-dev/README.md` and in
   `web-dev/docs/companion-audit.md`, and its overrides in `web-dev/references/companions.md`.
-- **Release:** bump `version` in `web-dev/.claude-plugin/plugin.json`.
+- **Commands a skill runs** are listed in its `allowed-tools` frontmatter, and the plugin's
+  scripts are spelled `${CLAUDE_SKILL_DIR}/...` in `SKILL.md` exactly as in that rule, so one
+  message runs without a permission prompt (headless and untrusted folders included). A new
+  command in a skill gets its rule in the same change; never add `Bash(*)`, `git` or `npx` there.
+- **Release:** bump `version` in `web-dev/.claude-plugin/plugin.json` (a git install is a cached
+  copy: without a bump, teams never receive the change), add its entry to
+  `web-dev/CHANGELOG.md`, and tag the release commit `web-dev--v<version>`.
 - **Routing changes** (a skill's description, `develop`'s tables, `detect-project.mjs`) get an
   eval case in `web-dev/evals/`; a new fixture gets a line in `fixtures/check-detect.sh`.
+- **Run the model evals only when the user asks for an eval run** (they cost credits). Never on
+  your own initiative: not to try a fix, not for one case, not as part of a release, a commit or
+  a push, and never by adding a hook, schedule or automatic CI trigger. Check work with the free
+  tools (`pnpm lint`, `verify-template.sh`, `validate-skills.sh`).
 - Keep files LF (`.gitattributes`); the shell scripts fail on CRLF.
 - `examples/` and `docs/evidence/` are demo output: they stay local and are never committed
   (`.gitignore`). Fix a problem in a demo app by fixing the skill or the template and running the

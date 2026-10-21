@@ -2,6 +2,7 @@
 name: feature-development
 description: This skill should be used when the user asks to "implement this ticket", "build the X page", "add a form for X", "create a CRUD screen" or "develop the feature in this issue" in an app built from the web-dev template (React, Effect, TanStack Query, React Hook Form, shadcn/ui). It turns one ticket into a tested feature folder with schemas, business rules, API calls, queries, form, the four UI states, routes, tests and stories. Not for a new project (project-setup), one endpoint alone (api-integration) or a design with no ticket (ui-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the api-integration and ui-development skills' references. Needs Node 22.22 or newer and pnpm."
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm format) Bash(npm run lint:fix) Bash(npm run format) Bash(yarn lint:fix) Bash(yarn format) Bash(bun run lint:fix) Bash(bun run format)
 ---
 
 # feature-development
@@ -68,7 +69,7 @@ Follow `references/stories.md`. Every component file gets a `.stories.tsx` besid
 
 ## 9. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the project's allow-list covers exactly those). Fix the cause until green; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until green; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result.
 
 ## Result
 

@@ -22,23 +22,44 @@ without edits, commits and PR/MR (`develop` says so and changes nothing).
 
 Requirements: Node ≥ 22.22, pnpm 10 or newer (it switches to the pinned pnpm 11.17 by itself), Claude Code.
 
-**As a plugin (recommended).** The repository root is a marketplace
-(`.claude-plugin/marketplace.json`) that lists this folder as the plugin `web-dev`.
-Install it once and the skills load in every project:
+**As a plugin, for a team (recommended).** The repository root is a marketplace
+(`.claude-plugin/marketplace.json`) that lists this folder as the plugin `web-dev`. Add it
+straight from its git host, with no clone, and the skills load in every project:
 
 ```bash
-git clone -b <branch> <repo-url> claude-training
-claude plugin marketplace add ./claude-training
+claude plugin marketplace add <repo-url>#feat/web-dev-plugin
+```
+
+```bash
 claude plugin install web-dev@claude-training
 ```
 
-`<branch>` is the branch that holds `.claude-plugin/marketplace.json` (for a fork, the branch you
-forked); leave out `-b` when it is the default branch. The plugin is read in place from the clone: `git pull` and
-`/reload-plugins` bring the latest skills. Typed, plugin skills are namespaced: start with
-`/web-dev:develop <request>`; Claude also picks a skill from plain words. In an empty folder,
-one message builds a whole app: `claude "/web-dev:develop Build me a library management app:
-books, members and loans"`, or just the skeleton: `claude "Scaffold a new web app called
-billing-portal"`.
+`<repo-url>` is the repository's git URL, `git@<host>:<group>/claude-training.git` or
+`https://<host>/<group>/claude-training.git`. `#feat/web-dev-plugin` picks the branch that holds
+the marketplace; drop it once the plugin is on the default branch, or pin a release tag instead
+(`#web-dev--v0.1.0`). The clone runs with your
+own git credentials and never prompts: an SSH key loaded in `ssh-agent`, or for an `https://`
+URL a credential your git helper already stores.
+
+A git install is a cached copy, so a release reaches you only when `version` in
+`.claude-plugin/plugin.json` changes: run `claude plugin update web-dev@claude-training`, or turn
+on auto-update once (`/plugin` → Marketplaces → claude-training → Enable auto-update). To offer
+the plugin to everyone who opens one repository, run the `marketplace add` command there with
+`--scope project` and commit the `.claude/settings.json` it writes; teammates who trust the
+folder get the marketplace registered.
+
+Typed, plugin skills are namespaced: start with `/web-dev:develop <request>`; Claude also picks a
+skill from plain words. In an empty folder, one message builds a whole app:
+`claude "/web-dev:develop Build me a library management app: books, members and loans"`, or just
+the skeleton: `claude "Scaffold a new web app called billing-portal"`. Headless, in CI or a
+script, the same message runs to the end with no settings file:
+`claude -p "/web-dev:develop <request>" --permission-mode acceptEdits --allowedTools Skill`
+(see Permissions below).
+
+**From a clone, to work on the plugin.** `git clone -b <branch> <repo-url> claude-training`,
+then `claude plugin marketplace add ./claude-training` and the same install. A marketplace added
+from a local path is read in place: your edits load at the next session or after
+`/reload-plugins`, with no version bump.
 
 **Or copy the folders.** Copy `skills/`, `references/`, `scripts/` and `agents/` into the
 project's `.claude/` (or into `~/.claude/` to have them everywhere): the skills reach the shared
@@ -81,7 +102,7 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
 3. Run the checks from the repository root: `pnpm lint`, `bash tools/verify-template.sh`, and
    `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1`).
 4. A change to routing (a description, `develop`'s tables, `detect-project.mjs`) gets an eval
-   case; run `bash evals/run.sh --tag routing --runs 1 --no-publish` from `web-dev/`.
+   case: write it, do not run it (`evals/README.md`, When evals run).
 5. Open a merge request with a Conventional Commit message; CI runs the checks again.
 
 ## What the template gives you
@@ -107,17 +128,25 @@ build and Storybook build. The parts every feature builds on:
   toast is asserted as text.
 - **Storybook 10** (`.storybook/`): stories render inside `story-providers.tsx` (the same
   providers as a test) with MSW served by the app's worker; `pnpm build-storybook` is a gate.
-- **Config**: `src/lib/config.ts` validates every `VITE_*` value with Effect Schema at startup.
-- **Permissions**: `.claude/settings.json` allows exactly the pnpm commands the skills run
-  (`install`, `lint`, `lint:fix`, `typecheck`, `test`, `build`, `build-storybook`, `check`,
-  `dev:mock`, `exec shadcn add` / `info`), so a feature runs end to end without a prompt.
-  Its `PostToolUse` hook (`.claude/hooks/format.mjs`) runs Prettier on every file Claude writes
-  or edits inside the project, so code is formatted as it is written.
-  `scaffold.sh` copies it only when the project has no `.claude/settings.json`.
-  Claude Code applies a project's allow rules only once the folder is trusted: open it with
-  `claude` once and accept the trust prompt. Until then it reports "this workspace has not been
-  trusted" and every `pnpm` command needs approval. A headless run (`claude -p`, CI) in a new
-  folder passes the same list instead: `claude -p "..." --settings .claude/settings.json`.
+- **Config**: `src/lib/config.ts` validates every `VITE_*` value with Effect Schema at startup;
+  Effect code reads it as the `AppConfig` service, so a test can provide other values.
+- **Auth hook**: `AuthToken` (`src/lib/api/auth.ts`) is where `ApiClient` gets a bearer token.
+  The template provides `AuthToken.none`; an app with sign-in swaps in
+  `AuthToken.fromGetter(() => token)` in `src/lib/runtime.ts`, one line, tested in
+  `client.test.ts`.
+- **Permissions**, in two layers. Each skill's `allowed-tools` frontmatter approves the exact
+  commands it runs, for the turn that invokes it: the plugin's scripts by their
+  `${CLAUDE_SKILL_DIR}` path (`detect-project.mjs`, `scaffold.sh`, `install-companions.sh`,
+  `verify-project.sh`) and the pnpm gates. Claude Code applies it even in a folder that was never
+  trusted, `-p` included, so one message runs to the end with no prompt and no settings file;
+  file edits need `--permission-mode acceptEdits` headless. For later turns, the project's
+  `.claude/settings.json` allows exactly the pnpm commands the skills run (`install`, `lint`,
+  `lint:fix`, `typecheck`, `test`, `build`, `build-storybook`, `check`, `dev:mock`,
+  `exec shadcn add` / `info`), and its `PostToolUse` hook (`.claude/hooks/format.mjs`) runs
+  Prettier on every file Claude writes or edits inside the project, so code is formatted as it is
+  written. `scaffold.sh` copies it only when the project has none, and Claude Code applies it
+  once the folder is trusted (open it with `claude` and accept the prompt).
+  `git init` and commits stay prompts on purpose.
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
@@ -223,7 +252,9 @@ Neither ships with the plugin.
    neither the template nor the todos feature (a detail key, `setQueryData`) is marked
    ` ```ts sketch ` and says so in the text. A todos block keeps its `file=` path; a new todos
    file gets a block with its own `file=` path, or `verify-template.sh` never tests it.
-4. Release: bump `version` in `.claude-plugin/plugin.json` and run
+4. Release: bump `version` in `.claude-plugin/plugin.json` (installs from git are cached copies,
+   so without a bump nobody receives the change), add the entry to `CHANGELOG.md`, tag the
+   commit `web-dev--v<version>`, and run
    `claude plugin validate --strict .claude-plugin/plugin.json` (and `claude plugin validate --strict ..`
    for the marketplace).
 
@@ -236,8 +267,8 @@ word, so a scaffolded app keeps them without the plugin; `check-guidelines.mjs` 
 
 **Routing** (`skills/develop/SKILL.md`, the skills' descriptions, `scripts/detect-project.mjs`)
 is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `evals/README.md`);
-`verify-template.sh` checks the tier of every fixture without a model, and CI runs the routing
-evals on schedules when `ANTHROPIC_API_KEY` is set.
+`verify-template.sh` checks the tier of every fixture without a model; the model evals run only
+on request (`evals/README.md`, When evals run).
 
 **CI** (`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
 and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,

@@ -3,7 +3,7 @@
 Turn one description into a running app on mocked data. Every gap gets a sensible default that is written down; nothing stops for a question.
 
 ```
-description -> docs/plan.md -> project-setup -> feature-development x N -> [ui-development] -> gates -> run
+description -> docs/plan.md -> project-setup -> feature-development x N (one subagent each, in order) -> [ui-development] -> gates -> run
 ```
 
 ## A0. Where to build
@@ -25,7 +25,7 @@ Write the plan in the shape of `plan.md` (beside this file) before any code. It 
 - **Mock data:** 6 to 10 realistic records per entity, covering every allowed value and edge (an overdue item, an empty optional field).
 - **Assumptions:** every choice the description left open, one line each.
 
-Gaps get the reading a typical user of that product would expect. Sign-in and roles, payments, file uploads, real-time updates, email, i18n and SSR are out of scope by default; a description that asks for one gets its UI on a mocked API, noted under Assumptions. The app runs on MSW mocks of this API, so keep the API realistic enough for a real backend to replace the mocks without touching the UI.
+Gaps get the reading a typical user of that product would expect. Sign-in and roles, payments, file uploads, real-time updates, email, i18n and SSR are out of scope by default; a description that asks for one gets its UI on a mocked API, noted under Assumptions (sign-in: a sign-in feature on mocked endpoints, its token passed to `ApiClient` through `AuthToken.fromGetter`, see `api-integration`'s `references/effect-http.md`, Auth). The app runs on MSW mocks of this API, so keep the API realistic enough for a real backend to replace the mocks without touching the UI.
 
 ## A2. Scaffold
 
@@ -33,12 +33,15 @@ Invoke `project-setup` (Skill tool) for the folder from A0 and follow it through
 
 ## A3. Build each feature
 
-For each ticket in `docs/plan.md`, in order, invoke `feature-development` (Skill tool) with it and reach green gates before the next ticket. Meanwhile:
+Build the tickets in `docs/plan.md` in order, one at a time, each in its own subagent (Agent tool, `general-purpose`), so this context keeps only the plan and one short report per ticket however many tickets there are. Start the next ticket only after the previous one reports green gates; never run two at once, since they share `src/app/routes.tsx`, `src/mocks/handlers.ts` and the nav.
 
-- the plan answers the ticket's questions; a gap it does not cover gets a default added to its **Assumptions**, and every criterion stays in scope;
-- mock handlers serve the plan's mock data;
-- a design waits for A4, which applies it once to the whole app;
-- keep one line of gate output per feature for the final Result instead of a Result per feature.
+Give each subagent a self-contained brief, since it does not see this conversation:
+
+- the project folder, `docs/plan.md`, and the ticket's number and title;
+- "Invoke the `feature-development` skill (Skill tool) for this ticket and follow it as under `develop`'s Workflow A: the plan answers the ticket's questions; a gap it does not cover gets a default appended to the plan's **Assumptions**, and every criterion stays in scope. Mock handlers serve the plan's mock data. Ignore any design (it is applied later to the whole app). Write no `## Result` block.";
+- "Finish with `pnpm lint:fix`, then `pnpm check`, each as a plain command. Reply in at most 15 lines: files and routes created, the `pnpm check` outcome with test count and coverage, the assumptions you added, and anything not done or any gate you could not run."
+
+Then read the report: a red or missing gate, or a ticket only partly built, is fixed before the next ticket (resume that subagent with SendMessage, or fix it here). Keep its gate line for the final Result. Without an Agent tool, invoke `feature-development` (Skill tool) here for each ticket, under the same rules.
 
 ## A4. Design
 
@@ -46,7 +49,7 @@ With a design (images in `design/`, a `DESIGN.md` about the look, or a Figma lin
 
 ## A5. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the project's allow-list covers exactly those). Fix the cause until all five gates pass; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result, and the POC is not called done.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until all five gates pass; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result, and the POC is not called done.
 
 ## A6. Run it
 

@@ -1,4 +1,4 @@
-import { Context, Effect, flow, Layer, Schema } from 'effect';
+import { Context, Effect, flow, Layer, Option, Schema } from 'effect';
 import {
   FetchHttpClient,
   HttpClient,
@@ -7,8 +7,9 @@ import {
   HttpClientResponse,
 } from 'effect/http';
 
-import { config } from '@/lib/config';
+import { AppConfig } from '@/lib/config';
 
+import { AuthToken } from './auth';
 import {
   type ApiError,
   ForbiddenError,
@@ -112,12 +113,21 @@ export class ApiClient extends Context.Service<
   static readonly layer = Layer.effect(
     ApiClient,
     Effect.gen(function* () {
+      const { apiUrl } = yield* AppConfig;
+      const auth = yield* AuthToken;
       const client = (yield* HttpClient.HttpClient).pipe(
         HttpClient.mapRequest(
-          flow(
-            HttpClientRequest.prependUrl(config.apiUrl),
-            HttpClientRequest.acceptJson,
-            // Auth goes here when the app has it, e.g. HttpClientRequest.bearerToken(token).
+          flow(HttpClientRequest.prependUrl(apiUrl), HttpClientRequest.acceptJson),
+        ),
+        // `Authorization: Bearer <token>` whenever AuthToken has one (see auth.ts).
+        HttpClient.mapRequestEffect((request) =>
+          auth.get.pipe(
+            Effect.map(
+              Option.match({
+                onNone: () => request,
+                onSome: (token) => HttpClientRequest.bearerToken(request, token),
+              }),
+            ),
           ),
         ),
         HttpClient.filterStatusOk,

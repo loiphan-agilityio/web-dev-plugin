@@ -1,9 +1,10 @@
-import { Effect, Schema } from 'effect';
+import { Effect, Layer, Schema } from 'effect';
 import { http, HttpResponse } from 'msw/http';
 
-import { config } from '@/lib/config';
+import { AppConfig, config } from '@/lib/config';
 import { server } from '@/mocks/server';
 
+import { AuthToken } from '../auth';
 import { ApiClient } from '../client';
 import { runEffect } from '../run';
 
@@ -62,5 +63,48 @@ describe('ApiClient', () => {
   it('maps a body that does not match the schema to InvalidResponseError', async () => {
     const error = await failure(() => HttpResponse.json({ id: 'not-a-number' }));
     expect(error).toMatchObject({ _tag: 'InvalidResponseError' });
+  });
+});
+
+describe('ApiClient layers', () => {
+  /** Runs getItem on ApiClient built from the given config and token layers. */
+  const runWith = (layer: Layer.Layer<AppConfig | AuthToken>) =>
+    Effect.runPromise(getItem.pipe(Effect.provide(ApiClient.layer.pipe(Layer.provide(layer)))));
+  const appConfig = (apiUrl: string) => Layer.succeed(AppConfig, { ...config, apiUrl });
+
+  it('prefixes the apiUrl from AppConfig', async () => {
+    server.use(http.get('https://other.test/items/1', () => HttpResponse.json({ id: 2 })));
+    await expect(
+      runWith(Layer.mergeAll(appConfig('https://other.test'), AuthToken.none)),
+    ).resolves.toEqual({ id: 2 });
+  });
+
+  it('sends no Authorization header with AuthToken.none', async () => {
+    server.use(
+      http.get(url, ({ request }) =>
+        HttpResponse.json({ id: request.headers.has('authorization') ? 0 : 1 }),
+      ),
+    );
+    await expect(
+      runWith(Layer.mergeAll(appConfig(config.apiUrl), AuthToken.none)),
+    ).resolves.toEqual({ id: 1 });
+  });
+
+  it('sends the token from AuthToken.fromGetter as a bearer token', async () => {
+    server.use(
+      http.get(url, ({ request }) =>
+        request.headers.get('authorization') === 'Bearer secret'
+          ? HttpResponse.json({ id: 1 })
+          : HttpResponse.json({}, { status: 401 }),
+      ),
+    );
+    await expect(
+      runWith(
+        Layer.mergeAll(
+          appConfig(config.apiUrl),
+          AuthToken.fromGetter(() => 'secret'),
+        ),
+      ),
+    ).resolves.toEqual({ id: 1 });
   });
 });

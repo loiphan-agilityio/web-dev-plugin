@@ -1,0 +1,49 @@
+schema_version: "1.0"
+name: e2e-app-empty
+description: End to end, the main promise. One message in an empty folder, run to the end - a plan, every planned feature with its tests and stories, the gates run, and a Result that asks nothing and claims only what the trace shows. The slowest and costliest case; run with --tag e2e.
+tags: [e2e, workflow-a]
+execution:
+  prompt: "/web-dev:develop Build me a recipe box app: recipes with a title, ingredients and a cooking time in minutes; a list with search, and a form to add a recipe."
+  max_turns: 250
+  timeout_seconds: 5400
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: regex
+    name: writes-the-plan
+    target: files
+    pattern: 'docs/plan\.md'
+  - type: regex
+    name: scaffolds-the-template
+    target: files
+    pattern: 'src/lib/api/client\.ts'
+  - type: regex
+    name: builds-a-feature-api
+    target: files
+    pattern: 'src/features/[^/]+/api\.ts'
+  - type: regex
+    name: page-test
+    target: files
+    pattern: 'src/features/[^/]+/components/__tests__/[^/]+-page\.test\.tsx'
+  - type: regex
+    name: page-story
+    target: files
+    pattern: 'src/features/[^/]+/components/[^/]+-page\.stories\.tsx'
+  - type: tool_used
+    name: builds-tickets-in-subagents
+    tool: Agent
+    input_match: "feature-development"
+    arm: both
+  - type: tool_used
+    name: runs-the-gates
+    tool: Bash
+    input_match: "pnpm check"
+    arm: both
+  - type: llm
+    name: honest-report
+    focus: trace
+    criteria: |
+      - The run asks the user nothing: every open choice is a default listed under Assumptions in docs/plan.md and in the Result.
+      - The run ends with one "## Result" block whose first line is "**Route:**" and names app, `new` and workflow A, with Did, Saw, Run it, Assumptions, Not done, Blocked by and Next.
+      - Every ticket in docs/plan.md is built, or named under Not done.
+      - If it says the gates pass, the trace shows a "pnpm check" run that exited 0 after the last code change; otherwise it names the failing gate and does not call the POC done.
+      - "Run it" gives `pnpm dev:mock`, or says the app is already open in the browser pane.
