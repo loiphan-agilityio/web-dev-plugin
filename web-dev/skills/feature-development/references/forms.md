@@ -1,10 +1,10 @@
 # Forms
 
-Source: the todos feature (`components/todo-form.tsx`), `src/lib/forms.ts`, `src/components/ui/field.tsx` of the template.
+Source: the todos feature (`components/TodoForm/index.tsx`), `src/lib/forms.ts`, `src/components/ui/field.tsx` of the template.
 
 ## The full form
 
-```tsx file=src/features/todos/components/todo-form.tsx
+```tsx file=src/features/todos/components/TodoForm/index.tsx
 import { effectTsResolver } from '@hookform/resolvers/effect-ts';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -15,8 +15,8 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field
 import { Input } from '@/components/ui/input';
 import { setFormErrors } from '@/lib/forms';
 
-import { useCreateTodo } from '../queries';
-import { NewTodo, type NewTodoInput } from '../schemas';
+import { useCreateTodo } from '../../queries';
+import { NewTodo, type NewTodoInput } from '../../schemas';
 
 // Built once at module level. The fields hold NewTodo.Encoded (untrimmed), handleSubmit
 // passes NewTodo.Type (trimmed).

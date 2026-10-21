@@ -23,11 +23,11 @@ graders:
   - type: regex
     name: page-test
     target: files
-    pattern: 'src/features/[^/]+/components/__tests__/[^/]+-page\.test\.tsx'
+    pattern: 'src/features/[^/]+/components/[^/]+Page/__tests__/[^/]+Page\.test\.tsx'
   - type: regex
     name: page-story
     target: files
-    pattern: 'src/features/[^/]+/components/[^/]+-page\.stories\.tsx'
+    pattern: 'src/features/[^/]+/components/[^/]+Page/[^/]+Page\.stories\.tsx'
   - type: tool_used
     name: builds-tickets-in-subagents
     tool: Agent

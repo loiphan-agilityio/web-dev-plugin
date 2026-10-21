@@ -11,23 +11,26 @@ execution:
   allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
 graders:
   - type: file_exists
+    name: list-component-folder
+    path: "src/features/customers/components/*List/index.tsx"
+  - type: file_exists
     name: list-component-test
-    path: "src/features/customers/components/__tests__/*-list.test.tsx"
+    path: "src/features/customers/components/*List/__tests__/*List.test.tsx"
   - type: file_exists
     name: form-component-test
-    path: "src/features/customers/components/__tests__/*-form.test.tsx"
+    path: "src/features/customers/components/*Form/__tests__/*Form.test.tsx"
   - type: file_exists
     name: page-test
-    path: "src/features/customers/components/__tests__/*-page.test.tsx"
+    path: "src/features/customers/components/*Page/__tests__/*Page.test.tsx"
   - type: file_exists
     name: list-story
-    path: "src/features/customers/components/*-list.stories.tsx"
+    path: "src/features/customers/components/*List/*List.stories.tsx"
   - type: file_exists
     name: form-story
-    path: "src/features/customers/components/*-form.stories.tsx"
+    path: "src/features/customers/components/*Form/*Form.stories.tsx"
   - type: file_exists
     name: page-story
-    path: "src/features/customers/components/*-page.stories.tsx"
+    path: "src/features/customers/components/*Page/*Page.stories.tsx"
   - type: tool_used
     name: runs-the-gates
     tool: Bash

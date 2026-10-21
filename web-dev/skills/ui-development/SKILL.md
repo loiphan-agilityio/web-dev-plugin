@@ -48,7 +48,7 @@ Tailwind 4 is CSS-first: the theme lives in `src/styles/index.css` (values in `:
 
 ## 4. Tests
 
-React Testing Library by role and label for what the design shows: headings, landmarks, lists, buttons, labels. Every new component gets its own test in `components/__tests__/` with `renderWithProviders`; the page test (`renderRoute`) covers how the parts work together; data screens test the four states (`../feature-development/references/testing.md`). Behaviour is asserted, not class names or colors.
+React Testing Library by role and label for what the design shows: headings, landmarks, lists, buttons, labels. Every new component gets its own folder (`components/<Name>/index.tsx`, `../feature-development/references/feature-layout.md`) and its own test in that folder's `__tests__/` with `renderWithProviders`; the page test (`renderRoute`) covers how the parts work together; data screens test the four states (`../feature-development/references/testing.md`). Behaviour is asserted, not class names or colors.
 
 ## 5. Visual check
 

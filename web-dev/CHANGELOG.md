@@ -13,7 +13,8 @@ The first release.
   Workflow B (an existing React project, mapped by the `codebase-explorer` agent and checked by
   `verify-project.sh`) or Workflow C (one change in an app from the template).
 - **Four skills** behind it: `project-setup`, `feature-development`, `api-integration`,
-  `ui-development`.
+  `ui-development`. Each component they write is a folder: `<Name>/index.tsx`, its
+  `<Name>.stories.tsx`, its `__tests__/` and the files only it uses (`types.ts`, `utils.ts`).
 - **The template** (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7,
   shadcn/ui): `ApiClient` with typed errors, reading `apiUrl` from `AppConfig` and the bearer
   token from `AuthToken` (none by default; `AuthToken.fromGetter` for sign-in); five gates (lint,

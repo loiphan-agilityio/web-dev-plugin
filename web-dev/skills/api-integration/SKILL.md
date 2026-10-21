@@ -36,7 +36,7 @@ In `queries.ts` ([references/react-query.md](references/react-query.md)): keys i
 
 ## 5. Mocks and tests
 
-Extend `createTodosHandlers(initial)` and `todosMocks` (pending, error, validation) in `mocks.ts`, with URLs built from `config.apiUrl`, and register the handlers in `src/mocks/handlers.ts` ([references/msw.md](references/msw.md)). Test success, every error tag the endpoint can produce, and for a mutation the invalidation. A test goes in the test file of the component that shows the result (`components/__tests__/`); only flows across components go in the page test. `client.test.ts` already proves the status-to-`ApiError` mapping, so feature tests check what the UI does with the error. Toasts are asserted as text with `findByText`. Test file layout and rules: `../feature-development/references/testing.md`.
+Extend `createTodosHandlers(initial)` and `todosMocks` (pending, error, validation) in `mocks.ts`, with URLs built from `config.apiUrl`, and register the handlers in `src/mocks/handlers.ts` ([references/msw.md](references/msw.md)). Test success, every error tag the endpoint can produce, and for a mutation the invalidation. A test goes in the test file of the component that shows the result (`components/<Name>/__tests__/<Name>.test.tsx`); only flows across components go in the page test. `client.test.ts` already proves the status-to-`ApiError` mapping, so feature tests check what the UI does with the error. Toasts are asserted as text with `findByText`. Test file layout and rules: `../feature-development/references/testing.md`.
 
 ## 6. Gates
 

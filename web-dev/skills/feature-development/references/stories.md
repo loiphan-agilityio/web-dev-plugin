@@ -1,6 +1,6 @@
 # Stories
 
-Source: the todos feature (`components/todo-list.stories.tsx`, `components/todo-form.stories.tsx`, `components/todos-page.stories.tsx`); template `.storybook/main.ts`, `.storybook/preview.tsx`, `.storybook/story-providers.tsx`.
+Source: the todos feature (`components/TodoList/TodoList.stories.tsx`, `components/TodoForm/TodoForm.stories.tsx`, `components/TodosPage/TodosPage.stories.tsx`); template `.storybook/main.ts`, `.storybook/preview.tsx`, `.storybook/story-providers.tsx`.
 
 Storybook 10 (`@storybook/react-vite`) shows every component in each state it can render, so a reviewer can see the screen without running the app. `pnpm storybook` opens it on port 6006; `pnpm build-storybook` is part of `pnpm check`, so a story that does not compile fails the gates.
 
@@ -14,17 +14,17 @@ There is no `msw-storybook-addon`: it calls MSW 2's `onUnhandledRequest`, and th
 
 ## One story file per component
 
-Every file in `components/` has a `.stories.tsx` beside it (`todo-list.tsx` → `todo-list.stories.tsx`); its `.test.tsx` is in `components/__tests__/`. The stories show the states; the tests prove them. Drive each state with the feature's `mocks.ts` (the same `create<Name>Handlers` and `<name>Mocks` the tests use), never with new inline data or by mocking hooks.
+Every component folder has a `<Name>.stories.tsx` beside its `index.tsx` (`TodoList/index.tsx` → `TodoList/TodoList.stories.tsx`), which imports the component from `.`; its test is `TodoList/__tests__/TodoList.test.tsx`. The stories show the states; the tests prove them. Drive each state with the feature's `mocks.ts` (the same `create<Name>Handlers` and `<name>Mocks` the tests use), never with new inline data or by mocking hooks.
 
 ### The list component
 
 One story per state: the four states of a data screen are four stories.
 
-```tsx file=src/features/todos/components/todo-list.stories.tsx
+```tsx file=src/features/todos/components/TodoList/TodoList.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { createTodosHandlers, todoFixtures, todosMocks } from '../mocks';
-import { TodoList } from './todo-list';
+import { createTodosHandlers, todoFixtures, todosMocks } from '../../mocks';
+import { TodoList } from '.';
 
 // One story per state, driven by the same MSW handlers as the tests.
 const meta = {
@@ -57,11 +57,11 @@ export const ErrorState: Story = {
 
 A state the form reaches only by interaction (a server field error, client validation) gets a `play` function. `canvas` and `userEvent` come from the story context; nothing is imported for them.
 
-```tsx file=src/features/todos/components/todo-form.stories.tsx
+```tsx file=src/features/todos/components/TodoForm/TodoForm.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { createTodosHandlers, todosMocks } from '../mocks';
-import { TodoForm } from './todo-form';
+import { createTodosHandlers, todosMocks } from '../../mocks';
+import { TodoForm } from '.';
 
 const meta = {
   title: 'Todos/TodoForm',
@@ -89,11 +89,11 @@ export const ServerFieldError: Story = {
 
 One `Default` story with working handlers: the parts together. The states are already in the component stories.
 
-```tsx file=src/features/todos/components/todos-page.stories.tsx
+```tsx file=src/features/todos/components/TodosPage/TodosPage.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { createTodosHandlers } from '../mocks';
-import { TodosPage } from './todos-page';
+import { createTodosHandlers } from '../../mocks';
+import { TodosPage } from '.';
 
 // TodoList and TodoForm have their own stories per state; this shows the parts together.
 const meta = {
@@ -116,4 +116,4 @@ export const Default: Story = {};
 - Minimum set: list = `Loading`, `Success`, `Empty`, `ErrorState`; form = `Default` plus one `play` story per server error the form shows; page = `Default`. Any other component (item row, dialog, edit form): a story per state it renders.
 - Do not name a story `Error`: it shadows the global `Error` in that module. Use `ErrorState`.
 - Handlers set on `meta.parameters` apply to every story in the file; a story's own `parameters.msw.handlers` replaces them.
-- Stories are not tests: the `.test.tsx` in `components/__tests__/` for each component still covers every state and error path. Do not delete or thin a test because a story shows the same state.
+- Stories are not tests: the `.test.tsx` in each component folder's `__tests__/` still covers every state and error path. Do not delete or thin a test because a story shows the same state.

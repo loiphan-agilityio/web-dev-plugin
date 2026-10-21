@@ -73,7 +73,7 @@ export const useCreateTodo = () => {
 
 Name `use<Action><Name>`. Invalidate exactly the keys the write changes: the lists the item can appear in, and the detail key of that item for update/delete. Return the promise.
 
-Call-site error handling: `todo-form.tsx` (the feature-development skill's `references/forms.md`,
+Call-site error handling: `TodoForm/index.tsx` (the feature-development skill's `references/forms.md`,
 `../../feature-development/references/forms.md`) calls `createTodo.mutate(values, { onSuccess, onError })`,
 with `form.reset()` and `toast.success(...)` in `onSuccess` and `setFormErrors(form.setError, error)`
 in `onError`.
@@ -95,4 +95,4 @@ Callbacks that touch the component (form reset, toast) go to `mutate`; the hook'
 
 ## Testing invalidation
 
-Drive it through the UI with in-memory handlers: render the list with `createTodosHandlers([])`, perform the mutation, and `await screen.findByRole('list', ...)`; if the new item shows, the list refetched. The `todos-page.test.tsx` test (the feature-development skill's `references/testing.md`, "The page test") does exactly this. Each test gets a fresh `QueryClient` from `renderRoute` / `renderWithProviders` (returned as `queryClient` when you need to inspect the cache).
+Drive it through the UI with in-memory handlers: render the list with `createTodosHandlers([])`, perform the mutation, and `await screen.findByRole('list', ...)`; if the new item shows, the list refetched. The `TodosPage.test.tsx` test (the feature-development skill's `references/testing.md`, "The page test") does exactly this. Each test gets a fresh `QueryClient` from `renderRoute` / `renderWithProviders` (returned as `queryClient` when you need to inspect the cache).

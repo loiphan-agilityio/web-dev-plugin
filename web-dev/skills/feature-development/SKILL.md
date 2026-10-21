@@ -32,12 +32,12 @@ Done when every criterion is in scope or excluded with its question.
 src/features/<name>/
   schemas.ts   model.ts   api.ts   queries.ts   mocks.ts   routes.tsx
   __tests__/   schemas.test.ts, model.test.ts
-  components/  <name>-page.tsx, <name>-form.tsx, <name>-list.tsx,
-               and a .stories.tsx beside each one
-    __tests__/ <name>-page.test.tsx, <name>-form.test.tsx, <name>-list.test.tsx
+  components/  one folder per component: <Name>Page/, <Name>Form/, <Name>List/
+    <Name>List/  index.tsx (the component), <Name>List.stories.tsx,
+                 __tests__/<Name>List.test.tsx, and types.ts / utils.ts only it uses
 ```
 
-Starting from todos, rename `todo` / `Todo` everywhere (folder, files, exports, keys, URLs) and keep the structure. Reuse before writing: `src/components/`, then `src/components/ui/`, then other features through their `schemas`, `model`, `queries` or `routes` (lint rejects another feature's `api`, `mocks` and `components`). A missing shadcn component comes from `pnpm exec shadcn add <name>`; delete any extra file the CLI added that nothing imports (`toggle-group` brings `toggle`).
+Starting from todos, rename `todo` / `Todo` everywhere (folders, files, exports, keys, URLs) and keep the structure (for a `customers` feature, `components/TodoList/` becomes `components/CustomerList/`; `references/feature-layout.md`, section components/). Reuse before writing: `src/components/`, then `src/components/ui/`, then other features through their `schemas`, `model`, `queries` or `routes` (lint rejects another feature's `api`, `mocks` and `components`). A missing shadcn component comes from `pnpm exec shadcn add <name>`; delete any extra file the CLI added that nothing imports (`toggle-group` brings `toggle`).
 
 ## 3. Schema, model, API, queries
 
@@ -61,11 +61,11 @@ The feature exports a lazy route factory (`todoRoutes = (): RouteObject[] => [..
 
 ## 7. Tests
 
-Follow `references/testing.md`. Every component file, including ones added later, gets its own test in `components/__tests__/`, rendered alone with `renderWithProviders`. The page test (`renderRoute`) covers only flows that need the parts together. Drive states with `server.use(...)` (a later call wins; within one call the first match wins), never by mocking hooks or `api.ts`. Query by role and label. Minimum: list = the four states; form = client validation, success (input cleared), server 422 next to its field; page = the create flow; schemas = `Schema.decodeUnknownSync`; model = each rule and its edges, without rendering.
+Follow `references/testing.md`. Every component, including ones added later, gets its own test in its folder's `__tests__/` (`components/<Name>List/__tests__/<Name>List.test.tsx`), rendered alone with `renderWithProviders`. The page test (`renderRoute`) covers only flows that need the parts together. Drive states with `server.use(...)` (a later call wins; within one call the first match wins), never by mocking hooks or `api.ts`. Query by role and label. Minimum: list = the four states; form = client validation, success (input cleared), server 422 next to its field; page = the create flow; schemas = `Schema.decodeUnknownSync`; model = each rule and its edges, without rendering.
 
 ## 8. Stories
 
-Follow `references/stories.md`. Every component file gets a `.stories.tsx` beside it with one story per state it renders, driven by the feature's `mocks.ts` through `parameters.msw.handlers`. The preview already provides the query client, router and `Toaster`. Done when every `components/*.tsx` has its test and its story.
+Follow `references/stories.md`. Every component gets a `<Name>.stories.tsx` in its folder with one story per state it renders, driven by the feature's `mocks.ts` through `parameters.msw.handlers`. The preview already provides the query client, router and `Toaster`. Done when every folder in `components/` has its `index.tsx`, its story and its test.
 
 ## 9. Gates
 

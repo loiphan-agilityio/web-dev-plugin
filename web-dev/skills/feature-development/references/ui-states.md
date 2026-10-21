@@ -1,10 +1,10 @@
 # UI states
 
-Source: the todos feature (`components/todo-list.tsx` and `todos-page.tsx`).
+Source: the todos feature (`components/TodoList/index.tsx` and `components/TodosPage/index.tsx`).
 
 Four states are four different screens. Never fold them into one ternary, and never let empty and error look the same.
 
-```tsx file=src/features/todos/components/todo-list.tsx
+```tsx file=src/features/todos/components/TodoList/index.tsx
 import { useQuery } from '@tanstack/react-query';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toUserMessage } from '@/lib/api/errors';
 
-import { openFirst } from '../model';
-import { todoListQueryOptions } from '../queries';
+import { openFirst } from '../../model';
+import { todoListQueryOptions } from '../../queries';
 
 /** Loading, error, empty and success are four different screens — never one ternary. */
 export const TodoList = () => {
@@ -86,9 +86,9 @@ export const TodoList = () => {
 
 ## Page composition
 
-```tsx file=src/features/todos/components/todos-page.tsx
-import { TodoForm } from './todo-form';
-import { TodoList } from './todo-list';
+```tsx file=src/features/todos/components/TodosPage/index.tsx
+import { TodoForm } from '../TodoForm';
+import { TodoList } from '../TodoList';
 
 export const TodosPage = () => (
   <section className="space-y-6">

@@ -25,7 +25,7 @@ Run each command on its own, exactly as written (`pnpm check`, not `pnpm check 2
 src/
   app/              routes.tsx (createRoutes), providers.tsx, root-layout.tsx, route-error.tsx
   components/ui/    shadcn components: add with `pnpm exec shadcn add <name>`, never edit by hand
-  components/       shared app components
+  components/       shared app components, one folder per component (as in a feature, below)
   features/<name>/  one folder per feature (names below are for an `items` feature):
     schemas.ts        Effect Schemas + derived types: Item, ItemList, NewItem / NewItemInput
     model.ts          business rules as pure functions of those types
@@ -33,8 +33,12 @@ src/
     queries.ts        key factory itemKeys, itemListQueryOptions(), mutation hooks useCreateItem()
     mocks.ts          createItemsHandlers(initial) + itemsMocks (MSW)
     routes.tsx        itemRoutes() — lazy route objects
-    components/       kebab-case files, PascalCase named exports, a .stories.tsx beside each one,
-                      a .test.tsx for each one in components/__tests__/
+    components/       one folder per component, named like its export (PascalCase):
+      ItemForm/
+        index.tsx                     the component itself (export const ItemForm), not a re-export
+        ItemForm.stories.tsx
+        __tests__/ItemForm.test.tsx
+        types.ts, utils.ts, ...       only what ItemForm alone uses; a second user moves it out
   lib/
     config.ts         every env value (VITE_*), read statically and validated with Effect Schema;
                       `config` outside Effect, the `AppConfig` service inside it
@@ -115,8 +119,8 @@ ApiClient → effect/http`
   path with a parameter (`/tasks/stats` before `/tasks/:id`): the first match wins, and
   `:id` would match `stats`.
 - Tests live in a `__tests__/` folder next to the code they test, never beside the file itself
-  (`components/x.tsx` → `components/__tests__/x.test.tsx`, `schemas.ts` → `__tests__/schemas.test.ts`).
-  Every component file has a unit test file there that renders it
+  (`components/ItemForm/index.tsx` → `components/ItemForm/__tests__/ItemForm.test.tsx`,
+  `schemas.ts` → `__tests__/schemas.test.ts`). Every component has a unit test file there that renders it
   alone with `renderWithProviders(<X />)`. The page test (`renderRoute`) covers only how the
   parts work together, not each component's cases again.
 - Query by role and label, not test ids. Test all four states and every form error path.
@@ -125,8 +129,8 @@ ApiClient → effect/http`
 
 ## Stories
 
-- Every component file has a `.stories.tsx` beside it (`components/x.tsx` →
-  `components/x.stories.tsx`), with one story per state it renders, driven by the feature's
+- Every component has a `<Name>.stories.tsx` in its folder (`components/ItemForm/index.tsx` →
+  `components/ItemForm/ItemForm.stories.tsx`), with one story per state it renders, driven by the feature's
   `mocks.ts` through `parameters.msw.handlers`.
 - The preview (`.storybook/preview.tsx`) wraps every story in the same providers as a test and
   starts the app's MSW worker: add no providers in a story.

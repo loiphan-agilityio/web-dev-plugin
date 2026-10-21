@@ -12,7 +12,24 @@ One folder per feature: `src/features/<name>/`. All code below is the todos feat
 | `queries.ts` | key factory, `queryOptions`, mutation hooks | `todoKeys`, `todoListQueryOptions`, `useCreateTodo` |
 | `mocks.ts` | MSW handlers | `createTodosHandlers`, `todosHandlers`, `todosMocks`, `todoFixtures` |
 | `routes.tsx` | lazy route factory | `todoRoutes` |
-| `components/` | kebab-case files, PascalCase named exports, a `.stories.tsx` beside each one and a `.test.tsx` for each one in `components/__tests__/` | `todo-form.tsx` -> `TodoForm` |
+| `components/` | one folder per component, named like its export (below) | `TodoForm/index.tsx` -> `TodoForm` |
+
+## components/
+
+One folder per component, named in PascalCase like the component it exports:
+
+```
+components/
+  TodoForm/
+    index.tsx                     the component itself: export const TodoForm
+    TodoForm.stories.tsx          its stories (stories.md)
+    __tests__/TodoForm.test.tsx   its tests (testing.md)
+    types.ts, utils.ts, ...       only what TodoForm alone uses: props types, helpers, constants
+```
+
+- `index.tsx` holds the component, not a re-export. Import the folder: `import { TodoForm } from '../TodoForm'`.
+- A file in the folder serves that component only. When a second component needs it, it leaves the folder: a business rule goes to `model.ts`, markup becomes its own component folder.
+- `src/components/` (shared app components) uses the same layout. `src/components/ui/` keeps the flat kebab-case files the shadcn CLI writes; `src/app/` keeps its kebab-case files.
 
 Import from `@/...` for anything outside the feature, relative paths inside it. From another feature, import only its `schemas`, `model`, `queries` or `routes`: lint rejects its `api`, `mocks` and `components`. Use inline type imports (`import { type NewTodo, Todo } from './schemas'`); lint enforces it.
 
@@ -82,7 +99,7 @@ export const todoRoutes = (): RouteObject[] => [
   {
     path: 'todos',
     lazy: {
-      Component: async () => (await import('./components/todos-page')).TodosPage,
+      Component: async () => (await import('./components/TodosPage')).TodosPage,
     },
   },
 ];
