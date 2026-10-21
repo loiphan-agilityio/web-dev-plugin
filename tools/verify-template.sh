@@ -6,7 +6,8 @@
 #    (check-guidelines.mjs) and that detect-project.mjs gives each eval fixture its tier.
 # 1. Scaffolds the template into a temporary directory, copies the plugin into its .claude/ (as a
 #    project that copies the folders has it) and runs all five gates (lint, typecheck, test,
-#    build, Storybook build), then checks the commit-message rules (commitlint).
+#    build, Storybook build), then checks the commit-message rules (commitlint) and the Claude
+#    Code hook that formats each file Claude writes.
 # 2. Writes the todos feature quoted in the skills' markdown into that app (every block marked
 #    `file=...`, see extract-snippets.mjs), applies its wiring diff and runs all five gates again.
 #
@@ -52,7 +53,21 @@ if echo 'added stuff' | pnpm exec commitlint >/dev/null 2>&1; then
   echo "verify: commitlint accepted a non-conventional message" >&2
   exit 1
 fi
-echo "verify: fresh scaffold passed all gates and the commit rules"
+# The PostToolUse hook formats the file Claude wrote, and nothing outside the project. Its command
+# runs as Claude Code runs it: hook input on stdin, CLAUDE_PROJECT_DIR set.
+hook="$(node -p "require('./.claude/settings.json').hooks.PostToolUse[0].hooks[0].command")"
+unformatted='export const x = {a:1}'
+echo "$unformatted" | tee src/hook-check.ts >"$tmp/outside.ts"
+for f in "$PWD/src/hook-check.ts" "$tmp/outside.ts"; do
+  printf '{"tool_input":{"file_path":"%s"}}' "$f" | CLAUDE_PROJECT_DIR="$PWD" bash -c "$hook"
+done
+pnpm exec prettier --check src/hook-check.ts
+rm src/hook-check.ts
+if [[ "$(cat "$tmp/outside.ts")" != "$unformatted" ]]; then
+  echo "verify: the format hook changed a file outside the project" >&2
+  exit 1
+fi
+echo "verify: fresh scaffold passed all gates, the commit rules and the format hook"
 
 node "$here/extract-snippets.mjs" "$skills_root" "$tmp/app"
 # core.autocrlf would turn the patched files to CRLF on Windows, and Prettier rejects that.

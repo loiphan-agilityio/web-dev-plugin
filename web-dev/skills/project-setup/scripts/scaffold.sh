@@ -7,7 +7,8 @@
 # Refuses to overwrite: if any template file already exists in the target, or a file sits where the
 # template has a directory, it lists the conflicts and exits 1 without copying anything. Existing
 # .git/ and .claude/ are left alone: the template's .claude/settings.json (the commands the skills
-# run, allowed without a prompt) is copied only when the target has none.
+# run, allowed without a prompt, and the hook that formats each file Claude writes) is copied only
+# when the target has none.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -64,7 +65,7 @@ fi
 (cd "$template" && tar -cf - "${excludes[@]}" .) | (cd "$target" && tar -xf -)
 
 if [[ -e "$target/$settings" ]]; then
-  echo "kept the existing $settings; the template's command allow-list was not copied"
+  echo "kept the existing $settings; the template's command allow-list and format hook were not copied"
 else
   mkdir -p "$target/.claude"
   cp "$template/$settings" "$target/$settings"

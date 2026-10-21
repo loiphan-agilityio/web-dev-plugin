@@ -111,6 +111,8 @@ build and Storybook build. The parts every feature builds on:
 - **Permissions**: `.claude/settings.json` allows exactly the pnpm commands the skills run
   (`install`, `lint`, `lint:fix`, `typecheck`, `test`, `build`, `build-storybook`, `check`,
   `dev:mock`, `exec shadcn add` / `info`), so a feature runs end to end without a prompt.
+  Its `PostToolUse` hook (`.claude/hooks/format.mjs`) runs Prettier on every file Claude writes
+  or edits inside the project, so code is formatted as it is written.
   `scaffold.sh` copies it only when the project has no `.claude/settings.json`.
   Claude Code applies a project's allow rules only once the folder is trusted: open it with
   `claude` once and accept the trust prompt. Until then it reports "this workspace has not been

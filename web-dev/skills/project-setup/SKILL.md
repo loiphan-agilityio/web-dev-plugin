@@ -20,7 +20,7 @@ Use what the user gave. Ask only when they gave neither a folder nor a name and 
 
 ## 3. Scaffold
 
-`bash <skill-dir>/scripts/scaffold.sh <target-dir> [app-name]`. It copies the template without its local output, renames `app-template` in the files that carry it, keeps an existing `.git/` and `.claude/`, and writes `.claude/settings.json` (the allow-list of the commands the skills run) only when the project has none; say which under **Did**. On a conflict it lists the existing files, exits 1 and copies nothing: show the list and ask how to proceed; the user's files stay as they are.
+`bash <skill-dir>/scripts/scaffold.sh <target-dir> [app-name]`. It copies the template without its local output, renames `app-template` in the files that carry it, keeps an existing `.git/` and `.claude/`, and writes `.claude/settings.json` (the allow-list of the commands the skills run, and a hook that runs Prettier on each file Claude writes) only when the project has none; say which under **Did**. On a conflict it lists the existing files, exits 1 and copies nothing: show the list and ask how to proceed; the user's files stay as they are.
 
 ## 4. Install
 

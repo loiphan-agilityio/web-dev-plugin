@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "pnpm --dir web-dev/skills/project-setup/assets/app-template install --frozen-lockfile",
     "prepare": "husky",
-    "lint": "shellcheck tools/*.sh web-dev/skills/project-setup/scripts/*.sh web-dev/scripts/*.sh web-dev/evals/*.sh web-dev/evals/fixtures/*.sh web-dev/evals/*/setup.sh && for f in tools/*.mjs web-dev/scripts/*.mjs; do node --check \"$f\" || exit 1; done && node tools/check-guidelines.mjs web-dev/references web-dev/skills/project-setup/assets/app-template/CLAUDE.md && pnpm --dir web-dev/skills/project-setup/assets/app-template lint && pnpm --dir web-dev/skills/project-setup/assets/app-template typecheck"
+    "lint": "shellcheck tools/*.sh web-dev/skills/project-setup/scripts/*.sh web-dev/scripts/*.sh web-dev/evals/*.sh web-dev/evals/fixtures/*.sh web-dev/evals/*/setup.sh && for f in tools/*.mjs web-dev/scripts/*.mjs web-dev/skills/project-setup/assets/app-template/.claude/hooks/*.mjs; do node --check \"$f\" || exit 1; done && node tools/check-guidelines.mjs web-dev/references web-dev/skills/project-setup/assets/app-template/CLAUDE.md && pnpm --dir web-dev/skills/project-setup/assets/app-template lint && pnpm --dir web-dev/skills/project-setup/assets/app-template typecheck"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
