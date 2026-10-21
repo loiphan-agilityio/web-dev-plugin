@@ -1,11 +1,13 @@
 ---
 name: design-to-ui
-description: Builds or restyles a screen or component in an existing React + shadcn/ui + Tailwind 4 app to match a design - screenshots, mockups or PNG exports, a Figma link, or a DESIGN.md with colors, type and spacing. It maps the design to theme tokens and shadcn components, writes semantic responsive markup with every data state, tests it, and checks it in a browser when one is available. When no design is given it asks once for an optional DESIGN.md or Figma link, and without them uses the app's current theme. Use for "implement this design", "make it look like this screenshot", "make it look like this mockup", "build this screen from this Figma link", "style it with our DESIGN.md", "match the design". When a ticket comes with a design, develop-feature leads and loads this skill for the UI step. Not for a ticket with no design (develop-feature), a single endpoint (integrate-api), or scaffolding a new app (code-skeleton).
+description: Builds or restyles a screen in an existing React + shadcn/ui + Tailwind 4 app to match a design - screenshots, mockups, PNG exports, a Figma link or a DESIGN.md - with theme tokens, shadcn components, every data state, tests and a browser check when one is available. With no design it asks once for an optional DESIGN.md or Figma link, then keeps the current theme. Use for "implement this design", "make it look like this screenshot/mockup", "build this screen from this Figma link", "style it with our DESIGN.md", "match the design". develop-feature loads it when a ticket comes with a design. Not for a ticket with no design (develop-feature), a single endpoint (integrate-api), or a new app (code-skeleton).
 ---
 
 # design-to-ui
 
 Turn a design into UI inside an app that follows `CLAUDE.md`. Read the project's `CLAUDE.md` first: its names, layout and commands are authoritative.
+
+**Under `build-app`, never ask:** wherever a step below says to ask, choose the default it names, keep going, and write the choice under **Design gaps**.
 
 **The design is a visual target, never an asset.**
 
@@ -41,8 +43,8 @@ Three sources, all optional; use every one that is present, and look before aski
 - **Figma link:** look for Figma MCP tools in your tool list, or with ToolSearch (query `figma`) if they are deferred.
   - Present (names vary by server version; for example `get_design_context`, `get_screenshot`): request the screenshot of each frame as the visual target, and the design context for exact values (colors, spacing, type, text content). The generated code in the design context uses absolute positioning and raw hex values: read it as a spec, never paste it. Download the image assets it returns into the project.
   - Absent: do not try to fetch the Figma page (it needs a sign-in and renders on a canvas, so a fetch returns nothing usable). Ask the user for a PNG export of each frame, and one per breakpoint if they have them.
-- **No source found:** ask once, in one message: "Do you have a DESIGN.md or a Figma link for this? Both are optional; without them I use the app's current theme." Use what the user gives. If they have neither, or say to go ahead, keep the theme in `src/styles/index.css` (skip the value changes in step 2), build with the rules below, and write "no design given: current theme" under **Design gaps**. Under `build-app`, never ask: use what is present, else the current theme.
-- **Then list what the design does NOT show:** loading / error / empty states, mobile (or desktop) layout, hover / focus / disabled, dark mode, long text and overflow. Each one goes under **Design gaps**. Ask the user only when a missing piece changes the structure (what a 5-column table becomes on a phone) and the answer is cheap to get; otherwise use the defaults in step 3 and report them as assumptions.
+- **No source found:** ask once, in one message: "Do you have a DESIGN.md or a Figma link for this? Both are optional; without them I use the app's current theme." Use what the user gives. If they have neither, or say to go ahead, keep the theme in `src/styles/index.css` (skip the value changes in step 2), build with the rules below, and write "no design given: current theme" under **Design gaps**.
+- **Then list what the design does NOT show:** loading / error / empty states, mobile (or desktop) layout, hover / focus / disabled, dark mode, long text and overflow. Each one goes under **Design gaps**. Ask the user only when a missing piece changes the structure (what a 5-column table becomes on a phone); otherwise use the defaults in step 3 and report them as assumptions.
 
 ### 1. Inventory
 
@@ -75,7 +77,7 @@ The verbatim `index.css` lines and how to edit them are in `references/design-ma
 - **Compose small components.** The page lays out regions; each child owns its own query or mutation (`../develop-feature/references/ui-states.md`, section Page composition).
 - **Data screens render the four states** (loading, error, empty, success) from `../develop-feature/references/ui-states.md`, styled to match the design: skeletons shaped like the design's rows or cards, the empty state in the design's typography with the next action. A design that shows only the success state does not remove the other three.
 - **Spacing and type** round to the 4px rhythm and the type scale (`references/design-mapping.md`); an exact off-scale value only when it is clearly intentional, and it goes under **Design gaps**.
-- **Mobile-first:** base classes for the narrow layout, `sm:` / `md:` / `lg:` add the wider one. If the design is desktop-only, collapse sensibly below 640px (`sm:`): columns stack, side navigation moves to the top, wide tables stack or scroll horizontally. Report it as an assumption.
+- **Mobile-first:** base classes for the narrow layout, `sm:` / `md:` / `lg:` add the wider one. If the design is desktop-only, collapse it below 640px (`sm:`): columns stack, side navigation moves to the top, wide tables stack or scroll horizontally. Report it as an assumption.
 - **Keep interaction states and focus rings.** shadcn variants already carry hover, `focus-visible` and `disabled` styles; do not strip a ring or outline to match a flat mockup. Keyboard users need it, and `jsx-a11y` lint is on.
 - Clearly low-contrast text in the design (light gray on white): keep the token, flag it under **Design gaps**.
 - **Real data, forms or endpoints:** follow the `develop-feature` skill (schemas, api, queries, form, mocks, routes) and `integrate-api` (one endpoint). Do not re-derive them here.

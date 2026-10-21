@@ -28,7 +28,7 @@ always call the scripts by that full path.
    install output ends with `using pnpm v11.17.0`). If Node or pnpm is missing or too old, stop
    and tell the user; do not install system tools unasked.
 2. **Target and name.** Use what the user gave. Ask only if they gave neither a directory nor a
-   name and the current directory is not an obviously empty project directory. The name must
+   name and the current directory is not empty (empty, or holding only `.git/` or `.claude/`). The name must
    match `^[a-z0-9][a-z0-9._-]*$` (defaults to the directory's name).
 3. **Scaffold.** `bash <skill-dir>/scripts/scaffold.sh <target-dir> [app-name]`. It copies the template
    (not its local output: `node_modules`, `dist`, `coverage`, `storybook-static`,
@@ -122,6 +122,13 @@ the project conventions. After scaffolding, hand off to `develop-feature`, `inte
 
 ## Result
 
-End your reply with:
+End with this block (skip it when `build-app` invoked this skill: it reports once at the end).
 
-**Did:** … **Saw:** … (real `pnpm check` output) **Not done:** … **Blocked by:** … **Next:** …
+```
+## Result
+**Did:** files created, install, companions, and the `pnpm check` outcome
+**Saw:** facts observed, including the real gate output
+**Not done:** anything skipped or failed, such as a companion install
+**Blocked by:** questions that stopped part of the work, or "nothing"
+**Next:** what the user can do or ask next
+```

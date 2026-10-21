@@ -5,7 +5,7 @@ description: Adds or changes one backend endpoint in an app built on the Effect 
 
 # Integrate an API endpoint
 
-Wire one endpoint through the app's fixed data flow, with a typed error for every failure and an MSW handler for every state. The app is the one scaffolded from the project template; `CLAUDE.md` in the repo root is the source of truth for names and commands.
+Wire one endpoint through the app's fixed data flow, with a typed error for every failure and an MSW handler for every state. The app is the one scaffolded from the project template; the project's `CLAUDE.md` is the source of truth for names and commands.
 
 ```
 component -> useQuery(xQueryOptions()) / useXMutation() -> runEffect(effect, signal)
@@ -27,7 +27,7 @@ Do not use for: scaffolding a new app, or building a whole feature (page, form, 
 
 1. Read `node_modules/effect/AGENTS.md` completely. Effect 4 is newer than most training data; do not write Effect code from memory.
 2. Read the current `src/lib/api/client.ts` and `errors.ts`, and the feature's existing `api.ts` / `queries.ts` / `mocks.ts` if the folder exists. Match them.
-3. Get the endpoint contract: method, path, request body, response body, error statuses. If the contract is unknown, ask; do not invent fields.
+3. Get the endpoint contract: method, path, request body, response body, error statuses. Take it from the request, `docs/plan.md`, an OpenAPI or Swagger file, or the existing code and mocks. Ask only if a field is still unknown, and never under `build-app` (its plan is the contract). Never invent fields.
 
 ## Steps
 
@@ -38,7 +38,7 @@ Work in `src/features/<name>/` (create the folder files you need; names below ar
 3. **Queries** (`queries.ts`): add keys to the key factory (`todoKeys`), a `queryOptions` factory for reads (`todoListQueryOptions`), a mutation hook for writes (`useCreateTodo`). Always go through `runEffect`; pass `signal` for queries. See [references/react-query.md](references/react-query.md).
 4. **Mocks** (`mocks.ts`): extend the handler factory (`createTodosHandlers(initial)`) and the one-off states (`todosMocks`: pending, error, validation). Register the feature's handlers in `src/mocks/handlers.ts`. See [references/msw.md](references/msw.md).
 5. **Tests**: success, each error tag this endpoint can produce (see [references/errors.md](references/errors.md)), and for mutations the invalidation (the list shows the new data). Use `renderRoute` / `renderWithProviders` and `server.use(...)`. Each test goes in the test file of the component that shows the result (a toggle in the list → `components/__tests__/todo-list.test.tsx`, rendered alone with `renderWithProviders`); a new component gets its own `.test.tsx` in `components/__tests__/`; only flows that span components (invalidation shown in another component) go in the page test. `src/lib/api/__tests__/client.test.ts` already proves every status → `ApiError` mapping, so feature tests check what the UI does with the error, not the mapping again. A toast is asserted as text with `findByText`: the render helpers mount the `Toaster` ([references/msw.md](references/msw.md), Toasts).
-6. **`pnpm lint:fix`, then `pnpm check`**, each as a plain command with no pipe or redirect (lint with a Prettier check, typecheck, test, build, Storybook build). Not done until it passes.
+6. **`pnpm lint:fix`, then `pnpm check`**, each as a plain command with no pipe or redirect (lint with a Prettier check, typecheck, test, build, Storybook build). Not done until it passes. When `develop-feature` loaded this skill, skip this step: its gate step runs them.
 
 ## Rules that are easy to break
 
@@ -80,13 +80,15 @@ Code blocks in them are copied from the template or the verified todos feature; 
 - [references/react-query.md](references/react-query.md): read when writing keys, `queryOptions`, a mutation hook, invalidation or `setQueryData`.
 - [references/msw.md](references/msw.md): read when writing handlers, adding states (pending/error/422), or tests that override them.
 
-## Finish
+## Result
 
-End your final message with this block, filled in honestly (when `develop-feature` loaded this skill, its Result is the only one):
+End with this block (skip it when `develop-feature` loaded this skill: its Result is the only one). `Saw` is what you observed, such as the real `pnpm check` output, not what you expect.
 
 ```
 ## Result
-**Did:** … **Saw:** … **Not done:** … **Blocked by:** … **Next:** …
+**Did:** the endpoint, the files changed, the tests, and the `pnpm check` outcome
+**Saw:** facts observed, including the real gate output
+**Not done:** anything skipped
+**Blocked by:** contract details still unknown, or "nothing"
+**Next:** what the user should answer or do
 ```
-
-`Saw` is what you observed (e.g. `pnpm check` output, test names that passed), not what you expect.
