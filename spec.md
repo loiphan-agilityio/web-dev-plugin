@@ -27,7 +27,7 @@ Every version is pinned in the template's lockfile.
 | 2 | **Develop feature:** ticket → tested UI (schema, API layer, queries/mutations, form, UI, tests) | `develop-feature` skill + a worked todos feature in its `references/` | A ticket becomes a page with the four data states, a test file and a story per component, and `pnpm check` passes |
 | 3 | **Integrate API:** Effect Schema + HttpClient with typed errors, `queryOptions` / mutations, MSW mocks | `integrate-api` skill + `ApiClient`, `runEffect`, `ApiError` in the template | Every backend failure maps to one of 7 typed `ApiError` cases; 404, 422 and 500 paths are tested |
 | 4 | **One message, whole app:** a description on any topic becomes a running POC without further input | `build-app` skill: plans `docs/plan.md`, then drives the other four, runs the gates and opens the app on mocks | One prompt yields a scaffold, every planned feature, five green gates and an app that runs with `pnpm dev:mock`; every decision made for the user is listed |
-| + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma) | `design-to-ui` skill | Theme tokens, shadcn components and the four data states, no raw colors |
+| + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma, DESIGN.md; all optional) | `design-to-ui` skill | Theme tokens, shadcn components and the four data states, no raw colors |
 
 ### Each skill must
 

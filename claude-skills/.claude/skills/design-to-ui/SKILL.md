@@ -1,6 +1,6 @@
 ---
 name: design-to-ui
-description: Builds a screen or component in an existing React + shadcn/ui + Tailwind 4 app so it matches a given design (screenshot, mockup, PNG export or Figma link). It maps the design to theme tokens and shadcn components, writes semantic responsive markup with every data state, tests it, and checks it in a browser when one is available. Use for "implement this design", "make it look like this screenshot", "make it look like this mockup", "build this screen from this Figma link", "match the design", "turn this mockup into a page". When a ticket comes with a design, develop-feature leads and loads this skill for the UI step. Not for a ticket with no design (develop-feature), a single endpoint (integrate-api), scaffolding a new app (code-skeleton), open-ended "design something for me" requests, or restyling / "make it look nicer" with no reference image to match.
+description: Builds or restyles a screen or component in an existing React + shadcn/ui + Tailwind 4 app to match a design - screenshots, mockups or PNG exports, a Figma link, or a DESIGN.md with colors, type and spacing. It maps the design to theme tokens and shadcn components, writes semantic responsive markup with every data state, tests it, and checks it in a browser when one is available. When no design is given it asks once for an optional DESIGN.md or Figma link, and without them uses the app's current theme. Use for "implement this design", "make it look like this screenshot", "make it look like this mockup", "build this screen from this Figma link", "style it with our DESIGN.md", "match the design". When a ticket comes with a design, develop-feature leads and loads this skill for the UI step. Not for a ticket with no design (develop-feature), a single endpoint (integrate-api), or scaffolding a new app (code-skeleton).
 ---
 
 # design-to-ui
@@ -34,10 +34,14 @@ The stack is newer than most training data. Copy from the project and the refere
 
 ### 0. Get the design
 
+Three sources, all optional; use every one that is present, and look before asking:
+
+- **DESIGN.md:** a path the request names, else `DESIGN.md` or `design/DESIGN.md` in the project. Use it only when it describes the look (colors, type, spacing, radius, components); a document about architecture or code is not a design spec. Read it fully. Its written values (hex colors, font names, sizes, radius) are exact, so they win over values measured from an image or Figma; note each conflict under **Design gaps**.
 - **Image paths or pasted images:** read every image with the Read tool, which shows it to you. Note each frame and the width it was drawn at. Check the export scale: Figma and PNG exports are often @2x, so halve every value measured from a 2x export.
 - **Figma link:** look for Figma MCP tools in your tool list, or with ToolSearch (query `figma`) if they are deferred.
   - Present (names vary by server version; for example `get_design_context`, `get_screenshot`): request the screenshot of each frame as the visual target, and the design context for exact values (colors, spacing, type, text content). The generated code in the design context uses absolute positioning and raw hex values: read it as a spec, never paste it. Download the image assets it returns into the project.
   - Absent: do not try to fetch the Figma page (it needs a sign-in and renders on a canvas, so a fetch returns nothing usable). Ask the user for a PNG export of each frame, and one per breakpoint if they have them.
+- **No source found:** ask once, in one message: "Do you have a DESIGN.md or a Figma link for this? Both are optional; without them I use the app's current theme." Use what the user gives. If they have neither, or say to go ahead, keep the theme in `src/styles/index.css` (skip the value changes in step 2), build with the rules below, and write "no design given: current theme" under **Design gaps**. Under `build-app`, never ask: use what is present, else the current theme.
 - **Then list what the design does NOT show:** loading / error / empty states, mobile (or desktop) layout, hover / focus / disabled, dark mode, long text and overflow. Each one goes under **Design gaps**. Ask the user only when a missing piece changes the structure (what a 5-column table becomes on a phone) and the answer is cheap to get; otherwise use the defaults in step 3 and report them as assumptions.
 
 ### 1. Inventory
@@ -58,6 +62,7 @@ Compare the design's colors, font and radius with the theme in `src/styles/index
 - **Keep the design's value as given.** A hex color is valid CSS in a custom property: replace the right-hand side (`oklch(...)`) with the design's value. No conversion to oklch, no conversion script.
 - **Map by role, not by look.** Each design color gets a role from the table in `references/design-mapping.md`; one color used in two roles is set in both variables.
 - **New token only for a role that does not exist** (success, warning): add the variable to `:root` (and `.dark` if dark is in scope) and a `--color-<name>: var(--<name>);` line to `@theme inline`, following the existing `--color-destructive: var(--destructive);`. Add a `-foreground` pair when text sits on it.
+- **Values from a DESIGN.md go in as written**, by role, like any other design value.
 - **A different font family needs a new `@fontsource` dependency: ASK the user first.** Adding a dependency is the project's decision. Until answered, keep Geist and note it under **Design gaps**.
 - **An existing app with other screens:** if the design's palette would restyle screens it does not cover, ask before changing a global value. It is a product decision, not a page detail.
 
@@ -89,7 +94,7 @@ The verbatim `index.css` lines and how to edit them are in `references/design-ma
 
 ### 5. Visual check
 
-Follow `references/visual-check.md`: with a browser tool, open the page, compare it with the design region by region and fix, at most 3 rounds; without one, skip it and say so under **Not done**.
+Follow `references/visual-check.md`: with a browser tool, open the page, compare it with the design region by region and fix, at most 3 rounds; without one, skip it and say so under **Not done**. With only a DESIGN.md, check that its colors, type and spacing show on the page; with no design at all, only check that the page renders well at the desktop width and at 375px.
 
 ### 6. Gates
 

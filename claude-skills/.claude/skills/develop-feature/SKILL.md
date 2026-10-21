@@ -26,7 +26,7 @@ Specific to this skill:
 - Read the ticket. A URL plus a matching CLI means read it with the CLI (`glab` for GitLab, `gh` for GitHub); otherwise ask the user to paste the ticket.
 - **Invoked by `build-app`:** the ticket comes from `docs/plan.md`, whose data model, API and Assumptions answer its open questions. A gap the plan does not cover gets a default added to its Assumptions: never stop to ask, never exclude a criterion. Skip the Result block; `build-app` reports once for the whole app.
 - Write down the acceptance criteria and the open questions.
-- The ticket links or attaches a design (Figma link, screenshot, mockup)? Note it, the frames it covers, and what it does not show (states, mobile, dark); step 4 invokes the `design-to-ui` skill for it.
+- The ticket links or attaches a design (Figma link, screenshot, mockup, DESIGN.md)? Note it, the frames it covers, and what it does not show (states, mobile, dark); step 4 invokes the `design-to-ui` skill for it.
 - Sort every gap in the ticket into one of two kinds before writing code:
   - **Open question**: the answer changes data, a business rule or what the backend must agree with (which tasks count as "due soon", whether a delete is soft, what a filter includes). The criterion that depends on it is **excluded from scope** and named in the report with its question. Never implement it on a guess: a plausible guess passes review and is wrong in production. Ask the user when the answer is cheap to get; keep going on the unblocked criteria meanwhile.
   - **Unstated detail**: the answer only changes presentation or interaction and is easy to change later (a label, a sort order on screen, where a button sits). Choose the simplest option that fits the existing screens, build it, and list each choice under **Next** for the user to confirm.
@@ -124,7 +124,7 @@ Companions installed in projects; priority when they disagree: CLAUDE.md and pro
 - `vercel-react-best-practices` — client-side performance (`rerender-*`, `js-*`, `advanced-*`, most `bundle-*`). Skip `server-*`, `async-api-routes`, `async-suspense-boundaries`, `rendering-hydration-*`, `rendering-resource-hints`, `rendering-script-defer-async`. Replace `next/dynamic` with `React.lazy`, `optimizePackageImports` with direct imports, SWR with TanStack Query, and the raw `fetch` / Promise examples (`async-parallel`, `async-defer-await`) with Effect (`Effect.all` with `concurrency`).
 - `vercel-composition-patterns` — compound components, React 19 APIs; its examples use React Native `TextInput`, adapt to DOM / shadcn.
 - `integrate-api` (project skill) — one endpoint end to end (schema, `ApiClient` call, keys, invalidation, MSW, error tests). Step 2 loads it for every endpoint beyond list + create; it hands the UI, wiring and Result back here.
-- `design-to-ui` (project skill) — building a UI that matches a design (screenshot, mockup, Figma). With a ticket, this skill leads and `design-to-ui` does the visual work; it hands data work back here.
+- `design-to-ui` (project skill) — building a UI that matches a design (screenshot, mockup, Figma, DESIGN.md). With a ticket, this skill leads and `design-to-ui` does the visual work; it hands data work back here.
 
 ## Result
 

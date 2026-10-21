@@ -13,7 +13,7 @@ description -> docs/plan.md -> code-skeleton -> develop-feature x N (integrate-a
 
 ## 0. Where to build
 
-- An empty folder, or one holding only `.git/`, `.claude/` or a `design/` folder: build there.
+- An empty folder, or one holding only `.git/`, `.claude/`, a `design/` folder or a `DESIGN.md`: build there.
 - A folder that already holds the app (a `package.json` naming this stack): skip step 2 and add the features to it.
 - Any other non-empty folder: create `<app-name>/` inside it and build there. Never move or delete the user's files.
 
@@ -35,7 +35,7 @@ Fill gaps instead of asking:
 - Pick the simplest reading that a typical user of that product would expect, and write it under **Assumptions**.
 - **Out of scope by default:** sign-in and roles, payments, file uploads, real-time updates, email, i18n, SSR. If the description asks for one, plan the UI with a mocked API and say so under Assumptions.
 - No backend exists: the app runs on MSW mocks of the API you designed. Keep the API realistic, so a real backend can replace the mocks without touching the UI.
-- A design in `design/` (PNG, screenshot) or a Figma link in the description is used in step 4.
+- A design in `design/` (PNG, screenshot), a `DESIGN.md`, or a Figma link in the description is used in step 4. All are optional: without them the app keeps the template's theme.
 
 ## 2. Scaffold
 
@@ -53,7 +53,7 @@ While this skill leads:
 
 ## 4. Design (only with a design)
 
-When `design/` holds images or the description links a Figma file, invoke the `design-to-ui` skill once all features exist, and follow it, including its visual check when a browser is available. Without a design, the shadcn theme stays as scaffolded.
+When `design/` holds images, the project has a `DESIGN.md` that describes the look, or the description links a Figma file, invoke the `design-to-ui` skill once all features exist, and follow it, including its visual check when a browser is available. Without a design, the shadcn theme stays as scaffolded.
 
 ## 5. Gates
 

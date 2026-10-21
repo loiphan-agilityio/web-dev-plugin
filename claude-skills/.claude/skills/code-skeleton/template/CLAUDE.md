@@ -164,8 +164,8 @@ Skills (the `web-app-skills` plugin, or copied into `.claude/skills/` or `~/.cla
 - `develop-feature` — ticket → schema, API, queries, form, UI, tests. Loads `integrate-api` for
   endpoints beyond list + create, and `design-to-ui` when the ticket has a design.
 - `integrate-api` — add or change an endpoint: schema, `ApiClient` call, query/mutation, MSW.
-- `design-to-ui` — a design (screenshot, mockup, Figma) → a UI that matches it: tokens, shadcn
-  components, states, tests, visual check.
+- `design-to-ui` — a design (screenshot, mockup, Figma, DESIGN.md; asks once if none) → a UI
+  that matches it: tokens, shadcn components, states, tests, visual check.
 
 Companion skills (installed by `install-companions.sh`): `shadcn`, `react-router-data-mode`,
 `vite`, `vitest`, `vercel-react-best-practices`, `vercel-composition-patterns`,

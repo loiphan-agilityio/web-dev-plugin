@@ -93,7 +93,9 @@ flowchart LR
 - `design-to-ui` matches a design by changing token values in `:root`, so every component,
   focus ring and toast follows. It maps each design color by role, asks before adding a font
   dependency or restyling screens the design does not cover, and lists what the design leaves
-  out under **Design gaps**.
+  out under **Design gaps**. Its inputs are all optional: images, a Figma link (through Figma
+  MCP), or a `DESIGN.md` whose written values win over measured ones. With none, it asks once,
+  then keeps the current theme; under `build-app` it never asks.
 
 ## 5. Decisions
 
