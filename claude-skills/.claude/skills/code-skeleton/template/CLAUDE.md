@@ -121,6 +121,16 @@ ApiClient → effect/http`
 - The preview (`.storybook/preview.tsx`) wraps every story in the same providers as a test and
   starts the app's MSW worker: add no providers in a story.
 
+## Commits
+
+- Messages follow Conventional Commits: `type(scope): summary` (`feat`, `fix`, `docs`, `refactor`,
+  `test`, `chore`...). The `commit-msg` hook rejects anything else (commitlint).
+- The `pre-commit` hook runs ESLint and Prettier on the staged files (lint-staged), then
+  `pnpm typecheck`. Fix what it reports; never commit with `--no-verify`.
+- The hooks are installed by `pnpm install` inside a git repository (husky, `prepare` script).
+  After a `git init`, run `pnpm install` once more to turn them on.
+- `.gitattributes` keeps every file LF, so a checkout with `core.autocrlf=true` still passes Prettier.
+
 ## Library versions newer than most training data
 
 These APIs changed recently and are easy to recall wrong. Lint catches some; the rest compile

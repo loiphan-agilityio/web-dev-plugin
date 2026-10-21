@@ -51,7 +51,9 @@ always call the scripts by that full path.
 6. **Gates.** `pnpm check` (lint with a Prettier check, typecheck, test with coverage, build, Storybook build),
    as a plain command with no pipe or redirect: the tool result holds the output and the exit code,
    and `.claude/settings.json` allows the plain command only. Report the real output, including
-   failures. Optionally offer `git init` and a first commit; ask first, never commit unasked.
+   failures. Optionally offer `git init` and a first commit; ask first, never commit unasked. After `git init`,
+   run `pnpm install` once more so husky turns the git hooks on, and write the commit message as
+   a Conventional Commit (`chore: scaffold <app-name>`): commitlint rejects anything else.
 7. **Hand over** (skip it when the `build-app` skill invoked this one: it goes on to build the
    features and reports at the end). Tell the user:
    - `pnpm dev`; `pnpm dev:mock` serves the API from `src/mocks` (MSW), in any shell.
@@ -90,6 +92,8 @@ Wiring worth knowing:
 - Shared app components in `src/components/`, each with a test and a story: `PageHeader`,
   `LoadingState`, `ErrorAlert`, `EmptyState`. Features render their title and three data states
   with them instead of writing that markup again.
+- Git hooks (husky): `pre-commit` runs lint-staged (ESLint, Prettier) and `pnpm typecheck`;
+  `commit-msg` runs commitlint (Conventional Commits). `.gitattributes` keeps files LF.
 - shadcn components vendored in `src/components/ui`: button, input, label, card, field,
   skeleton, alert, sonner, separator. That folder is excluded from ESLint and Prettier; add or
   refresh components with `pnpm exec shadcn add <name>`, do not edit them by hand.

@@ -159,6 +159,12 @@ re-run the script after updating it.
 `../.gitattributes` (the repository root) keeps every file LF, so the shell scripts still run from a CRLF checkout
 (`core.autocrlf=true`).
 
+Run `pnpm install` once at the repository root: it installs the git hooks (husky) and the
+template's dependencies. Commit messages follow Conventional Commits (commitlint); the
+`pre-commit` hook lints staged scripts and template files. `pnpm lint` at the root checks
+everything at once. Apps made from the template get the same hooks (see its `CLAUDE.md`,
+section Commits).
+
 ```
 .claude-plugin/          ← plugin.json (name web-app-skills, version); ../.claude-plugin/ is the marketplace
 .claude/skills/          ← the product: what gets copied into projects

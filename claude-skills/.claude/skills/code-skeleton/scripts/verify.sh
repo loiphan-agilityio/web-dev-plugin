@@ -4,7 +4,7 @@
 #
 # 1. Scaffolds the template into a temporary directory, copies the skills into its .claude/skills
 #    (as a real project has them) and runs all five gates (lint, typecheck, test, build,
-#    Storybook build).
+#    Storybook build), then checks the commit-message rules (commitlint).
 # 2. Writes the todos feature quoted in the skills' markdown into that app (every block marked
 #    `file=...`, see extract-snippets.mjs), applies its wiring diff and runs all five gates again.
 #
@@ -38,7 +38,13 @@ done
 cd "$tmp/app"
 pnpm install --frozen-lockfile
 pnpm check
-echo "verify: fresh scaffold passed all gates"
+# The commit rules the husky commit-msg hook enforces: a conventional message passes, others fail.
+echo 'feat: verify the commit rules' | pnpm exec commitlint
+if echo 'added stuff' | pnpm exec commitlint >/dev/null 2>&1; then
+  echo "verify: commitlint accepted a non-conventional message" >&2
+  exit 1
+fi
+echo "verify: fresh scaffold passed all gates and the commit rules"
 
 node "$here/extract-snippets.mjs" "$skills_root" "$tmp/app"
 # core.autocrlf would turn the patched files to CRLF on Windows, and Prettier rejects that.

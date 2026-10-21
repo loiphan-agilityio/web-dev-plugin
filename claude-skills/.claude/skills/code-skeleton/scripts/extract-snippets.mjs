@@ -14,6 +14,7 @@ if (!skillsDir || !appDir) {
   process.exit(2);
 }
 
+/** @type {(dir: string) => string[]} */
 const markdownFiles = (dir) =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
@@ -22,6 +23,7 @@ const markdownFiles = (dir) =>
   });
 
 const fence = /^```\w+ file=(\S+)\s*$/;
+/** @type {Map<string, string[]>} */
 const files = new Map();
 for (const doc of markdownFiles(skillsDir)) {
   const lines = readFileSync(doc, 'utf8').split(/\r?\n/);

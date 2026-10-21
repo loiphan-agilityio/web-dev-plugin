@@ -26,6 +26,8 @@ docs/evidence/                    gate logs, screenshots, recording and per-step
 
 | Command | What it proves |
 |---|---|
+| `pnpm install` (repository root) | Installs the git hooks (husky) and the template's dependencies, which the hooks and `pnpm lint` use. Run it once after cloning. |
+| `pnpm lint` (repository root) | ShellCheck on the scripts, `node --check` on `extract-snippets.mjs`, and the template's ESLint, Prettier and TypeScript. |
 | `bash claude-skills/.claude/skills/code-skeleton/scripts/verify.sh` | A fresh scaffold passes all five gates (lint, typecheck, test, build, Storybook build). Same as CI. |
 | `pnpm check` in `claude-skills/.claude/skills/code-skeleton/template/` | The template itself passes the gates. |
 | `pnpm install && pnpm check` in `examples/task-tracker/` | The POC app passes the gates. |
@@ -61,3 +63,7 @@ corepack picks that version.
 
 - Commit only what the change touches; stage exact paths and read back
   `git diff --cached --name-only` before committing.
+- Messages follow Conventional Commits (`feat(design-to-ui): ...`), checked by commitlint in the
+  `commit-msg` hook. The `pre-commit` hook runs ShellCheck and `node --check` on staged scripts,
+  the template's ESLint and Prettier on staged template files, and its TypeScript when a template
+  `.ts`/`.tsx` file is staged. Never commit with `--no-verify`.
