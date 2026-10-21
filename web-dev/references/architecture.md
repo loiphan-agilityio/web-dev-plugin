@@ -28,9 +28,7 @@ ApiClient → effect/http`
   keys they change, and return that promise from `onSuccess`.
 - **Every data screen renders four distinct states:** loading (`isPending`, not `isLoading`),
   error (with `toUserMessage` and a retry), empty (with the next action), success. Empty and
-  error never look the same. Render the first three with `LoadingState`, `ErrorAlert` and
-  `EmptyState` from `src/components/`, and the page title with `PageHeader`. Markup that a
-  second feature needs goes to `src/components/`, with a test and a story.
+  error never look the same.
 - **Forms:** `useForm<Input, unknown, Output>({ resolver, defaultValues })` with
   `effectTsResolver(Schema)` built once at module level (`Input`/`Output` are the schema's
   Encoded/Type: inferred from `defaultValues`, a literal union widens to `string`), `Controller` + shadcn `Field` / `FieldLabel` / `FieldError`,

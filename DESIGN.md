@@ -94,9 +94,6 @@ flowchart LR
 - Another feature is reached only through its `schemas`, `model`, `queries` or `routes`; lint
   (`no-restricted-imports`, a pattern for `src/features/**`) rejects its `api`, `mocks` and
   `components`.
-- Shared markup lives once, in `src/components/`: `PageHeader`, `LoadingState`, `ErrorAlert` and
-  `EmptyState`. A feature writes only what is its own (its list, its form); markup that a second
-  feature needs moves there, with a test and a story.
 - `ApiClient` is the only way to call the backend. It decodes every body with an Effect Schema
   and maps every failure to a typed `ApiError`, so a component can switch on
   `query.error._tag`.

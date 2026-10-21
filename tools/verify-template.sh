@@ -4,10 +4,11 @@
 #
 # 0. Checks that the plugin's shared references/ match the template's CLAUDE.md
 #    (check-guidelines.mjs) and that detect-project.mjs gives each eval fixture its tier.
-# 1. Scaffolds the template into a temporary directory, copies the plugin into its .claude/ (as a
-#    project that copies the folders has it) and runs all five gates (lint, typecheck, test,
-#    build, Storybook build), then checks the commit-message rules (commitlint) and the Claude
-#    Code hook that formats each file Claude writes.
+# 1. Scaffolds the template into a temporary directory, checks that it names no todos (a new
+#    project starts empty; the todos feature is only the skills' worked example), copies the
+#    plugin into its .claude/ (as a project that copies the folders has it) and runs all five
+#    gates (lint, typecheck, test, build, Storybook build), then checks the commit-message rules
+#    (commitlint) and the Claude Code hook that formats each file Claude writes.
 # 2. Writes the todos feature quoted in the skills' markdown into that app (every block marked
 #    `file=...`, see extract-snippets.mjs), applies its wiring diff and runs all five gates again.
 #
@@ -37,6 +38,10 @@ node "$here/check-guidelines.mjs" "$plugin_root/references" \
 bash "$plugin_root/evals/fixtures/check-detect.sh"
 
 bash "$skills_root/project-setup/scripts/scaffold.sh" "$tmp/app" verify-app
+if grep -rniI todo "$tmp/app"; then
+  echo "verify: the fresh scaffold mentions todos (above); a new project carries no example feature" >&2
+  exit 1
+fi
 # Install the plugin inside the project, as teams do: the app's gates must ignore .claude/.
 # skills/, references/, scripts/ and agents/ keep their places, so `../../references` and
 # `../../scripts` resolve from every skill.

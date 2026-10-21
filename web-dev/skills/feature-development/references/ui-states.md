@@ -7,9 +7,10 @@ Four states are four different screens. Never fold them into one ternary, and ne
 ```tsx file=src/features/todos/components/todo-list.tsx
 import { useQuery } from '@tanstack/react-query';
 
-import { EmptyState } from '@/components/empty-state';
-import { ErrorAlert } from '@/components/error-alert';
-import { LoadingState } from '@/components/loading-state';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toUserMessage } from '@/lib/api/errors';
 
 import { openFirst } from '../model';
 import { todoListQueryOptions } from '../queries';
@@ -21,22 +22,38 @@ export const TodoList = () => {
 
   // isPending is true only before the first result, so a background refetch keeps the list.
   if (isPending) {
-    return <LoadingState label="Loading todos" />;
+    return (
+      <div role="status" aria-label="Loading todos" className="space-y-2">
+        <Skeleton className="h-10" />
+        <Skeleton className="h-10" />
+        <Skeleton className="h-10" />
+      </div>
+    );
   }
 
   if (isError) {
     return (
-      <ErrorAlert
-        title="Could not load todos"
-        error={error}
-        onRetry={() => void refetch()}
-        retrying={isRefetching}
-      />
+      <Alert variant="destructive">
+        <AlertTitle>Could not load todos</AlertTitle>
+        <AlertDescription>
+          <p>{toUserMessage(error)}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            disabled={isRefetching}
+            onClick={() => void refetch()}
+          >
+            Try again
+          </Button>
+        </AlertDescription>
+      </Alert>
     );
   }
 
   if (data.length === 0) {
-    return <EmptyState message="No todos yet. Add the first one above." />;
+    return <p className="text-muted-foreground">No todos yet. Add the first one above.</p>;
   }
 
   return (
@@ -55,36 +72,27 @@ export const TodoList = () => {
 
 ## State by state
 
-Three of the four states, and the page title, are shared components in `src/components/`. Use
-them instead of writing the markup again; each already has the accessibility the state needs.
-
-| State | Condition | Render |
+| State | Condition | Must have |
 |---|---|---|
-| Loading | `isPending` | `<LoadingState label="Loading <things>" />` (`role="status"`, skeleton rows; `rows` to match the content) |
-| Error | `isError` | `<ErrorAlert title="Could not load <things>" error={error} onRetry={() => void refetch()} retrying={isRefetching} />` (shows `toUserMessage(error)`, never the raw message) |
-| Empty | success, no rows | `<EmptyState message="<what to do next>" action={...} />` (plain text, never an alert) |
-| Success | data present | the feature's own list or table, with an accessible name (`aria-label="Todos"`) |
-
-Page title: `<PageHeader title="..." description="..." actions={...} />` renders the page's one `h1`.
-A look these components do not cover (a skeleton shaped like cards) is written in the feature;
-when a second feature needs the same markup, move it to `src/components/` with a test and a story.
+| Loading | `isPending` | `role="status"` + `aria-label` naming what loads; `Skeleton` shaped like the content |
+| Error | `isError` | `toUserMessage(error)` (never `error.message` raw), a "Try again" button calling `refetch()`, `type="button"` |
+| Empty | success, no rows | plain text that says the next action; **no** `role="alert"` or destructive styling |
+| Success | data present | semantic list/table with an accessible name (`aria-label="Todos"`) |
 
 - Use **`isPending`**, not `isLoading`. `isPending` is true only before the first result, so a background refetch keeps showing data.
 - Order matters: pending, error, empty, success. TypeScript narrows `data` after the first two returns.
-- `isRefetching`, passed as `retrying`, disables the retry button while the retry runs.
+- `isRefetching` disables the retry button while the retry runs.
 - `error` is already typed as `ApiError` (registered in `src/lib/query-client.ts`); switch on `error._tag` if one error needs special UI (e.g. `NotFoundError` on a detail page).
 
 ## Page composition
 
 ```tsx file=src/features/todos/components/todos-page.tsx
-import { PageHeader } from '@/components/page-header';
-
 import { TodoForm } from './todo-form';
 import { TodoList } from './todo-list';
 
 export const TodosPage = () => (
   <section className="space-y-6">
-    <PageHeader title="Todos" />
+    <h1 className="font-heading text-2xl font-semibold">Todos</h1>
     <TodoForm />
     <TodoList />
   </section>
@@ -101,7 +109,7 @@ The page only composes; each child owns its own query/mutation. Both use the sam
 - Icon-only buttons need `aria-label`.
 - Lists use `ul`/`li`; headings keep order (`h1` in the page, `h2` below).
 - Lint runs `jsx-a11y`; fix findings, don't disable them.
-- Reuse in this order: `src/components/` (shared app components), then shadcn components in `src/components/ui/` (`Button`, `Field`, `Card`...), composed instead of restyled. Components in `src/components/ui` are never edited.
+- Compose shadcn components (`Alert`, `Skeleton`, `Button`, `Field`) instead of restyling; the `shadcn` companion covers composition. Components in `src/components/ui` are never edited.
 
 ## Lazy loading
 

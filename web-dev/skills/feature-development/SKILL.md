@@ -37,7 +37,7 @@ src/features/<name>/
     __tests__/ <name>-page.test.tsx, <name>-form.test.tsx, <name>-list.test.tsx
 ```
 
-Starting from todos, rename `todo` / `Todo` everywhere (folder, files, exports, keys, URLs) and keep the structure. Reuse before writing: `src/components/` (`PageHeader`, `LoadingState`, `ErrorAlert`, `EmptyState`), then `src/components/ui/`, then other features through their `schemas`, `model`, `queries` or `routes` (lint rejects another feature's `api`, `mocks` and `components`); markup a second feature needs moves to `src/components/`. A missing shadcn component comes from `pnpm exec shadcn add <name>`; delete any extra file the CLI added that nothing imports (`toggle-group` brings `toggle`).
+Starting from todos, rename `todo` / `Todo` everywhere (folder, files, exports, keys, URLs) and keep the structure. Reuse before writing: `src/components/`, then `src/components/ui/`, then other features through their `schemas`, `model`, `queries` or `routes` (lint rejects another feature's `api`, `mocks` and `components`). A missing shadcn component comes from `pnpm exec shadcn add <name>`; delete any extra file the CLI added that nothing imports (`toggle-group` brings `toggle`).
 
 ## 3. Schema, model, API, queries
 
@@ -51,7 +51,7 @@ Follow `references/forms.md`. The traps: `effectTsResolver(Schema)` from `@hookf
 
 ## 5. UI
 
-Every data screen renders four distinct states: loading (`LoadingState`), error with retry (`ErrorAlert`), empty with the next action (`EmptyState`), success (the feature's own list or table), under a `PageHeader`, styled with theme tokens and `cn` from `@/lib/utils`. Patterns and accessibility rules: `references/ui-states.md`.
+Every data screen renders four distinct states: loading (`isPending`, `role="status"` with an `aria-label`), error (`toUserMessage(error)` plus a retry button), empty (says what to do next, no `role="alert"`), success, styled with theme tokens and `cn` from `@/lib/utils`. Patterns and accessibility rules: `references/ui-states.md`.
 
 With a design, invoke `ui-development` (Skill tool) before writing UI code (under `develop`'s Workflow A, skip it: step A4 applies the design once every feature exists), and run its visual check after step 6. A design that shows only the success state still gets the other three.
 

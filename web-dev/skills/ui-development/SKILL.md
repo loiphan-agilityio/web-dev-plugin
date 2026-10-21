@@ -24,7 +24,7 @@ Then list what the design leaves out (loading, error and empty states, the other
 
 ## 1. Inventory
 
-Split the design into regions (shell, header, toolbar, list, card, form) and map each to what exists: `src/components/` (`PageHeader`, `LoadingState`, `ErrorAlert`, `EmptyState`), `src/components/ui/`, then `src/features/*/components/`. The shell is `src/app/root-layout.tsx`. Elements to components, and icons to lucide: `references/design-mapping.md`. A missing shadcn component (style `radix-nova`; the template ships `alert button card field input label separator skeleton sonner`) comes from `pnpm exec shadcn add <name>`. A look no variant provides is a small app component that wraps the shadcn one; `src/components/ui/` is generated and stays untouched. Done when every region has its component written down: this list is the plan and the report.
+Split the design into regions (shell, header, toolbar, list, card, form) and map each to what exists: `src/components/ui/`, `src/components/`, then `src/features/*/components/`. The shell is `src/app/root-layout.tsx`. Elements to components, and icons to lucide: `references/design-mapping.md`. A missing shadcn component (style `radix-nova`; the template ships `alert button card field input label separator skeleton sonner`) comes from `pnpm exec shadcn add <name>`. A look no variant provides is a small app component that wraps the shadcn one; `src/components/ui/` is generated and stays untouched. Done when every region has its component written down: this list is the plan and the report.
 
 ## 2. Tokens
 

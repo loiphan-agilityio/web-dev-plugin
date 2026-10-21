@@ -16,10 +16,9 @@ The first release.
   `ui-development`.
 - **The template** (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7,
   shadcn/ui): `ApiClient` with typed errors, reading `apiUrl` from `AppConfig` and the bearer
-  token from `AuthToken` (none by default; `AuthToken.fromGetter` for sign-in); shared
-  `PageHeader`, `LoadingState`, `ErrorAlert` and `EmptyState`; five gates (lint, typecheck, tests
-  with coverage, build, Storybook build); husky, commitlint and lint-staged; a Prettier hook on
-  every file Claude writes.
+  token from `AuthToken` (none by default; `AuthToken.fromGetter` for sign-in); five gates (lint,
+  typecheck, tests with coverage, build, Storybook build); husky, commitlint and lint-staged; a
+  Prettier hook on every file Claude writes.
 - **No permission prompts in a run.** Each skill lists the commands it runs in `allowed-tools` and
   calls the plugin's scripts by their `${CLAUDE_SKILL_DIR}` path, so one message runs to the end,
   in an untrusted folder and in `claude -p` too.

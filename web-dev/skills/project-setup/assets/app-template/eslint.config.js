@@ -9,7 +9,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-// `const { title } = todo`, not `const title = todo.title`. Array indexes stay as they are.
+// `const { title } = item`, not `const title = item.title`. Array indexes stay as they are.
 const preferDestructuring = {
   VariableDeclarator: { object: true, array: false },
   AssignmentExpression: { object: false, array: false },

@@ -25,15 +25,14 @@ Run each command on its own, exactly as written (`pnpm check`, not `pnpm check 2
 src/
   app/              routes.tsx (createRoutes), providers.tsx, root-layout.tsx, route-error.tsx
   components/ui/    shadcn components: add with `pnpm exec shadcn add <name>`, never edit by hand
-  components/       shared app components: PageHeader, LoadingState, ErrorAlert, EmptyState;
-                    reuse them before writing new markup
-  features/<name>/  one folder per feature (names below are from a `todos` feature):
-    schemas.ts        Effect Schemas + derived types: Todo, TodoList, NewTodo / NewTodoInput
-    model.ts          business rules as pure functions of those types: openFirst
-    api.ts            Effect.fn functions that call ApiClient: listTodos, createTodo
-    queries.ts        key factory todoKeys, todoListQueryOptions(), mutation hooks useCreateTodo()
-    mocks.ts          createTodosHandlers(initial) + todosMocks (MSW)
-    routes.tsx        todoRoutes() — lazy route objects
+  components/       shared app components
+  features/<name>/  one folder per feature (names below are for an `items` feature):
+    schemas.ts        Effect Schemas + derived types: Item, ItemList, NewItem / NewItemInput
+    model.ts          business rules as pure functions of those types
+    api.ts            Effect.fn functions that call ApiClient: listItems, createItem
+    queries.ts        key factory itemKeys, itemListQueryOptions(), mutation hooks useCreateItem()
+    mocks.ts          createItemsHandlers(initial) + itemsMocks (MSW)
+    routes.tsx        itemRoutes() — lazy route objects
     components/       kebab-case files, PascalCase named exports, a .stories.tsx beside each one,
                       a .test.tsx for each one in components/__tests__/
   lib/
@@ -58,14 +57,14 @@ src/
 
 Lint enforces it, and `func-style` has no autofix, so write it this way from the start:
 
-- Arrow functions only: `export const TodoList = () => { ... };`, `export const useX = () => ...`.
+- Arrow functions only: `export const ItemList = () => { ... };`, `export const useX = () => ...`.
   `function*` stays only inside `Effect.gen` / `Effect.fn`. A component that only returns markup
   returns it directly: `export const Page = () => (<section>...</section>);`.
-- Destructure objects (`const { title } = todo`, props, callback arguments), use shorthand
+- Destructure objects (`const { title } = item`, props, callback arguments), use shorthand
   properties, template literals instead of `+`, `??` / `?.`, `const` (never `var`), `===`.
 - A handler that returns nothing gets braces: `onClick={() => { setOpen(true); }}`, not
   `onClick={() => setOpen(true)}` (`no-confusing-void-expression`).
-- Inline type imports (`import { type Todo, NewTodo } from './schemas'`); `pnpm lint:fix`
+- Inline type imports (`import { type Item, NewItem } from './schemas'`); `pnpm lint:fix`
   fixes most of the rest and formats.
 
 ## How data flows
@@ -87,9 +86,7 @@ ApiClient → effect/http`
   keys they change, and return that promise from `onSuccess`.
 - **Every data screen renders four distinct states:** loading (`isPending`, not `isLoading`),
   error (with `toUserMessage` and a retry), empty (with the next action), success. Empty and
-  error never look the same. Render the first three with `LoadingState`, `ErrorAlert` and
-  `EmptyState` from `src/components/`, and the page title with `PageHeader`. Markup that a
-  second feature needs goes to `src/components/`, with a test and a story.
+  error never look the same.
 - **Forms:** `useForm<Input, unknown, Output>({ resolver, defaultValues })` with
   `effectTsResolver(Schema)` built once at module level (`Input`/`Output` are the schema's
   Encoded/Type: inferred from `defaultValues`, a literal union widens to `string`), `Controller` + shadcn `Field` / `FieldLabel` / `FieldError`,
