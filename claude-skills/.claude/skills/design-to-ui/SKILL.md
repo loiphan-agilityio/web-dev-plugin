@@ -50,7 +50,7 @@ Three sources, all optional; use every one that is present, and look before aski
 
 Split the design into regions (app shell, page header, toolbar or filters, list, card, form, footer) and write the list down before coding: it is your plan and your report.
 
-- Map each region to what exists: `src/components/ui/`, `src/components/`, then `src/features/*/components/`. Reuse before writing new.
+- Map each region to what exists: `src/components/` (`PageHeader`, `LoadingState`, `ErrorAlert`, `EmptyState`), `src/components/ui/`, then `src/features/*/components/`. Reuse before writing new; restyle a shared component through tokens, not a copy.
 - The app shell (header and nav around every page) is `src/app/root-layout.tsx`. Change it there, not in each page.
 - A missing shadcn component is added through the CLI (`pnpm exec shadcn add <name>`). The design-element-to-component table is in `references/design-mapping.md`.
 - A look no variant provides: compose the shadcn component inside a small app component in `src/components/` (shared) or the feature's `components/` (local). Never edit `src/components/ui/`.

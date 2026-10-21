@@ -72,6 +72,9 @@ build and Storybook build. The parts every feature builds on:
   `ValidationError`, `ServerError`, `InvalidResponseError`). Tested in `client.test.ts`.
 - **`runEffect`** (`src/lib/api/run.ts`): runs an effect for TanStack Query, passes the abort
   signal, rejects with the typed error so `query.error._tag` is safe to switch on.
+- **Shared components** (`src/components/`): `PageHeader` (the page's `h1`), `LoadingState`,
+  `ErrorAlert` (message from `toUserMessage` and a retry) and `EmptyState`, each with a test and
+  a story. Features use them for their title and three data states instead of rewriting the markup.
 - **Forms**: React Hook Form + `effectTsResolver(schema)` (`@hookform/resolvers` 6, Effect 4) +
   shadcn `Field`; `setFormErrors` puts server field errors under the right inputs.
 - **MSW worker**: `public/mockServiceWorker.js` is not in the template; the `postinstall` script

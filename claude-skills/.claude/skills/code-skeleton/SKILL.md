@@ -87,6 +87,9 @@ Wiring worth knowing:
 - ESLint `no-restricted-imports` / `no-restricted-globals` enforce the version traps:
   `react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw` `http` / `HttpResponse` /
   `delay` / `passthrough` / `bypass`, `clsx`, `tailwind-merge`, `fetch` (bare, `window.` or `globalThis.`) and `XMLHttpRequest`. Prettier runs inside `pnpm lint`.
+- Shared app components in `src/components/`, each with a test and a story: `PageHeader`,
+  `LoadingState`, `ErrorAlert`, `EmptyState`. Features render their title and three data states
+  with them instead of writing that markup again.
 - shadcn components vendored in `src/components/ui`: button, input, label, card, field,
   skeleton, alert, sonner, separator. That folder is excluded from ESLint and Prettier; add or
   refresh components with `pnpm exec shadcn add <name>`, do not edit them by hand.

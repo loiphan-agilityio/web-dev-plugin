@@ -25,7 +25,8 @@ Run each command on its own, exactly as written (`pnpm check`, not `pnpm check 2
 src/
   app/              routes.tsx (createRoutes), providers.tsx, root-layout.tsx, route-error.tsx
   components/ui/    shadcn components: add with `pnpm exec shadcn add <name>`, never edit by hand
-  components/       shared app components
+  components/       shared app components: PageHeader, LoadingState, ErrorAlert, EmptyState;
+                    reuse them before writing new markup
   features/<name>/  one folder per feature (names below are from a `todos` feature):
     schemas.ts        Effect Schemas + derived types: Todo, TodoList, NewTodo / NewTodoInput
     api.ts            Effect.fn functions that call ApiClient: listTodos, createTodo
@@ -80,7 +81,9 @@ ApiClient → effect/http`
   keys they change, and return that promise from `onSuccess`.
 - **Every data screen renders four distinct states:** loading (`isPending`, not `isLoading`),
   error (with `toUserMessage` and a retry), empty (with the next action), success. Empty and
-  error never look the same.
+  error never look the same. Render the first three with `LoadingState`, `ErrorAlert` and
+  `EmptyState` from `src/components/`, and the page title with `PageHeader`. Markup that a
+  second feature needs goes to `src/components/`, with a test and a story.
 - **Forms:** `useForm<Input, unknown, Output>({ resolver, defaultValues })` with
   `effectTsResolver(Schema)` built once at module level (`Input`/`Output` are the schema's
   Encoded/Type: inferred from `defaultValues`, a literal union widens to `string`), `Controller` + shadcn `Field` / `FieldLabel` / `FieldError`,
