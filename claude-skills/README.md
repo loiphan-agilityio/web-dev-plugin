@@ -1,6 +1,6 @@
 # Claude Code skills for web development
 
-Four Claude Code skills that let Claude build web apps on a modern React stack and follow its
+Five Claude Code skills that let Claude build web apps on a modern React stack and follow its
 conventions on the first try.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
