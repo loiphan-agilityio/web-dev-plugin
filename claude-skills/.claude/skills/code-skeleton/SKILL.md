@@ -1,6 +1,6 @@
 ---
 name: code-skeleton
-description: Scaffolds a new web app (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query, React Router 8, shadcn/ui on Tailwind 4, Vitest 5 + MSW 3) from a verified template. Use when asked to create, scaffold, bootstrap or set up a new web app, project or frontend, to "start a new React app with our stack", or to make a "new project from the template". Do NOT use when the request also says what the app should do (a topic, features: "build me a library app") - build-app plans that and calls this skill first - or for adding features, pages or endpoints to an existing app (develop-feature, integrate-api or design-to-ui).
+description: Scaffolds a new web app (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query, React Router 8, shadcn/ui on Tailwind 4, Vitest 5 + MSW 3) from a verified template. Use when asked to create, scaffold, bootstrap or set up a new web app, project or frontend, to "start a new React app with our stack", or to make a "new project from the template". Do NOT use when the request also says what the app should do (a topic or features, e.g. "build me a library app") - build-app plans that and calls this skill first - or for adding features, pages or endpoints to an existing app (develop-feature, integrate-api or design-to-ui).
 ---
 
 # Code skeleton
