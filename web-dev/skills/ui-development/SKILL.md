@@ -2,7 +2,7 @@
 name: ui-development
 description: This skill should be used when the user asks to "implement this design", "make it look like this screenshot", "build this screen from this Figma link", "style it with our DESIGN.md" or "match the mockup" in an app built from the web-dev template (shadcn/ui, Tailwind 4). It turns a design into theme tokens, shadcn components, every data state, tests and a browser check. Not for a ticket without a design (feature-development), one endpoint (api-integration) or a new project (project-setup).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm; the visual check needs a browser tool."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm check) Bash(pnpm exec shadcn add *)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *)
 ---
 
 # ui-development
@@ -56,7 +56,7 @@ Follow `references/visual-check.md`: with a browser tool, compare the page with 
 
 ## 6. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. Fix the cause until green; a rule, a type and an assertion stay as strict as they are.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then `pnpm check` again.
 
 ## Result
 

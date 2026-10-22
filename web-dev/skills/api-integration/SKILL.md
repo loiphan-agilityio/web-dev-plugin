@@ -2,7 +2,7 @@
 name: api-integration
 description: This skill should be used when the user asks to "add an endpoint", "call the API", "hook this up to the backend", "add a mutation", "handle the 404/422 from the API", "mock this endpoint", "add an ApiError case" or "invalidate the cache after a write" in an app built from the web-dev template (Effect HttpClient, TanStack Query, MSW). It wires one endpoint with its schema, Effect.fn, query or mutation, MSW handlers and error tests. Not for a new project (project-setup) or a whole feature with screens and routes (feature-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm check)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check)
 ---
 
 # api-integration
@@ -40,7 +40,7 @@ Extend `createTodosHandlers(initial)` and `todosMocks` (pending, error, validati
 
 ## 6. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. Fix the cause until green; a rule, a type and an assertion stay as strict as they are.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then `pnpm check` again.
 
 Auth: `ApiClient` sends the bearer token `AuthToken` gives, `AuthToken.none` in a project without authentication, the token of `src/features/auth` with it. For an app with sign-in but no such feature, provide `AuthToken.fromGetter(...)` in `src/lib/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
 
