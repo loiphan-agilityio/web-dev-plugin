@@ -122,7 +122,28 @@ flowchart LR
   MCP), or a `DESIGN.md` whose written values win over measured ones. With none, it asks once,
   then keeps the current theme; under `develop` it never asks.
 
-## 5. Decisions
+## 5. Tests, CI/CD and deploy
+
+```mermaid
+flowchart LR
+  W["pnpm test:watch<br/>while coding"] --> PR["pull request"]
+  PR --> CK["check<br/>lint, typecheck, unit, build, Storybook"]
+  PR --> E2["e2e<br/>Playwright on the mock build"]
+  CK --> DP["deploy<br/>Netlify draft: app + Storybook"]
+  E2 --> DP
+  DP --> ED["e2e-deployed<br/>same specs on the draft URL"]
+  ED -->|"main only"| PM["promote<br/>same files to production"]
+```
+
+- `pnpm check` is six gates: lint, typecheck, unit tests with coverage, build, Storybook build and
+  Playwright e2e. The e2e gate builds with `--mode mock` and serves `dist/` with `vite preview`,
+  so it tests the same build CI deploys.
+- One e2e spec per feature walks its main flow; states and error paths stay in the unit tests,
+  which are faster and drive MSW per test.
+- The deployed app runs on mocks (MSW in the browser) until it has a backend: a POC from one
+  message has none, and the e2e specs need known data.
+
+## 6. Decisions
 
 | Decision | Why |
 |---|---|

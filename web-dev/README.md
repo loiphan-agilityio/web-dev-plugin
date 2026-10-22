@@ -5,7 +5,8 @@ a modern React stack and follow its conventions on the first try, in a new folde
 existing React project.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
-shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Storybook 10 · pnpm 11
+shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Playwright 1.64 · Storybook 10 · pnpm 11 ·
+GitHub Actions + Netlify
 
 | Skill | Use it for | Example prompt |
 |---|---|---|
@@ -140,7 +141,8 @@ A project from the boilerplate passes lint, typecheck, tests, build and Storyboo
   trusted, `-p` included, so one message runs to the end with no prompt and no settings file;
   file edits need `--permission-mode acceptEdits` headless. For later turns, the project's
   `.claude/settings.json` allows exactly the pnpm commands the skills run (`install`, `lint`,
-  `lint:fix`, `typecheck`, `test`, `build`, `build-storybook`, `check`, `dev:mock`,
+  `lint:fix`, `typecheck`, `test`, `test:e2e`, `test:e2e:install`, `build`,
+  `build-storybook`, `check`, `dev:mock`,
   `exec shadcn add` / `info`), and its `PostToolUse` hook (`.claude/hooks/format.mjs`) runs
   Prettier on every file Claude writes or edits inside the project, so code is formatted as it is
   written. A project from the boilerplate has two: the root's, for sessions started there
@@ -149,6 +151,21 @@ A project from the boilerplate passes lint, typecheck, tests, build and Storyboo
   root one only when the project has none, and Claude Code applies it once the folder is trusted (open it with `claude` and accept the prompt).
   `git init` and commits stay prompts on purpose.
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
+- **Watch mode**: `pnpm test:watch` (`vitest --watch`) re-runs the tests that import a file
+  each time it is saved; `--watch` keeps it watching even where `CI` is set.
+- **End-to-end**: Playwright in `e2e/` (`playwright.config.ts`). `pnpm test:e2e` builds the app
+  on mocks (`pnpm build:mock`) and serves it with `vite preview`; with `E2E_BASE_URL` set it
+  tests that URL instead. `pnpm check` runs it as the sixth gate; `pnpm test:e2e:install`
+  downloads Chromium once per machine (`project-setup` runs it). Every feature adds
+  `e2e/<name>.spec.ts` for its main flow.
+- **CI/CD** (`.github/workflows/ci.yml`): `check` (lint, typecheck, unit tests, build, Storybook
+  build) and `e2e` in parallel; then `deploy` sends the mock build and Storybook to Netlify as a
+  draft (`pr-<n>` on a pull request), `e2e-deployed` runs the same specs against that URL, and on
+  `main` `promote` publishes the same files to production. It needs the `NETLIFY_AUTH_TOKEN`
+  secret and the `NETLIFY_SITE_ID` variable (`NETLIFY_STORYBOOK_SITE_ID` for Storybook); without
+  them the deploy jobs are skipped.
+- **Netlify** (`netlify.toml`): SPA redirect, long cache for `assets/`, no cache for the MSW
+  worker. The deploy runs on mocks (`build:mock`, MSW in the browser) until the app has a backend.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
   helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`); `pnpm lint` also runs `prettier --check`.

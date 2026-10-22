@@ -58,6 +58,8 @@ Every version is pinned in the boilerplate's lockfile.
 - Show server validation errors (422) next to the matching form fields.
 - Mock every request with MSW in tests; an unhandled request fails the test.
 - Keep at least 80% line coverage in `src/features/**` and `src/lib/**`.
+- Walk each feature's main flow in a Playwright spec that passes on the mock build locally and
+  on the Netlify deploy in CI.
 
 ## Proof of concept
 
