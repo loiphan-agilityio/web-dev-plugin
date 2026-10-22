@@ -1,5 +1,5 @@
 {
-  "name": "claude-training",
+  "name": "web-dev-plugin",
   "description": "Marketplace for the web-dev plugin (folder web-dev/).",
   "owner": {
     "name": "web-dev"
