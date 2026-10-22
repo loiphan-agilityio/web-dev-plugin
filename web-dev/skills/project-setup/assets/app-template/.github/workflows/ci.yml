@@ -1,0 +1,188 @@
+# CI/CD for this app on GitHub Actions.
+#
+# - check: lint, typecheck, unit tests with coverage, build and Storybook build.
+# - e2e: the Playwright tests against the app built on the mocked API (`pnpm build:mock`).
+# - deploy: once both pass, the app and Storybook go to Netlify as a draft: `pr-<number>--<site>`
+#   on a pull request, a unique draft URL on a push to main.
+# - e2e-deployed: the same Playwright tests against that deploy URL.
+# - promote (push to main only): once the deployed e2e tests pass, the same files go live.
+#
+# Deploys need the NETLIFY_AUTH_TOKEN secret and the NETLIFY_SITE_ID variable (Settings > Secrets
+# and variables > Actions); NETLIFY_STORYBOOK_SITE_ID adds a second site for Storybook. Without
+# NETLIFY_SITE_ID the deploy jobs are skipped, and so are pull requests from forks, which get no
+# secrets.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # A newer push to a pull request cancels its run; runs on main finish, so a deploy is never cut.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    # Adds pipefail, so a failing command before a pipe fails the step.
+    shell: bash
+
+env:
+  NETLIFY_CLI: netlify-cli@27.14.1
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # pnpm's version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # `pnpm check` minus test:e2e, which runs in its own job, in parallel.
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm build-storybook
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      # Builds on mocks and serves dist/ with `vite preview` (playwright.config.ts, webServer).
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v7
+        if: ${{ failure() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  deploy:
+    needs: [check, e2e]
+    if: >-
+      vars.NETLIFY_SITE_ID != '' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.app.outputs.url }}
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+      NETLIFY_STORYBOOK_SITE_ID: ${{ vars.NETLIFY_STORYBOOK_SITE_ID }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The mocked API: a new app has no backend yet. Once it has one, set VITE_API_URL here and
+      # switch to `pnpm build` (and in netlify.toml).
+      - run: pnpm build:mock
+      - run: pnpm build-storybook
+      - name: Deploy the app (draft)
+        id: app
+        run: |
+          alias=()
+          if [[ -n "$PR_NUMBER" ]]; then alias=(--alias "pr-$PR_NUMBER"); fi
+          url="$(npx -y "$NETLIFY_CLI" deploy --no-build --dir dist --site "$NETLIFY_SITE_ID" \
+            "${alias[@]}" --message "$GITHUB_SHA" --json | jq -r .deploy_url)"
+          [[ "$url" == https://* ]]
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "App: $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Deploy Storybook (draft)
+        if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}
+        run: |
+          alias=()
+          if [[ -n "$PR_NUMBER" ]]; then alias=(--alias "pr-$PR_NUMBER"); fi
+          url="$(npx -y "$NETLIFY_CLI" deploy --no-build --dir storybook-static \
+            --site "$NETLIFY_STORYBOOK_SITE_ID" "${alias[@]}" --message "$GITHUB_SHA" --json |
+            jq -r .deploy_url)"
+          [[ "$url" == https://* ]]
+          echo "Storybook: $url" >> "$GITHUB_STEP_SUMMARY"
+      # promote publishes exactly these files, not a rebuild.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: deploy
+          path: |
+            dist/
+            storybook-static/
+          retention-days: 7
+
+  e2e-deployed:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      # With E2E_BASE_URL set, Playwright starts no server and tests the deploy itself.
+      - run: pnpm test:e2e
+        env:
+          E2E_BASE_URL: ${{ needs.deploy.outputs.url }}
+      - uses: actions/upload-artifact@v7
+        if: ${{ failure() }}
+        with:
+          name: playwright-report-deployed
+          path: playwright-report/
+          retention-days: 14
+
+  promote:
+    needs: e2e-deployed
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Approvals or branch rules for production can be set on this environment in the settings.
+    environment: production
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+      NETLIFY_STORYBOOK_SITE_ID: ${{ vars.NETLIFY_STORYBOOK_SITE_ID }}
+    steps:
+      # netlify.toml holds the redirects and headers the deploy applies.
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: deploy
+      - name: Publish the app
+        run: |
+          url="$(npx -y "$NETLIFY_CLI" deploy --no-build --dir dist --site "$NETLIFY_SITE_ID" \
+            --prod --message "$GITHUB_SHA" --json | jq -r .url)"
+          echo "App: $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish Storybook
+        if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}
+        run: |
+          url="$(npx -y "$NETLIFY_CLI" deploy --no-build --dir storybook-static \
+            --site "$NETLIFY_STORYBOOK_SITE_ID" --prod --message "$GITHUB_SHA" --json | jq -r .url)"
+          echo "Storybook: $url" >> "$GITHUB_STEP_SUMMARY"

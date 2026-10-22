@@ -1,0 +1,30 @@
+# Netlify hosting. CI (.github/workflows/ci.yml) builds the app and runs `netlify deploy --no-build
+# --dir dist`, which reads the redirects and headers below. [build] applies only when Netlify
+# builds from git itself instead.
+[build]
+  # The mocked API: a new app has no backend yet. Once it has one, set VITE_API_URL and switch to
+  # `pnpm build` (here and in CI).
+  command = "pnpm build:mock"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# Single-page app: a path that is not a file serves index.html, so deep links and reloads reach
+# React Router.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Vite hashes every file in assets/, so a cached copy is never stale.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The MSW worker keeps its name across releases: always revalidate it.
+[[headers]]
+  for = "/mockServiceWorker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
