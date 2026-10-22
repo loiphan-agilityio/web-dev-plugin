@@ -28,23 +28,22 @@ Requirements: Node ≥ 22.22, pnpm 10 or newer (it switches to the pinned pnpm 1
 straight from its git host, with no clone, and the skills load in every project:
 
 ```bash
-claude plugin marketplace add <repo-url>#feat/web-dev-plugin
+claude plugin marketplace add git@github.com:loiphan-agilityio/web-dev-plugin.git
 ```
 
 ```bash
-claude plugin install web-dev@claude-training
+claude plugin install web-dev@web-dev-plugin
 ```
 
-`<repo-url>` is the repository's git URL, `git@<host>:<group>/claude-training.git` or
-`https://<host>/<group>/claude-training.git`. `#feat/web-dev-plugin` picks the branch that holds
-the marketplace; drop it once the plugin is on the default branch, or pin a release tag instead
-(`#web-dev--v0.1.0`). The clone runs with your
+The URL is the repository's git URL (`https://github.com/loiphan-agilityio/web-dev-plugin.git`
+works too). It installs from the default branch, `main`; append `#<ref>` to pick another
+branch or pin a release tag (`#web-dev--v0.2.0`). The clone runs with your
 own git credentials and never prompts: an SSH key loaded in `ssh-agent`, or for an `https://`
 URL a credential your git helper already stores.
 
 A git install is a cached copy, so a release reaches you only when `version` in
-`.claude-plugin/plugin.json` changes: run `claude plugin update web-dev@claude-training`, or turn
-on auto-update once (`/plugin` → Marketplaces → claude-training → Enable auto-update). To offer
+`.claude-plugin/plugin.json` changes: run `claude plugin update web-dev@web-dev-plugin`, or turn
+on auto-update once (`/plugin` → Marketplaces → web-dev-plugin → Enable auto-update). To offer
 the plugin to everyone who opens one repository, run the `marketplace add` command there with
 `--scope project` and commit the `.claude/settings.json` it writes; teammates who trust the
 folder get the marketplace registered.
@@ -57,8 +56,8 @@ script, the same message runs to the end with no settings file:
 `claude -p "/web-dev:develop <request>" --permission-mode acceptEdits --allowedTools Skill`
 (see Permissions below).
 
-**From a clone, to work on the plugin.** `git clone -b <branch> <repo-url> claude-training`,
-then `claude plugin marketplace add ./claude-training` and the same install. A marketplace added
+**From a clone, to work on the plugin.** `git clone <repo-url> web-dev-plugin`,
+then `claude plugin marketplace add ./web-dev-plugin` and the same install. A marketplace added
 from a local path is read in place: your edits load at the next session or after
 `/reload-plugins`, with no version bump.
 
