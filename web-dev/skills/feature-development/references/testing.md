@@ -219,7 +219,7 @@ A model test calls the function with plain values: no render, no MSW. Cover each
 - Prefer a native `<select>` (`native-select`) and `user.selectOptions(...)`; the Radix `select` needs browser APIs jsdom lacks (`references/forms.md`, Other controls).
 - When a ticket changes a component (a badge becomes a select), update its existing tests and stories in the same change, and say which in the Result.
 - Assert behaviour (what the user sees), not implementation (hook calls, cache keys).
-- A toast is text on screen: `expect(await screen.findByText('Todo added')).toBeInTheDocument()`. The render helpers mount the `Toaster`; never `vi.mock('sonner')`. In a project scaffolded before the template did this, add the `<Toaster />` to `src/test/render.tsx`, and the `matchMedia` stub and `toast.dismiss()` to `src/test/setup.ts`, as in the `project-setup` skill's `assets/app-template/src/test/`.
+- A toast is text on screen: `expect(await screen.findByText('Todo added')).toBeInTheDocument()`. The render helpers mount the `Toaster`; never `vi.mock('sonner')`. In an app from the plugin's 0.1.0 template that lacks it, add the `<Toaster />` to `src/test/render.tsx`, and the `matchMedia` stub and `toast.dismiss()` to `src/test/setup.ts`, as in the boilerplate's `apps/web/src/test/`.
 - Vitest 5 globals (`describe`, `it`, `expect`) are on; `clearMocks` is default true; `vi.mock` only at file top level. There is no Jest; do not use `jest.*`.
 - MSW 3 imports: `msw/http`, `msw/utils/delay`. Root `msw` imports of `http`/`HttpResponse`/`delay` are rejected by lint.
 - Don't make a test pass by weakening it: no removing assertions, no `.skip`, no loosening queries. If a test exposes a bug, fix the code.

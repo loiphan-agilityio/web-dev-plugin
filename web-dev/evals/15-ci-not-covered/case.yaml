@@ -5,7 +5,7 @@ tags: [routing, edge]
 context:
   scaffold_script: setup.sh
 execution:
-  prompt: "/web-dev:develop Set up CI on GitHub that runs our unit tests on every push."
+  prompt: "/web-dev:develop In apps/web, set up CI on GitHub that runs our unit tests on every push."
   max_turns: 8
   timeout_seconds: 300
   allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]

@@ -8,7 +8,8 @@
 // Tiers:
 //   new          an empty folder (or one holding only .git/, .claude/, design/, DESIGN.md), or a
 //                non-empty folder without package.json (the app goes in a subfolder)
-//   template     scaffolded from the template: ApiClient, src/test/render.tsx and effect
+//   template     an app from the boilerplate (apps/web) or the 0.1.0 template: ApiClient,
+//                src/test/render.tsx and effect
 //   same-stack   the template's stack (React, Vite, Effect, TanStack Query, React Hook Form),
 //                another layout
 //   other-stack  a React app on another stack (axios, zod, Redux, another router...)

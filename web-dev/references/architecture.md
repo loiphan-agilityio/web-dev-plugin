@@ -1,12 +1,12 @@
 # Architecture
 
-The data flow of a project scaffolded from the template: which layer calls which, and the rules
+The data flow of a project from the boilerplate: which layer calls which, and the rules
 each layer keeps. A project with another layout keeps its own; the `develop` skill's project map
 names the file that plays each role here (HTTP client, query layer, forms, test helpers), and
 the skills work through those files instead.
 
-A project scaffolded from the template carries the section below, word for word, in its own
-`CLAUDE.md`. `tools/check-guidelines.mjs` (in the repository, not shipped with the plugin) fails when the
+The boilerplate's `apps/web/CLAUDE.md` carries the section below, word for word, so a project
+from it has the section without the plugin. `tools/check-guidelines.mjs` (in the repository, not shipped with the plugin) fails when the
 two differ.
 
 ## How data flows

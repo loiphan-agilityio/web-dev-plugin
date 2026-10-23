@@ -14,7 +14,10 @@ A git install is a cached copy, so a change reaches users only with a new versio
   and keeps an existing `.claude/settings.json` (the boilerplate brings one at its root and one in
   `apps/web`, since Claude Code reads it only where a session starts).
   `tools/check-create-project.sh` (run by `verify.sh`) checks both variants; eval
-  `19-setup-asks-for-auth`. `assets/app-template/` stays for the eval fixtures.
+  `19-setup-asks-for-auth`. The plugin no longer ships a template: `assets/app-template/` and
+  `scaffold.sh` are gone, the eval fixtures create their project from the boilerplate (the cases
+  name `apps/web`), `ui-development` edits the theme in `packages/ui/src/styles/globals.css`, and
+  `references/` mirror the boilerplate's `apps/web/CLAUDE.md`.
 - `tools/verify.sh` replaces `verify-template.sh`: it runs the todos feature the skills quote in a
   project created from the boilerplate, where Claude copies it, instead of in the template. The
   quoted code imports the boilerplate's UI kit (`@repo/ui/components/*`, `cn` from

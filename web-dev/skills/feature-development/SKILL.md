@@ -7,7 +7,7 @@ allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnp
 
 # feature-development
 
-Turn one ticket into a tested feature in `src/features/<name>/`. `references/` holds the worked todos feature (a list and a create form), verified on a fresh scaffold: copy its shapes, never library code from memory.
+Turn one ticket into a tested feature in `src/features/<name>/`. `references/` holds the worked todos feature (a list and a create form), verified in a project from the boilerplate: copy its shapes, never library code from memory.
 
 Before writing code, read the project's `CLAUDE.md`, `../../references/stack-guidelines.md` (version traps) and, for Effect code, `node_modules/effect/AGENTS.md` in full. In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`.
 

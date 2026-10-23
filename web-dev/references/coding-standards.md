@@ -1,11 +1,11 @@
 # Coding standards
 
-How code reads in a project this plugin writes. ESLint enforces it in a project scaffolded from
-the template. In any other project, the project's own lint config and the code around the change
+How code reads in a project this plugin writes. ESLint enforces it in a project from the
+boilerplate. In any other project, the project's own lint config and the code around the change
 win: match them, and do not reformat code the task does not touch.
 
-A project scaffolded from the template carries the section below, word for word, in its own
-`CLAUDE.md`. `tools/check-guidelines.mjs` (in the repository, not shipped with the plugin) fails when the
+The boilerplate's `apps/web/CLAUDE.md` carries the section below, word for word, so a project
+from it has the section without the plugin. `tools/check-guidelines.mjs` (in the repository, not shipped with the plugin) fails when the
 two differ.
 
 ## Code style

@@ -2,7 +2,7 @@
 
 A Claude Code plugin for web apps on React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5
 (React Query), React Hook Form 7 and shadcn/ui. One entry point, `/web-dev:develop <request>`,
-inspects the folder (empty, an app from the plugin's template, or another React project), picks
+inspects the folder (empty, an app from the boilerplate, or another React project), picks
 the workflow and runs the skills that do the work: **project setup**, **feature development**,
 **API integration** and **UI development**.
 
@@ -30,7 +30,7 @@ runs, the pinned versions and the companion skills.
 
 | Path | What it is |
 |---|---|
-| [`web-dev/`](web-dev/) | The plugin: the `develop` entry skill, four skills, the app template they copy from, shared references, scripts and evals. |
+| [`web-dev/`](web-dev/) | The plugin: the `develop` entry skill, four skills, shared references, scripts and evals. New projects come from the react-vite-boilerplate repository. |
 | `examples/`, `docs/evidence/` | Demo output and what a run collected (reports, logs, screenshots), local only: not in the repository. |
 | [`spec.md`](spec.md) | What the skills must do, and the POC steps. |
 | [`DESIGN.md`](DESIGN.md) | How the plugin, the skills and the generated app are built, and why. |

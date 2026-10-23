@@ -5,7 +5,7 @@ tags: [routing, workflow-c]
 context:
   scaffold_script: setup.sh
 execution:
-  prompt: "/web-dev:develop Add an invoices page: a list from GET /invoices with a status filter (draft, sent, paid)."
+  prompt: "/web-dev:develop In apps/web, add an invoices page: a list from GET /invoices with a status filter (draft, sent, paid)."
   max_turns: 12
   timeout_seconds: 600
   allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
@@ -18,7 +18,7 @@ graders:
   - type: tool_used
     name: no-new-scaffold
     tool: Bash
-    input_match: "scaffold\\.sh"
+    input_match: "create-project\\.sh"
     min: 0
     max: 0
     arm: both

@@ -1,2 +1,0 @@
-# Keep LF everywhere, whatever core.autocrlf says: Prettier rejects CRLF line endings.
-* text=auto eol=lf

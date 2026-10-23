@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Runs the eval suite against a clean copy of the plugin. `claude plugin eval` on web-dev/ itself
-# fails with E2BIG once the template's node_modules is installed (the root `pnpm install` puts
-# ~37k files there), so this copies the plugin without local output and runs the copy.
+# Runs the eval suite against a clean copy of the plugin. `claude plugin eval` on a plugin folder
+# that holds a node_modules fails with E2BIG, so this copies the plugin without local output and
+# runs the copy.
 #
 #   evals/run.sh [claude plugin eval options...]
 #
