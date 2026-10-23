@@ -4,7 +4,7 @@
 // that the boilerplate's apps/web/CLAUDE.md carries word for word, so a project from it keeps it
 // without the plugin. Other files in references/ (companions.md) are for the skills only.
 // The boilerplate is the source: --write copies its sections over the ones in references/ and
-// keeps each preamble (tools/sync-references.sh runs it on a fresh clone of the boilerplate).
+// keeps each preamble (tools/sync-references.sh runs it on a project created from the boilerplate).
 //
 //   node check-guidelines.mjs [--write] <references-dir> <app-claude-md>
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';

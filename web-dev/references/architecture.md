@@ -7,7 +7,7 @@ the skills work through those files instead.
 
 The boilerplate's `apps/web/CLAUDE.md` carries the section below, word for word, so a project
 from it has the section without the plugin. `tools/check-guidelines.mjs` (in the repository, not shipped with the plugin) fails when the
-two differ; `tools/sync-references.sh` copies it from the boilerplate, its source.
+two differ.
 
 ## How data flows
 
