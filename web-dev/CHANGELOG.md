@@ -3,6 +3,34 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.0
+
+- **`ci-setup`**, a fifth skill behind `develop` (request kind **ci**, any tier with a
+  `package.json`): `scripts/setup-ci.sh` writes a GitHub Actions workflow
+  (`.github/workflows/unit-tests.yml`) or a GitLab CI job (`.gitlab-ci.yml`) that runs the whole
+  unit-test suite on every push. The skill always asks GitHub or GitLab, unless the request names
+  one, and never picks the host from the remotes or the files in the folder. The file goes to the
+  git root, with the job in the project's folder; `node:24` with corepack and a frozen install
+  (pnpm, npm or yarn); `actions/checkout` pinned by commit. It refuses to overwrite a pipeline, or
+  to write one without a `test` script or a lockfile, then runs the gates.
+- **`project-setup` creates the project from the react-vite-boilerplate** instead of copying
+  `assets/app-template/`: `scripts/create-project.sh <dir> --auth|--no-auth` clones the boilerplate
+  and runs its own generator (`create/index.js`), so a new project is a pnpm + Turborepo monorepo
+  with the app in `apps/web`. The skill asks whether to include authentication (email + password
+  sign-in, `protectedRoutes()`, MSW mocks) unless the request says; Workflow A takes it from the
+  plan and builds the features in `apps/web`. It refuses a folder with any of the project's files,
+  and keeps an existing `.claude/settings.json` (the boilerplate brings one at its root and one in
+  `apps/web`, since Claude Code reads it only where a session starts).
+  `tools/check-create-project.sh` (run by `verify.sh`) checks both variants; eval
+  `19-setup-asks-for-auth`. `assets/app-template/` stays for the eval fixtures.
+- `tools/verify.sh` replaces `verify-template.sh`: it runs the todos feature the skills quote in a
+  project created from the boilerplate, where Claude copies it, instead of in the template. The
+  quoted code imports the boilerplate's UI kit (`@repo/ui/components/*`, `cn` from
+  `@repo/ui/lib/utils`), and the wiring is two edits (routes, mock handlers): the boilerplate's
+  root layout has no nav, and with authentication the route goes inside `protectedRoutes([...])`.
+- `tools/check-ci-setup.sh` tests the script without a host; `verify.sh` runs it and
+  writes both pipelines into a project from the boilerplate.
+
 ## 0.1.0
 
 The first release.

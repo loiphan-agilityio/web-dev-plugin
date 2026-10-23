@@ -24,7 +24,7 @@ Then list what the design leaves out (loading, error and empty states, the other
 
 ## 1. Inventory
 
-Split the design into regions (shell, header, toolbar, list, card, form) and map each to what exists: `src/components/ui/`, `src/components/`, then `src/features/*/components/`. The shell is `src/app/root-layout.tsx`. Elements to components, and icons to lucide: `references/design-mapping.md`. A missing shadcn component (style `radix-nova`; the template ships `alert button card field input label separator skeleton sonner`) comes from `pnpm exec shadcn add <name>`. A look no variant provides is a small app component that wraps the shadcn one; `src/components/ui/` is generated and stays untouched. Done when every region has its component written down: this list is the plan and the report.
+Split the design into regions (shell, header, toolbar, list, card, form) and map each to what exists: `packages/ui/src/components/` (`@repo/ui/components/<name>`), `src/components/`, then `src/features/*/components/`. The shell is `src/app/root-layout.tsx`. Elements to components, and icons to lucide: `references/design-mapping.md`. A missing shadcn component (style `radix-nova`; the boilerplate ships `alert badge button card field input label separator skeleton sonner`) comes from `pnpm exec shadcn add <name>` in `apps/web`, which writes into `packages/ui`. A look no variant provides is a small app component that wraps the shadcn one; `packages/ui/src/components/` is generated and stays untouched. In a single-package app (from the plugin's 0.1.0 template: `src/components/ui/` exists, no `packages/ui`), the kit is `@/components/ui/<name>` in `src/components/ui/` and `cn` comes from `@/lib/utils`. Done when every region has its component written down: this list is the plan and the report.
 
 ## 2. Tokens
 
@@ -32,7 +32,7 @@ Tailwind 4 is CSS-first: the theme lives in `src/styles/index.css` (values in `:
 
 - Map each design color by role, and edit the **values** in `:root`, so every component, focus ring and toast follows. Keep the design's value as given (hex is valid there).
 - A role the theme lacks (success, warning) gets a new variable, its `@theme inline` line and a `-foreground` pair.
-- Components use tokens only (`bg-primary`, `text-muted-foreground`) and `cn` from `@/lib/utils`; raw colors and palette classes bypass the theme.
+- Components use tokens only (`bg-primary`, `text-muted-foreground`) and `cn` from `@repo/ui/lib/utils`; raw colors and palette classes bypass the theme.
 - Ask first: a new font (a `@fontsource` dependency; keep Geist meanwhile), and a palette change that would restyle screens the design does not cover.
 - Dark mode is not wired; `references/design-mapping.md`, Dark mode, says what to do when the design shows one.
 

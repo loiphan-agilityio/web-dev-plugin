@@ -23,13 +23,14 @@ Every version is pinned in the template's lockfile.
 
 | # | Requirement | Delivered by | Done when |
 |---|---|---|---|
-| 0 | **One entry point:** `/web-dev:develop <request>` sorts the request and the project, and runs the right workflow; the user never picks a skill | `develop` skill + `scripts/detect-project.mjs` | Each folder gets its tier (`fixtures/check-detect.sh`, run by `verify-template.sh`), and the routing evals in `web-dev/evals/` pass |
-| 1 | **Code skeleton:** scaffold a working project (providers, Effect runtime, query client, path alias, lint, tests) | `project-setup` skill + `assets/app-template/` + `scaffold.sh` | A fresh scaffold passes lint, typecheck, test, build and Storybook build (`verify-template.sh`, also run by CI) |
+| 0 | **One entry point:** `/web-dev:develop <request>` sorts the request and the project, and runs the right workflow; the user never picks a skill | `develop` skill + `scripts/detect-project.mjs` | Each folder gets its tier (`fixtures/check-detect.sh`, run by `verify.sh`), and the routing evals in `web-dev/evals/` pass |
+| 1 | **Code skeleton:** create a working project (providers, Effect runtime, query client, path alias, lint, tests) from the react-vite-boilerplate monorepo, with or without its authentication feature as the user chooses | `project-setup` skill + `scripts/create-project.sh` (runs the boilerplate's own generator) | Both variants are created, wired and refused as `tools/check-create-project.sh` expects (run by `verify.sh`); the generated project passes the boilerplate's `pnpm check` |
 | 2 | **Develop feature:** ticket → tested UI (schema, API layer, queries/mutations, form, UI, tests) | `feature-development` skill + a worked todos feature in its `references/` | A ticket becomes a page with the four data states, a test file and a story per component, and `pnpm check` passes |
 | 3 | **Integrate API:** Effect Schema + HttpClient with typed errors, `queryOptions` / mutations, MSW mocks | `api-integration` skill + `ApiClient`, `runEffect`, `ApiError` in the template | Every backend failure maps to one of 7 typed `ApiError` cases; 404, 422 and 500 paths are tested |
 | 4 | **One message, whole app:** a description on any topic becomes a running POC without further input | `develop` skill, Workflow A: plans `docs/plan.md`, then drives the other four, runs the gates and opens the app on mocks | One prompt yields a scaffold, every planned feature, five green gates and an app that runs with `pnpm dev:mock`; every decision made for the user is listed |
 | 5 | **Existing project:** a feature, endpoint or screen in a React project not made from the template, built on its own code and conventions | `develop` skill, Workflow B + `codebase-explorer` agent + `scripts/verify-project.sh`; `references/outside-template.md` in each building skill | The change reuses the project's HTTP client, query layer and tests, adds no library unasked, and the project's own gates pass |
 | + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma, DESIGN.md; all optional) | `ui-development` skill | Theme tokens, shadcn components and the four data states, no raw colors |
+| + | Not in the assignment: a CI pipeline (GitHub Actions or GitLab CI) that runs the whole unit-test suite on every push, in an app from the template or another React project | `ci-setup` skill + `scripts/setup-ci.sh` | The file sits at the git root, installs from the lockfile and runs the `test` script; `tools/check-ci-setup.sh` passes and a project from the boilerplate with both pipelines passes all five gates (`verify.sh`) |
 
 ### Each skill must
 
@@ -67,12 +68,13 @@ Requirement 4, one message to a whole app: the demo in `README.md` ("Demo") give
 
 ## Out of scope
 
-- SSR and Next.js, backend code, CI/CD pipelines for the generated apps.
+- SSR and Next.js, backend code, deploy and release pipelines (CD) for the generated apps; the
+  one CI pipeline `ci-setup` writes runs the unit tests only.
 - End-to-end browser tests (Playwright): the template has unit and component tests only.
-- Applying the skeleton to an existing project: `scaffold.sh` refuses a folder with
+- Applying the skeleton to an existing project: `create-project.sh` refuses a folder with
   conflicting files. An existing project gets features through Workflow B instead.
-- Not yet: bug fixes, review without edits, commits, PR/MR and CI work (`develop` reports them as
-  not covered and changes nothing), and projects that are not React or use Next.js / SSR.
+- Not yet: bug fixes, review without edits, commits, PR/MR, and CI work besides the unit-test
+  pipeline (`develop` reports them as not covered and changes nothing), and projects that are not React or use Next.js / SSR.
 
 ## Distribution
 

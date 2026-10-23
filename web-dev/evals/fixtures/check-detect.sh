@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds each fixture in a temporary directory and checks the tier detect-project.mjs gives it.
-# Runs without network or an install; tools/verify-template.sh calls it.
+# Runs without network or an install; tools/verify.sh calls it.
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 detect="$here/../../scripts/detect-project.mjs"

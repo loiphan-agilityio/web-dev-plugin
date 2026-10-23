@@ -1,6 +1,6 @@
 # web-dev: Claude Code plugin for web development
 
-One entry point, `/web-dev:develop <request>`, and four skills that let Claude build web apps on
+One entry point, `/web-dev:develop <request>`, and five skills that let Claude build web apps on
 a modern React stack and follow its conventions on the first try, in a new folder or in an
 existing React project.
 
@@ -10,13 +10,15 @@ shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library
 | Skill | Use it for | Example prompt |
 |---|---|---|
 | `develop` | The entry point. Runs `scripts/detect-project.mjs`, sorts the request and picks a workflow: **A** a whole app in a new folder (plans features, data model, API and mock data in `docs/plan.md`, runs the skills below and all gates, opens the app on a mocked API; decides instead of asking), **B** a change in a React project not made from the template (maps it with the `codebase-explorer` agent, builds on its own code, runs its own gates with `scripts/verify-project.sh`), **C** one feature, endpoint or screen in an app from the template | "/web-dev:develop Build an employee management app with CRUD, search and forms" · "/web-dev:develop Add a department filter to the employees list" |
-| `project-setup` | A new project: copies a verified template, installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal" |
+| `project-setup` | A new project from the react-vite-boilerplate (pnpm + Turborepo monorepo, the app in `apps/web`): asks whether to include authentication (email + password sign-in, protected routes, MSW mocks), creates it with the boilerplate's generator (`scripts/create-project.sh`), installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal, with login" |
 | `feature-development` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `api-integration` for endpoints beyond list + create and `ui-development` for a design | "Implement this ticket: <paste or issue URL>" |
 | `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `ui-development` | A design (screenshot, mockup, Figma frame, DESIGN.md) → a UI that matches it: theme tokens, shadcn components, states, tests, a visual check in the browser. With no design it asks once for an optional DESIGN.md or Figma link, then uses the current theme | "Make the settings page look like design/settings.png" |
+| `ci-setup` | A CI pipeline that runs the whole unit-test suite on every push: `scripts/setup-ci.sh` writes `.github/workflows/unit-tests.yml` (GitHub Actions) or `.gitlab-ci.yml` at the git root, for the host the user picks (it always asks GitHub or GitLab unless the request names one; it never guesses from the remotes), with the project's package manager and a frozen install from its lockfile; then the gates run. Never overwrites a pipeline | "Set up GitHub Actions to run our unit tests on every push" |
 
-Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD. Not yet: bug fixes, review
-without edits, commits and PR/MR (`develop` says so and changes nothing).
+Out of scope: SSR / Next.js, non-React projects, backend code, deploy pipelines (CD). Not yet: bug
+fixes, review without edits, commits and PR/MR, CI jobs besides the unit tests (`develop` says so
+and changes nothing).
 
 ## Install
 
@@ -74,8 +76,11 @@ rm -rf .claude/skills/project-setup/assets/app-template/node_modules
 claude "Scaffold a new web app called billing-portal"
 ```
 
-`project-setup` copies the template, runs `pnpm install`, installs the companion skills and runs
-`pnpm check`. The generated `CLAUDE.md` holds the project conventions from then on.
+`project-setup` asks whether to include authentication, creates the project from the
+react-vite-boilerplate (`scripts/create-project.sh` clones it and runs its generator), runs
+`pnpm install`, installs the companion skills and runs `pnpm check`. The generated root `CLAUDE.md`
+and `apps/web/CLAUDE.md` hold the project conventions from then on; run the web-dev skills from
+`apps/web`.
 
 **Existing project.** Install the plugin (or copy the folders) as above and ask through
 `/web-dev:develop`: it detects the project (`scripts/detect-project.mjs` prints the tier and the
@@ -99,7 +104,7 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
 1. Edit a skill in `skills/<name>/` (or the template, then the skills that quote it; see
    Maintaining).
 2. Try it in a scratch folder: `claude --plugin-dir <clone>/web-dev`, then `/web-dev:develop …`.
-3. Run the checks from the repository root: `pnpm lint`, `bash tools/verify-template.sh`, and
+3. Run the checks from the repository root: `pnpm lint`, `bash tools/verify.sh`, and
    `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1`).
 4. A change to routing (a description, `develop`'s tables, `detect-project.mjs`) gets an eval
    case: write it, do not run it (`evals/README.md`, When evals run).
@@ -133,16 +138,19 @@ build and Storybook build. The parts every feature builds on:
   `client.test.ts`.
 - **Permissions**, in two layers. Each skill's `allowed-tools` frontmatter approves the exact
   commands it runs, for the turn that invokes it: the plugin's scripts by their
-  `${CLAUDE_SKILL_DIR}` path (`detect-project.mjs`, `scaffold.sh`, `install-companions.sh`,
-  `verify-project.sh`) and the pnpm gates. Claude Code applies it even in a folder that was never
+  `${CLAUDE_SKILL_DIR}` path (`detect-project.mjs`, `create-project.sh`, `install-companions.sh`,
+  `verify-project.sh`, `setup-ci.sh`) and the pnpm gates. Claude Code applies it even in a folder that was never
   trusted, `-p` included, so one message runs to the end with no prompt and no settings file;
   file edits need `--permission-mode acceptEdits` headless. For later turns, the project's
   `.claude/settings.json` allows exactly the pnpm commands the skills run (`install`, `lint`,
   `lint:fix`, `typecheck`, `test`, `build`, `build-storybook`, `check`, `dev:mock`,
   `exec shadcn add` / `info`), and its `PostToolUse` hook (`.claude/hooks/format.mjs`) runs
   Prettier on every file Claude writes or edits inside the project, so code is formatted as it is
-  written. `scaffold.sh` copies it only when the project has none, and Claude Code applies it
-  once the folder is trusted (open it with `claude` and accept the prompt).
+  written. A project from the boilerplate has two: the root's, for sessions started there
+  (Workflow A, `ci-setup`), and `apps/web/.claude/settings.json`, for sessions in the app (Claude
+  Code reads the file only from the folder a session starts in). `create-project.sh` (and
+  `scaffold.sh` for the template) copies the root one only when the project has none, and Claude
+  Code applies it once the folder is trusted (open it with `claude` and accept the prompt).
   `git init` and commits stay prompts on purpose.
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
@@ -151,7 +159,7 @@ build and Storybook build. The parts every feature builds on:
 - **Code style in ESLint**: arrow functions only (`func-style`, `prefer-arrow-callback`; `function*` stays for Effect), destructuring, shorthand, template literals, `??` / `?.` and the rest of `typescript-eslint`'s `stylisticTypeChecked`, so code the skills write later reads like the template.
 
 `feature-development/references/` (with `api.ts` and `mocks.ts` in `api-integration/references/`) quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
-wiring diff for the three files a feature registers in.
+wiring diff for the two files a feature registers in.
 
 ## Pinned versions and why
 
@@ -174,12 +182,12 @@ other advisory fails it. Remove the entry once a fixed `braces` is released.
 
 ## Companion skills
 
-Popular third-party skills for parts of the stack, installed next to the five
+Popular third-party skills for parts of the stack, installed next to the six
 skills by `install-companions.sh` and pinned to an audited commit. Each was read in full for security
 and fit; the findings are in [`docs/companion-audit.md`](docs/companion-audit.md), and what Claude
 must ignore in each one is in [`references/companions.md`](references/companions.md), which every
 skill reads before following a companion. When a companion disagrees with the project, the
-project's `CLAUDE.md` and the five project skills win. The installer is pinned too:
+project's `CLAUDE.md` and the six project skills win. The installer is pinned too:
 `install-companions.sh` runs `skills@1.7.2`, not whatever `npx skills` serves that day.
 
 | Skill | Source | Commit | License | What it is for |
@@ -221,11 +229,13 @@ section Commits).
 .claude-plugin/          ← plugin.json (name web-dev, version); ../.claude-plugin/ is the marketplace
 skills/                  ← the product
   develop/  SKILL.md (entry point, routing), references/ (new-app, existing-project, plan)
-  project-setup/  assets/app-template/ (the app), scripts/ (scaffold, install-companions),
-                  SKILL.md
+  project-setup/  SKILL.md, scripts/ (create-project: a new project from the boilerplate;
+                  install-companions; scaffold: the template, for checks and eval fixtures),
+                  assets/app-template/ (the reference app the snippets are copied from)
   feature-development/  SKILL.md, references/ (the todos feature, outside-template)
   api-integration/  SKILL.md, references/ (effect-http, errors, msw, react-query, outside-template)
   ui-development/  SKILL.md, references/ (design-mapping, visual-check, outside-template)
+  ci-setup/  SKILL.md, scripts/ (setup-ci: the unit-test pipeline for GitHub or GitLab)
 references/              ← shared guidelines the skills read (stack, coding standards, architecture,
                            companions)
 scripts/                 ← detect-project.mjs, verify-project.sh, run by the skills in projects
@@ -234,21 +244,22 @@ evals/                   ← routing cases for `claude plugin eval`, fixtures, c
 docs/companion-audit.md  ← audit of the companion skills
 ```
 
-Outside the plugin, at the repository root: `tools/` (maintainer scripts: `verify-template.sh`,
-`extract-snippets.mjs`, `check-guidelines.mjs`) and `.claude/` (maintainer agents and settings).
+Outside the plugin, at the repository root: `tools/` (maintainer scripts: `verify.sh`,
+`extract-snippets.mjs`, `check-guidelines.mjs`, `check-ci-setup.sh`, `check-create-project.sh`) and `.claude/` (maintainer agents and settings).
 Neither ships with the plugin.
 
-**Change the template or bump a dependency:**
+**Change the boilerplate or bump a dependency:**
 
-1. Edit `skills/project-setup/assets/app-template/` and run `pnpm check` inside it.
-2. `bash ../tools/verify-template.sh` — the shared references and fixture tiers, then a fresh
-   scaffold, all gates; then the todos feature quoted in the skills (every ` ```tsx file=... `
-   block, written out by `extract-snippets.mjs`) wired into it, all gates again.
+1. Change the boilerplate (react-vite-boilerplate), run `pnpm check` in it and push.
+2. `bash ../tools/verify.sh` — the shared references and fixture tiers, then a project created
+   from the boilerplate, with the todos feature quoted in the skills (every ` ```tsx file=... `
+   block, written out by `extract-snippets.mjs`) wired into its `apps/web`, all gates.
+   `BOILERPLATE_REPO=file://<clone>` runs it on a local commit before the push.
 3. Update every snippet in the skills that quotes a changed file. Snippets are copied from the
-   template, never written from memory; keep it that way. A block that shows a pattern found in
-   neither the template nor the todos feature (a detail key, `setQueryData`) is marked
+   boilerplate's `apps/web`, never written from memory; keep it that way. A block that shows a
+   pattern found in neither the boilerplate nor the todos feature (a detail key, `setQueryData`) is marked
    ` ```ts sketch ` and says so in the text. A todos block keeps its `file=` path; a new todos
-   file gets a block with its own `file=` path, or `verify-template.sh` never tests it.
+   file gets a block with its own `file=` path, or `verify.sh` never tests it.
 4. Release: bump `version` in `.claude-plugin/plugin.json` (installs from git are cached copies,
    so without a bump nobody receives the change), add the entry to `CHANGELOG.md`, tag the
    commit `web-dev--v<version>`, and run
@@ -260,19 +271,19 @@ Storybook 10) are written once, in `references/stack-guidelines.md`; code style 
 in `coding-standards.md` and `architecture.md` beside it. Skills point there and keep only the
 traps specific to their own step. The template's `CLAUDE.md` carries the same sections word for
 word, so a scaffolded app keeps them without the plugin; `check-guidelines.mjs` (run by
-`verify-template.sh` and `pnpm lint` at the root) fails when the copies differ.
+`verify.sh` and `pnpm lint` at the root) fails when the copies differ.
 
 **Routing** (`skills/develop/SKILL.md`, the skills' descriptions, `scripts/detect-project.mjs`)
 is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `evals/README.md`);
-`verify-template.sh` checks the tier of every fixture without a model; the model evals run only
+`verify.sh` checks the tier of every fixture without a model; the model evals run only
 on request (`evals/README.md`, When evals run).
 
 **CI** (`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
 and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,
-and `verify-template.sh`. Schedules also run `install-companions.sh` in a fresh scaffold, so a
+and `verify.sh`. Schedules also run `install-companions.sh` in a fresh scaffold, so a
 companion whose repo moved or deleted the pinned path shows up. Add a weekly schedule in GitLab (Build >
-Pipeline schedules) so a dependency release that breaks the template shows up before a user hits
-it. On another Git host, run the same commands from your own CI.
+Pipeline schedules) so a boilerplate change that breaks the code the skills quote shows up before a
+user hits it. On another Git host, run the same commands from your own CI.
 
 **Upgrade a companion:** read the diff between the pinned and the new commit, re-check it
 against the conventions, then change the SHA in `install-companions.sh`, in the table above and in

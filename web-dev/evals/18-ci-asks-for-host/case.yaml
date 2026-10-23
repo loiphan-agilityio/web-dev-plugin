@@ -1,0 +1,37 @@
+schema_version: "1.0"
+name: ci-asks-for-host
+description: A CI request that names no host asks GitHub or GitLab and writes nothing, even in a repository whose origin is on GitHub.
+tags: [routing, workflow-c, edge]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Set up CI that runs our unit tests on every push."
+  max_turns: 10
+  timeout_seconds: 300
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: runs-ci-setup
+    tool: Skill
+    input_match: "ci-setup"
+    arm: both
+  - type: tool_used
+    name: writes-no-pipeline
+    tool: Bash
+    input_match: "setup-ci\\.sh"
+    min: 0
+    max: 0
+    arm: both
+  - type: file_exists
+    name: no-github-workflow
+    path: ".github/workflows/unit-tests.yml"
+    exists: false
+  - type: file_exists
+    name: no-gitlab-job
+    path: ".gitlab-ci.yml"
+    exists: false
+  - type: llm
+    name: asks-for-the-host
+    criteria: |
+      - The answer asks whether the pipeline should run on GitHub (Actions) or GitLab (CI).
+      - It does not pick GitHub on its own from the git remote, and does not claim a pipeline was written.

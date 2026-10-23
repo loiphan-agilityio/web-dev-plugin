@@ -1,7 +1,7 @@
 # Checks the web-dev plugin:
 # - plugin-manifest: the plugin and marketplace manifests are valid.
-# - web-dev: the template, and the todos feature the skills quote, pass every gate on a
-#   fresh scaffold.
+# - web-dev: tools/verify.sh: the free checks, then the todos feature the skills quote passes every
+#   gate in a project created from the boilerplate (cloned from GitHub).
 # - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
 #   every eval case.yaml parses.
 # - audit: no known vulnerability in the template's dependencies, apart from the ones listed with
@@ -48,10 +48,10 @@ plugin-manifest:
 web-dev:
   extends: .plugin-changes
   before_script:
-    # pnpm 11 comes from the template's packageManager field.
+    # pnpm 11 comes from the project's packageManager field.
     - corepack enable
   script:
-    - bash tools/verify-template.sh
+    - bash tools/verify.sh
 
 skills-spec:
   extends: .plugin-changes
@@ -92,7 +92,7 @@ companions:
   needs: [plugin-manifest, web-dev, skills-spec]
   variables:
     CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
-    # The needs above already ran tools/verify-template.sh and the validators.
+    # The needs above already ran tools/verify.sh and the validators.
     EVALS_CHECKS_DONE: '1'
     # One arm by default (half the cost). When starting the job for a release that changes a
     # skill's description or develop's routing, set EVALS_ARGS to "--ablation with-without" to

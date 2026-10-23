@@ -1,0 +1,33 @@
+schema_version: "1.0"
+name: ci-other-stack-no-lockfile
+description: A CI request in a React project on another stack that has no lockfile writes no pipeline and says why.
+tags: [routing, existing-project, failure]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Run our unit tests in GitHub Actions on every push."
+  max_turns: 10
+  timeout_seconds: 300
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: runs-ci-setup
+    tool: Skill
+    input_match: "ci-setup"
+    arm: both
+  - type: file_exists
+    name: no-workflow
+    path: ".github/workflows/unit-tests.yml"
+    exists: false
+  - type: tool_used
+    name: no-lockfile-made-unasked
+    tool: Bash
+    input_match: "(npm|pnpm|yarn) (install|i)( |$)"
+    min: 0
+    max: 0
+    arm: both
+  - type: llm
+    name: reports-the-lockfile
+    criteria: |
+      - The answer says no pipeline was written because the project has no lockfile (package-lock.json).
+      - It tells the user to create and commit the lockfile first, and does not claim CI is set up.

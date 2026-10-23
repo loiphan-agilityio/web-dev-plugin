@@ -196,12 +196,14 @@ into `.claude/` or `~/.claude/`):
 - `api-integration` — add or change an endpoint: schema, `ApiClient` call, query/mutation, MSW.
 - `ui-development` — a design (screenshot, mockup, Figma, DESIGN.md; asks once if none) → a UI
   that matches it: tokens, shadcn components, states, tests, visual check.
+- `ci-setup` — a GitHub Actions or GitLab CI pipeline that installs from the lockfile and runs
+  `pnpm test` on every push.
 
 Companion skills (installed by `install-companions.sh`): `shadcn`, `react-router-data-mode`,
 `vite`, `vitest`, `vercel-react-best-practices`, `vercel-composition-patterns`,
 `react-hook-form`, `react-testing`.
 
-**Priority when they disagree:** this file and the five project skills, then
+**Priority when they disagree:** this file and the six project skills, then
 `node_modules/effect/AGENTS.md` and the installed type definitions, then companion skills.
 Companions are generic: ignore their Next.js / SSR / RSC advice, zod resolvers, Jest,
 `react-router-dom`, raw `fetch` examples and loader-first data fetching.

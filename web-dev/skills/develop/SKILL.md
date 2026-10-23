@@ -44,7 +44,8 @@ The tier decides whether the template's rules apply, so a failed detection stops
 | **feature** | a ticket, page, form or CRUD screen | `template`: C with `feature-development`. Otherwise: B |
 | **api** | one endpoint, an error case, a mock, cache invalidation | `template`: C with `api-integration`. Otherwise: B |
 | **ui** | a design to match, with no ticket | `template`: C with `ui-development`. Otherwise: B |
-| **not yet** | a bug fix, a review with no edits, a commit, push, PR/MR or CI work | say this version does not cover it; change nothing |
+| **ci** | a CI pipeline that runs the unit tests | `template`, `same-stack`, `other-stack`: C with `ci-setup`. `new`: no project to test yet; say so and change nothing |
+| **not yet** | a bug fix, a review with no edits, a commit, push, PR/MR, or CI work besides the unit-test pipeline (deploy, release, a failing pipeline) | say this version does not cover it; change nothing |
 
 Sort a mixed request by its largest part (a whole app with a design is **app**; a ticket with a design is **feature**). The first line of the Result is `**Route:** <kind>, <tier>, workflow <A|B|C> (<reason>)`.
 
@@ -54,15 +55,17 @@ Ask once, in one message, before writing code, when:
 
 - a `same-stack` or `other-stack` project would need a new dependency (Effect, shadcn/ui, React Hook Form, a router);
 - in Workflow B or C, a criterion depends on data, a business rule or the backend contract, and neither the request nor the code answers it;
-- the work needs an action outside the folder (push, PR/MR, deploy): this version does none.
+- the work needs an action outside the folder (push, PR/MR, deploy): this version does none;
+- a **ci** request that does not name GitHub or GitLab: `ci-setup` asks which, as its step 1 says, and never picks the host from the repository;
+- a **setup** request that does not say whether to include authentication: `project-setup` asks, as its step 2 says, and never picks it for the user.
 
-Everything else gets the simplest default, listed under **Assumptions**. Workflow A never asks: the user asked once and expects a running app.
+Everything else gets the simplest default, listed under **Assumptions**. Workflow A never asks: the user asked once and expects a running app (its plan decides authentication).
 
 ## 4. Run the workflow
 
 - **A, a new app:** follow `references/new-app.md`; the plan it writes takes the shape of `references/plan.md`.
 - **B, an existing project**, including a whole app or a setup request in a folder that already has files: follow `references/existing-project.md`; it maps the project with the `codebase-explorer` agent (`../../agents/codebase-explorer.md`).
-- **C, one change in a `template` project:** invoke the skill from step 2 (Skill tool) and follow it through its gates and its Result. Put the **Route:** line on top of that Result; write no second one.
+- **C, one change in a `template` project:** invoke the skill from step 2 (Skill tool) and follow it through its gates and its Result. Put the **Route:** line on top of that Result; write no second one. A **ci** request takes C in every tier with a `package.json`: `ci-setup` reads only the package manager, the scripts and the lockfile, so the project needs no map.
 - **setup in an empty folder:** invoke `project-setup`; its Result, with the **Route:** line on top, is the report.
 
 ## Result

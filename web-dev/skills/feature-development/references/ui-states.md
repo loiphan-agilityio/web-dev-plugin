@@ -7,9 +7,9 @@ Four states are four different screens. Never fold them into one ternary, and ne
 ```tsx file=src/features/todos/components/TodoList/index.tsx
 import { useQuery } from '@tanstack/react-query';
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@repo/ui/components/alert';
+import { Button } from '@repo/ui/components/button';
+import { Skeleton } from '@repo/ui/components/skeleton';
 import { toUserMessage } from '@/lib/api/errors';
 
 import { openFirst } from '../../model';
@@ -104,12 +104,12 @@ The page only composes; each child owns its own query/mutation. Both use the sam
 ## Styling and a11y rules
 
 - Tokens, not raw colors: `text-muted-foreground`, `bg-background`, `border`. No `tailwind.config.js` exists (Tailwind 4, tokens in `src/styles/index.css`).
-- `cn` from `@/lib/utils` for conditional classes; do not import `clsx` or `tailwind-merge` (lint rejects them).
+- `cn` from `@repo/ui/lib/utils` for conditional classes; do not import `clsx` or `tailwind-merge` (lint rejects them).
 - `type="button"` on every non-submit `Button`, otherwise it submits an enclosing form.
 - Icon-only buttons need `aria-label`.
 - Lists use `ul`/`li`; headings keep order (`h1` in the page, `h2` below).
 - Lint runs `jsx-a11y`; fix findings, don't disable them.
-- Compose shadcn components (`Alert`, `Skeleton`, `Button`, `Field`) instead of restyling; the `shadcn` companion covers composition. Components in `src/components/ui` are never edited.
+- Compose shadcn components (`Alert`, `Skeleton`, `Button`, `Field`) instead of restyling; the `shadcn` companion covers composition. Components in `packages/ui/src/components` are never edited.
 
 ## Lazy loading
 

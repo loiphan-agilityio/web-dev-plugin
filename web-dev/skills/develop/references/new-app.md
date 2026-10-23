@@ -12,7 +12,7 @@ description -> docs/plan.md -> project-setup -> feature-development x N (one sub
 - Tier `new`, `state: other`: a new `<app-name>/` subfolder; the files already here stay as they are.
 - Tier `template`: here, without A2.
 
-The app name comes from the description (`library-manager`): lowercase, dashes.
+The app name comes from the description (`library-manager`): lowercase, dashes. A2 creates a monorepo: from then on the **app folder** is its `apps/web`, where A3 and A4 build (read `apps/web/CLAUDE.md`: where its paths differ from the skills' examples, it wins); `docs/plan.md`, A5 and A6 stay at the project root. In a `template` folder the app folder is the folder itself.
 
 ## A1. Plan: `docs/plan.md`
 
@@ -23,13 +23,13 @@ Write the plan in the shape of `plan.md` (beside this file) before any code. It 
 - **API:** every endpoint with method, path, body, response and error statuses (404 for an unknown id, 422 for invalid input). REST, JSON, under `VITE_API_URL`.
 - **Features:** 2 to 5 tickets in build order, each with a title, a user story and testable acceptance criteria. Together they cover the description, nothing more. A usual shape: a list with filters and a create form, a detail page with edit and delete, a dashboard when the topic has numbers worth showing.
 - **Mock data:** 6 to 10 realistic records per entity, covering every allowed value and edge (an overdue item, an empty optional field).
-- **Assumptions:** every choice the description left open, one line each.
+- **Assumptions:** every choice the description left open, one line each, the first one "Authentication: yes" or "Authentication: no" (A2).
 
-Gaps get the reading a typical user of that product would expect. Sign-in and roles, payments, file uploads, real-time updates, email, i18n and SSR are out of scope by default; a description that asks for one gets its UI on a mocked API, noted under Assumptions (sign-in: a sign-in feature on mocked endpoints, its token passed to `ApiClient` through `AuthToken.fromGetter`, see `api-integration`'s `references/effect-http.md`, Auth). The app runs on MSW mocks of this API, so keep the API realistic enough for a real backend to replace the mocks without touching the UI.
+Gaps get the reading a typical user of that product would expect. Sign-in and roles, payments, file uploads, real-time updates, email, i18n and SSR are out of scope by default; a description that asks for one gets its UI on a mocked API, noted under Assumptions. Sign-in, login or user accounts in the description mean "Authentication: yes": A2 creates the project with the boilerplate's sign-in feature, and the features' pages go inside `protectedRoutes([...])`; roles stay out. In a `template` folder, which skips A2, sign-in is a feature of its own on mocked endpoints, its token passed to `ApiClient` through `AuthToken.fromGetter` (see `api-integration`'s `references/effect-http.md`, Auth). The app runs on MSW mocks of this API, so keep the API realistic enough for a real backend to replace the mocks without touching the UI.
 
 ## A2. Scaffold
 
-Invoke `project-setup` (Skill tool) for the folder from A0 and follow it through its gates; skip its hand-over. A companion install that fails offline goes under **Not done** and the build continues.
+Invoke `project-setup` (Skill tool) for the folder from A0, with the plan's authentication answer (`--auth` or `--no-auth`; it asks nothing then), and follow it through its gates; skip its hand-over. A companion install that fails offline goes under **Not done** and the build continues. A project that could not be created (no network, the boilerplate unreachable) stops the run: report it; never build the app from another template.
 
 ## A3. Build each feature
 
@@ -37,9 +37,9 @@ Build the tickets in `docs/plan.md` in order, one at a time, each in its own sub
 
 Give each subagent a self-contained brief, since it does not see this conversation:
 
-- the project folder, `docs/plan.md`, and the ticket's number and title;
+- the project folder, its app folder (A0) where the feature goes, `docs/plan.md`, and the ticket's number and title;
 - "Invoke the `feature-development` skill (Skill tool) for this ticket and follow it as under `develop`'s Workflow A: the plan answers the ticket's questions; a gap it does not cover gets a default appended to the plan's **Assumptions**, and every criterion stays in scope. Mock handlers serve the plan's mock data. Ignore any design (it is applied later to the whole app). Write no `## Result` block.";
-- "Finish with `pnpm lint:fix`, then `pnpm check`, each as a plain command. Reply in at most 15 lines: files and routes created, the `pnpm check` outcome with test count and coverage, the assumptions you added, and anything not done or any gate you could not run."
+- "Finish with `pnpm lint:fix`, then `pnpm check`, each as a plain command from the project folder. Reply in at most 15 lines: files and routes created, the `pnpm check` outcome with test count and coverage, the assumptions you added, and anything not done or any gate you could not run."
 
 Then read the report: a red or missing gate, or a ticket only partly built, is fixed before the next ticket (resume that subagent with SendMessage, or fix it here). Keep its gate line for the final Result. Without an Agent tool, invoke `feature-development` (Skill tool) here for each ticket, under the same rules.
 
@@ -53,5 +53,5 @@ With a design (images in `design/`, a `DESIGN.md` about the look, or a Figma lin
 
 ## A6. Run it
 
-- With the Claude desktop browser tools (`mcp__Claude_Browser__*`): add a configuration to `.claude/launch.json` (create it if missing, keep other entries): `{ "name": "dev-mock", "runtimeExecutable": "pnpm", "runtimeArgs": ["dev:mock", "--port", "5173", "--strictPort"], "port": 5173 }`, `preview_start` it and open `/`.
+- With the Claude desktop browser tools (`mcp__Claude_Browser__*`): add a configuration to `.claude/launch.json` (create it if missing, keep other entries): `{ "name": "dev-mock", "runtimeExecutable": "pnpm", "runtimeArgs": ["dev:mock", "--port", "5173", "--strictPort"], "port": 5173 }`, `preview_start` it and open `/`. In the monorepo the runtime args start with `"--filter", "web"`: the root `dev:mock` runs turbo, which rejects Vite's flags. With authentication, `/` sends to the sign-in page: sign in as `demo@example.com` / `password`.
 - Otherwise: leave no server running; tell the user to run `pnpm dev:mock` and open the URL Vite prints.

@@ -1,0 +1,24 @@
+schema_version: "1.0"
+name: ci-natural-gitlab
+description: A CI request in plain words, without the command, reaches ci-setup and gets a GitLab job.
+tags: [routing, workflow-c]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "Add a GitLab CI pipeline that runs the unit tests of this project on every push."
+  max_turns: 12
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: reaches-ci-setup
+    tool: Skill
+    input_match: "ci-setup"
+    arm: both
+  - type: file_exists
+    name: gitlab-job-written
+    path: ".gitlab-ci.yml"
+  - type: file_exists
+    name: no-github-workflow
+    path: ".github/workflows/unit-tests.yml"
+    exists: false

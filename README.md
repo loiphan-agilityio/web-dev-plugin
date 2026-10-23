@@ -4,7 +4,7 @@ A Claude Code plugin for web apps on React 19, Vite 8, TypeScript 6, Effect 4, T
 (React Query), React Hook Form 7 and shadcn/ui. One entry point, `/web-dev:develop <request>`,
 inspects the folder (empty, an app from the plugin's template, or another React project), picks
 the workflow and runs the skills that do the work: **project setup**, **feature development**,
-**API integration** and **UI development**.
+**API integration**, **UI development** and **CI setup** (a pipeline that runs the unit tests).
 
 ## Demo
 
@@ -30,10 +30,10 @@ runs, the pinned versions and the companion skills.
 
 | Path | What it is |
 |---|---|
-| [`web-dev/`](web-dev/) | The plugin: the `develop` entry skill, four skills, the app template they copy from, shared references, scripts and evals. |
+| [`web-dev/`](web-dev/) | The plugin: the `develop` entry skill, five skills, the app template they copy from, shared references, scripts and evals. |
 | `examples/`, `docs/evidence/` | Demo output and what a run collected (reports, logs, screenshots), local only: not in the repository. |
 | [`spec.md`](spec.md) | What the skills must do, and the POC steps. |
 | [`DESIGN.md`](DESIGN.md) | How the plugin, the skills and the generated app are built, and why. |
 | [`CLAUDE.md`](CLAUDE.md) | Instructions for Claude Code when it works on this repository. |
 | [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) | Marketplace that lists `web-dev/` as the plugin `web-dev`. |
-| [`.gitlab-ci.yml`](.gitlab-ci.yml) | Runs the template check on merge requests, pushes and schedules. On another host, run `tools/verify-template.sh` in your own CI. |
+| [`.gitlab-ci.yml`](.gitlab-ci.yml) | Runs the free checks on merge requests, pushes and schedules (`tools/verify.sh`: the code the skills quote, in a project from the boilerplate). On another host, run `tools/verify.sh` in your own CI. |
