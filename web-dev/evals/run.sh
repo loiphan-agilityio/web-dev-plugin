@@ -12,7 +12,7 @@
 #   - plugin content already evaluated with the same options (delete that results folder to rerun):
 #     the key is a hash of skills/, agents/, references/, scripts/ and evals/ without READMEs, so a
 #     commit that only edits docs or bumps the version does not pay for the same evals again;
-#   - work that fails the free checks (tools/verify-template.sh); CI sets EVALS_CHECKS_DONE=1
+#   - work that fails the free checks (tools/verify.sh); CI sets EVALS_CHECKS_DONE=1
 #     because its eval jobs run only after those jobs passed.
 # It adds --max-cost-usd 30 when no cap is given, and --ablation none (one arm, half the cost)
 # unless --ablation with-without asks for the no-plugin baseline and its Δ: pass that only when a
@@ -59,8 +59,8 @@ for done_run in "$here"/results/*/run.txt; do
 done
 
 if [[ "${EVALS_CHECKS_DONE:-}" != 1 ]]; then
-  echo "run.sh: free checks first (tools/verify-template.sh)"
-  bash "$repo/tools/verify-template.sh"
+  echo "run.sh: free checks first (tools/verify.sh)"
+  bash "$repo/tools/verify.sh"
 fi
 
 defaults=()

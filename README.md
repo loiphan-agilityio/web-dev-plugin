@@ -36,4 +36,4 @@ runs, the pinned versions and the companion skills.
 | [`DESIGN.md`](DESIGN.md) | How the plugin, the skills and the generated app are built, and why. |
 | [`CLAUDE.md`](CLAUDE.md) | Instructions for Claude Code when it works on this repository. |
 | [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) | Marketplace that lists `web-dev/` as the plugin `web-dev`. |
-| [`.gitlab-ci.yml`](.gitlab-ci.yml) | Runs the template check on merge requests, pushes and schedules. On another host, run `tools/verify-template.sh` in your own CI. |
+| [`.gitlab-ci.yml`](.gitlab-ci.yml) | Runs the free checks on merge requests, pushes and schedules (`tools/verify.sh`: the code the skills quote, in a project from the boilerplate). On another host, run `tools/verify.sh` in your own CI. |

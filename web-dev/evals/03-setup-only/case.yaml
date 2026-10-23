@@ -3,7 +3,7 @@ name: setup-only
 description: A new project with no features goes to project-setup alone, without a plan.
 tags: [routing]
 execution:
-  prompt: "/web-dev:develop Scaffold a new web app called billing-portal."
+  prompt: "/web-dev:develop Scaffold a new web app called billing-portal, without authentication."
   max_turns: 12
   timeout_seconds: 600
   allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
@@ -16,7 +16,7 @@ graders:
   - type: tool_used
     name: scaffolds
     tool: Bash
-    input_match: "scaffold\\.sh"
+    input_match: "create-project\\.sh .*--no-auth"
     arm: both
   - type: file_exists
     name: no-plan

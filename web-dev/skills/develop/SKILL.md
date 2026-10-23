@@ -44,7 +44,7 @@ The tier decides whether the template's rules apply, so a failed detection stops
 | **feature** | a ticket, page, form or CRUD screen | `template`: C with `feature-development`. Otherwise: B |
 | **api** | one endpoint, an error case, a mock, cache invalidation | `template`: C with `api-integration`. Otherwise: B |
 | **ui** | a design to match, with no ticket | `template`: C with `ui-development`. Otherwise: B |
-| **not yet** | a bug fix, a review with no edits, a commit, push, PR/MR or CI work | say this version does not cover it; change nothing |
+| **not yet** | a bug fix, a review with no edits, a commit, push, PR/MR, or CI/CD work (pipelines come with the boilerplate, not the plugin) | say this version does not cover it; change nothing |
 
 Sort a mixed request by its largest part (a whole app with a design is **app**; a ticket with a design is **feature**). The first line of the Result is `**Route:** <kind>, <tier>, workflow <A|B|C> (<reason>)`.
 
@@ -54,9 +54,10 @@ Ask once, in one message, before writing code, when:
 
 - a `same-stack` or `other-stack` project would need a new dependency (Effect, shadcn/ui, React Hook Form, a router);
 - in Workflow B or C, a criterion depends on data, a business rule or the backend contract, and neither the request nor the code answers it;
-- the work needs an action outside the folder (push, PR/MR, deploy): this version does none.
+- the work needs an action outside the folder (push, PR/MR, deploy): this version does none;
+- a **setup** request that does not say whether to include authentication: `project-setup` asks, as its step 2 says, and never picks it for the user.
 
-Everything else gets the simplest default, listed under **Assumptions**. Workflow A never asks: the user asked once and expects a running app.
+Everything else gets the simplest default, listed under **Assumptions**. Workflow A never asks: the user asked once and expects a running app (its plan decides authentication).
 
 ## 4. Run the workflow
 

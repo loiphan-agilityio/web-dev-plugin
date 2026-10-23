@@ -1,0 +1,31 @@
+schema_version: "1.0"
+name: setup-asks-for-auth
+description: A setup request that does not say whether to include authentication asks first and creates nothing.
+tags: [routing, edge]
+execution:
+  prompt: "/web-dev:develop Scaffold a new web app called billing-portal."
+  max_turns: 10
+  timeout_seconds: 300
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: runs-project-setup
+    tool: Skill
+    input_match: "project-setup"
+    arm: both
+  - type: tool_used
+    name: creates-nothing
+    tool: Bash
+    input_match: "create-project\\.sh"
+    min: 0
+    max: 0
+    arm: both
+  - type: file_exists
+    name: no-project
+    path: "**/pnpm-workspace.yaml"
+    exists: false
+  - type: llm
+    name: asks-about-authentication
+    criteria: |
+      - The answer asks whether the project should include authentication (sign-in), and says what each choice gives.
+      - It does not pick one on its own, and does not claim a project was created.

@@ -22,14 +22,16 @@ the plugin alone.
 | `12-app-other-stack` | `other-stack` | a whole app is planned and built inside the project: maps it, writes the plan, keeps its stack |
 | `13-feature-direct-template` | `template` | a ticket without the command reaches `feature-development`; records whether `develop` fired too (the two overlap on purpose) |
 | `14-app-other-folder` | files, no `package.json` | the app goes into a subfolder; `notes.md` stays as it is |
+| `15-ci-not-covered` | `template` | a CI request is not covered (pipelines come with the boilerplate): no pipeline written, no other skill run, and the answer says so |
+| `19-setup-asks-for-auth` | empty | a setup request that does not say whether to include authentication: asks, and runs no `create-project.sh` |
 | `20-e2e-feature-template` | `template` | **output quality**, run to the end: a test and a story per component, `pnpm check` runs, the Result has a Route line and claims only what the trace shows |
 | `21-e2e-app-empty` | empty | **the main promise**, run to the end: one message gives `docs/plan.md`, the scaffold, every planned feature with a page test and story, `pnpm check`, and a Result that asks nothing and claims only what the trace shows |
 
 `fixtures/` builds the folders; each case's `setup.sh` calls one. `fixtures/check-detect.sh`
-checks the tier `scripts/detect-project.mjs` gives each fixture, without a model; `verify-template.sh`
+checks the tier `scripts/detect-project.mjs` gives each fixture, without a model; `verify.sh`
 runs it.
 
-Tags: `routing` (cases 01 to 14, short runs that stop once the route is clear), `e2e` (cases 20 and 21,
+Tags: `routing` (cases 01 to 19, short runs that stop once the route is clear), `e2e` (cases 20 and 21,
 a full feature, or a whole app, with install and gates: slow, several dollars a run for 20 and more for 21), and finer tags within
 them: `workflow-a`, `workflow-b`, `workflow-c`, `existing-project`, `no-trigger` (the plugin
 must not fire), `edge`, `failure`, `overlap`.
@@ -43,7 +45,7 @@ words. A release does not need one. When a run is asked for:
 
 1. **While building or changing a skill, never.** Write or update the case that covers the
    change (a routing change gets one, see `CLAUDE.md`), and check it with the free tools only:
-   `pnpm lint`, `bash tools/verify-template.sh` (which runs `fixtures/check-detect.sh`), and
+   `pnpm lint`, `bash tools/verify.sh` (which runs `fixtures/check-detect.sh`), and
    `bash tools/validate-skills.sh`.
 2. **Only on finished work:** every skill change committed and the free checks and CI green.
    Then one routing run and, when the change touched a workflow, one e2e run.
@@ -52,7 +54,7 @@ words. A release does not need one. When a run is asked for:
 
 `run.sh` enforces this before it spends anything: it refuses `--case`, uncommitted changes under
 `web-dev/` or `tools/`, and plugin content already evaluated with the same options (delete that
-`results/` folder to rerun after an infrastructure failure); it runs `tools/verify-template.sh`
+`results/` folder to rerun after an infrastructure failure); it runs `tools/verify.sh`
 first, and caps the run at `--max-cost-usd 30` when no cap is given. "Already evaluated" is keyed
 on the committed content of `skills/`, `agents/`, `references/`, `scripts/` and `evals/`
 (READMEs excluded), so a commit that only edits docs or bumps the version reuses the last result.

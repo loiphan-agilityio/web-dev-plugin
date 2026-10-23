@@ -37,7 +37,7 @@ src/features/<name>/
                  __tests__/<Name>List.test.tsx, and types.ts / utils.ts only it uses
 ```
 
-Starting from todos, rename `todo` / `Todo` everywhere (folders, files, exports, keys, URLs) and keep the structure (for a `customers` feature, `components/TodoList/` becomes `components/CustomerList/`; `references/feature-layout.md`, section components/). Reuse before writing: `src/components/`, then `src/components/ui/`, then other features through their `schemas`, `model`, `queries` or `routes` (lint rejects another feature's `api`, `mocks` and `components`). A missing shadcn component comes from `pnpm exec shadcn add <name>`; delete any extra file the CLI added that nothing imports (`toggle-group` brings `toggle`).
+Starting from todos, rename `todo` / `Todo` everywhere (folders, files, exports, keys, URLs) and keep the structure (for a `customers` feature, `components/TodoList/` becomes `components/CustomerList/`; `references/feature-layout.md`, section components/). Reuse before writing: `src/components/`, then `@repo/ui/components/` (`packages/ui/src/components/`), then other features through their `schemas`, `model`, `queries` or `routes` (lint rejects another feature's `api`, `mocks` and `components`). A missing shadcn component comes from `pnpm exec shadcn add <name>` in `apps/web`; delete any extra file the CLI added that nothing imports (`toggle-group` brings `toggle`). In a single-package app (from the plugin's 0.1.0 template: `src/components/ui/` exists, no `packages/ui`), the kit is `@/components/ui/<name>` in `src/components/ui/` and `cn` comes from `@/lib/utils`.
 
 ## 3. Schema, model, API, queries
 
@@ -51,13 +51,13 @@ Follow `references/forms.md`. The traps: `effectTsResolver(Schema)` from `@hookf
 
 ## 5. UI
 
-Every data screen renders four distinct states: loading (`isPending`, `role="status"` with an `aria-label`), error (`toUserMessage(error)` plus a retry button), empty (says what to do next, no `role="alert"`), success, styled with theme tokens and `cn` from `@/lib/utils`. Patterns and accessibility rules: `references/ui-states.md`.
+Every data screen renders four distinct states: loading (`isPending`, `role="status"` with an `aria-label`), error (`toUserMessage(error)` plus a retry button), empty (says what to do next, no `role="alert"`), success, styled with theme tokens and `cn` from `@repo/ui/lib/utils`. Patterns and accessibility rules: `references/ui-states.md`.
 
 With a design, invoke `ui-development` (Skill tool) before writing UI code (under `develop`'s Workflow A, skip it: step A4 applies the design once every feature exists), and run its visual check after step 6. A design that shows only the success state still gets the other three.
 
 ## 6. Routes and wiring
 
-The feature exports a lazy route factory (`todoRoutes = (): RouteObject[] => [...]`), a function because React Router 8 empties a lazy route object once loaded. Register it in three places (diff in `references/feature-layout.md`, Wiring): `src/app/routes.tsx` (`...todoRoutes()` in the root `children`), `src/mocks/handlers.ts` (`...todosHandlers`), and a `<Link>` in `src/app/root-layout.tsx`.
+The feature exports a lazy route factory (`todoRoutes = (): RouteObject[] => [...]`), a function because React Router 8 empties a lazy route object once loaded. Register it in two places (diff in `references/feature-layout.md`, Wiring): `src/app/routes.tsx` (`...todoRoutes()` in the root `children`, or inside `protectedRoutes([...])` in an app with authentication) and `src/mocks/handlers.ts` (`...todosHandlers`); a `<Link>` too when `src/app/root-layout.tsx` has a nav.
 
 ## 7. Tests
 

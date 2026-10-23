@@ -162,4 +162,4 @@ A different family needs a new `@fontsource` dependency: ask the user before add
 
 ## Dark mode
 
-Dark mode is not wired. `index.css` has `@custom-variant dark (&:is(.dark *));` and a `.dark` block, but nothing adds the `.dark` class: there is no ThemeProvider, and `next-themes` is imported only by `src/components/ui/sonner.tsx`. When the design shows a dark version, set the `.dark` values so the theme is ready, and report "dark tokens set, dark theme not active in the app" under **Design gaps**. Switching themes (a toggle, or following `prefers-color-scheme`) is a separate feature: ask before building it.
+Dark mode is not wired. `index.css` has `@custom-variant dark (&:is(.dark *));` and a `.dark` block, but nothing adds the `.dark` class: there is no ThemeProvider, and `next-themes` is imported only by `packages/ui/src/components/sonner.tsx`. When the design shows a dark version, set the `.dark` values so the theme is ready, and report "dark tokens set, dark theme not active in the app" under **Design gaps**. Switching themes (a toggle, or following `prefers-color-scheme`) is a separate feature: ask before building it.

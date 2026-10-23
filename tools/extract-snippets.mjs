@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Writes the worked todos feature that the skills quote into an app, so verify-template.sh can run
+// Writes the worked todos feature that the skills quote into an app, so verify.sh can run
 // every gate on it. The markdown is the only source: each quoted file is a fenced block whose info
 // string names it (```tsx file=src/features/todos/components/TodoList/index.tsx). Blocks naming the
 // same file are joined in order (schemas.ts is quoted in two parts).

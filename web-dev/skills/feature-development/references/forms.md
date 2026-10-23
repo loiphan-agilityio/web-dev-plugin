@@ -1,6 +1,6 @@
 # Forms
 
-Source: the todos feature (`components/TodoForm/index.tsx`), `src/lib/forms.ts`, `src/components/ui/field.tsx` of the template.
+Source: the todos feature (`components/TodoForm/index.tsx`), `src/lib/forms.ts`, `packages/ui/src/components/field.tsx` of the boilerplate.
 
 ## The full form
 
@@ -9,10 +9,10 @@ import { effectTsResolver } from '@hookform/resolvers/effect-ts';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@repo/ui/components/alert';
+import { Button } from '@repo/ui/components/button';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@repo/ui/components/field';
+import { Input } from '@repo/ui/components/input';
 import { setFormErrors } from '@/lib/forms';
 
 import { useCreateTodo } from '../../queries';
@@ -106,6 +106,6 @@ Seed `defaultValues` from loaded data only after the query has succeeded (render
 
 ## Other controls
 
-Select, checkbox, textarea: add via `pnpm exec shadcn add <name>` and read the generated file in `src/components/ui/` for its props before wiring it into `Controller`. Pass `aria-invalid` the same way.
+Select, checkbox, textarea: add via `pnpm exec shadcn add <name>` and read the generated file in `packages/ui/src/components/` for its props before wiring it into `Controller`. Pass `aria-invalid` the same way.
 
 For a choice from a short list, prefer `native-select` (`pnpm exec shadcn add native-select`) over the Radix `select`. The Radix one opens a portal and relies on pointer capture and `scrollIntoView`, which jsdom does not implement, so its tests need stubs and are fragile; a native `<select>` is driven with `user.selectOptions(...)` and works on phones out of the box. Use the Radix `select` only when the design needs what a native one cannot show (icons or rich content in the options), and say so in the Result.

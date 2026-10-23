@@ -1,0 +1,32 @@
+schema_version: "1.0"
+name: ci-not-covered
+description: A CI request in a template app is not covered (pipelines come with the boilerplate); develop says so and writes no pipeline.
+tags: [routing, edge]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Set up CI on GitHub that runs our unit tests on every push."
+  max_turns: 8
+  timeout_seconds: 300
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: file_exists
+    name: no-github-workflow
+    path: ".github/workflows/*"
+    exists: false
+  - type: file_exists
+    name: no-gitlab-pipeline
+    path: ".gitlab-ci.yml"
+    exists: false
+  - type: tool_used
+    name: no-other-skill
+    tool: Skill
+    input_match: "feature-development|api-integration|ui-development|project-setup"
+    min: 0
+    max: 0
+    arm: both
+  - type: llm
+    name: says-not-covered
+    criteria: |
+      - The answer says this version of the plugin does not cover CI/CD work and changes nothing.
+      - It does not claim a pipeline was written.

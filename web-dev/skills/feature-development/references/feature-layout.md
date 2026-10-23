@@ -29,7 +29,7 @@ components/
 
 - `index.tsx` holds the component, not a re-export. Import the folder: `import { TodoForm } from '../TodoForm'`.
 - A file in the folder serves that component only. When a second component needs it, it leaves the folder: a business rule goes to `model.ts`, markup becomes its own component folder.
-- `src/components/` (shared app components) uses the same layout. `src/components/ui/` keeps the flat kebab-case files the shadcn CLI writes; `src/app/` keeps its kebab-case files.
+- `src/components/` (shared app components) uses the same layout. `packages/ui/src/components/` keeps the flat kebab-case files the shadcn CLI writes; `src/app/` keeps its kebab-case files.
 
 Import from `@/...` for anything outside the feature, relative paths inside it. From another feature, import only its `schemas`, `model`, `queries` or `routes`: lint rejects its `api`, `mocks` and `components`. Use inline type imports (`import { type NewTodo, Todo } from './schemas'`); lint enforces it.
 
@@ -107,21 +107,11 @@ export const todoRoutes = (): RouteObject[] => [
 
 Factory, because React Router 8 empties a lazy route object once loaded. A module-level array would work for the first router and break the next one.
 
-## Wiring (three edits outside the folder)
+## Wiring (two edits outside the folder)
 
-The todos wiring diff:
+The todos wiring diff, on a project from the boilerplate without authentication. With authentication, the route goes inside `protectedRoutes([...])` instead (`children: [...authRoutes(), protectedRoutes([{ index: true, Component: HomePage }, ...todoRoutes()])]`), unless the page is public. The boilerplate's `src/app/root-layout.tsx` has no nav; when the app has one, add a `<Link to="/todos">` there too.
 
 ```diff file=wiring.diff
-diff --git a/src/app/root-layout.tsx b/src/app/root-layout.tsx
-index 548b02a..3d7e1e1 100644
---- a/src/app/root-layout.tsx
-+++ b/src/app/root-layout.tsx
-@@ -9,2 +9,5 @@ export const RootLayout = () => (
-         </Link>
-+        <Link to="/todos" className="text-sm text-muted-foreground hover:text-foreground">
-+          Todos
-+        </Link>
-       </nav>
 diff --git a/src/app/routes.tsx b/src/app/routes.tsx
 index e5ca784..716fb95 100644
 --- a/src/app/routes.tsx
@@ -157,4 +147,4 @@ Forgetting the handlers line is the usual failure: `pnpm dev:mock` returns unhan
 
 1. `src/features/*/` — another feature may already own the schema or query you need; import its `queries.ts`, don't duplicate the call.
 2. `src/components/` — shared app components.
-3. `src/components/ui/` — installed shadcn components. Missing one: `pnpm exec shadcn add <name>`; never hand-edit this folder (it is generated and lint-ignored).
+3. `packages/ui/src/components/` (`@repo/ui/components/<name>`) — installed shadcn components. Missing one: `pnpm exec shadcn add <name>` in `apps/web`; never hand-edit this folder (it is generated and lint-ignored).
