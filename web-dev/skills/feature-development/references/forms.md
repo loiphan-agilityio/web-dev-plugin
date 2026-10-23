@@ -93,7 +93,7 @@ export const TodoForm = () => {
 
 ## Server errors
 
-`setFormErrors` (template `src/lib/forms.ts`), in short:
+`setFormErrors` (`src/lib/forms.ts`), in short:
 
 A `ValidationError` with field messages puts each one under its input with `setError(field, { type: 'server', message })`; anything else goes to `errors.root.server` with `toUserMessage(error)`. Read the file in the project for the code.
 

@@ -1,6 +1,6 @@
 # Feature layout
 
-One folder per feature: `src/features/<name>/`. All code below is the todos feature (`src/features/todos/`), verified on a fresh scaffold.
+One folder per feature: `src/features/<name>/`. All code below is the todos feature (`src/features/todos/`), verified in a project from the boilerplate (`apps/web`).
 
 ## Files and names
 

@@ -28,7 +28,7 @@ Split the design into regions (shell, header, toolbar, list, card, form) and map
 
 ## 2. Tokens
 
-Tailwind 4 is CSS-first: the theme lives in `src/styles/index.css` (values in `:root` / `.dark`, exposed by `@theme inline`), and there is no `tailwind.config.js`. Follow `references/design-mapping.md`:
+Tailwind 4 is CSS-first: the theme lives in `packages/ui/src/styles/globals.css` (values in `:root` / `.dark`, exposed by `@theme inline`; `apps/web/src/styles/index.css` only imports it), and there is no `tailwind.config.js`. Follow `references/design-mapping.md`:
 
 - Map each design color by role, and edit the **values** in `:root`, so every component, focus ring and toast follows. Keep the design's value as given (hex is valid there).
 - A role the theme lacks (success, warning) gets a new variable, its `@theme inline` line and a `-foreground` pair.

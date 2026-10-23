@@ -42,7 +42,7 @@ Extend `createTodosHandlers(initial)` and `todosMocks` (pending, error, validati
 
 `pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. Fix the cause until green; a rule, a type and an assertion stay as strict as they are.
 
-Auth: `ApiClient` sends the bearer token `AuthToken` gives, and the template provides `AuthToken.none`. For an app with sign-in, provide `AuthToken.fromGetter(...)` in `src/lib/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
+Auth: `ApiClient` sends the bearer token `AuthToken` gives, `AuthToken.none` in a project without authentication, the token of `src/features/auth` with it. For an app with sign-in but no such feature, provide `AuthToken.fromGetter(...)` in `src/lib/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
 
 ## Result
 

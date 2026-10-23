@@ -1,6 +1,6 @@
 # Effect Schema, Effect.fn and ApiClient
 
-Read `node_modules/effect/AGENTS.md` completely before writing Effect code. Every code block below is copied from the template or the verified todos feature.
+Read `node_modules/effect/AGENTS.md` completely before writing Effect code. Every code block below is copied from the boilerplate's `apps/web` or the verified todos feature.
 
 ## Schema (`features/<name>/schemas.ts`)
 
@@ -90,4 +90,4 @@ Edit `src/lib/api/client.ts` only when an endpoint cannot be expressed with the 
 
 ## Auth
 
-`AuthToken` (`src/lib/api/auth.ts`) holds where the bearer token comes from, read again for every request. The template sends none (`AuthToken.none`). For an app with sign-in, change one line in `src/lib/runtime.ts`: `AuthToken.none` becomes `AuthToken.fromGetter(() => <the token the session holds>)`; `ApiClient` then sends `Authorization: Bearer <token>`, and a 401 still reaches the UI as `UnauthorizedError` (route it to the sign-in page). How the session stores the token, and the sign-in screen and its endpoint, are the app's; build them as a feature, ask the user where the token lives, and name `runtime.ts` in the Result since every request changes. `client.test.ts` shows how to test with other layers (`Layer.succeed(AppConfig, ...)`, `AuthToken.fromGetter`).
+`AuthToken` (`src/lib/api/auth.ts`) holds where the bearer token comes from, read again for every request. A project from the boilerplate without authentication sends none (`AuthToken.none`); with authentication, `runtime.ts` already provides `AuthToken.fromGetter(tokenStore.get)` from `src/features/auth`. For an app with sign-in but no such feature, change one line in `src/lib/runtime.ts`: `AuthToken.none` becomes `AuthToken.fromGetter(() => <the token the session holds>)`; `ApiClient` then sends `Authorization: Bearer <token>`, and a 401 still reaches the UI as `UnauthorizedError` (route it to the sign-in page). How the session stores the token, and the sign-in screen and its endpoint, are the app's; build them as a feature, ask the user where the token lives, and name `runtime.ts` in the Result since every request changes. `client.test.ts` shows how to test with other layers (`Layer.succeed(AppConfig, ...)`, `AuthToken.fromGetter`).

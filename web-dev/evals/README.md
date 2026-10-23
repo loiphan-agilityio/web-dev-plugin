@@ -1,7 +1,7 @@
 # Evals
 
 Routing cases for the `develop` entry point: does one request reach the right workflow and
-skill, in an empty folder, an app scaffolded from the template (`template`), a project on the
+skill, in an empty folder, an app from the boilerplate (`template`: its `apps/web`, which the prompt names, since `develop` refuses the monorepo root), a project on the
 same stack in another layout (`same-stack`), a React app on another stack (`other-stack`), a Vue
 app (unsupported) and a project whose `package.json` is broken, and do unrelated requests leave
 the plugin alone.
@@ -68,8 +68,7 @@ and `evals-e2e`, offered on release tags (`web-dev--v<version>`) once the free j
 ## Run
 
 From `web-dev/`, when the maintainer asks for a run, with `evals/run.sh`. It copies the plugin without
-`node_modules` (on the plugin folder itself, once the root `pnpm install` has filled the
-template's `node_modules`, `claude plugin eval` fails with `E2BIG`) and runs `claude plugin
+`node_modules` (a plugin folder with a `node_modules` makes `claude plugin eval` fail with `E2BIG`) and runs `claude plugin
 eval` on the copy with `--scaffold` (each case's `setup.sh` only writes fixture files), the tools
 the skills need (`Bash`, `Write`, `Edit`), one arm unless `--ablation with-without` is passed.
 Other options pass through:

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds each fixture in a temporary directory and checks the tier detect-project.mjs gives it.
-# Runs without network or an install; tools/verify.sh calls it.
+# Clones the boilerplate for the template fixture (network), installs nothing; tools/verify.sh calls it.
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 detect="$here/../../scripts/detect-project.mjs"
@@ -40,7 +40,8 @@ printf '{"version":"19.3.1"}\n' > "$tmp/range/node_modules/react/package.json"
 echo "check-detect:"
 expect empty new
 expect other new
-expect template template
+expect template/apps/web template
+expect template unsupported
 expect same-stack same-stack
 expect other-stack other-stack
 expect vue unsupported

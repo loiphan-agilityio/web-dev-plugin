@@ -2,7 +2,7 @@
 
 Object syntax only. `isPending` is the first-load state (not `isLoading`). Retries come from `createQueryClient` only.
 
-Code blocks are copied from the template or the verified todos feature; blocks marked `sketch` show standard TanStack Query 5 patterns that are in neither.
+Code blocks are copied from the boilerplate's `apps/web` or the verified todos feature; blocks marked `sketch` show standard TanStack Query 5 patterns that are in neither.
 
 ## `runEffect`: the bridge
 

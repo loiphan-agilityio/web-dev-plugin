@@ -71,7 +71,6 @@ Then ask Claude to scaffold. `<plugin-dir>` below is the `web-dev/` folder of yo
 mkdir billing-portal && cd billing-portal && git init
 mkdir -p .claude
 cp -r <plugin-dir>/{skills,references,scripts,agents} .claude/
-rm -rf .claude/skills/project-setup/assets/app-template/node_modules
 claude "Scaffold a new web app called billing-portal"
 ```
 
@@ -83,7 +82,7 @@ and `apps/web/CLAUDE.md` hold the project conventions from then on; run the web-
 
 **Existing project.** Install the plugin (or copy the folders) as above and ask through
 `/web-dev:develop`: it detects the project (`scripts/detect-project.mjs` prints the tier and the
-reasons), and in a project not made from the template it maps the code first and builds on it.
+reasons), and in a project not made from the boilerplate it maps the code first and builds on it.
 The companion skills fit this stack; in a project on it, install them from the project root
 (the script installs into the current folder):
 
@@ -100,7 +99,7 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
 
 ## Contributing
 
-1. Edit a skill in `skills/<name>/` (or the template, then the skills that quote it; see
+1. Edit a skill in `skills/<name>/` (or the boilerplate, then the skills that quote it; see
    Maintaining).
 2. Try it in a scratch folder: `claude --plugin-dir <clone>/web-dev`, then `/web-dev:develop …`.
 3. Run the checks from the repository root: `pnpm lint`, `bash tools/verify.sh`, and
@@ -109,10 +108,10 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
    case: write it, do not run it (`evals/README.md`, When evals run).
 5. Open a merge request with a Conventional Commit message; CI runs the checks again.
 
-## What the template gives you
+## What a new project gives you
 
-`skills/project-setup/assets/app-template/` is a complete app that passes lint, typecheck, tests,
-build and Storybook build. The parts every feature builds on:
+A project from the boilerplate passes lint, typecheck, tests, build and Storybook build. Its app,
+`apps/web`, holds the parts every feature builds on (paths below are relative to it):
 
 - **`ApiClient`** (`src/lib/api/client.ts`): the only way to call the backend. Effect 4
   `HttpClient`, decodes every body with an Effect Schema and maps every failure to a typed
@@ -122,7 +121,7 @@ build and Storybook build. The parts every feature builds on:
   signal, rejects with the typed error so `query.error._tag` is safe to switch on.
 - **Forms**: React Hook Form + `effectTsResolver(schema)` (`@hookform/resolvers` 6, Effect 4) +
   shadcn `Field`; `setFormErrors` puts server field errors under the right inputs.
-- **MSW worker**: `public/mockServiceWorker.js` is not in the template; the `postinstall` script
+- **MSW worker**: `public/mockServiceWorker.js` is not in the boilerplate; the `postinstall` script
   (`msw init`) writes it from the installed msw, so it always matches the msw version. `pnpm dev:mock` (Vite mode `mock`, `.env.mock`) serves the API from those handlers in any shell, Windows included.
 - **Tests**: MSW 3 for every test (unhandled requests fail), `renderRoute` / `renderWithProviders`.
   Both mount the `Toaster` (with a `matchMedia` stub and a per-test reset in `setup.ts`), so a
@@ -132,8 +131,8 @@ build and Storybook build. The parts every feature builds on:
 - **Config**: `src/lib/config.ts` validates every `VITE_*` value with Effect Schema at startup;
   Effect code reads it as the `AppConfig` service, so a test can provide other values.
 - **Auth hook**: `AuthToken` (`src/lib/api/auth.ts`) is where `ApiClient` gets a bearer token.
-  The template provides `AuthToken.none`; an app with sign-in swaps in
-  `AuthToken.fromGetter(() => token)` in `src/lib/runtime.ts`, one line, tested in
+  Without authentication the app provides `AuthToken.none`; with it, `src/lib/runtime.ts`
+  provides `AuthToken.fromGetter(tokenStore.get)` from `src/features/auth`. Both are tested in
   `client.test.ts`.
 - **Permissions**, in two layers. Each skill's `allowed-tools` frontmatter approves the exact
   commands it runs, for the turn that invokes it: the plugin's scripts by their
@@ -147,9 +146,8 @@ build and Storybook build. The parts every feature builds on:
   Prettier on every file Claude writes or edits inside the project, so code is formatted as it is
   written. A project from the boilerplate has two: the root's, for sessions started there
   (Workflow A), and `apps/web/.claude/settings.json`, for sessions in the app (Claude
-  Code reads the file only from the folder a session starts in). `create-project.sh` (and
-  `scaffold.sh` for the template) copies the root one only when the project has none, and Claude
-  Code applies it once the folder is trusted (open it with `claude` and accept the prompt).
+  Code reads the file only from the folder a session starts in). `create-project.sh` copies the
+  root one only when the project has none, and Claude Code applies it once the folder is trusted (open it with `claude` and accept the prompt).
   `git init` and commits stay prompts on purpose.
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
@@ -172,12 +170,6 @@ wiring diff for the two files a feature registers in.
 | vitest | 5.0 | `clearMocks` on by default; `vi.mock` top-level only. |
 | shadcn | 4.22 | Style `radix-nova`; `cn` comes from shadcn's `cn` package. |
 | storybook | 10.6 | `@storybook/react-vite` + addon-a11y. No `msw-storybook-addon`: 3.0.3 calls MSW 2's `onUnhandledRequest`, so `.storybook/preview.tsx` starts the app's own worker. Its esbuild dependency is allowed under `allowBuilds` (`esbuild: true`) in `pnpm-workspace.yaml`, because pnpm 11 blocks unreviewed install scripts. |
-
-**Known advisory:** `pnpm audit` reports GHSA-vfj7-8cjw-p6xm (`braces` <=3.0.3, high) through
-the shadcn CLI. It runs at dev time on the project's own glob patterns and nothing of it ships to
-the browser, and no patched `braces` exists yet, so the template lists it under
-`auditConfig.ignoreGhsas` in `pnpm-workspace.yaml`, with that reason. CI runs `pnpm audit`, so any
-other advisory fails it. Remove the entry once a fixed `braces` is released.
 
 ## Companion skills
 
@@ -218,19 +210,17 @@ re-run the script after updating it.
 `../.gitattributes` (the repository root) keeps every file LF, so the shell scripts still run from a CRLF checkout
 (`core.autocrlf=true`).
 
-Run `pnpm install` once at the repository root: it installs the git hooks (husky) and the
-template's dependencies. Commit messages follow Conventional Commits (commitlint); the
-`pre-commit` hook lints staged scripts and template files. `pnpm lint` at the root checks
-everything at once. Apps made from the template get the same hooks (see its `CLAUDE.md`,
-section Commits).
+Run `pnpm install` once at the repository root: it installs the git hooks (husky). Commit
+messages follow Conventional Commits (commitlint); the `pre-commit` hook checks staged scripts.
+`pnpm lint` at the root checks every script at once. Projects from the boilerplate get the same
+hooks (see its `CLAUDE.md`).
 
 ```
 .claude-plugin/          ← plugin.json (name web-dev, version); ../.claude-plugin/ is the marketplace
 skills/                  ← the product
   develop/  SKILL.md (entry point, routing), references/ (new-app, existing-project, plan)
   project-setup/  SKILL.md, scripts/ (create-project: a new project from the boilerplate;
-                  install-companions; scaffold: the template, for checks and eval fixtures),
-                  assets/app-template/ (the reference app the snippets are copied from)
+                  install-companions)
   feature-development/  SKILL.md, references/ (the todos feature, outside-template)
   api-integration/  SKILL.md, references/ (effect-http, errors, msw, react-query, outside-template)
   ui-development/  SKILL.md, references/ (design-mapping, visual-check, outside-template)
@@ -267,9 +257,9 @@ Neither ships with the plugin.
 **Version traps** (Effect 4, React Router 8, MSW 3, TanStack Query 5, Tailwind 4, Vitest 5,
 Storybook 10) are written once, in `references/stack-guidelines.md`; code style and the data flow
 in `coding-standards.md` and `architecture.md` beside it. Skills point there and keep only the
-traps specific to their own step. The template's `CLAUDE.md` carries the same sections word for
-word, so a scaffolded app keeps them without the plugin; `check-guidelines.mjs` (run by
-`verify.sh` and `pnpm lint` at the root) fails when the copies differ.
+traps specific to their own step. The boilerplate's `apps/web/CLAUDE.md` carries the same sections
+word for word, so a project from it keeps them without the plugin; `check-guidelines.mjs` (run
+by `verify.sh`) fails when the copies differ.
 
 **Routing** (`skills/develop/SKILL.md`, the skills' descriptions, `scripts/detect-project.mjs`)
 is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `evals/README.md`);
@@ -278,7 +268,7 @@ on request (`evals/README.md`, When evals run).
 
 **CI** (`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
 and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,
-and `verify.sh`. Schedules also run `install-companions.sh` in a fresh scaffold, so a
+and `verify.sh`. Schedules also run `install-companions.sh` in a new project from the boilerplate, so a
 companion whose repo moved or deleted the pinned path shows up. Add a weekly schedule in GitLab (Build >
 Pipeline schedules) so a boilerplate change that breaks the code the skills quote shows up before a
 user hits it. On another Git host, run the same commands from your own CI.

@@ -4,15 +4,13 @@
 #   gate in a project created from the boilerplate (cloned from GitHub).
 # - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
 #   every eval case.yaml parses.
-# - audit: no known vulnerability in the template's dependencies, apart from the ones listed with
-#   a reason under auditConfig in its pnpm-workspace.yaml.
 # - companions (schedules only): the pinned companion skills still install, and shadcn is pinned.
 # - evals-routing, evals-e2e (manual jobs on release tags web-dev--v*, when the ANTHROPIC_API_KEY
 #   variable is set): the model evals. They cost API credits, so nothing starts them: they run only
 #   when the maintainer presses them, after every free job passed, each capped by --max-cost-usd.
 # Runs on merge requests and branch pushes that touch the plugin, on release tags, and on pipeline
-# schedules (set a weekly one in Build > Pipeline schedules) to catch a dependency release that
-# breaks the template; schedules run only the free jobs.
+# schedules (set a weekly one in Build > Pipeline schedules) to catch a boilerplate change that
+# breaks the code the skills quote; schedules run only the free jobs.
 workflow:
   rules:
     # Schedules first: a scheduled pipeline also has CI_COMMIT_BRANCH, and must not be dropped
@@ -61,22 +59,13 @@ skills-spec:
     - pip install --quiet skills-ref==0.1.1 pyyaml==6.0.3
     - bash tools/validate-skills.sh
 
-audit:
-  extends: .plugin-changes
-  before_script:
-    - corepack enable
-  script:
-    # Reads the lockfile only; a new advisory fails the job until it is fixed or explicitly ignored.
-    - cd web-dev/skills/project-setup/assets/app-template
-    - pnpm audit
-
 companions:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
     # Upstream repos can move or delete a pinned path; the script fails on a missing companion, a
     # missing skills-lock.json or an unpinned shadcn@latest.
-    - bash web-dev/skills/project-setup/scripts/scaffold.sh /tmp/app companions-app
+    - bash web-dev/skills/project-setup/scripts/create-project.sh /tmp/app --no-auth
     - cd /tmp/app
     - bash "$CI_PROJECT_DIR/web-dev/skills/project-setup/scripts/install-companions.sh"
     - test "$(find .claude/skills -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 8

@@ -1,6 +1,6 @@
 # Design mapping
 
-Source: the template's `src/styles/index.css`, `components.json` and `src/components/ui/*.tsx`. Class strings quoted below are copied from those files, except the two page classes (`space-y-6`, the page title), which come from `../../feature-development/references/ui-states.md`, section Page composition.
+Source: the boilerplate's `packages/ui/src/styles/globals.css`, `apps/web/components.json` and `packages/ui/src/components/*.tsx`. Class strings quoted below are copied from those files, except the two page classes (`space-y-6`, the page title), which come from `../../feature-development/references/ui-states.md`, section Page composition.
 
 ## Colors → semantic tokens
 
@@ -73,14 +73,14 @@ In `@theme inline`:
 
 ## Design elements → shadcn components
 
-| Design element | Component | In the template? |
+| Design element | Component | In the boilerplate? |
 |---|---|---|
 | Buttons: primary, secondary, outlined, borderless, text link, destructive | `Button` with `variant` `default` / `secondary` / `outline` / `ghost` / `link` / `destructive` | yes |
 | Button heights 24 / 28 / 32 / 36px | `Button` `size` `xs` / `sm` / `default` / `lg` (`h-6` / `h-7` / `h-8` / `h-9`); icon-only: `icon-xs` / `icon-sm` / `icon` / `icon-lg` | yes |
 | Panel with title, description, action, footer | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`, `CardContent`, `CardFooter`; `size="sm"` for tighter padding | yes |
 | Text field with label, hint, error | `Input` inside `Field` with `FieldLabel`, `FieldDescription`, `FieldError` (forms: `feature-development` skill, `references/forms.md`) | yes |
 | Multi-line text field | `Textarea`: `pnpm exec shadcn add textarea` | no |
-| Tag, pill, status chip, count | `Badge`: `pnpm exec shadcn add badge` | no |
+| Tag, pill, status chip, count | `Badge` (`@repo/ui/components/badge`) | yes |
 | Inline message or banner | `Alert` (`variant` `default` / `destructive`), `AlertTitle`, `AlertDescription`, `AlertAction` | yes |
 | Divider line | `Separator` | yes |
 | Loading placeholder | `Skeleton`, shaped like the content it replaces | yes |
@@ -111,7 +111,7 @@ import { CircleCheckIcon, InfoIcon } from 'lucide-react';
 
 ## Token editing
 
-Edit only `src/styles/index.css`, and only the value on the right side of the colon. The variable names are what every component and utility reads; renaming one breaks them silently.
+Edit only `packages/ui/src/styles/globals.css` (the theme every app shares; `apps/web/src/styles/index.css` only imports it), and only the value on the right side of the colon. The variable names are what every component and utility reads; renaming one breaks them silently.
 
 The `@theme inline` block maps each variable to a utility. Leave these lines alone:
 
@@ -123,15 +123,15 @@ The `@theme inline` block maps each variable to a utility. Leave these lines alo
 The `:root` block holds the values. These are the lines you change:
 
 ```css
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.58 0.2 277);
   --primary-foreground: oklch(0.985 0 0);
 ```
 
-Replace `oklch(0.205 0 0)` with the design's value exactly as the design gives it; a hex color is valid here. Do the same for each role you mapped in the color table, and for `--radius`. Change the matching lines in `.dark` only when the design shows a dark version:
+Replace `oklch(0.58 0.2 277)` with the design's value exactly as the design gives it; a hex color is valid here. Do the same for each role you mapped in the color table, and for `--radius`. Change the matching lines in `.dark` only when the design shows a dark version:
 
 ```css
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.16 0.02 277);
   --foreground: oklch(0.985 0 0);
 ```
 
@@ -158,8 +158,8 @@ and the family in `@theme inline`:
   --font-sans: 'Geist Variable', sans-serif;
 ```
 
-A different family needs a new `@fontsource` dependency: ask the user before adding it. Once approved, add the package with pnpm, replace the import, and change the value of `--font-sans` (and `--font-heading` if headings use a second family).
+A different family needs a new `@fontsource` dependency: ask the user before adding it. Once approved, add the package to `@repo/ui` (`packages/ui/package.json`) with pnpm, replace the import, and change the value of `--font-sans` (and `--font-heading` if headings use a second family).
 
 ## Dark mode
 
-Dark mode is not wired. `index.css` has `@custom-variant dark (&:is(.dark *));` and a `.dark` block, but nothing adds the `.dark` class: there is no ThemeProvider, and `next-themes` is imported only by `packages/ui/src/components/sonner.tsx`. When the design shows a dark version, set the `.dark` values so the theme is ready, and report "dark tokens set, dark theme not active in the app" under **Design gaps**. Switching themes (a toggle, or following `prefers-color-scheme`) is a separate feature: ask before building it.
+Dark mode is not wired. `globals.css` has `@custom-variant dark (&:is(.dark *));` and a `.dark` block, but nothing adds the `.dark` class: there is no ThemeProvider, and `next-themes` is imported only by `packages/ui/src/components/sonner.tsx`. When the design shows a dark version, set the `.dark` values so the theme is ready, and report "dark tokens set, dark theme not active in the app" under **Design gaps**. Switching themes (a toggle, or following `prefers-color-scheme`) is a separate feature: ask before building it.

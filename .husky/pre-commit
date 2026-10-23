@@ -1,5 +1,1 @@
 pnpm exec lint-staged
-# The template's TypeScript only when a template .ts/.tsx file is staged; lint-staged runs per file.
-if git diff --cached --name-only | grep -Eq '^web-dev/skills/project-setup/assets/app-template/.*\.tsx?$'; then
-  pnpm --dir web-dev/skills/project-setup/assets/app-template typecheck
-fi

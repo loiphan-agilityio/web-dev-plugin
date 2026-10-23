@@ -68,7 +68,7 @@ Neither browser, or it cannot load the page (headless and CI runs land here):
    - typography: size, weight, line height, font family;
    - missing or extra elements, and text content;
    - icons: right icon, size, color.
-6. **Fix in the code**, tokens first (`src/styles/index.css`), then component classes. The token and component rules from `references/design-mapping.md` still hold: no raw colors to "make it match", no edits to `packages/ui/src/components/`.
+6. **Fix in the code**, tokens first (`packages/ui/src/styles/globals.css`), then component classes. The token and component rules from `references/design-mapping.md` still hold: no raw colors to "make it match", no edits to `packages/ui/src/components/`.
 7. **Repeat at most 3 rounds.** Pixel-perfect is not the goal; the design's structure, spacing rhythm, colors and type are. Whatever still differs after round 3 goes under **Not done** as remaining differences, each with a one-line reason (a rounded value, a variant difference, a missing asset).
 8. **Clean up:** close the tab you opened (`tabs_close_mcp`) and stop the background dev server.
 

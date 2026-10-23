@@ -1,13 +1,13 @@
 # Stack guidelines
 
 The library versions this plugin is written for, and the APIs that changed in them. Every skill
-reads this file before writing code. It holds for a project on these majors (the template, or a
+reads this file before writing code. It holds for a project on these majors (one from the boilerplate, or a
 project whose `package.json` pins the same majors). In a project on other majors, the installed
 versions win: read its `package.json` and the types in `node_modules`, and do not apply a trap
 from this file to a library the project does not have.
 
-A project scaffolded from the template carries the section below, word for word, in its own
-`CLAUDE.md`. `tools/check-guidelines.mjs` (in the repository, not shipped with the plugin) fails when the
+The boilerplate's `apps/web/CLAUDE.md` carries the section below, word for word, so a project
+from it has the section without the plugin. `tools/check-guidelines.mjs` (in the repository, not shipped with the plugin) fails when the
 two differ.
 
 ## Library versions newer than most training data
@@ -36,9 +36,10 @@ and concepts that the guide doesn't cover, search through the source code in
   `rest.get`; `onUnhandledRequest` is now `onUnhandledFrame`. Precedence: a later `server.use()`
   call wins; within one call the first matching handler wins.
 - **TanStack Query 5:** `isPending` for the first load; object syntax only; `queryOptions()`.
-- **Tailwind 4:** CSS-first. Theme tokens live in `src/styles/index.css` (`@theme inline`);
-  there is no `tailwind.config.js`. Use tokens (`bg-background`, `text-muted-foreground`),
-  not raw colors.
+- **Tailwind 4:** CSS-first. Theme tokens live in `packages/ui/src/styles/globals.css`
+  (`@theme inline`), shared by every app; a token only this app uses goes in
+  `src/styles/index.css` after the `@import`. There is still no `tailwind.config.js`. Use tokens
+  (`bg-background`, `text-muted-foreground`), not raw colors.
 - **Vitest 5:** `clearMocks` is on by default; `vi.mock` must be at the top level of a file; never
   `jest.*`. Mock the API with MSW, never `vi.stubGlobal('fetch')` or `vi.mock` of an `api.ts`.
 - **Storybook 10:** `Meta` / `StoryObj` from `@storybook/react-vite`; `@storybook/test` is gone

@@ -2,12 +2,11 @@
 # Proves that the code the skills quote passes every gate in a project created from the
 # react-vite-boilerplate, the project users get. Exits non-zero on the first failure.
 #
-# 0. Checks that the plugin's shared references/ match the template's CLAUDE.md
-#    (check-guidelines.mjs), that detect-project.mjs gives each eval fixture its tier, and what
-#    project-setup's create-project.sh creates from the boilerplate and refuses
-#    (check-create-project.sh).
+# 0. Checks that detect-project.mjs gives each eval fixture its tier, and what project-setup's
+#    create-project.sh creates from the boilerplate and refuses (check-create-project.sh).
 # 1. Creates a project with create-project.sh --no-auth (clones the boilerplate: network;
-#    BOILERPLATE_REPO points it at another clone URL), checks that its app names no todos (a new
+#    BOILERPLATE_REPO points it at another clone URL), checks that the plugin's shared references/
+#    match its apps/web/CLAUDE.md (check-guidelines.mjs), that its app names no todos (a new
 #    project starts empty; the todos feature is only the skills' worked example), and checks the
 #    hook in apps/web/.claude/settings.json that formats each file Claude writes.
 # 2. Writes the todos feature quoted in the skills' markdown into apps/web (every block marked
@@ -35,13 +34,12 @@ fi
 
 plugin_root="$(cd "$here/../web-dev" && pwd)"
 skills_root="$plugin_root/skills"
-node "$here/check-guidelines.mjs" "$plugin_root/references" \
-  "$skills_root/project-setup/assets/app-template/CLAUDE.md"
 bash "$plugin_root/evals/fixtures/check-detect.sh"
 bash "$here/check-create-project.sh"
 
 bash "$skills_root/project-setup/scripts/create-project.sh" "$tmp/app" --no-auth
 app="$tmp/app/apps/web"
+node "$here/check-guidelines.mjs" "$plugin_root/references" "$app/CLAUDE.md"
 if grep -rniI todo "$app/src"; then
   echo "verify: the new project's app mentions todos (above); it carries no example feature" >&2
   exit 1

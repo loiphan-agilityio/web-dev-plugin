@@ -103,7 +103,7 @@ The page only composes; each child owns its own query/mutation. Both use the sam
 
 ## Styling and a11y rules
 
-- Tokens, not raw colors: `text-muted-foreground`, `bg-background`, `border`. No `tailwind.config.js` exists (Tailwind 4, tokens in `src/styles/index.css`).
+- Tokens, not raw colors: `text-muted-foreground`, `bg-background`, `border`. No `tailwind.config.js` exists (Tailwind 4, tokens in `packages/ui/src/styles/globals.css`).
 - `cn` from `@repo/ui/lib/utils` for conditional classes; do not import `clsx` or `tailwind-merge` (lint rejects them).
 - `type="button"` on every non-submit `Button`, otherwise it submits an enclosing form.
 - Icon-only buttons need `aria-label`.

@@ -1,6 +1,6 @@
 # MSW 3 handlers and tests
 
-Code blocks are copied from the template or the verified todos feature; blocks marked `sketch` show patterns that are in neither.
+Code blocks are copied from the boilerplate's `apps/web` or the verified todos feature; blocks marked `sketch` show patterns that are in neither.
 
 ## Imports (lint enforces the root-`msw` ban on these names)
 
@@ -116,7 +116,7 @@ server.use(todosMocks.createInvalid({ title: 'x' }));
 ### Toasts
 
 A toast is asserted as text (`findByText`): the render helpers mount the `Toaster`. Never mock
-`sonner`. Details, and what to add in a project scaffolded before the template did this:
+`sonner`. Details, and what to add in an app from the plugin's 0.1.0 template that lacks it:
 `../../feature-development/references/testing.md`, section Rules.
 
 ### Other rules

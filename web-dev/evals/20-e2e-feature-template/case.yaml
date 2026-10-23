@@ -5,32 +5,32 @@ tags: [e2e, workflow-c]
 context:
   scaffold_script: setup.sh
 execution:
-  prompt: "/web-dev:develop Add a customers page: list customers from GET /customers (id, name, email) with a search box, and a form to add one with POST /customers (name required, email must be valid)."
+  prompt: "/web-dev:develop In apps/web, add a customers page: list customers from GET /customers (id, name, email) with a search box, and a form to add one with POST /customers (name required, email must be valid)."
   max_turns: 120
   timeout_seconds: 3000
   allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
 graders:
   - type: file_exists
     name: list-component-folder
-    path: "src/features/customers/components/*List/index.tsx"
+    path: "apps/web/src/features/customers/components/*List/index.tsx"
   - type: file_exists
     name: list-component-test
-    path: "src/features/customers/components/*List/__tests__/*List.test.tsx"
+    path: "apps/web/src/features/customers/components/*List/__tests__/*List.test.tsx"
   - type: file_exists
     name: form-component-test
-    path: "src/features/customers/components/*Form/__tests__/*Form.test.tsx"
+    path: "apps/web/src/features/customers/components/*Form/__tests__/*Form.test.tsx"
   - type: file_exists
     name: page-test
-    path: "src/features/customers/components/*Page/__tests__/*Page.test.tsx"
+    path: "apps/web/src/features/customers/components/*Page/__tests__/*Page.test.tsx"
   - type: file_exists
     name: list-story
-    path: "src/features/customers/components/*List/*List.stories.tsx"
+    path: "apps/web/src/features/customers/components/*List/*List.stories.tsx"
   - type: file_exists
     name: form-story
-    path: "src/features/customers/components/*Form/*Form.stories.tsx"
+    path: "apps/web/src/features/customers/components/*Form/*Form.stories.tsx"
   - type: file_exists
     name: page-story
-    path: "src/features/customers/components/*Page/*Page.stories.tsx"
+    path: "apps/web/src/features/customers/components/*Page/*Page.stories.tsx"
   - type: tool_used
     name: runs-the-gates
     tool: Bash

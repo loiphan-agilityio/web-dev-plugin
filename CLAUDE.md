@@ -21,12 +21,8 @@ web-dev/                          the plugin (its README.md is the user guide)
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
   skills/                         the product: develop (entry), project-setup, feature-development,
                                   api-integration, ui-development
-    project-setup/assets/app-template/   the earlier single-package app: the eval fixtures and the
-                                  guidelines' copy still use it (new projects and the snippets'
-                                  checks use the boilerplate)
     project-setup/scripts/        create-project.sh (a new project from the boilerplate, with or
-                                  without auth), install-companions.sh, scaffold.sh (the
-                                  template, for the eval fixtures)
+                                  without auth), install-companions.sh
   references/                     shared guidelines: stack-guidelines, coding-standards, architecture
   scripts/                        detect-project.mjs, verify-project.sh (run by the skills)
   agents/                         codebase-explorer (shipped with the plugin)
@@ -40,15 +36,14 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 
 | Command | What it proves |
 |---|---|
-| `pnpm install` (repository root) | Installs the git hooks (husky) and the template's dependencies, which the hooks and `pnpm lint` use. Run it once after cloning. |
-| `pnpm lint` (repository root) | ShellCheck on the scripts, `node --check` on the `.mjs` scripts, `check-guidelines.mjs`, and the template's ESLint, Prettier and TypeScript. |
-| `bash tools/verify.sh` | `references/` match the template's `CLAUDE.md`, each eval fixture gets its tier, `create-project.sh` creates both boilerplate variants and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) the format hook works and the quoted todos feature passes all five gates (lint, typecheck, test, build, Storybook build). Same as CI. |
+| `pnpm install` (repository root) | Installs the git hooks (husky) and the tools they and `pnpm lint` use. Run it once after cloning. |
+| `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
+| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates both boilerplate variants and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all five gates (lint, typecheck, test, build, Storybook build). Same as CI. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
-| `pnpm check` in `web-dev/skills/project-setup/assets/app-template/` | The template itself passes the gates. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` | The plugin manifest is valid. |
 
-The template pins pnpm in `packageManager`; run pnpm from inside the template or an app so
+The boilerplate pins pnpm in `packageManager`; run pnpm from inside a project made from it so
 corepack picks that version.
 
 ## Rules for changing the skills
@@ -63,9 +58,10 @@ corepack picks that version.
   marked ` ```ts sketch ` and says so.
 - **Shared guidelines live in `web-dev/references/`:** version traps in `stack-guidelines.md`,
   code style in `coding-standards.md`, the data flow in `architecture.md`. Skills point there
-  (`../../references/` from a skill) and keep only the traps of their own step. The template's
-  `CLAUDE.md` carries the same sections word for word, so a scaffolded app has them without the
-  plugin; `check-guidelines.mjs` fails when the two differ, so change both together.
+  (`../../references/` from a skill) and keep only the traps of their own step. The boilerplate's
+  `apps/web/CLAUDE.md` carries the same sections word for word, so a project from it has them
+  without the plugin; `check-guidelines.mjs` (in `verify.sh`) fails when the two differ, so change
+  both together (the boilerplate first).
 - **Skills reach the plugin's shared files by relative path** (`../../references/`,
   `../../scripts/`, `../../agents/`), which holds both for the installed plugin and for a project
   that copies `skills/`, `references/`, `scripts/` and `agents/` into its `.claude/`.
@@ -98,6 +94,5 @@ corepack picks that version.
 - Commit only what the change touches; stage exact paths and read back
   `git diff --cached --name-only` before committing.
 - Messages follow Conventional Commits (`feat(ui-development): ...`), checked by commitlint in the
-  `commit-msg` hook. The `pre-commit` hook runs ShellCheck and `node --check` on staged scripts,
-  the template's ESLint and Prettier on staged template files, and its TypeScript when a template
-  `.ts`/`.tsx` file is staged. Never commit with `--no-verify`.
+  `commit-msg` hook. The `pre-commit` hook runs ShellCheck and `node --check` on staged scripts.
+  Never commit with `--no-verify`.

@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// Fails when a shared guideline in the plugin's references/ and the same section of the template's
+// Fails when a shared guideline in the plugin's references/ and the same section of the app's
 // CLAUDE.md differ. Each mirrored file below has a preamble for the skills, then one `## ` section
-// that the template's CLAUDE.md carries word for word, so a scaffolded app keeps it without the
-// plugin. Other files in references/ (companions.md) are for the skills only.
+// that the boilerplate's apps/web/CLAUDE.md carries word for word, so a project from it keeps it
+// without the plugin. Other files in references/ (companions.md) are for the skills only.
 //
-//   node check-guidelines.mjs <references-dir> <template-claude-md>
+//   node check-guidelines.mjs <references-dir> <app-claude-md>
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const [referencesDir, claudeMd] = process.argv.slice(2);
 if (!referencesDir || !claudeMd) {
-  console.error('usage: check-guidelines.mjs <references-dir> <template-claude-md>');
+  console.error('usage: check-guidelines.mjs <references-dir> <app-claude-md>');
   process.exit(2);
 }
 
@@ -46,4 +46,4 @@ if (problems.length > 0) {
   });
   process.exit(1);
 }
-console.log('check-guidelines: references/ and the template CLAUDE.md agree');
+console.log(`check-guidelines: references/ and ${claudeMd} agree`);
