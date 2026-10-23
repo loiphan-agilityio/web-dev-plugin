@@ -8,7 +8,7 @@ from this file to a library the project does not have.
 
 The boilerplate's `apps/web/CLAUDE.md` carries the section below, word for word, so a project
 from it has the section without the plugin. `tools/check-guidelines.mjs` (in the repository, not shipped with the plugin) fails when the
-two differ.
+two differ; `tools/sync-references.sh` copies it from the boilerplate, its source.
 
 ## Library versions newer than most training data
 
