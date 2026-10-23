@@ -75,4 +75,5 @@ expect_exit() {
 }
 expect_exit broken 1
 expect_exit missing 2
+expect_exit broken/package.json 2
 exit "$failed"

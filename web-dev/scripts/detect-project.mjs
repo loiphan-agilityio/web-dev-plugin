@@ -15,14 +15,19 @@
 //   other-stack  a React app on another stack (axios, zod, Redux, another router...)
 //   unsupported  not React, Next.js or another SSR framework, or a monorepo root
 //
-// Exits 2 when <dir> does not exist and 1 when its package.json is not valid JSON, with the cause
-// on stderr and nothing on stdout.
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+// Exits 2 when <dir> does not exist or is not a folder, and 1 when its package.json is not valid
+// JSON, with the cause on stderr and nothing on stdout.
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 const dir = resolve(process.argv[2] ?? '.');
 if (!existsSync(dir)) {
   console.error(`detect-project: ${dir} does not exist`);
+  process.exit(2);
+}
+// A file is no project folder either; readdirSync would throw and exit 1, the broken-JSON code.
+if (!statSync(dir).isDirectory()) {
+  console.error(`detect-project: ${dir} is not a folder`);
   process.exit(2);
 }
 
