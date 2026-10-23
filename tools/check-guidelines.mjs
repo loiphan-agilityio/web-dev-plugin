@@ -3,14 +3,18 @@
 // CLAUDE.md differ. Each mirrored file below has a preamble for the skills, then one `## ` section
 // that the boilerplate's apps/web/CLAUDE.md carries word for word, so a project from it keeps it
 // without the plugin. Other files in references/ (companions.md) are for the skills only.
+// The boilerplate is the source: --write copies its sections over the ones in references/ and
+// keeps each preamble (tools/sync-references.sh runs it on a project created from the boilerplate).
 //
-//   node check-guidelines.mjs <references-dir> <app-claude-md>
-import { existsSync, readFileSync } from 'node:fs';
+//   node check-guidelines.mjs [--write] <references-dir> <app-claude-md>
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const [referencesDir, claudeMd] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const write = args[0] === '--write';
+const [referencesDir, claudeMd] = write ? args.slice(1) : args;
 if (!referencesDir || !claudeMd) {
-  console.error('usage: check-guidelines.mjs <references-dir> <app-claude-md>');
+  console.error('usage: check-guidelines.mjs [--write] <references-dir> <app-claude-md>');
   process.exit(2);
 }
 
@@ -28,15 +32,20 @@ const sectionOf = (lines, heading) => {
 const mirrored = ['stack-guidelines.md', 'coding-standards.md', 'architecture.md'];
 const template = readFileSync(claudeMd, 'utf8').split(/\r?\n/);
 const problems = mirrored.flatMap((name) => {
-  if (!existsSync(join(referencesDir, name))) return [`${name}: missing from ${referencesDir}`];
-  const lines = readFileSync(join(referencesDir, name), 'utf8').split(/\r?\n/);
+  const path = join(referencesDir, name);
+  if (!existsSync(path)) return [`${name}: missing from ${referencesDir}`];
+  const lines = readFileSync(path, 'utf8').split(/\r?\n/);
   const start = lines.findIndex((line) => line.startsWith('## '));
   if (start < 0) return [`${name}: no \`## \` section`];
   const heading = lines[start];
   const shared = text(lines.slice(start));
   const copy = sectionOf(template, heading);
   if (copy === undefined) return [`${name}: CLAUDE.md has no "${heading}"`];
-  return copy === shared ? [] : [`${name}: "${heading}" differs from CLAUDE.md`];
+  if (copy === shared) return [];
+  if (!write) return [`${name}: "${heading}" differs from CLAUDE.md`];
+  writeFileSync(path, `${text([...lines.slice(0, start), copy])}\n`);
+  console.log(`check-guidelines: ${name}: copied "${heading}" from ${claudeMd}`);
+  return [];
 });
 
 if (problems.length > 0) {
@@ -44,6 +53,10 @@ if (problems.length > 0) {
   problems.forEach((problem) => {
     console.error(`  ${problem}`);
   });
+  if (!write) {
+    console.error("  The boilerplate's apps/web/CLAUDE.md is the source: change a section there,");
+    console.error('  then copy it here with `bash tools/sync-references.sh`.');
+  }
   process.exit(1);
 }
 console.log(`check-guidelines: references/ and ${claudeMd} agree`);

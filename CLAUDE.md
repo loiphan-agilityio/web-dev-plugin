@@ -18,7 +18,7 @@ demo in `README.md`.
 .gitlab-ci.yml                    runs tools/verify.sh on merge requests, pushes, schedules
 tools/                            maintainer scripts, not shipped: verify.sh,
                                   extract-snippets.mjs, check-guidelines.mjs,
-                                  check-create-project.sh
+                                  check-create-project.sh, sync-references.sh
 web-dev/                          the plugin (its README.md is the user guide)
   .claude-plugin/plugin.json      name, version
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
@@ -42,6 +42,7 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the tools they and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
 | `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates both boilerplate variants and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged. Same as CI. |
+| `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (clones `main`: network; `BOILERPLATE_REPO` as above) into `web-dev/references/`, keeping each file's preamble. Run it after a guideline change is merged in the boilerplate, then review and commit the diff. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` | The plugin manifest is valid. |
@@ -63,8 +64,10 @@ corepack picks that version.
   code style in `coding-standards.md`, the data flow in `architecture.md`. Skills point there
   (`../../references/` from a skill) and keep only the traps of their own step. The boilerplate's
   `apps/web/CLAUDE.md` carries the same sections word for word, so a project from it has them
-  without the plugin; `check-guidelines.mjs` (in `verify.sh`) fails when the two differ, so change
-  both together (the boilerplate first).
+  without the plugin. The boilerplate is the source: change a section there, then run
+  `bash tools/sync-references.sh` here and commit what it copied. `check-guidelines.mjs` (in
+  `verify.sh`) fails when the two differ and names that command. Edit only the preamble above a
+  section in `references/`.
 - **Skills reach the plugin's shared files by relative path** (`../../references/`,
   `../../scripts/`, `../../agents/`), which holds both for the installed plugin and for a project
   that copies `skills/`, `references/`, `scripts/` and `agents/` into its `.claude/`.

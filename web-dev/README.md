@@ -254,7 +254,7 @@ docs/companion-audit.md  ← audit of the companion skills
 ```
 
 Outside the plugin, at the repository root: `tools/` (maintainer scripts: `verify.sh`,
-`extract-snippets.mjs`, `check-guidelines.mjs`, `check-create-project.sh`) and `.claude/` (maintainer agents and settings).
+`extract-snippets.mjs`, `check-guidelines.mjs`, `check-create-project.sh`, `sync-references.sh`) and `.claude/` (maintainer agents and settings).
 Neither ships with the plugin.
 
 **Change the boilerplate or bump a dependency:**
@@ -279,8 +279,9 @@ Neither ships with the plugin.
 Storybook 10) are written once, in `references/stack-guidelines.md`; code style and the data flow
 in `coding-standards.md` and `architecture.md` beside it. Skills point there and keep only the
 traps specific to their own step. The boilerplate's `apps/web/CLAUDE.md` carries the same sections
-word for word, so a project from it keeps them without the plugin; `check-guidelines.mjs` (run
-by `verify.sh`) fails when the copies differ.
+word for word, so a project from it keeps them without the plugin. The boilerplate is the source:
+change a section there, then `bash tools/sync-references.sh` copies it into `references/`;
+`check-guidelines.mjs` (run by `verify.sh`) fails when the copies differ.
 
 **Routing** (`skills/develop/SKILL.md`, the skills' descriptions, `scripts/detect-project.mjs`)
 is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `evals/README.md`);
