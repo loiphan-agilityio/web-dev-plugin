@@ -12,6 +12,9 @@ demo in `README.md`.
 .claude-plugin/marketplace.json   marketplace: lists web-dev/ as the plugin web-dev
 .claude/                          for maintaining this repo, not part of the plugin: agents/
                                   (companion-auditor, skill-reviewer, version-scout), settings.json
+.github/workflows/                the same checks on GitHub Actions: ci.yml (pull requests, pushes
+                                  to main, tags, weekly), companions.yml (weekly), evals.yml
+                                  (by hand only)
 .gitlab-ci.yml                    runs tools/verify.sh on merge requests, pushes, schedules
 tools/                            maintainer scripts, not shipped: verify.sh,
                                   extract-snippets.mjs, check-guidelines.mjs,
@@ -38,7 +41,7 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 |---|---|
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the tools they and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
-| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates both boilerplate variants and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all five gates (lint, typecheck, test, build, Storybook build). Same as CI. |
+| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates both boilerplate variants and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged. Same as CI. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` | The plugin manifest is valid. |

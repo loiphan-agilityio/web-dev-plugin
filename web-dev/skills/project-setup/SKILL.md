@@ -2,7 +2,7 @@
 name: project-setup
 description: This skill should be used when the user asks to "scaffold a new web app", "create a new React project with our stack", "bootstrap a frontend" or "start a new project from the template" or "from the boilerplate", with no features described. It creates the project from the react-vite-boilerplate (a pnpm + Turborepo monorepo, the app in apps/web; React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query, shadcn/ui, Vitest, MSW), with or without its authentication feature as the user chooses, installs it, adds the companion skills and runs every gate. Not for an app described by its features (develop plans that), or for features, endpoints or screens in an existing app.
 compatibility: "Claude Code, as part of the web-dev plugin only (reads the plugin's references/). Needs Node 22.22 or newer, pnpm 10 or newer, git, and network access to clone the boilerplate, for pnpm install and the companion skills."
-allowed-tools: Bash(node --version) Bash(pnpm --version) Bash(bash ${CLAUDE_SKILL_DIR}/scripts/create-project.sh *) Bash(bash ${CLAUDE_SKILL_DIR}/scripts/install-companions.sh) Bash(pnpm install) Bash(pnpm check)
+allowed-tools: Bash(node --version) Bash(pnpm --version) Bash(bash ${CLAUDE_SKILL_DIR}/scripts/create-project.sh *) Bash(bash ${CLAUDE_SKILL_DIR}/scripts/install-companions.sh) Bash(pnpm install) Bash(pnpm test:e2e:install) Bash(pnpm check)
 ---
 
 # project-setup
@@ -45,7 +45,7 @@ Never build the project by hand, from memory or from another template instead: r
 
 ## 6. Gates
 
-`pnpm check` in the target root (turbo runs lint with Prettier, typecheck, tests with coverage, build and Storybook build in every package) as a plain command with no pipe or redirect: the skill's `allowed-tools` cover exactly that. Report the real output, failures included.
+`pnpm test:e2e:install` in the target root (Chromium for Playwright, once per machine; it needs network, and a failure goes under **Not done**), then `pnpm check` (turbo runs lint with Prettier, typecheck, tests with coverage, build, Storybook build and the Playwright e2e tests in every package that has them), each as a plain command with no pipe or redirect: the skill's `allowed-tools` cover exactly those. Report the real output, failures included.
 
 Offer `git init` and a first commit; commit only on a yes. After `git init`, run `pnpm install` again so husky turns the hooks on, and write the message as a Conventional Commit (`chore: scaffold <folder-name>`), since commitlint rejects anything else.
 

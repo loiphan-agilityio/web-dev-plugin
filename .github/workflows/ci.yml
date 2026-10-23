@@ -1,0 +1,82 @@
+# Checks the web-dev plugin on GitHub Actions (the free jobs of .gitlab-ci.yml):
+# - manifests: the plugin and marketplace manifests are valid.
+# - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
+#   every eval case.yaml parses.
+# - verify: tools/verify.sh: the free checks, then the todos feature the skills quote passes every
+#   gate, e2e included, in a project created from the boilerplate (cloned from GitHub).
+# Runs on pull requests and pushes to main that touch the plugin, on release tags, and weekly, so
+# a dependency or boilerplate release that breaks what the skills quote shows up before a user
+# hits it. A branch is checked through its pull request, so each check runs once. evals.yml calls
+# this workflow before the model evals; companions.yml checks the companion skills.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['web-dev--v*']
+    paths:
+      - 'web-dev/**'
+      - 'tools/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'web-dev/**'
+      - 'tools/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/ci.yml'
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  # A called run gets its own group, so it never waits for, or cancels, a run of its caller's ref.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  manifests:
+    name: 'Validate: plugin manifests'
+    runs-on: ubuntu-latest
+    env:
+      # Pinned like everything else; validation needs no login.
+      CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npx -y "$CLAUDE_CODE" plugin validate --strict web-dev/.claude-plugin/plugin.json
+      - run: npx -y "$CLAUDE_CODE" plugin validate --strict .
+
+  skills-spec:
+    name: 'Validate: skills spec'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      # The Agent Skills reference validator, pinned like every other tool here.
+      - run: pip install --quiet skills-ref==0.1.1 pyyaml==6.0.3
+      - run: bash tools/validate-skills.sh
+
+  verify:
+    name: 'Test: quoted code in the boilerplate'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # pnpm 11 comes from each project's packageManager field.
+      - run: corepack enable
+      - run: bash tools/verify.sh

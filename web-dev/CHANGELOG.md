@@ -3,6 +3,26 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.3.0
+
+Needs the react-vite-boilerplate with Playwright, `build:mock` and its CI/CD (the boilerplate's
+`feat/playwright-netlify-ci`): release it after that is merged.
+
+- **End-to-end tests:** `feature-development` writes `e2e/<name>.spec.ts` per feature, the main
+  flow in a real browser on the mock build, quoted from `references/testing.md` (todos opens
+  `/todos`; with authentication it signs in first). `project-setup` runs
+  `pnpm test:e2e:install` before `pnpm check`, and every building skill installs Chromium when the
+  e2e gate reports it missing. `pnpm test:watch` is named for the inner loop.
+- **CI/CD lives in the boilerplate:** its `.github/workflows/ci.yml` and `apps/web/netlify.toml`
+  run checks and e2e, a Netlify draft deploy with the e2e specs against it, then production, and
+  link each deploy from the checks list. The plugin writes none of it, and `develop` still
+  answers CI/CD work with "not yet".
+- `tools/verify.sh` installs Chromium and runs all six gates, the quoted e2e spec included;
+  `BOILERPLATE_REPO` points it at a boilerplate branch before it is merged.
+- **Plugin CI on GitHub Actions**, the jobs of `.gitlab-ci.yml` in three workflows: `ci.yml`
+  (manifests, skills spec, `verify.sh`), `companions.yml` (weekly) and `evals.yml` (the
+  model evals, only from a manual run on a release tag, after `ci.yml` passes).
+
 ## 0.2.0
 
 - **`project-setup` creates the project from the react-vite-boilerplate** instead of copying

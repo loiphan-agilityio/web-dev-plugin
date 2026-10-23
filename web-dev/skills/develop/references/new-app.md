@@ -49,7 +49,7 @@ With a design (images in `design/`, a `DESIGN.md` about the look, or a Figma lin
 
 ## A5. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until all five gates pass; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result, and the POC is not called done.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until all six gates pass; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result, and the POC is not called done.
 
 ## A6. Run it
 

@@ -224,4 +224,34 @@ A model test calls the function with plain values: no render, no MSW. Cover each
 - MSW 3 imports: `msw/http`, `msw/utils/delay`. Root `msw` imports of `http`/`HttpResponse`/`delay` are rejected by lint.
 - Don't make a test pass by weakening it: no removing assertions, no `.skip`, no loosening queries. If a test exposes a bug, fix the code.
 - Test data for a new feature goes in its `mocks.ts` fixtures, not inline in each test.
-- Run one file while iterating: `pnpm test <path>`; run `pnpm check` before finishing.
+- Run one file while iterating: `pnpm test <path>`, or keep `pnpm test:watch` running in a terminal of its own (it re-runs the tests that import each saved file); run `pnpm check` before finishing.
+
+## End-to-end
+
+One Playwright spec per feature in `e2e/`, named after the feature. It walks the main flow a user takes in a real browser, on the app built with mocks (`pnpm build:mock`): the default handlers from `src/mocks/handlers.ts` serve the feature's fixtures, fresh on every page load.
+
+```ts file=e2e/todos.spec.ts
+import { expect, test } from '@playwright/test';
+
+// The mocked API serves the fixtures in src/features/todos/mocks.ts, fresh on every page load.
+test('adds a todo from the todos page', async ({ page }) => {
+  await page.goto('/todos');
+  await expect(page.getByRole('heading', { name: 'Todos' })).toBeVisible();
+
+  const list = page.getByRole('list', { name: 'Todos' });
+  await expect(list.getByText('Write the first feature')).toBeVisible();
+
+  await page.getByLabel('Title').fill('Ship the e2e tests');
+  await page.getByRole('button', { name: 'Add todo' }).click();
+
+  await expect(list.getByText('Ship the e2e tests')).toBeVisible();
+  await expect(page.getByLabel('Title')).toHaveValue('');
+});
+```
+
+- Open the feature's path (`page.goto('/todos')`): the spec then also proves the lazy route and, on the deploy, the SPA redirect. When `src/app/root-layout.tsx` has a nav, start from `/` and click its link instead, so the spec proves the link too.
+- In an app with authentication the route sits inside `protectedRoutes([...])`: sign in first, as `e2e/home.spec.ts` does (`demo@example.com` / `password` on the mocks).
+- Assert on fixture values from `mocks.ts`; the same spec runs in CI against the Netlify deploy (`E2E_BASE_URL`), which serves the same mocks.
+- Locators by role and label, web-first assertions (`await expect(locator).toBeVisible()`), which wait on their own; never `page.waitForTimeout`.
+- One flow per feature. States, error paths and 422s belong to the unit tests above, which are faster and cover them exactly.
+- `pnpm test:e2e` runs only the specs; `pnpm check` runs them as its last gate. A missing browser fails with "Executable doesn't exist": run `pnpm test:e2e:install`.

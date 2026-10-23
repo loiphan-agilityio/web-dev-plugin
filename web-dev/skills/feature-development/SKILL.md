@@ -2,7 +2,7 @@
 name: feature-development
 description: This skill should be used when the user asks to "implement this ticket", "build the X page", "add a form for X", "create a CRUD screen" or "develop the feature in this issue" in an app built from the web-dev template (React, Effect, TanStack Query, React Hook Form, shadcn/ui). It turns one ticket into a tested feature folder with schemas, business rules, API calls, queries, form, the four UI states, routes, tests and stories. Not for a new project (project-setup), one endpoint alone (api-integration) or a design with no ticket (ui-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the api-integration and ui-development skills' references. Needs Node 22.22 or newer and pnpm."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm format) Bash(npm run lint:fix) Bash(npm run format) Bash(yarn lint:fix) Bash(yarn format) Bash(bun run lint:fix) Bash(bun run format)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm format) Bash(npm run lint:fix) Bash(npm run format) Bash(yarn lint:fix) Bash(yarn format) Bash(bun run lint:fix) Bash(bun run format)
 ---
 
 # feature-development
@@ -35,6 +35,7 @@ src/features/<name>/
   components/  one folder per component: <Name>Page/, <Name>Form/, <Name>List/
     <Name>List/  index.tsx (the component), <Name>List.stories.tsx,
                  __tests__/<Name>List.test.tsx, and types.ts / utils.ts only it uses
+e2e/<name>.spec.ts   the feature's main flow in a real browser (Playwright)
 ```
 
 Starting from todos, rename `todo` / `Todo` everywhere (folders, files, exports, keys, URLs) and keep the structure (for a `customers` feature, `components/TodoList/` becomes `components/CustomerList/`; `references/feature-layout.md`, section components/). Reuse before writing: `src/components/`, then `@repo/ui/components/` (`packages/ui/src/components/`), then other features through their `schemas`, `model`, `queries` or `routes` (lint rejects another feature's `api`, `mocks` and `components`). A missing shadcn component comes from `pnpm exec shadcn add <name>` in `apps/web`; delete any extra file the CLI added that nothing imports (`toggle-group` brings `toggle`). In a single-package app (from the plugin's 0.1.0 template: `src/components/ui/` exists, no `packages/ui`), the kit is `@/components/ui/<name>` in `src/components/ui/` and `cn` comes from `@/lib/utils`.
@@ -63,13 +64,15 @@ The feature exports a lazy route factory (`todoRoutes = (): RouteObject[] => [..
 
 Follow `references/testing.md`. Every component, including ones added later, gets its own test in its folder's `__tests__/` (`components/<Name>List/__tests__/<Name>List.test.tsx`), rendered alone with `renderWithProviders`. The page test (`renderRoute`) covers only flows that need the parts together. Drive states with `server.use(...)` (a later call wins; within one call the first match wins), never by mocking hooks or `api.ts`. Query by role and label. Minimum: list = the four states; form = client validation, success (input cleared), server 422 next to its field; page = the create flow; schemas = `Schema.decodeUnknownSync`; model = each rule and its edges, without rendering.
 
+One Playwright spec per feature, `e2e/<name>.spec.ts` (`references/testing.md`, End-to-end): the main flow from the feature's path (or the nav link, when the root layout has a nav) through the list and the form, on the default mock handlers and their fixtures; with authentication, it signs in first. It runs in `pnpm check` and again in CI against the Netlify deploy, so it never assumes a host or port. While writing code, `pnpm test:watch` in a terminal of its own re-runs the affected tests on each save.
+
 ## 8. Stories
 
 Follow `references/stories.md`. Every component gets a `<Name>.stories.tsx` in its folder with one story per state it renders, driven by the feature's `mocks.ts` through `parameters.msw.handlers`. The preview already provides the query client, router and `Toaster`. Done when every folder in `components/` has its `index.tsx`, its story and its test.
 
 ## 9. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until green; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then `pnpm check` again. A gate that stays red goes in the Result.
 
 ## Result
 

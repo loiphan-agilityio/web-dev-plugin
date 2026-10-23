@@ -122,7 +122,31 @@ flowchart LR
   MCP), or a `DESIGN.md` whose written values win over measured ones. With none, it asks once,
   then keeps the current theme; under `develop` it never asks.
 
-## 5. Decisions
+## 5. Tests, CI/CD and deploy
+
+```mermaid
+flowchart LR
+  W["pnpm test:watch<br/>while coding"] --> PR["pull request"]
+  PR --> CK["check<br/>lint, typecheck, unit, build, Storybook"]
+  PR --> E2["e2e<br/>Playwright on the mock build"]
+  CK --> DP["deploy-draft<br/>Netlify draft: app + Storybook"]
+  E2 --> DP
+  DP --> ED["e2e-deployed<br/>same specs on the draft URL"]
+  ED -->|"main only"| PM["deploy-production<br/>same files to production"]
+```
+
+- The pipeline above is the react-vite-boilerplate's (`.github/workflows/ci.yml`,
+  `apps/web/netlify.toml`), so every project created from it carries it. The plugin writes no
+  pipeline: `develop` answers CI/CD work with "not yet".
+- `pnpm check` is six gates: lint, typecheck, unit tests with coverage, build, Storybook build and
+  Playwright e2e. The e2e gate builds with `--mode mock` and serves `dist/` with `vite preview`,
+  so it tests the same build CI deploys.
+- One e2e spec per feature walks its main flow; states and error paths stay in the unit tests,
+  which are faster and drive MSW per test.
+- The deployed app runs on mocks (MSW in the browser) until it has a backend: a POC from one
+  message has none, and the e2e specs need known data.
+
+## 6. Decisions
 
 | Decision | Why |
 |---|---|
@@ -137,7 +161,7 @@ flowchart LR
 | Git hooks (husky) in the boilerplate and in this repository: lint-staged and typecheck before a commit, commitlint (Conventional Commits) on its message | Lint and type errors are stopped where they are written, not in CI or review, and the history stays readable. `.gitattributes` keeps files LF so Prettier passes on every OS. |
 | CI runs `verify.sh` on every change to the plugin and on a schedule | A boilerplate change that breaks the code the skills quote shows up before a user hits it. |
 | Pin the `skills` CLI that installs the companions (`skills@1.7.2`), and install them on a CI schedule | A companion pinned by SHA but fetched by whatever installer npm serves today is only as safe as that release; a moved or deleted upstream path shows up in CI, not in a user's scaffold. |
-| `pnpm lint` also runs `prettier --check`; skills run `pnpm lint:fix` before the gates | Generated code stays formatted without a sixth gate. Markdown is excluded: it is prose for Claude, and table padding is only diff noise. |
+| `pnpm lint` also runs `prettier --check`; skills run `pnpm lint:fix` before the gates | Generated code stays formatted without a separate format gate. Markdown is excluded: it is prose for Claude, and table padding is only diff noise. |
 | The boilerplate's `.claude/settings.json` has a `PostToolUse` hook that runs Prettier on each file Claude writes or edits; the plugin ships no hook | Code is formatted as it is written, not only when a skill remembers `lint:fix` or a commit runs lint-staged. In the boilerplate, not the plugin: a plugin hook would run in every project with the plugin enabled and reformat whole files in projects that do not use Prettier. It skips files outside the project and never blocks an edit. |
 | `pnpm dev:mock` reads `.env.mock` (Vite mode `mock`) | `VITE_API_MOCKING=true pnpm dev` fails in PowerShell and cmd, and a fixed script is what the desktop app's `.claude/launch.json` can start for the visual check. |
 | Lint rejects `fetch` in every form (`window.`, `globalThis.`, `self.`) and `XMLHttpRequest` | `no-restricted-globals` alone sees only a bare `fetch`, which left the "only through `ApiClient`" rule one prefix away from broken. |

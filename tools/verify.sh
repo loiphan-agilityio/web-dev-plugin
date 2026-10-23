@@ -10,8 +10,9 @@
 #    project starts empty; the todos feature is only the skills' worked example), and checks the
 #    hook in apps/web/.claude/settings.json that formats each file Claude writes.
 # 2. Writes the todos feature quoted in the skills' markdown into apps/web (every block marked
-#    `file=...`, see extract-snippets.mjs), applies its wiring diff and runs all five gates
-#    (lint, typecheck, test, build, Storybook build) across the monorepo.
+#    `file=...`, see extract-snippets.mjs), applies its wiring diff, installs Chromium and runs
+#    all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e) across the
+#    monorepo.
 #
 #   tools/verify.sh [--keep]   --keep leaves the temp project in place, prints its path
 set -euo pipefail
@@ -68,6 +69,12 @@ node "$here/extract-snippets.mjs" "$skills_root" "$app"
 git -c core.autocrlf=false apply wiring.diff
 rm wiring.diff
 cd "$tmp/app"
+# The e2e gate needs Chromium; CI images also lack its system libraries, which --with-deps adds.
+if [[ -n "${CI:-}" ]]; then
+  pnpm --filter web exec playwright install --with-deps chromium
+else
+  pnpm test:e2e:install
+fi
 pnpm check
 if [[ "$keep" == true ]]; then
   echo "verify: the quoted todos feature passed all gates in a project from the boilerplate (kept at $tmp/app)"

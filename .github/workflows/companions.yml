@@ -1,0 +1,33 @@
+# The pinned companion skills still install, and shadcn is pinned (the companions job of
+# .gitlab-ci.yml). Upstream repositories can move or delete a pinned path, so it runs weekly, and
+# by hand after changing install-companions.sh.
+name: Companions
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  companions:
+    name: 'Check: pinned companion skills'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # A project from the boilerplate (cloned from GitHub), as project-setup creates one.
+      - run: bash web-dev/skills/project-setup/scripts/create-project.sh /tmp/app --no-auth
+      # Fails on a missing companion, a missing skills-lock.json or an unpinned shadcn@latest.
+      - run: bash "$GITHUB_WORKSPACE/web-dev/skills/project-setup/scripts/install-companions.sh"
+        working-directory: /tmp/app
+      - run: test "$(find .claude/skills -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 8
+        working-directory: /tmp/app

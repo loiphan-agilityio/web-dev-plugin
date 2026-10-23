@@ -5,7 +5,8 @@ a modern React stack and follow its conventions on the first try, in a new folde
 existing React project.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
-shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Storybook 10 · pnpm 11
+shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Playwright 1.64 · Storybook 10 · pnpm 11 ·
+GitHub Actions + Netlify (in the boilerplate)
 
 | Skill | Use it for | Example prompt |
 |---|---|---|
@@ -28,23 +29,22 @@ Requirements: Node ≥ 22.22, pnpm 10 or newer (it switches to the pinned pnpm 1
 straight from its git host, with no clone, and the skills load in every project:
 
 ```bash
-claude plugin marketplace add <repo-url>#feat/web-dev-plugin
+claude plugin marketplace add git@github.com:loiphan-agilityio/web-dev-plugin.git
 ```
 
 ```bash
-claude plugin install web-dev@claude-training
+claude plugin install web-dev@web-dev-plugin
 ```
 
-`<repo-url>` is the repository's git URL, `git@<host>:<group>/claude-training.git` or
-`https://<host>/<group>/claude-training.git`. `#feat/web-dev-plugin` picks the branch that holds
-the marketplace; drop it once the plugin is on the default branch, or pin a release tag instead
-(`#web-dev--v0.1.0`). The clone runs with your
+The URL is the repository's git URL (`https://github.com/loiphan-agilityio/web-dev-plugin.git`
+works too). It installs from the default branch, `main`; append `#<ref>` to pick another
+branch or pin a release tag (`#web-dev--v0.2.0`). The clone runs with your
 own git credentials and never prompts: an SSH key loaded in `ssh-agent`, or for an `https://`
 URL a credential your git helper already stores.
 
 A git install is a cached copy, so a release reaches you only when `version` in
-`.claude-plugin/plugin.json` changes: run `claude plugin update web-dev@claude-training`, or turn
-on auto-update once (`/plugin` → Marketplaces → claude-training → Enable auto-update). To offer
+`.claude-plugin/plugin.json` changes: run `claude plugin update web-dev@web-dev-plugin`, or turn
+on auto-update once (`/plugin` → Marketplaces → web-dev-plugin → Enable auto-update). To offer
 the plugin to everyone who opens one repository, run the `marketplace add` command there with
 `--scope project` and commit the `.claude/settings.json` it writes; teammates who trust the
 folder get the marketplace registered.
@@ -57,8 +57,8 @@ script, the same message runs to the end with no settings file:
 `claude -p "/web-dev:develop <request>" --permission-mode acceptEdits --allowedTools Skill`
 (see Permissions below).
 
-**From a clone, to work on the plugin.** `git clone -b <branch> <repo-url> claude-training`,
-then `claude plugin marketplace add ./claude-training` and the same install. A marketplace added
+**From a clone, to work on the plugin.** `git clone <repo-url> web-dev-plugin`,
+then `claude plugin marketplace add ./web-dev-plugin` and the same install. A marketplace added
 from a local path is read in place: your edits load at the next session or after
 `/reload-plugins`, with no version bump.
 
@@ -110,7 +110,8 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
 
 ## What a new project gives you
 
-A project from the boilerplate passes lint, typecheck, tests, build and Storybook build. Its app,
+A project from the boilerplate passes lint, typecheck, tests, build, Storybook build and Playwright
+e2e. Its app,
 `apps/web`, holds the parts every feature builds on (paths below are relative to it):
 
 - **`ApiClient`** (`src/lib/api/client.ts`): the only way to call the backend. Effect 4
@@ -141,7 +142,8 @@ A project from the boilerplate passes lint, typecheck, tests, build and Storyboo
   trusted, `-p` included, so one message runs to the end with no prompt and no settings file;
   file edits need `--permission-mode acceptEdits` headless. For later turns, the project's
   `.claude/settings.json` allows exactly the pnpm commands the skills run (`install`, `lint`,
-  `lint:fix`, `typecheck`, `test`, `build`, `build-storybook`, `check`, `dev:mock`,
+  `lint:fix`, `typecheck`, `test`, `test:e2e`, `test:e2e:install`, `build`,
+  `build-storybook`, `check`, `dev:mock`,
   `exec shadcn add` / `info`), and its `PostToolUse` hook (`.claude/hooks/format.mjs`) runs
   Prettier on every file Claude writes or edits inside the project, so code is formatted as it is
   written. A project from the boilerplate has two: the root's, for sessions started there
@@ -157,6 +159,25 @@ A project from the boilerplate passes lint, typecheck, tests, build and Storyboo
 
 `feature-development/references/` (with `api.ts` and `mocks.ts` in `api-integration/references/`) quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
 wiring diff for the two files a feature registers in.
+
+## End-to-end tests and CI/CD (from the boilerplate)
+
+A project from the [react-vite-boilerplate](https://github.com/loiphan-agilityio/react-vite-boilerplate)
+brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "not yet"):
+
+- **End-to-end**: Playwright in `apps/web/e2e/`. `pnpm test:e2e` builds the app on mocks
+  (`pnpm build:mock`) and serves it with `vite preview`; with `E2E_BASE_URL` set it tests that URL
+  instead. `pnpm check` runs it as the sixth gate; `pnpm test:e2e:install` downloads Chromium once
+  per machine (`project-setup` runs it). `feature-development` adds `e2e/<name>.spec.ts` for each
+  feature's main flow, quoted from `references/testing.md` and run by `tools/verify.sh`.
+- **Watch mode**: `pnpm test:watch` (`vitest --watch`) re-runs the tests that import a file each
+  time it is saved, even where `CI` is set.
+- **CI/CD** (`.github/workflows/ci.yml`, `apps/web/netlify.toml`): checks and e2e in parallel, a
+  Netlify draft deploy of the builds they made (`pr-<n>` on a pull request), the same specs
+  against it, then production on `main`. Each deploy adds a commit status
+  (`Preview - Webapp Deployment`, `Prod - Webapp Deployment`) whose Details link opens it. It needs
+  the `NETLIFY_AUTH_TOKEN` secret and the `NETLIFY_SITE_ID` variable; the boilerplate's `CLAUDE.md`
+  has the setup.
 
 ## Pinned versions and why
 
@@ -266,7 +287,10 @@ is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `ev
 `verify.sh` checks the tier of every fixture without a model; the model evals run only
 on request (`evals/README.md`, When evals run).
 
-**CI** (`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
+**CI** on GitHub Actions (`../.github/workflows/`: `ci.yml` for the free checks, also weekly
+instead of a pipeline schedule; `companions.yml` weekly; `evals.yml`, the model evals, only from
+a manual run on a release tag) and on GitLab
+(`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
 and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,
 and `verify.sh`. Schedules also run `install-companions.sh` in a new project from the boilerplate, so a
 companion whose repo moved or deleted the pinned path shows up. Add a weekly schedule in GitLab (Build >
