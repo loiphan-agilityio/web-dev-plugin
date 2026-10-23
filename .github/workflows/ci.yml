@@ -131,7 +131,9 @@ jobs:
   # The model evals run only when the maintainer asks: a manual run on a release tag, after the free
   # jobs passed (needs). Nothing starts them automatically.
   evals:
-    name: 'Evals: ${{ matrix.tag }}'
+    # A static name: GitHub adds the matrix value when the job runs (Evals (routing)), and a skipped
+    # job shows "Evals" instead of an unexpanded expression.
+    name: Evals
     if: >-
       github.event_name == 'workflow_dispatch' &&
       startsWith(github.ref, 'refs/tags/web-dev--v') &&
@@ -141,15 +143,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Three runs per case. A run scores the share of its graders that pass, and a case the
-          # mean of its runs; a case below 0.66 fails the job. Model runs vary, so the bar is not
-          # 1.0.
-          - tag: routing
-            args: --tag routing --runs 3 --threshold 0.66 --max-cost-usd 25
-          # One run each: a whole feature (20) and a whole app (21), the costliest cases.
-          - tag: e2e
-            args: --tag e2e --runs 1 --max-cost-usd 40
+        tag: [routing, e2e]
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       # The needs above already ran tools/verify.sh and the validators.
@@ -174,8 +168,16 @@ jobs:
             echo "The ANTHROPIC_API_KEY secret is not set" >&2
             exit 1
           fi
-          # shellcheck disable=SC2086 # the arguments are meant to split
-          bash evals/run.sh ${{ matrix.args }} --trust-plugin --no-publish $EVALS_ARGS
+          case "${{ matrix.tag }}" in
+            # Three runs per case. A run scores the share of its graders that pass, and a case the
+            # mean of its runs; a case below 0.66 fails the job. Model runs vary, so the bar is
+            # not 1.0.
+            routing) args=(--tag routing --runs 3 --threshold 0.66 --max-cost-usd 25) ;;
+            # One run each: a whole feature (20) and a whole app (21), the costliest cases.
+            e2e) args=(--tag e2e --runs 1 --max-cost-usd 40) ;;
+          esac
+          # shellcheck disable=SC2086 # EVALS_ARGS is meant to split
+          bash evals/run.sh "${args[@]}" --trust-plugin --no-publish $EVALS_ARGS
       - uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
