@@ -15,12 +15,12 @@ Needs the react-vite-boilerplate with Playwright, `build:mock` and its CI/CD (th
   e2e gate reports it missing. `pnpm test:watch` is named for the inner loop.
 - **CI/CD lives in the boilerplate:** its `.github/workflows/ci.yml` and `apps/web/netlify.toml`
   run checks and e2e, a Netlify draft deploy with the e2e specs against it, then production, and
-  link each deploy from the checks list. The plugin's template carries none of it, and `develop`
-  still answers CI/CD work with "not yet".
+  link each deploy from the checks list. The plugin writes none of it, and `develop` still
+  answers CI/CD work with "not yet".
 - `tools/verify.sh` installs Chromium and runs all six gates, the quoted e2e spec included;
   `BOILERPLATE_REPO` points it at a boilerplate branch before it is merged.
 - **Plugin CI on GitHub Actions**, the jobs of `.gitlab-ci.yml` in three workflows: `ci.yml`
-  (manifests, skills spec, `verify.sh`, audit), `companions.yml` (weekly) and `evals.yml` (the
+  (manifests, skills spec, `verify.sh`), `companions.yml` (weekly) and `evals.yml` (the
   model evals, only from a manual run on a release tag, after `ci.yml` passes).
 
 ## 0.2.0

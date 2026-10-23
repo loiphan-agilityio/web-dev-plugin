@@ -110,7 +110,8 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
 
 ## What a new project gives you
 
-A project from the boilerplate passes lint, typecheck, tests, build and Storybook build. Its app,
+A project from the boilerplate passes lint, typecheck, tests, build, Storybook build and Playwright
+e2e. Its app,
 `apps/web`, holds the parts every feature builds on (paths below are relative to it):
 
 - **`ApiClient`** (`src/lib/api/client.ts`): the only way to call the backend. Effect 4

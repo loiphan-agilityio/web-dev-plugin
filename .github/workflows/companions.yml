@@ -24,7 +24,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - run: bash web-dev/skills/project-setup/scripts/scaffold.sh /tmp/app companions-app
+      # A project from the boilerplate (cloned from GitHub), as project-setup creates one.
+      - run: bash web-dev/skills/project-setup/scripts/create-project.sh /tmp/app --no-auth
       # Fails on a missing companion, a missing skills-lock.json or an unpinned shadcn@latest.
       - run: bash "$GITHUB_WORKSPACE/web-dev/skills/project-setup/scripts/install-companions.sh"
         working-directory: /tmp/app
