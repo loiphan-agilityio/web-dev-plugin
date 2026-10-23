@@ -30,7 +30,6 @@ Every version is pinned in the template's lockfile.
 | 4 | **One message, whole app:** a description on any topic becomes a running POC without further input | `develop` skill, Workflow A: plans `docs/plan.md`, then drives the other four, runs the gates and opens the app on mocks | One prompt yields a scaffold, every planned feature, five green gates and an app that runs with `pnpm dev:mock`; every decision made for the user is listed |
 | 5 | **Existing project:** a feature, endpoint or screen in a React project not made from the template, built on its own code and conventions | `develop` skill, Workflow B + `codebase-explorer` agent + `scripts/verify-project.sh`; `references/outside-template.md` in each building skill | The change reuses the project's HTTP client, query layer and tests, adds no library unasked, and the project's own gates pass |
 | + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma, DESIGN.md; all optional) | `ui-development` skill | Theme tokens, shadcn components and the four data states, no raw colors |
-| + | Not in the assignment: a CI pipeline (GitHub Actions or GitLab CI) that runs the whole unit-test suite on every push, in an app from the template or another React project | `ci-setup` skill + `scripts/setup-ci.sh` | The file sits at the git root, installs from the lockfile and runs the `test` script; `tools/check-ci-setup.sh` passes and a project from the boilerplate with both pipelines passes all five gates (`verify.sh`) |
 
 ### Each skill must
 
@@ -68,13 +67,13 @@ Requirement 4, one message to a whole app: the demo in `README.md` ("Demo") give
 
 ## Out of scope
 
-- SSR and Next.js, backend code, deploy and release pipelines (CD) for the generated apps; the
-  one CI pipeline `ci-setup` writes runs the unit tests only.
+- SSR and Next.js, backend code, CI/CD pipelines for the generated apps: they come with the
+  boilerplate.
 - End-to-end browser tests (Playwright): the template has unit and component tests only.
 - Applying the skeleton to an existing project: `create-project.sh` refuses a folder with
   conflicting files. An existing project gets features through Workflow B instead.
-- Not yet: bug fixes, review without edits, commits, PR/MR, and CI work besides the unit-test
-  pipeline (`develop` reports them as not covered and changes nothing), and projects that are not React or use Next.js / SSR.
+- Not yet: bug fixes, review without edits, commits, PR/MR and CI work (`develop` reports them as
+  not covered and changes nothing), and projects that are not React or use Next.js / SSR.
 
 ## Distribution
 

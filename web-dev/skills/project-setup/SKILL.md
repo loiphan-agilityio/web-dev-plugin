@@ -57,8 +57,8 @@ Skip under `develop`'s Workflow A (it builds on and reports at the end). Otherwi
 - with authentication: sign in as `demo@example.com` / `password` on the mocks; the home page sits inside `protectedRoutes()`, and a new page that needs a signed-in user goes there too (`apps/web/src/app/routes.tsx`);
 - copy `apps/web/.env.example` to `apps/web/.env.local` and set `VITE_API_URL` (every `VITE_*` value is public);
 - conventions live in the root `CLAUDE.md` (the monorepo, its packages, adding an app or a package) and `apps/web/CLAUDE.md` (the app; where its paths differ from the skills' examples, it wins);
-- the web-dev skills run from `apps/web` (`cd apps/web`): at the root, `develop` reports a monorepo root and stops. `ci-setup` is the exception: run `/web-dev:ci-setup` from the root, which holds the lockfile;
-- next: `feature-development` (a ticket), `api-integration` (an endpoint), `ui-development` (a design), `ci-setup` (a pipeline that runs the unit tests on every push), or `/web-dev:develop` for any of them.
+- the web-dev skills run from `apps/web` (`cd apps/web`): at the root, `develop` reports a monorepo root and stops;
+- next: `feature-development` (a ticket), `api-integration` (an endpoint), `ui-development` (a design), or `/web-dev:develop` for any of them.
 
 Setup traps: `../../references/stack-guidelines.md`. Read the project's files over recalling config: TypeScript 6 uses `paths` without `baseUrl`; pnpm 11 reads its settings from `pnpm-workspace.yaml`, where `eslint-plugin-jsx-a11y` is allowed on ESLint 10. When a `CLAUDE.md` and the files disagree, the files win; tell the user.
 

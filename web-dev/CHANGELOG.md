@@ -5,14 +5,6 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## 0.2.0
 
-- **`ci-setup`**, a fifth skill behind `develop` (request kind **ci**, any tier with a
-  `package.json`): `scripts/setup-ci.sh` writes a GitHub Actions workflow
-  (`.github/workflows/unit-tests.yml`) or a GitLab CI job (`.gitlab-ci.yml`) that runs the whole
-  unit-test suite on every push. The skill always asks GitHub or GitLab, unless the request names
-  one, and never picks the host from the remotes or the files in the folder. The file goes to the
-  git root, with the job in the project's folder; `node:24` with corepack and a frozen install
-  (pnpm, npm or yarn); `actions/checkout` pinned by commit. It refuses to overwrite a pipeline, or
-  to write one without a `test` script or a lockfile, then runs the gates.
 - **`project-setup` creates the project from the react-vite-boilerplate** instead of copying
   `assets/app-template/`: `scripts/create-project.sh <dir> --auth|--no-auth` clones the boilerplate
   and runs its own generator (`create/index.js`), so a new project is a pnpm + Turborepo monorepo
@@ -28,8 +20,6 @@ A git install is a cached copy, so a change reaches users only with a new versio
   quoted code imports the boilerplate's UI kit (`@repo/ui/components/*`, `cn` from
   `@repo/ui/lib/utils`), and the wiring is two edits (routes, mock handlers): the boilerplate's
   root layout has no nav, and with authentication the route goes inside `protectedRoutes([...])`.
-- `tools/check-ci-setup.sh` tests the script without a host; `verify.sh` runs it and
-  writes both pipelines into a project from the boilerplate.
 
 ## 0.1.0
 

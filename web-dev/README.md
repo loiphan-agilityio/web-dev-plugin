@@ -1,6 +1,6 @@
 # web-dev: Claude Code plugin for web development
 
-One entry point, `/web-dev:develop <request>`, and five skills that let Claude build web apps on
+One entry point, `/web-dev:develop <request>`, and four skills that let Claude build web apps on
 a modern React stack and follow its conventions on the first try, in a new folder or in an
 existing React project.
 
@@ -14,11 +14,10 @@ shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library
 | `feature-development` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `api-integration` for endpoints beyond list + create and `ui-development` for a design | "Implement this ticket: <paste or issue URL>" |
 | `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `ui-development` | A design (screenshot, mockup, Figma frame, DESIGN.md) → a UI that matches it: theme tokens, shadcn components, states, tests, a visual check in the browser. With no design it asks once for an optional DESIGN.md or Figma link, then uses the current theme | "Make the settings page look like design/settings.png" |
-| `ci-setup` | A CI pipeline that runs the whole unit-test suite on every push: `scripts/setup-ci.sh` writes `.github/workflows/unit-tests.yml` (GitHub Actions) or `.gitlab-ci.yml` at the git root, for the host the user picks (it always asks GitHub or GitLab unless the request names one; it never guesses from the remotes), with the project's package manager and a frozen install from its lockfile; then the gates run. Never overwrites a pipeline | "Set up GitHub Actions to run our unit tests on every push" |
 
-Out of scope: SSR / Next.js, non-React projects, backend code, deploy pipelines (CD). Not yet: bug
-fixes, review without edits, commits and PR/MR, CI jobs besides the unit tests (`develop` says so
-and changes nothing).
+Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD (it comes with the
+boilerplate). Not yet: bug fixes, review without edits, commits and PR/MR (`develop` says so and
+changes nothing).
 
 ## Install
 
@@ -139,7 +138,7 @@ build and Storybook build. The parts every feature builds on:
 - **Permissions**, in two layers. Each skill's `allowed-tools` frontmatter approves the exact
   commands it runs, for the turn that invokes it: the plugin's scripts by their
   `${CLAUDE_SKILL_DIR}` path (`detect-project.mjs`, `create-project.sh`, `install-companions.sh`,
-  `verify-project.sh`, `setup-ci.sh`) and the pnpm gates. Claude Code applies it even in a folder that was never
+  `verify-project.sh`) and the pnpm gates. Claude Code applies it even in a folder that was never
   trusted, `-p` included, so one message runs to the end with no prompt and no settings file;
   file edits need `--permission-mode acceptEdits` headless. For later turns, the project's
   `.claude/settings.json` allows exactly the pnpm commands the skills run (`install`, `lint`,
@@ -147,7 +146,7 @@ build and Storybook build. The parts every feature builds on:
   `exec shadcn add` / `info`), and its `PostToolUse` hook (`.claude/hooks/format.mjs`) runs
   Prettier on every file Claude writes or edits inside the project, so code is formatted as it is
   written. A project from the boilerplate has two: the root's, for sessions started there
-  (Workflow A, `ci-setup`), and `apps/web/.claude/settings.json`, for sessions in the app (Claude
+  (Workflow A), and `apps/web/.claude/settings.json`, for sessions in the app (Claude
   Code reads the file only from the folder a session starts in). `create-project.sh` (and
   `scaffold.sh` for the template) copies the root one only when the project has none, and Claude
   Code applies it once the folder is trusted (open it with `claude` and accept the prompt).
@@ -182,12 +181,12 @@ other advisory fails it. Remove the entry once a fixed `braces` is released.
 
 ## Companion skills
 
-Popular third-party skills for parts of the stack, installed next to the six
+Popular third-party skills for parts of the stack, installed next to the five
 skills by `install-companions.sh` and pinned to an audited commit. Each was read in full for security
 and fit; the findings are in [`docs/companion-audit.md`](docs/companion-audit.md), and what Claude
 must ignore in each one is in [`references/companions.md`](references/companions.md), which every
 skill reads before following a companion. When a companion disagrees with the project, the
-project's `CLAUDE.md` and the six project skills win. The installer is pinned too:
+project's `CLAUDE.md` and the five project skills win. The installer is pinned too:
 `install-companions.sh` runs `skills@1.7.2`, not whatever `npx skills` serves that day.
 
 | Skill | Source | Commit | License | What it is for |
@@ -235,7 +234,6 @@ skills/                  ← the product
   feature-development/  SKILL.md, references/ (the todos feature, outside-template)
   api-integration/  SKILL.md, references/ (effect-http, errors, msw, react-query, outside-template)
   ui-development/  SKILL.md, references/ (design-mapping, visual-check, outside-template)
-  ci-setup/  SKILL.md, scripts/ (setup-ci: the unit-test pipeline for GitHub or GitLab)
 references/              ← shared guidelines the skills read (stack, coding standards, architecture,
                            companions)
 scripts/                 ← detect-project.mjs, verify-project.sh, run by the skills in projects
@@ -245,7 +243,7 @@ docs/companion-audit.md  ← audit of the companion skills
 ```
 
 Outside the plugin, at the repository root: `tools/` (maintainer scripts: `verify.sh`,
-`extract-snippets.mjs`, `check-guidelines.mjs`, `check-ci-setup.sh`, `check-create-project.sh`) and `.claude/` (maintainer agents and settings).
+`extract-snippets.mjs`, `check-guidelines.mjs`, `check-create-project.sh`) and `.claude/` (maintainer agents and settings).
 Neither ships with the plugin.
 
 **Change the boilerplate or bump a dependency:**

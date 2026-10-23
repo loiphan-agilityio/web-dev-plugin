@@ -9,7 +9,7 @@ the user guide is [`web-dev/README.md`](web-dev/README.md).
 flowchart LR
   repo["this repository"] --> mkt[".claude-plugin/marketplace.json"]
   mkt --> plugin["web-dev/<br/>plugin web-dev"]
-  plugin --> skills["6 skills<br/>skills/"]
+  plugin --> skills["5 skills<br/>skills/"]
   plugin --> shared["references/, scripts/,<br/>agents/"]
   skills -->|project-setup runs the<br/>boilerplate generator| app["new monorepo, app in apps/web<br/>with or without auth + CLAUDE.md"]
   skills -->|install-companions.sh| comp["8 companion skills<br/>pinned by commit"]
@@ -22,7 +22,7 @@ project. The plugin is read in place from the clone, so `git pull` updates it. C
 skills reach the shared files as `../../references/` and `../../scripts/`, which resolve in both
 layouts.
 
-## 2. One entry point, six skills
+## 2. One entry point, five skills
 
 ```mermaid
 flowchart TD
@@ -42,14 +42,12 @@ flowchart TD
   C --> DF
   C --> IA
   C --> DU
-  D -->|"ci, any tier with package.json"| CI[ci-setup]
   DF -->|"endpoint beyond list + create,<br/>or an error besides 422/500"| IA
   DF -->|"the ticket has a design"| DU
   CS --> G{{"pnpm check (template) or<br/>verify-project.sh (other tiers)"}}
   DF --> G
   IA --> G
   DU --> G
-  CI --> G
   G --> R["## Result<br/>Route / Did / Saw / Not done / Blocked by / Next"]
 ```
 
@@ -68,7 +66,6 @@ flowchart TD
 | `feature-development` | A ticket, story or issue | `api-integration` for endpoint detail, `ui-development` for the UI when there is a design |
 | `api-integration` | One endpoint on its own | — (when loaded by `feature-development`, it hands the UI and the Result back) |
 | `ui-development` | A design with no ticket | — (when loaded by `feature-development`, it hands data work back) |
-| `ci-setup` | A CI pipeline that runs the unit tests | — |
 
 Each skill still triggers on its own words ("Implement this ticket", "Add PATCH /todos/:id"), so a
 user who knows which one they need skips the routing. `develop` and `feature-development` tell
@@ -149,11 +146,10 @@ flowchart LR
 | The scaffold also writes a narrow `.claude/settings.json` allow-list, only when the project has none | Covers the turns after the first, once the folder is trusted. Only the pnpm commands the skills run are listed, not `pnpm *`, and an existing settings file is never touched. The boilerplate ships one at its root and one in `apps/web`, sharing the root's `.claude/hooks/format.mjs`: Claude Code reads `.claude/settings.json` only from the folder a session starts in, and the skills run from `apps/web`. |
 | Workflow A builds each ticket in its own subagent, one after another | A whole app is 2 to 5 tickets, each with its reads, edits and gate output; in one context the run reaches compaction and the later tickets lose the plan's details. A fresh subagent per ticket starts from `docs/plan.md` and returns a 15-line report. Sequential, because tickets share the routes, the mock handlers and the nav. |
 | `ApiClient` reads `AppConfig` and `AuthToken` services instead of module constants | Config and the bearer token become layers a test can replace (`client.test.ts` does), and sign-in is one line in `runtime.ts` (`AuthToken.fromGetter`) instead of an edit inside the client every app redoes differently. `config` stays as a constant for the code outside Effect (`main.tsx`, MSW handlers). |
-| One entry skill (`develop`) that routes, instead of a slash command plus six skills that compete on their descriptions | The plan asks for one input. A skill can be typed (`/web-dev:develop`) and still triggers on plain words; the routing rules live in one file instead of six descriptions. |
+| One entry skill (`develop`) that routes, instead of a slash command plus five skills that compete on their descriptions | The plan asks for one input. A skill can be typed (`/web-dev:develop`) and still triggers on plain words; the routing rules live in one file instead of five descriptions. |
 | Model evals run only when the maintainer asks; free checks run on every change | An eval run is paid model time and a whole-app case costs dollars. Lint, `verify.sh`, `check-detect.sh` and the validators catch most mistakes for free, so the model only judges finished work: `run.sh` refuses single cases, uncommitted work and plugin content already evaluated, runs one arm unless the baseline Δ is needed, and CI offers the eval jobs only on release tags. |
 | Detect the project with a script (`detect-project.mjs`), not by reading files each time | The same folder always gets the same tier, the reasons are printed, and `check-detect.sh` tests it without a model. |
 | Existing projects keep their stack; the skills say per rule what still holds outside the template | The template's layers are one way to meet the rules (typed errors, four states, tests on mocks). Forcing Effect or MSW into a working project is a rewrite nobody asked for. |
 | Shared guidelines in `references/`, copied word for word into the template's `CLAUDE.md` | Skills need them in projects that never had the template; a scaffolded app needs them without the plugin. `check-guidelines.mjs` keeps the two copies equal. |
 | The todos feature lives only in the skills' markdown, each block tagged `file=...`; `verify.sh` writes it into a project created from the boilerplate and runs every gate | One source for what Claude copies. A separate fixture folder drifts from the markdown; untested markdown drifts from the libraries. |
 | `project-setup` creates the project with the boilerplate's own generator (`create/index.js`, cloned by `create-project.sh`), and asks whether to include authentication | The boilerplate is the team's project template; its generator and auth overlay are tested in that repository, and a patch that no longer matches stops the run instead of half-applying. Cloned, not `pnpm create react-vite-turbo`: the generator and its overlay always come from the same commit, and nothing waits for an npm release. Auth is the user's choice, never detected; Workflow A takes it from the plan (sign-in in the description means yes). The snippets follow the boilerplate (`@repo/ui/components/*`, no nav in the root layout) and `verify.sh` runs them in a project created from it, so what Claude copies is tested where it lands; `assets/app-template/` stays only for the eval fixtures and the guidelines' copy. Theme tokens are the one path the skills still name the single-package way (`src/styles/index.css`); the boilerplate's `apps/web/CLAUDE.md` maps them to `packages/ui`. |
-| `ci-setup` writes the pipeline with a script (`setup-ci.sh`), not from a snippet, and runs only the `test` script | The file is identical every time and tested without a host (`check-ci-setup.sh`; a fresh scaffold's Prettier check parses both YAML files). `node:24` with `corepack enable`, as this repository's CI, so the job uses the pnpm or yarn `package.json` pins; a frozen install, so CI tests what the lockfile pins; `actions/checkout` pinned by commit with `persist-credentials: false` and a read-only token. The file goes to the git root, because neither host reads a pipeline from a subfolder, and an existing pipeline is never overwritten. The host is always asked, unless the request names it, and never detected: remotes and files mislead (a mirror on both hosts, an SSH alias, a leftover `.gitlab-ci.yml`), and a pipeline for the wrong host never runs and nothing reports it. Lint, build and deploy jobs stay out: the request was the unit tests, and each is one more line the user can ask for. |

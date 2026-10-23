@@ -3,14 +3,13 @@
 # react-vite-boilerplate, the project users get. Exits non-zero on the first failure.
 #
 # 0. Checks that the plugin's shared references/ match the template's CLAUDE.md
-#    (check-guidelines.mjs), that detect-project.mjs gives each eval fixture its tier, what
-#    ci-setup's setup-ci.sh writes and refuses (check-ci-setup.sh), and what project-setup's
-#    create-project.sh creates from the boilerplate and refuses (check-create-project.sh).
+#    (check-guidelines.mjs), that detect-project.mjs gives each eval fixture its tier, and what
+#    project-setup's create-project.sh creates from the boilerplate and refuses
+#    (check-create-project.sh).
 # 1. Creates a project with create-project.sh --no-auth (clones the boilerplate: network;
 #    BOILERPLATE_REPO points it at another clone URL), checks that its app names no todos (a new
-#    project starts empty; the todos feature is only the skills' worked example), writes both CI
-#    pipelines with setup-ci.sh, and checks the hook in apps/web/.claude/settings.json that formats
-#    each file Claude writes.
+#    project starts empty; the todos feature is only the skills' worked example), and checks the
+#    hook in apps/web/.claude/settings.json that formats each file Claude writes.
 # 2. Writes the todos feature quoted in the skills' markdown into apps/web (every block marked
 #    `file=...`, see extract-snippets.mjs), applies its wiring diff and runs all five gates
 #    (lint, typecheck, test, build, Storybook build) across the monorepo.
@@ -39,7 +38,6 @@ skills_root="$plugin_root/skills"
 node "$here/check-guidelines.mjs" "$plugin_root/references" \
   "$skills_root/project-setup/assets/app-template/CLAUDE.md"
 bash "$plugin_root/evals/fixtures/check-detect.sh"
-bash "$here/check-ci-setup.sh"
 bash "$here/check-create-project.sh"
 
 bash "$skills_root/project-setup/scripts/create-project.sh" "$tmp/app" --no-auth
@@ -48,8 +46,6 @@ if grep -rniI todo "$app/src"; then
   echo "verify: the new project's app mentions todos (above); it carries no example feature" >&2
   exit 1
 fi
-bash "$skills_root/ci-setup/scripts/setup-ci.sh" "$tmp/app" github
-bash "$skills_root/ci-setup/scripts/setup-ci.sh" "$tmp/app" gitlab
 cd "$tmp/app"
 pnpm install --frozen-lockfile
 

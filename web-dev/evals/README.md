@@ -22,10 +22,7 @@ the plugin alone.
 | `12-app-other-stack` | `other-stack` | a whole app is planned and built inside the project: maps it, writes the plan, keeps its stack |
 | `13-feature-direct-template` | `template` | a ticket without the command reaches `feature-development`; records whether `develop` fired too (the two overlap on purpose) |
 | `14-app-other-folder` | files, no `package.json` | the app goes into a subfolder; `notes.md` stays as it is |
-| `15-ci-template-command` | `template` | a CI request reaches `ci-setup`, which writes `.github/workflows/unit-tests.yml` with `setup-ci.sh`; no scaffold |
-| `16-ci-natural-gitlab` | `template` | the same in plain words, without the command, for GitLab: `.gitlab-ci.yml`, no GitHub workflow |
-| `17-ci-other-stack-no-lockfile` | `other-stack` | no lockfile: no pipeline, no install to make one, and the report says why |
-| `18-ci-asks-for-host` | `template`, GitHub `origin` | no host named: asks GitHub or GitLab even though `origin` is on GitHub, and writes no pipeline |
+| `15-ci-not-covered` | `template` | a CI request is not covered (pipelines come with the boilerplate): no pipeline written, no other skill run, and the answer says so |
 | `19-setup-asks-for-auth` | empty | a setup request that does not say whether to include authentication: asks, and runs no `create-project.sh` |
 | `20-e2e-feature-template` | `template` | **output quality**, run to the end: a test and a story per component, `pnpm check` runs, the Result has a Route line and claims only what the trace shows |
 | `21-e2e-app-empty` | empty | **the main promise**, run to the end: one message gives `docs/plan.md`, the scaffold, every planned feature with a page test and story, `pnpm check`, and a Result that asks nothing and claims only what the trace shows |

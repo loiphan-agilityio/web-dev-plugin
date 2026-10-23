@@ -1,7 +1,7 @@
 # web-dev
 
 This repository ships the **web-dev** Claude Code plugin: an entry skill, `develop`, that inspects
-the project and routes a request to five skills that build web apps on React 19, Vite 8,
+the project and routes a request to four skills that build web apps on React 19, Vite 8,
 TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui.
 What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and how to run the
 demo in `README.md`.
@@ -14,20 +14,19 @@ demo in `README.md`.
                                   (companion-auditor, skill-reviewer, version-scout), settings.json
 .gitlab-ci.yml                    runs tools/verify.sh on merge requests, pushes, schedules
 tools/                            maintainer scripts, not shipped: verify.sh,
-                                  extract-snippets.mjs, check-guidelines.mjs, check-ci-setup.sh,
+                                  extract-snippets.mjs, check-guidelines.mjs,
                                   check-create-project.sh
 web-dev/                          the plugin (its README.md is the user guide)
   .claude-plugin/plugin.json      name, version
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
   skills/                         the product: develop (entry), project-setup, feature-development,
-                                  api-integration, ui-development, ci-setup
+                                  api-integration, ui-development
     project-setup/assets/app-template/   the earlier single-package app: the eval fixtures and the
                                   guidelines' copy still use it (new projects and the snippets'
                                   checks use the boilerplate)
     project-setup/scripts/        create-project.sh (a new project from the boilerplate, with or
                                   without auth), install-companions.sh, scaffold.sh (the
                                   template, for the eval fixtures)
-    ci-setup/scripts/             setup-ci.sh (writes the unit-test pipeline)
   references/                     shared guidelines: stack-guidelines, coding-standards, architecture
   scripts/                        detect-project.mjs, verify-project.sh (run by the skills)
   agents/                         codebase-explorer (shipped with the plugin)
@@ -43,7 +42,7 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 |---|---|
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the template's dependencies, which the hooks and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts, `node --check` on the `.mjs` scripts, `check-guidelines.mjs`, and the template's ESLint, Prettier and TypeScript. |
-| `bash tools/verify.sh` | `references/` match the template's `CLAUDE.md`, each eval fixture gets its tier, `setup-ci.sh` writes and refuses what `check-ci-setup.sh` expects, `create-project.sh` creates both boilerplate variants and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) the format hook works and the quoted todos feature passes all five gates (lint, typecheck, test, build, Storybook build). Same as CI. |
+| `bash tools/verify.sh` | `references/` match the template's `CLAUDE.md`, each eval fixture gets its tier, `create-project.sh` creates both boilerplate variants and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) the format hook works and the quoted todos feature passes all five gates (lint, typecheck, test, build, Storybook build). Same as CI. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
 | `pnpm check` in `web-dev/skills/project-setup/assets/app-template/` | The template itself passes the gates. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
