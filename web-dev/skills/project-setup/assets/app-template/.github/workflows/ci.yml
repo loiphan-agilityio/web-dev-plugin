@@ -144,7 +144,8 @@ jobs:
           echo "App: $url" >> "$GITHUB_STEP_SUMMARY"
           # A commit status whose Details link in the checks list opens the deploy.
           gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=success \
-            -f context='Netlify: preview' -f target_url="$url" -f description='Draft deploy'
+            -f context='Preview - Webapp Deployment' -f target_url="$url" \
+            -f description='Draft deploy'
       - name: Deploy Storybook (draft)
         if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}
         run: |
@@ -215,7 +216,8 @@ jobs:
           echo "App: $url" >> "$GITHUB_STEP_SUMMARY"
           # A commit status whose Details link in the checks list opens the live site.
           gh api "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state=success \
-            -f context='Netlify: production' -f target_url="$url" -f description='Live site'
+            -f context='Prod - Webapp Deployment' -f target_url="$url" \
+            -f description='Live site'
       - name: Publish Storybook
         if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}
         run: |

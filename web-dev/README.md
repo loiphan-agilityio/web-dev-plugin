@@ -163,7 +163,8 @@ A project from the boilerplate passes lint, typecheck, tests, build and Storyboo
   to Netlify as a draft (`pr-<n>` on a pull request), `e2e-deployed` runs the same specs against
   that URL, and on `main` `deploy-production` publishes the same files to production. Each job has
   a `name:` that GitHub shows in the checks list (`CI / Deploy: Netlify draft`), and each deploy
-  adds a commit status (`Netlify: preview`, `Netlify: production`) whose Details link opens it.
+  adds a commit status (`Preview - Webapp Deployment`, `Prod - Webapp Deployment`) whose Details
+  link opens it.
   The deploys need the `NETLIFY_AUTH_TOKEN` secret and the `NETLIFY_SITE_ID` variable
   (`NETLIFY_STORYBOOK_SITE_ID` for Storybook); without them the deploy jobs are skipped.
 - **Netlify** (`netlify.toml`): SPA redirect, long cache for `assets/`, no cache for the MSW
