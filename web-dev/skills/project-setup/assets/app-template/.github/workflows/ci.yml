@@ -54,6 +54,13 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm build-storybook
+      # The deploy jobs publish this Storybook build instead of building it again.
+      - uses: actions/upload-artifact@v7
+        if: ${{ vars.NETLIFY_STORYBOOK_SITE_ID != '' }}
+        with:
+          name: storybook
+          path: storybook-static/
+          retention-days: 7
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
@@ -76,6 +83,14 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       # Builds on mocks and serves dist/ with `vite preview` (playwright.config.ts, webServer).
       - run: pnpm test:e2e
+      # The deploy jobs publish the build these tests passed on. Once the app has a backend, upload
+      # dist/ from check's `pnpm build` (with VITE_API_URL) as `app` instead.
+      - uses: actions/upload-artifact@v7
+        if: ${{ vars.NETLIFY_SITE_ID != '' }}
+        with:
+          name: app
+          path: dist/
+          retention-days: 7
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
@@ -102,17 +117,17 @@ jobs:
       NETLIFY_STORYBOOK_SITE_ID: ${{ vars.NETLIFY_STORYBOOK_SITE_ID }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
+      # netlify.toml holds the redirects and headers the deploy applies.
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: actions/download-artifact@v8
         with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      # The mocked API: a new app has no backend yet. Once it has one, set VITE_API_URL here and
-      # switch to `pnpm build` (and in netlify.toml).
-      - run: pnpm build:mock
-      - run: pnpm build-storybook
+          name: app
+          path: dist/
+      - uses: actions/download-artifact@v8
+        if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}
+        with:
+          name: storybook
+          path: storybook-static/
       - name: Deploy the app (draft)
         id: app
         env:
@@ -140,14 +155,6 @@ jobs:
             jq -r .deploy_url)"
           [[ "$url" == https://* ]]
           echo "Storybook: $url" >> "$GITHUB_STEP_SUMMARY"
-      # deploy-production publishes exactly these files, not a rebuild.
-      - uses: actions/upload-artifact@v7
-        with:
-          name: deploy
-          path: |
-            dist/
-            storybook-static/
-          retention-days: 7
 
   e2e-deployed:
     name: 'E2E: Netlify draft'
@@ -192,7 +199,13 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
-          name: deploy
+          name: app
+          path: dist/
+      - uses: actions/download-artifact@v8
+        if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}
+        with:
+          name: storybook
+          path: storybook-static/
       - name: Publish the app
         env:
           GH_TOKEN: ${{ github.token }}
