@@ -91,10 +91,9 @@ jobs:
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
-    # The URL becomes the link on this job in the run graph and "View deployment" on a pull request.
-    environment:
-      name: preview
-      url: ${{ steps.app.outputs.url }}
+    permissions:
+      contents: read
+      statuses: write
     outputs:
       url: ${{ steps.app.outputs.url }}
     env:
@@ -116,6 +115,10 @@ jobs:
       - run: pnpm build-storybook
       - name: Deploy the app (draft)
         id: app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # On a pull request github.sha is the merge commit; the checks list shows the head commit.
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           alias=()
           if [[ -n "$PR_NUMBER" ]]; then alias=(--alias "pr-$PR_NUMBER"); fi
@@ -124,6 +127,9 @@ jobs:
           [[ "$url" == https://* ]]
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "App: $url" >> "$GITHUB_STEP_SUMMARY"
+          # A commit status whose Details link in the checks list opens the deploy.
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=success \
+            -f context='Netlify: preview' -f target_url="$url" -f description='Draft deploy'
       - name: Deploy Storybook (draft)
         if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}
         run: |
@@ -173,9 +179,10 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # Approvals or branch rules for production can be set on this environment in the settings.
-    environment:
-      name: production
-      url: ${{ steps.app.outputs.url }}
+    environment: production
+    permissions:
+      contents: read
+      statuses: write
     env:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
@@ -187,12 +194,15 @@ jobs:
         with:
           name: deploy
       - name: Publish the app
-        id: app
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           url="$(npx -y "$NETLIFY_CLI" deploy --no-build --dir dist --site "$NETLIFY_SITE_ID" \
             --prod --message "$GITHUB_SHA" --json | jq -r .url)"
-          echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "App: $url" >> "$GITHUB_STEP_SUMMARY"
+          # A commit status whose Details link in the checks list opens the live site.
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state=success \
+            -f context='Netlify: production' -f target_url="$url" -f description='Live site'
       - name: Publish Storybook
         if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}
         run: |
