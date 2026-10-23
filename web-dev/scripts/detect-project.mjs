@@ -18,7 +18,7 @@
 // Exits 2 when <dir> does not exist and 1 when its package.json is not valid JSON, with the cause
 // on stderr and nothing on stdout.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 const dir = resolve(process.argv[2] ?? '.');
 if (!existsSync(dir)) {
@@ -181,8 +181,33 @@ const expectedMajors = {
   vitest: 5,
   tailwindcss: 4,
 };
+// pnpm's `catalog:` names no version: the default catalog of the nearest pnpm-workspace.yaml does
+// (the boilerplate's apps/web declares react, typescript and tailwindcss that way).
+/** @type {() => Record<string, string>} */
+const defaultCatalog = () => {
+  for (let at = dir; ; at = dirname(at)) {
+    const yaml = readText(join(at, 'pnpm-workspace.yaml'));
+    if (yaml) {
+      const lines = yaml.split(/\r?\n/);
+      const start = lines.findIndex((line) => /^catalog:\s*$/.test(line));
+      /** @type {Record<string, string>} */
+      const catalog = {};
+      for (const line of start < 0 ? [] : lines.slice(start + 1)) {
+        if (/^\S/.test(line)) break;
+        const [, key, range] = /^\s+['"]?([^'":\s]+)['"]?:\s*['"]?([^'"#\s]+)/.exec(line) ?? [];
+        if (key) catalog[key] = range;
+      }
+      return catalog;
+    }
+    if (dirname(at) === at) return {};
+  }
+};
+const catalog = defaultCatalog();
 // The installed version decides; a range such as `>=18` names no single major.
-const actualVersion = (/** @type {string} */ name) => versions[name]?.installed ?? declared[name];
+const actualVersion = (/** @type {string} */ name) =>
+  versions[name]?.installed ??
+  (/^catalog:(default)?$/.test(declared[name]) ? catalog[name] : undefined) ??
+  declared[name];
 const otherMajors = Object.entries(expectedMajors)
   .filter(([name, major]) => has(name) && majorOf(actualVersion(name)) !== major)
   .map(([name, major]) => `${name} ${actualVersion(name)} (guidelines: ${major})`);
