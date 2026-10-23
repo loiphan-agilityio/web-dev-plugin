@@ -6,7 +6,7 @@ existing React project.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
 shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Playwright 1.64 · Storybook 10 · pnpm 11 ·
-GitHub Actions + Netlify
+GitHub Actions + Netlify (in the boilerplate)
 
 | Skill | Use it for | Example prompt |
 |---|---|---|
@@ -151,24 +151,6 @@ A project from the boilerplate passes lint, typecheck, tests, build and Storyboo
   root one only when the project has none, and Claude Code applies it once the folder is trusted (open it with `claude` and accept the prompt).
   `git init` and commits stay prompts on purpose.
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
-- **Watch mode**: `pnpm test:watch` (`vitest --watch`) re-runs the tests that import a file
-  each time it is saved; `--watch` keeps it watching even where `CI` is set.
-- **End-to-end**: Playwright in `e2e/` (`playwright.config.ts`). `pnpm test:e2e` builds the app
-  on mocks (`pnpm build:mock`) and serves it with `vite preview`; with `E2E_BASE_URL` set it
-  tests that URL instead. `pnpm check` runs it as the sixth gate; `pnpm test:e2e:install`
-  downloads Chromium once per machine (`project-setup` runs it). Every feature adds
-  `e2e/<name>.spec.ts` for its main flow.
-- **CI/CD** (`.github/workflows/ci.yml`): `check` (lint, typecheck, unit tests, build, Storybook
-  build) and `e2e` in parallel; then `deploy-draft` sends the mock build and Storybook they built
-  to Netlify as a draft (`pr-<n>` on a pull request), `e2e-deployed` runs the same specs against
-  that URL, and on `main` `deploy-production` publishes the same files to production. Each job has
-  a `name:` that GitHub shows in the checks list (`CI / Deploy: Netlify draft`), and each deploy
-  adds a commit status (`Preview - Webapp Deployment`, `Prod - Webapp Deployment`) whose Details
-  link opens it.
-  The deploys need the `NETLIFY_AUTH_TOKEN` secret and the `NETLIFY_SITE_ID` variable
-  (`NETLIFY_STORYBOOK_SITE_ID` for Storybook); without them the deploy jobs are skipped.
-- **Netlify** (`netlify.toml`): SPA redirect, long cache for `assets/`, no cache for the MSW
-  worker. The deploy runs on mocks (`build:mock`, MSW in the browser) until the app has a backend.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
   helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`); `pnpm lint` also runs `prettier --check`.
@@ -176,6 +158,25 @@ A project from the boilerplate passes lint, typecheck, tests, build and Storyboo
 
 `feature-development/references/` (with `api.ts` and `mocks.ts` in `api-integration/references/`) quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
 wiring diff for the two files a feature registers in.
+
+## End-to-end tests and CI/CD (from the boilerplate)
+
+A project from the [react-vite-boilerplate](https://github.com/loiphan-agilityio/react-vite-boilerplate)
+brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "not yet"):
+
+- **End-to-end**: Playwright in `apps/web/e2e/`. `pnpm test:e2e` builds the app on mocks
+  (`pnpm build:mock`) and serves it with `vite preview`; with `E2E_BASE_URL` set it tests that URL
+  instead. `pnpm check` runs it as the sixth gate; `pnpm test:e2e:install` downloads Chromium once
+  per machine (`project-setup` runs it). `feature-development` adds `e2e/<name>.spec.ts` for each
+  feature's main flow, quoted from `references/testing.md` and run by `tools/verify.sh`.
+- **Watch mode**: `pnpm test:watch` (`vitest --watch`) re-runs the tests that import a file each
+  time it is saved, even where `CI` is set.
+- **CI/CD** (`.github/workflows/ci.yml`, `apps/web/netlify.toml`): checks and e2e in parallel, a
+  Netlify draft deploy of the builds they made (`pr-<n>` on a pull request), the same specs
+  against it, then production on `main`. Each deploy adds a commit status
+  (`Preview - Webapp Deployment`, `Prod - Webapp Deployment`) whose Details link opens it. It needs
+  the `NETLIFY_AUTH_TOKEN` secret and the `NETLIFY_SITE_ID` variable; the boilerplate's `CLAUDE.md`
+  has the setup.
 
 ## Pinned versions and why
 
@@ -285,7 +286,9 @@ is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `ev
 `verify.sh` checks the tier of every fixture without a model; the model evals run only
 on request (`evals/README.md`, When evals run).
 
-**CI** (`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
+**CI** on GitHub Actions (`../.github/workflows/ci.yml`: the same jobs, weekly instead of a
+pipeline schedule, the model evals only from a manual run on a release tag) and on GitLab
+(`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
 and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,
 and `verify.sh`. Schedules also run `install-companions.sh` in a new project from the boilerplate, so a
 companion whose repo moved or deleted the pinned path shows up. Add a weekly schedule in GitLab (Build >

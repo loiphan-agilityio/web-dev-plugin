@@ -135,6 +135,9 @@ flowchart LR
   ED -->|"main only"| PM["deploy-production<br/>same files to production"]
 ```
 
+- The pipeline above is the react-vite-boilerplate's (`.github/workflows/ci.yml`,
+  `apps/web/netlify.toml`), so every project created from it carries it. The plugin writes no
+  pipeline: `develop` answers CI/CD work with "not yet".
 - `pnpm check` is six gates: lint, typecheck, unit tests with coverage, build, Storybook build and
   Playwright e2e. The e2e gate builds with `--mode mock` and serves `dist/` with `vite preview`,
   so it tests the same build CI deploys.

@@ -235,8 +235,7 @@ import { expect, test } from '@playwright/test';
 
 // The mocked API serves the fixtures in src/features/todos/mocks.ts, fresh on every page load.
 test('adds a todo from the todos page', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Todos' }).click();
+  await page.goto('/todos');
   await expect(page.getByRole('heading', { name: 'Todos' })).toBeVisible();
 
   const list = page.getByRole('list', { name: 'Todos' });
@@ -250,7 +249,8 @@ test('adds a todo from the todos page', async ({ page }) => {
 });
 ```
 
-- Start from the header link, not a `page.goto` to the feature's path: the spec then also proves the nav and the lazy route.
+- Open the feature's path (`page.goto('/todos')`): the spec then also proves the lazy route and, on the deploy, the SPA redirect. When `src/app/root-layout.tsx` has a nav, start from `/` and click its link instead, so the spec proves the link too.
+- In an app with authentication the route sits inside `protectedRoutes([...])`: sign in first, as `e2e/home.spec.ts` does (`demo@example.com` / `password` on the mocks).
 - Assert on fixture values from `mocks.ts`; the same spec runs in CI against the Netlify deploy (`E2E_BASE_URL`), which serves the same mocks.
 - Locators by role and label, web-first assertions (`await expect(locator).toBeVisible()`), which wait on their own; never `page.waitForTimeout`.
 - One flow per feature. States, error paths and 422s belong to the unit tests above, which are faster and cover them exactly.

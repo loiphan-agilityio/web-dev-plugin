@@ -1,0 +1,184 @@
+# Checks the web-dev plugin on GitHub Actions (the same jobs as .gitlab-ci.yml):
+# - plugin-manifest: the plugin and marketplace manifests are valid.
+# - verify: tools/verify.sh: the free checks, then the todos feature the skills quote passes every
+#   gate, e2e included, in a project created from the boilerplate (cloned from GitHub).
+# - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
+#   every eval case.yaml parses.
+# - audit: no known vulnerability in the template's dependencies, apart from the ones listed with
+#   a reason under auditConfig in its pnpm-workspace.yaml.
+# - companions (schedule only): the pinned companion skills still install, and shadcn is pinned.
+# - evals-routing, evals-e2e (manual only): the model evals. They cost API credits, so nothing
+#   starts them: they run when the maintainer runs this workflow by hand on a release tag
+#   web-dev--v* with `evals` set, the ANTHROPIC_API_KEY secret present, after every free job passed.
+# Runs on pull requests and pushes that touch the plugin, on release tags, and weekly, so a
+# dependency or boilerplate release that breaks what the skills quote shows up before a user hits
+# it; the schedule runs only the free jobs.
+name: Plugin CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['web-dev--v*']
+    paths:
+      - 'web-dev/**'
+      - 'tools/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'web-dev/**'
+      - 'tools/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/ci.yml'
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      evals:
+        description: 'Model evals to run (cost API credits; release tags only)'
+        type: choice
+        options: [none, routing, e2e, both]
+        default: none
+      evals-args:
+        description: 'Extra evals/run.sh arguments, e.g. --ablation with-without'
+        type: string
+        default: ''
+
+concurrency:
+  group: plugin-ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # Pinned like everything else; validation needs no login.
+  CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
+
+jobs:
+  plugin-manifest:
+    name: 'Plugin: manifests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npx -y "$CLAUDE_CODE" plugin validate --strict web-dev/.claude-plugin/plugin.json
+      - run: npx -y "$CLAUDE_CODE" plugin validate --strict .
+
+  verify:
+    name: 'Verify: quoted code in a boilerplate project'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # pnpm 11 comes from each project's packageManager field.
+      - run: corepack enable
+      - run: bash tools/verify.sh
+
+  skills-spec:
+    name: 'Skills: specification'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      # The Agent Skills reference validator, pinned like every other tool here.
+      - run: pip install --quiet skills-ref==0.1.1 pyyaml==6.0.3
+      - run: bash tools/validate-skills.sh
+
+  audit:
+    name: 'Audit: template dependencies'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-dev/skills/project-setup/assets/app-template
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: corepack enable
+      # Reads the lockfile only; a new advisory fails the job until it is fixed or explicitly
+      # ignored.
+      - run: pnpm audit
+
+  companions:
+    name: 'Companions: pinned skills install'
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # Upstream repos can move or delete a pinned path; the script fails on a missing companion, a
+      # missing skills-lock.json or an unpinned shadcn@latest.
+      - run: bash web-dev/skills/project-setup/scripts/scaffold.sh /tmp/app companions-app
+      - run: bash "$GITHUB_WORKSPACE/web-dev/skills/project-setup/scripts/install-companions.sh"
+        working-directory: /tmp/app
+      - run: test "$(find .claude/skills -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 8
+        working-directory: /tmp/app
+
+  # The model evals run only when the maintainer asks: a manual run on a release tag, after the free
+  # jobs passed (needs). Nothing starts them automatically.
+  evals:
+    name: 'Evals: ${{ matrix.tag }}'
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      startsWith(github.ref, 'refs/tags/web-dev--v') &&
+      inputs.evals != 'none'
+    needs: [plugin-manifest, verify, skills-spec]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Three runs per case. A run scores the share of its graders that pass, and a case the
+          # mean of its runs; a case below 0.66 fails the job. Model runs vary, so the bar is not
+          # 1.0.
+          - tag: routing
+            args: --tag routing --runs 3 --threshold 0.66 --max-cost-usd 25
+          # One run each: a whole feature (20) and a whole app (21), the costliest cases.
+          - tag: e2e
+            args: --tag e2e --runs 1 --max-cost-usd 40
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      # The needs above already ran tools/verify.sh and the validators.
+      EVALS_CHECKS_DONE: '1'
+      SELECTED: ${{ inputs.evals }}
+      EVALS_ARGS: ${{ inputs.evals-args }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: npm install -g "$CLAUDE_CODE"
+      - name: Run the ${{ matrix.tag }} evals
+        working-directory: web-dev
+        run: |
+          if [[ "$SELECTED" != both && "$SELECTED" != "${{ matrix.tag }}" ]]; then
+            echo "Not selected: ${{ matrix.tag }}"
+            exit 0
+          fi
+          if [[ -z "$ANTHROPIC_API_KEY" ]]; then
+            echo "The ANTHROPIC_API_KEY secret is not set" >&2
+            exit 1
+          fi
+          # shellcheck disable=SC2086 # the arguments are meant to split
+          bash evals/run.sh ${{ matrix.args }} --trust-plugin --no-publish $EVALS_ARGS
+      - uses: actions/upload-artifact@v7
+        if: ${{ always() }}
+        with:
+          name: evals-${{ matrix.tag }}
+          path: web-dev/evals/results/
+          if-no-files-found: ignore

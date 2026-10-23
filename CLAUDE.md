@@ -12,6 +12,7 @@ demo in `README.md`.
 .claude-plugin/marketplace.json   marketplace: lists web-dev/ as the plugin web-dev
 .claude/                          for maintaining this repo, not part of the plugin: agents/
                                   (companion-auditor, skill-reviewer, version-scout), settings.json
+.github/workflows/ci.yml          the same checks on GitHub Actions: pull requests, pushes, weekly
 .gitlab-ci.yml                    runs tools/verify.sh on merge requests, pushes, schedules
 tools/                            maintainer scripts, not shipped: verify.sh,
                                   extract-snippets.mjs, check-guidelines.mjs,
