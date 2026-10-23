@@ -2,10 +2,10 @@
 #
 # - check: lint, typecheck, unit tests with coverage, build and Storybook build.
 # - e2e: the Playwright tests against the app built on the mocked API (`pnpm build:mock`).
-# - deploy: once both pass, the app and Storybook go to Netlify as a draft: `pr-<number>--<site>`
-#   on a pull request, a unique draft URL on a push to main.
+# - deploy-draft: once both pass, the app and Storybook go to Netlify as a draft:
+#   `pr-<number>--<site>` on a pull request, a unique draft URL on a push to main.
 # - e2e-deployed: the same Playwright tests against that deploy URL.
-# - promote (push to main only): once the deployed e2e tests pass, the same files go live.
+# - deploy-production (push to main only): once the deployed e2e tests pass, the same files go live.
 #
 # Deploys need the NETLIFY_AUTH_TOKEN secret and the NETLIFY_SITE_ID variable (Settings > Secrets
 # and variables > Actions); NETLIFY_STORYBOOK_SITE_ID adds a second site for Storybook. Without
@@ -37,6 +37,7 @@ env:
 
 jobs:
   check:
+    name: 'Checks: lint, typecheck, unit, build'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -62,6 +63,7 @@ jobs:
           retention-days: 14
 
   e2e:
+    name: 'E2E: mock build'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -81,13 +83,18 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-  deploy:
+  deploy-draft:
+    name: 'Deploy: Netlify draft'
     needs: [check, e2e]
     if: >-
       vars.NETLIFY_SITE_ID != '' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
+    # The URL becomes the link on this job in the run graph and "View deployment" on a pull request.
+    environment:
+      name: preview
+      url: ${{ steps.app.outputs.url }}
     outputs:
       url: ${{ steps.app.outputs.url }}
     env:
@@ -127,7 +134,7 @@ jobs:
             jq -r .deploy_url)"
           [[ "$url" == https://* ]]
           echo "Storybook: $url" >> "$GITHUB_STEP_SUMMARY"
-      # promote publishes exactly these files, not a rebuild.
+      # deploy-production publishes exactly these files, not a rebuild.
       - uses: actions/upload-artifact@v7
         with:
           name: deploy
@@ -137,7 +144,8 @@ jobs:
           retention-days: 7
 
   e2e-deployed:
-    needs: deploy
+    name: 'E2E: Netlify draft'
+    needs: deploy-draft
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -151,7 +159,7 @@ jobs:
       # With E2E_BASE_URL set, Playwright starts no server and tests the deploy itself.
       - run: pnpm test:e2e
         env:
-          E2E_BASE_URL: ${{ needs.deploy.outputs.url }}
+          E2E_BASE_URL: ${{ needs.deploy-draft.outputs.url }}
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
@@ -159,12 +167,15 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-  promote:
+  deploy-production:
+    name: 'Deploy: Netlify production'
     needs: e2e-deployed
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # Approvals or branch rules for production can be set on this environment in the settings.
-    environment: production
+    environment:
+      name: production
+      url: ${{ steps.app.outputs.url }}
     env:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
@@ -176,9 +187,11 @@ jobs:
         with:
           name: deploy
       - name: Publish the app
+        id: app
         run: |
           url="$(npx -y "$NETLIFY_CLI" deploy --no-build --dir dist --site "$NETLIFY_SITE_ID" \
             --prod --message "$GITHUB_SHA" --json | jq -r .url)"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "App: $url" >> "$GITHUB_STEP_SUMMARY"
       - name: Publish Storybook
         if: ${{ env.NETLIFY_STORYBOOK_SITE_ID != '' }}

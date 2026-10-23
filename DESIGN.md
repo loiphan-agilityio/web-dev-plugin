@@ -129,10 +129,10 @@ flowchart LR
   W["pnpm test:watch<br/>while coding"] --> PR["pull request"]
   PR --> CK["check<br/>lint, typecheck, unit, build, Storybook"]
   PR --> E2["e2e<br/>Playwright on the mock build"]
-  CK --> DP["deploy<br/>Netlify draft: app + Storybook"]
+  CK --> DP["deploy-draft<br/>Netlify draft: app + Storybook"]
   E2 --> DP
   DP --> ED["e2e-deployed<br/>same specs on the draft URL"]
-  ED -->|"main only"| PM["promote<br/>same files to production"]
+  ED -->|"main only"| PM["deploy-production<br/>same files to production"]
 ```
 
 - `pnpm check` is six gates: lint, typecheck, unit tests with coverage, build, Storybook build and

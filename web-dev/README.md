@@ -159,11 +159,14 @@ A project from the boilerplate passes lint, typecheck, tests, build and Storyboo
   downloads Chromium once per machine (`project-setup` runs it). Every feature adds
   `e2e/<name>.spec.ts` for its main flow.
 - **CI/CD** (`.github/workflows/ci.yml`): `check` (lint, typecheck, unit tests, build, Storybook
-  build) and `e2e` in parallel; then `deploy` sends the mock build and Storybook to Netlify as a
-  draft (`pr-<n>` on a pull request), `e2e-deployed` runs the same specs against that URL, and on
-  `main` `promote` publishes the same files to production. It needs the `NETLIFY_AUTH_TOKEN`
-  secret and the `NETLIFY_SITE_ID` variable (`NETLIFY_STORYBOOK_SITE_ID` for Storybook); without
-  them the deploy jobs are skipped.
+  build) and `e2e` in parallel; then `deploy-draft` sends the mock build and Storybook to Netlify
+  as a draft (`pr-<n>` on a pull request), `e2e-deployed` runs the same specs against that URL, and
+  on `main` `deploy-production` publishes the same files to production. Each job has a `name:`
+  that GitHub shows in the checks list (`CI / Deploy: Netlify draft`), and both deploy jobs link
+  their URL through an environment (`preview`, `production`): on the job in the run graph and as
+  "View deployment" on a pull request. The deploys need the `NETLIFY_AUTH_TOKEN` secret and the
+  `NETLIFY_SITE_ID` variable (`NETLIFY_STORYBOOK_SITE_ID` for Storybook); without them the deploy
+  jobs are skipped.
 - **Netlify** (`netlify.toml`): SPA redirect, long cache for `assets/`, no cache for the MSW
   worker. The deploy runs on mocks (`build:mock`, MSW in the browser) until the app has a backend.
 - **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
