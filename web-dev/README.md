@@ -286,8 +286,9 @@ is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `ev
 `verify.sh` checks the tier of every fixture without a model; the model evals run only
 on request (`evals/README.md`, When evals run).
 
-**CI** on GitHub Actions (`../.github/workflows/ci.yml`: the same jobs, weekly instead of a
-pipeline schedule, the model evals only from a manual run on a release tag) and on GitLab
+**CI** on GitHub Actions (`../.github/workflows/`: `ci.yml` for the free checks, also weekly
+instead of a pipeline schedule; `companions.yml` weekly; `evals.yml`, the model evals, only from
+a manual run on a release tag) and on GitLab
 (`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
 and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,
 and `verify.sh`. Schedules also run `install-companions.sh` in a new project from the boilerplate, so a

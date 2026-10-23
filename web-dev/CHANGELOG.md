@@ -19,9 +19,9 @@ Needs the react-vite-boilerplate with Playwright, `build:mock` and its CI/CD (th
   still answers CI/CD work with "not yet".
 - `tools/verify.sh` installs Chromium and runs all six gates, the quoted e2e spec included;
   `BOILERPLATE_REPO` points it at a boilerplate branch before it is merged.
-- **Plugin CI on GitHub Actions:** `.github/workflows/ci.yml` runs the jobs of `.gitlab-ci.yml`
-  (manifests, `verify.sh`, the skills spec, the audit, weekly companions); the model evals run
-  only from a manual run on a release tag.
+- **Plugin CI on GitHub Actions**, the jobs of `.gitlab-ci.yml` in three workflows: `ci.yml`
+  (manifests, skills spec, `verify.sh`, audit), `companions.yml` (weekly) and `evals.yml` (the
+  model evals, only from a manual run on a release tag, after `ci.yml` passes).
 
 ## 0.2.0
 

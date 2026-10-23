@@ -1,0 +1,82 @@
+# The model evals (the evals jobs of .gitlab-ci.yml). They cost API credits, so nothing starts
+# them: the maintainer runs this workflow by hand, on a release tag web-dev--v*, with the
+# ANTHROPIC_API_KEY secret set. The free checks of ci.yml run first, and the evals only after they
+# pass.
+name: Evals
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Which evals (each costs API credits)'
+        type: choice
+        options: [routing, e2e, both]
+        default: routing
+      args:
+        description: 'Extra evals/run.sh arguments, e.g. --ablation with-without'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  evals:
+    name: 'Evals: ${{ matrix.suite }}'
+    needs: ci
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: >-
+          ${{ fromJSON(inputs.suite == 'both' && '["routing","e2e"]' ||
+          format('["{0}"]', inputs.suite)) }}
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
+      # The ci job above already ran tools/verify.sh and the validators.
+      EVALS_CHECKS_DONE: '1'
+      EVALS_ARGS: ${{ inputs.args }}
+    steps:
+      - name: Check the ref and the API key
+        run: |
+          if [[ "$GITHUB_REF" != refs/tags/web-dev--v* ]]; then
+            echo "Run the evals on a release tag web-dev--v*, not $GITHUB_REF" >&2
+            exit 1
+          fi
+          if [[ -z "$ANTHROPIC_API_KEY" ]]; then
+            echo "The ANTHROPIC_API_KEY secret is not set" >&2
+            exit 1
+          fi
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: npm install -g "$CLAUDE_CODE"
+      - name: Run the ${{ matrix.suite }} evals
+        working-directory: web-dev
+        run: |
+          case "${{ matrix.suite }}" in
+            # Three runs per case. A run scores the share of its graders that pass, and a case the
+            # mean of its runs; a case below 0.66 fails the job. Model runs vary, so the bar is
+            # not 1.0.
+            routing) args=(--tag routing --runs 3 --threshold 0.66 --max-cost-usd 25) ;;
+            # One run each: a whole feature (20) and a whole app (21), the costliest cases.
+            e2e) args=(--tag e2e --runs 1 --max-cost-usd 40) ;;
+          esac
+          # shellcheck disable=SC2086 # EVALS_ARGS is meant to split
+          bash evals/run.sh "${args[@]}" --trust-plugin --no-publish $EVALS_ARGS
+      - uses: actions/upload-artifact@v7
+        if: ${{ always() }}
+        with:
+          name: evals-${{ matrix.suite }}
+          path: web-dev/evals/results/
+          if-no-files-found: ignore
