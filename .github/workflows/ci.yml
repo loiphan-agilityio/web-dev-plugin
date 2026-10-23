@@ -7,17 +7,18 @@
 # - audit: no known vulnerability in the template's dependencies, apart from the ones listed with
 #   a reason under auditConfig in its pnpm-workspace.yaml.
 # - companions (schedule only): the pinned companion skills still install, and shadcn is pinned.
-# - evals-routing, evals-e2e (manual only): the model evals. They cost API credits, so nothing
-#   starts them: they run when the maintainer runs this workflow by hand on a release tag
-#   web-dev--v* with `evals` set, the ANTHROPIC_API_KEY secret present, after every free job passed.
-# Runs on pull requests and pushes that touch the plugin, on release tags, and weekly, so a
-# dependency or boilerplate release that breaks what the skills quote shows up before a user hits
-# it; the schedule runs only the free jobs.
+# - evals (routing, e2e; manual only): the model evals. They cost API credits, so nothing starts
+#   them: they run when the maintainer runs this workflow by hand on a release tag web-dev--v*
+#   with `evals` set, the ANTHROPIC_API_KEY secret present, after every free job passed.
+# Runs on pull requests and pushes to main that touch the plugin, on release tags, and weekly, so
+# a dependency or boilerplate release that breaks what the skills quote shows up before a user
+# hits it; the schedule runs only the free jobs. A branch is checked through its pull request, so
+# each check runs once.
 name: Plugin CI
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
     tags: ['web-dev--v*']
     paths:
       - 'web-dev/**'
