@@ -3,6 +3,21 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.3.1
+
+Fixes, each reproduced before the change:
+
+- `detect-project.mjs` resolves `catalog:` versions from `pnpm-workspace.yaml`, so a project fresh
+  from the boilerplate no longer reports react, typescript and tailwindcss on another major; a
+  path that is a file exits 2 ("is not a folder") instead of 1, the broken-JSON code.
+- `verify-project.sh` exits 2 when the project has no gate script, instead of 0 with nothing run.
+- Evals 05, 06, 11 and 12: the no-scaffold graders match `create-project.sh`; they matched the
+  removed `scaffold.sh` and could never fail.
+- `feature-development`: running one test file passes `--coverage.enabled=false`, since the 80%
+  threshold fails a single file whose tests pass.
+- `ui-development`: at the monorepo root, the visual check's dev server runs with
+  `--filter web`; `pnpm dev:mock --port ...` there stopped at turbo's `unexpected argument`.
+
 ## 0.3.0
 
 Needs the react-vite-boilerplate with Playwright, `build:mock` and its CI/CD (the boilerplate's

@@ -18,7 +18,7 @@ graders:
   - type: tool_used
     name: no-scaffold
     tool: Bash
-    input_match: "scaffold\\.sh"
+    input_match: "create-project\\.sh"
     min: 0
     max: 0
     arm: both

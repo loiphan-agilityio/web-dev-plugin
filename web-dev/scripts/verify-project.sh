@@ -7,7 +7,7 @@
 #
 # Runs the `check` script when there is one, else lint, typecheck, test and build in that order.
 # Every gate runs even after one fails, so the report is complete. Exits 1 if any gate failed, 2
-# if nothing could be verified (no package.json, or detect-project.mjs failed).
+# if nothing could be verified (no package.json, detect-project.mjs failed, or no gate script).
 set -uo pipefail
 
 # Resolved before the cd below, so a relative path to this script still finds its sibling.
@@ -75,5 +75,9 @@ if has_script check; then
   echo "  no own script: ${undeclared[*]:-none} (only \`check\` ran: read it to see what it covers)"
 else
   echo "  missing: ${missing[*]:-none} (no such script in package.json)"
+fi
+if (( ${#passed[@]} + ${#failed[@]} == 0 )); then
+  echo "verify-project: the project has none of these gates; nothing was verified" >&2
+  exit 2
 fi
 (( ${#failed[@]} == 0 ))

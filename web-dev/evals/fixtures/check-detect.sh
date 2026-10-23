@@ -48,13 +48,19 @@ expect vue unsupported
 expect monorepo unsupported
 expect remix unsupported
 
-other_majors="$(node "$detect" "$tmp/range" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).otherMajors.length')"
-if [[ "$other_majors" == 0 ]]; then
-  echo "  ok   range: installed react 19 matches the guidelines"
-else
-  echo "  FAIL range: otherMajors has $other_majors entries, expected 0" >&2
-  failed=1
-fi
+expect_no_other_majors() {
+  local name="$1" why="$2" other_majors
+  other_majors="$(node "$detect" "$tmp/$name" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).otherMajors.length')"
+  if [[ "$other_majors" == 0 ]]; then
+    echo "  ok   $name: $why"
+  else
+    echo "  FAIL $name: otherMajors has $other_majors entries, expected 0" >&2
+    failed=1
+  fi
+}
+expect_no_other_majors range "installed react 19 matches the guidelines"
+# Not installed: react, typescript and tailwindcss are `catalog:`, pinned in pnpm-workspace.yaml.
+expect_no_other_majors template/apps/web "the boilerplate's catalog: versions match the guidelines"
 
 # A broken package.json and a missing folder are errors with their own exit codes, not tiers.
 expect_exit() {
@@ -69,4 +75,5 @@ expect_exit() {
 }
 expect_exit broken 1
 expect_exit missing 2
+expect_exit broken/package.json 2
 exit "$failed"
