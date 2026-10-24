@@ -17,6 +17,10 @@ Fixes, each reproduced before the change:
 - Eval 15 fails a run that changes the pipeline the fixture ships, through Edit, Write or the
   shell; it only caught new pipeline files.
 - `tools/verify.sh` passes native paths to the format hook on Windows (maintainers only).
+- `api-integration` (`effect-http.md`, Auth) describes the boilerplate's new 401 hook,
+  `AuthToken.fromGetter(get, onRejected)`, which the auth variant wires as
+  `fromGetter(tokenStore.get, tokenStore.reject)` (react-vite-boilerplate#3); the one-argument
+  form still works on an older boilerplate.
 
 ## 0.3.1
 
