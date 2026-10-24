@@ -53,10 +53,12 @@ same rewrite answers `/robots.txt` with `index.html` and 200 `text/html`: check 
 not the status.
 
 A preview or staging deploy must not be indexed. `check-headers.mjs` reports its `X-Robots-Tag`
-(`robots-header`); the boilerplate's Netlify draft deploys send none, so an indexer that finds a
-draft URL may index it. Send `X-Robots-Tag: noindex` from those deploys (a host setting, or a
-header the deploy step adds for previews only), never from a `robots.txt` that could reach
-production.
+(`robots-header`); without it, an indexer that finds a draft URL may index it. Send
+`X-Robots-Tag: noindex` from those deploys only (a host setting, or a header the deploy step adds
+for previews), never from a `robots.txt` or a config file that could reach production. The
+boilerplate's CI does the second: its deploy-draft job appends a `_headers` file with that rule to
+its own copy of the build, and production deploys the build without it (observed: every path of a
+`pr-<n>--` draft answers `X-Robots-Tag: noindex`, the live site none).
 
 ## Canonical URLs
 
