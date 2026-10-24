@@ -15,6 +15,9 @@ only web platform APIs and were run against the boilerplate's Netlify deploy.
   is much faster than the 75th-percentile phone; treat a lab LCP near 2.5 s as a fail on mobile.
 - Prefer a deployed build (real compression, CDN, headers) or `vite preview` of `dist/` over
   `vite dev`, which serves unbundled modules and is not representative.
+- A mock build (MSW in the browser) needs a service worker. The Claude desktop browser refused to
+  register one in our runs, so the app ran without mocks there and its data screens showed their
+  error state: measure such a build in Chrome, or say that the data screens were not measured.
 
 ## Load metrics: LCP, CLS, FCP, TTFB
 
