@@ -1,6 +1,6 @@
 {
   "name": "web-dev",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Web development on a modern React stack (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7, shadcn/ui): one entry point, /web-dev:develop, that inspects the repository, picks the workflow (new project, existing project, one feature or API) and runs the skills for project setup, feature development, API integration and UI development.",
   "author": {
     "name": "web-dev contributors"

@@ -20,7 +20,7 @@ the plugin alone.
 | `10-broken-package` | broken `package.json` | detection fails; `develop` reports the file and writes nothing |
 | `11-setup-other-stack` | `other-stack` | a setup request scaffolds nothing, adds no library, offers a new app in a subfolder |
 | `12-app-other-stack` | `other-stack` | a whole app is planned and built inside the project: maps it, writes the plan, keeps its stack |
-| `13-feature-direct-template` | `template` | a ticket without the command reaches `feature-development`; records whether `develop` fired too (the two overlap on purpose) |
+| `13-feature-direct-template` | `template` | a ticket without the command reaches `feature-development`, no new scaffold; whether `develop` fired too is not graded (the two overlap on purpose; the trace shows it) |
 | `14-app-other-folder` | files, no `package.json` | the app goes into a subfolder; `notes.md` stays as it is |
 | `15-ci-not-covered` | `template` | a CI request is not covered (pipelines come with the boilerplate): no file written or edited (the fixture already has a workflow), no other skill run, and the answer says so |
 | `19-setup-asks-for-auth` | empty | a setup request that does not say whether to include authentication: asks, and runs no `create-project.sh` |

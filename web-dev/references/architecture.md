@@ -33,7 +33,8 @@ ApiClient → effect/http`
   `effectTsResolver(Schema)` built once at module level (`Input`/`Output` are the schema's
   Encoded/Type: inferred from `defaultValues`, a literal union widens to `string`), `Controller` + shadcn `Field` / `FieldLabel` / `FieldError`,
   `data-invalid` on `Field`, `aria-invalid` on the control. Server errors go through
-  `setFormErrors(form.setError, error)`.
+  `setFormErrors(form.setError, error, form.getValues())`: with the values, a message for a name
+  the form has no input for shows above the submit button instead of nowhere.
 - **Business rules are pure functions in the feature's `model.ts`** (what sorts first, a total,
   what counts as overdue), tested in `__tests__/model.test.ts` without rendering. Components and
   queries call them instead of computing a rule inline; a rule that needs today's date takes it as

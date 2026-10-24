@@ -88,7 +88,8 @@ flowchart LR
 
 - One feature is one folder: `src/features/<name>/` with `schemas.ts`, `model.ts`, `api.ts`,
   `queries.ts`, `mocks.ts`, `routes.tsx`, `components/` and `__tests__/`. A feature registers in
-  three files: `src/app/routes.tsx`, `src/mocks/handlers.ts` and the header in `root-layout.tsx`.
+  two files: `src/app/routes.tsx` and `src/mocks/handlers.ts`, plus a `<Link>` in
+  `src/app/root-layout.tsx` only when the app's layout has a nav (the boilerplate's has none).
 - Business rules are pure functions in `model.ts`, tested without rendering; a rule that needs
   today's date takes it as a parameter. Components and queries call them.
 - Another feature is reached only through its `schemas`, `model`, `queries` or `routes`; lint
@@ -107,9 +108,9 @@ flowchart LR
 ## 4. UI design
 
 - shadcn/ui, style `radix-nova`, base color `neutral`, icons from `lucide-react`
-  (`components.json`). Components in `src/components/ui/` come from the shadcn CLI and are
-  never edited by hand.
-- Colors, radius and font are CSS variables in `src/styles/index.css` (Tailwind 4,
+  (`components.json`). Components in `packages/ui/src/components/` (`@repo/ui/components/<name>`)
+  come from the shadcn CLI and are never edited by hand.
+- Colors, radius and font are CSS variables in `packages/ui/src/styles/globals.css` (Tailwind 4,
   `@theme inline`); there is no `tailwind.config.js`. Code uses tokens such as `bg-background`
   and `text-muted-foreground`, never raw colors.
 - Every data screen has four distinct states: loading (skeleton), error (alert with retry),

@@ -5,7 +5,7 @@
   "packageManager": "pnpm@11.17.0",
   "scripts": {
     "prepare": "husky",
-    "lint": "shellcheck tools/*.sh web-dev/skills/*/scripts/*.sh web-dev/scripts/*.sh web-dev/evals/*.sh web-dev/evals/fixtures/*.sh web-dev/evals/*/setup.sh && for f in tools/*.mjs web-dev/scripts/*.mjs; do node --check \"$f\" || exit 1; done"
+    "lint": "bash tools/lint.sh"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",

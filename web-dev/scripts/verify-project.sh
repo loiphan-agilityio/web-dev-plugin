@@ -33,7 +33,9 @@ read -r -a scripts <<< "$(field scripts)"
 
 has_script() {
   local s
-  for s in "${scripts[@]}"; do
+  # A package.json without scripts leaves the array empty; bash 3.2 (macOS) with `set -u` aborts
+  # on a bare "${scripts[@]}" then, so expand it only when it has elements.
+  for s in ${scripts[@]+"${scripts[@]}"}; do
     [[ "$s" == "$1" ]] && return 0
   done
   return 1

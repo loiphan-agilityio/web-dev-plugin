@@ -50,7 +50,7 @@ The todos feature covers one list (`GET`) and one create (`POST` with a 422). In
 
 ## 4. Form
 
-Follow `references/forms.md`. The traps: `effectTsResolver(Schema)` from `@hookform/resolvers/effect-ts` (version 6, built for Effect 4; no `zodResolver`), built once at module level; `useForm<Input, unknown, Output>` with the schema's Encoded and Type, since a literal union inferred from `defaultValues` widens to `string`; shadcn `FieldGroup` + `Field` (the old `Form` / `FormField` is gone); server errors through `setFormErrors(form.setError, error)`.
+Follow `references/forms.md`. The traps: `effectTsResolver(Schema)` from `@hookform/resolvers/effect-ts` (version 6, built for Effect 4; no `zodResolver`), built once at module level; `useForm<Input, unknown, Output>` with the schema's Encoded and Type, since a literal union inferred from `defaultValues` widens to `string`; shadcn `FieldGroup` + `Field` (the old `Form` / `FormField` is gone); server errors through `setFormErrors(form.setError, error, form.getValues())`.
 
 ## 5. UI
 

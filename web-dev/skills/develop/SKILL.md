@@ -31,7 +31,8 @@ Run detect (`<target>`: the folder the request names, else the current directory
 The tier decides whether the template's rules apply, so a failed detection stops the run instead of a guess:
 
 - `node` missing: tell the user to install Node 22.22 or newer.
-- Exit 2, no such folder: for an **app** or **setup** request, create it and detect again; otherwise ask which folder holds the project.
+- Exit 2, `does not exist`: for an **app** or **setup** request, create the folder and detect again; otherwise ask which folder holds the project.
+- Exit 2, `is not a folder` (the path is a file): report it and ask which folder holds the project; create nothing.
 - Exit 1, `package.json` is not valid JSON: report it and leave the file as it is.
 - Any other failure: report the command and its output.
 

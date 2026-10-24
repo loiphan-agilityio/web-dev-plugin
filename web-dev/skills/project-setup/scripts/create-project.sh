@@ -31,8 +31,14 @@ if [[ ! -f "$tmp/src/create/index.js" ]]; then
   echo "error: $repo has no create/index.js on its default branch" >&2
   exit 1
 fi
+# The generator names the project after its output folder, a temporary one here: pass the target's
+# name instead (`.` counts as the folder it names). A generator from before --name has none.
+name=()
+if grep -q -- '--name' "$tmp/src/create/index.js"; then
+  name=(--name "$(node -p 'require("node:path").basename(require("node:path").resolve(process.argv[1]))' "$target")")
+fi
 # The generator prints next steps with the temporary path; the skill gives its own.
-node "$tmp/src/create/index.js" "$tmp/out" --from "$tmp/src" "$auth" >/dev/null
+node "$tmp/src/create/index.js" "$tmp/out" --from "$tmp/src" "$auth" ${name[@]+"${name[@]}"} >/dev/null
 
 mkdir -p "$target"
 target="$(cd "$target" && pwd)"
