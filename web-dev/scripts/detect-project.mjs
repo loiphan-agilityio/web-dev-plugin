@@ -104,10 +104,32 @@ const lockfiles = {
   'bun.lock': 'bun',
   'bun.lockb': 'bun',
 };
+/** @type {(at: string) => string | undefined} */
+const packageManagerIn = (at) =>
+  /^(\w+)@/.exec(readJson(join(at, 'package.json'))?.packageManager ?? '')?.[1] ??
+  Object.entries(lockfiles).find(([file]) => existsSync(join(at, file)))?.[1];
+// A package inside a pnpm or yarn workspace has no lockfile of its own: the workspace root (a
+// pnpm-workspace.yaml, or a package.json with `workspaces`) holds it. Outside a workspace only
+// <dir> counts, so a stray lockfile in a parent folder decides nothing.
+/** @type {() => string[]} */
+const foldersUpToWorkspaceRoot = () => {
+  /** @type {string[]} */
+  const folders = [];
+  for (let at = dir; ; at = dirname(at)) {
+    folders.push(at);
+    if (
+      existsSync(join(at, 'pnpm-workspace.yaml')) ||
+      readJson(join(at, 'package.json'))?.workspaces !== undefined
+    ) {
+      return folders;
+    }
+    if (dirname(at) === at) return [dir];
+  }
+};
 const packageManager =
-  /^(\w+)@/.exec(pkg?.packageManager ?? '')?.[1] ??
-  Object.entries(lockfiles).find(([file]) => existsSync(join(dir, file)))?.[1] ??
-  (pkg ? 'npm' : null);
+  foldersUpToWorkspaceRoot()
+    .map(packageManagerIn)
+    .find((name) => name !== undefined) ?? (pkg ? 'npm' : null);
 
 const markers = {
   apiClient: readText(join(dir, 'src/lib/api/client.ts')).includes('ApiClient'),

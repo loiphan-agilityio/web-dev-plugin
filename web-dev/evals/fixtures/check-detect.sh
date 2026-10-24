@@ -36,6 +36,15 @@ printf '{"workspaces":["apps/*"],"dependencies":{"react":"^19.3.1","vite":"^8.3.
 printf '{"dependencies":{"react":"^19.3.1","@remix-run/react":"^2.15.0"}}\n' > "$tmp/remix/package.json"
 printf '{"dependencies":{"react":">=18"}}\n' > "$tmp/range/package.json"
 printf '{"version":"19.3.1"}\n' > "$tmp/range/node_modules/react/package.json"
+# Workspace packages with no packageManager field and no lockfile of their own: the workspace root
+# (pnpm-workspace.yaml, or package.json `workspaces`) holds the lockfile.
+mkdir -p "$tmp/pnpm-ws/apps/web" "$tmp/yarn-ws/packages/app"
+printf 'packages:\n  - apps/*\n' > "$tmp/pnpm-ws/pnpm-workspace.yaml"
+: > "$tmp/pnpm-ws/pnpm-lock.yaml"
+printf '{"dependencies":{"react":"^19.3.1"}}\n' > "$tmp/pnpm-ws/apps/web/package.json"
+printf '{"workspaces":["packages/*"]}\n' > "$tmp/yarn-ws/package.json"
+: > "$tmp/yarn-ws/yarn.lock"
+printf '{"dependencies":{"react":"^19.3.1"}}\n' > "$tmp/yarn-ws/packages/app/package.json"
 
 echo "check-detect:"
 expect empty new
@@ -61,6 +70,19 @@ expect_no_other_majors() {
 expect_no_other_majors range "installed react 19 matches the guidelines"
 # Not installed: react, typescript and tailwindcss are `catalog:`, pinned in pnpm-workspace.yaml.
 expect_no_other_majors template/apps/web "the boilerplate's catalog: versions match the guidelines"
+
+expect_package_manager() {
+  local name="$1" want="$2" got
+  got="$(node "$detect" "$tmp/$name" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).packageManager')"
+  if [[ "$got" == "$want" ]]; then
+    echo "  ok   $name: package manager $got"
+  else
+    echo "  FAIL $name: package manager $got, expected $want" >&2
+    failed=1
+  fi
+}
+expect_package_manager pnpm-ws/apps/web pnpm
+expect_package_manager yarn-ws/packages/app yarn
 
 # A broken package.json and a missing folder are errors with their own exit codes, not tiers.
 expect_exit() {
