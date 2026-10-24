@@ -3,6 +3,12 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.5.1
+
+- The Evals workflow installs the shell sandbox `claude plugin eval` requires (bubblewrap and
+  socat, with Ubuntu 24.04's user-namespace restriction lifted) and checks that it runs. Without it
+  every case is refused before the model runs, as a run on Windows showed (maintainers only).
+
 ## 0.5.0
 
 - **The boilerplate is pinned to a commit.** `create-project.sh` fetches react-vite-boilerplate at
