@@ -3,6 +3,12 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.1
+
+- `spa-seo.md`: the boilerplate's Netlify drafts now send `X-Robots-Tag: noindex` (its CI adds a
+  `_headers` file to the draft's copy of the build; observed on a draft and on the live site), and
+  how to do the same.
+
 ## 0.2.0
 
 - `scripts/pagespeed.mjs <url> [--strategy mobile|desktop]`: PageSpeed Insights v5 as JSON, the

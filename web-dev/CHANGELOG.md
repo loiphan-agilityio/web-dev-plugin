@@ -3,6 +3,17 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.4.1
+
+Fixes, found by writing a real contract with the `ticket` skill:
+
+- `check-contract.mjs` ignores what HTML comments hold: the templates' example items
+  (`- [ ] AC-1 ...` inside a fill comment) passed the criteria, tasks and traceability checks of a
+  contract nobody had filled.
+- `check-contract.mjs` counts a criterion as planned only when a task line cites it; a mention in
+  the Tests section alone passed.
+- `testing.md` says the boilerplate's root has `pnpm test:watch` (it said the root had none).
+
 ## 0.4.0
 
 New:
