@@ -3,6 +3,21 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.0
+
+- `scripts/pagespeed.mjs <url> [--strategy mobile|desktop]`: PageSpeed Insights v5 as JSON, the
+  Lighthouse category scores of Google's lab run against `references/thresholds.md` (Accessibility
+  and SEO fail under target, Performance and Best Practices warn, and fail under 50) and the field
+  LCP, INP and CLS at the 75th percentile, from the URL or, with too few visits, its origin. It
+  refuses localhost and private addresses, reads an optional `PAGESPEED_API_KEY` (never printed;
+  the keyless quota is shared and was spent when this was written: 429) and exits 2 on an API
+  error. Tests against a local fake API.
+- `audit`: a landing page checklist (axe, keyboard, Lighthouse, PageSpeed Insights, SEO head,
+  bundle) with the boilerplate's `accessibility.spec.ts` and its CI `lighthouse` job; PageSpeed in
+  the measurements table. `performance` and `seo` run `pagespeed.mjs` for field data and the SEO
+  score.
+- Routing eval `07-landing-checklist` (maintainers only).
+
 ## 0.1.0
 
 First release.

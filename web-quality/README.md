@@ -10,7 +10,7 @@ single-page apps on React 19 + Vite, and for projects from the
 
 | Skill | Use it for | Example prompt |
 |---|---|---|
-| `audit` | The entry point: picks the pages, measures loading, bundle, headers, dependencies, accessibility and SEO, judges each finding (impact, and measured / config / hypothesis), writes one report and hands fixes to the skills below | "/web-quality:audit https://app.example.com" · "Is this app production ready?" |
+| `audit` | The entry point: picks the pages, measures loading, bundle, headers, field data, dependencies, accessibility and SEO, judges each finding (impact, and measured / config / hypothesis), writes one report and hands fixes to the skills below; a launch checklist for landing pages (axe, keyboard, Lighthouse, PageSpeed, SEO head, bundle) | "/web-quality:audit https://app.example.com" · "Is this app production ready?" |
 | `performance` | Core Web Vitals (LCP, INP, CLS) in a real browser, the initial load against budgets, cause → fix → before/after | "Why is LCP 4 seconds on the home page?" |
 | `accessibility` | axe in a Playwright test, keyboard and accessibility-tree checks against WCAG 2.2 AA, fixes with shadcn/Radix, a regression test | "Check this app for WCAG AA and fix what fails" |
 | `seo` | Each route's title, description, canonical, robots, sitemap and social card; React 19 document metadata; when to prerender | "Add page titles and a sitemap" |
@@ -30,6 +30,10 @@ Thresholds (Core Web Vitals, bundle budgets, Lighthouse targets, WCAG AA) are in
   gone asset, mixed content, `X-Robots-Tag`. JSON out, read-only.
 - **`scripts/bundle-budget.mjs <dist>`:** kB of gzip over the initial load (entry, preloads,
   styles) against budgets, and the largest lazy chunks; `--fail` for CI.
+- **`scripts/pagespeed.mjs <url>`:** PageSpeed Insights on a public URL: real users' LCP, INP and
+  CLS from the Chrome UX Report (when the site has enough visits) and Google's Lighthouse scores,
+  mobile by default. Set `PAGESPEED_API_KEY` for your own quota: without it the shared one often
+  answers 429. Cannot reach localhost or a deploy behind a password.
 - **The project's own tools:** `pnpm audit`, Playwright with `@axe-core/playwright`, and in a project
   from the boilerplate its lint (jsx-a11y), the Storybook a11y addon and `pnpm check`.
 
