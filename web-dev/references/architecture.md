@@ -20,8 +20,9 @@ ApiClient → effect/http`
   maps every failure to an `ApiError`. Lint rejects `fetch`, `window.fetch`, `globalThis.fetch`,
   `XMLHttpRequest` and `axios`.
 - **`runEffect` is the only bridge to TanStack Query.** Pass the query's `signal` so
-  cancellation aborts the request. It rejects with the typed `ApiError`, so `query.error._tag`
-  is safe to switch on.
+  cancellation aborts the request. It rejects with the typed `ApiError`: branch on it with the
+  error classes (`error instanceof UnauthorizedError`) or Effect's `Match` (`Match.tagsExhaustive`),
+  never on `_tag` by hand (anti-slop rejects it).
 - **Retries live in TanStack Query only** (queries: once, and only for `NetworkError` or a
   `ServerError` with a 5xx status; mutations: never). Do not add `HttpClient.retryTransient`.
 - **Query keys come from a key factory** in `queries.ts`; mutations invalidate exactly the
