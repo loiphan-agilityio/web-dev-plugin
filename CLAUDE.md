@@ -2,7 +2,8 @@
 
 This repository ships the **web-dev** Claude Code plugin: an entry skill, `develop`, that inspects
 the project and routes a request to four skills that build web apps on React 19, Vite 8,
-TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui.
+TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui, and two skills that write
+the contracts around the code: `ticket` (docs/tickets/<id>/) and `incident` (docs/incidents/<id>/).
 What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and how to run the
 demo in `README.md`.
 
@@ -29,11 +30,13 @@ web-dev/                          the plugin (its README.md is the user guide)
   .claude-plugin/plugin.json      name, version
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
   skills/                         the product: develop (entry), project-setup, feature-development,
-                                  api-integration, ui-development
-    project-setup/scripts/        create-project.sh (a new project from the boilerplate, with or
-                                  without auth), install-companions.sh
+                                  api-integration, ui-development, ticket, incident (their
+                                  contract templates in references/)
+    project-setup/scripts/        create-project.sh (a new project from the boilerplate: landing
+                                  page, or web app with or without auth), install-companions.sh
   references/                     shared guidelines: stack-guidelines, coding-standards, architecture
-  scripts/                        detect-project.mjs, verify-project.sh (run by the skills)
+  scripts/                        detect-project.mjs, verify-project.sh, check-contract.mjs (run
+                                  by the skills), and check-contract's tests in scripts/test/
   agents/                         codebase-explorer (shipped with the plugin)
   evals/                          routing and e2e cases for `claude plugin eval`, run.sh, fixtures
   docs/companion-audit.md         security and fit audit of the 8 companion skills
@@ -56,12 +59,12 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 |---|---|
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the tools they and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
-| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates both boilerplate variants and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged. Same as CI. |
+| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the three boilerplate variants (landing page, web app with or without auth) and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged. Same as CI. |
 | `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (clones `main`: network; `BOILERPLATE_REPO` as above) into `web-dev/references/`, keeping each file's preamble. Run it after a guideline change is merged in the boilerplate, then review and commit the diff. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` (and `web-quality/...`) | Each plugin manifest is valid. |
-| `node --test web-quality/scripts/test/*.test.mjs` | web-quality's measurement scripts against local servers and temporary builds, no network. Also a CI job. |
+| `node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs` | web-dev's contract check against temporary folders (the shipped templates included), and web-quality's measurement scripts against local servers and temporary builds, no network. Also a CI job. |
 | `bash evals/run.sh --tag routing` in `web-quality/` | web-quality's routing evals. Paid, as above. |
 
 The boilerplate pins pnpm in `packageManager`; run pnpm from inside a project made from it so
