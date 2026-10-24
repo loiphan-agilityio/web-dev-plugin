@@ -1,5 +1,6 @@
 node_modules/
 web-dev/evals/results/
+web-quality/evals/results/
 # Demo output: the app the skills write when you run the demo (README.md, "Demo"), and the
 # reports, logs and screenshots collected from a run. Kept locally, never pushed.
 examples/

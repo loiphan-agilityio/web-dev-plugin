@@ -1,6 +1,6 @@
 {
   "name": "web-dev-plugin",
-  "description": "Marketplace for the web-dev plugin (folder web-dev/).",
+  "description": "Marketplace for the web-dev plugins: web-dev (folder web-dev/) and web-quality (folder web-quality/).",
   "owner": {
     "name": "web-dev"
   },
@@ -9,6 +9,11 @@
       "name": "web-dev",
       "source": "./web-dev",
       "description": "Web development for a React + Effect + TanStack Query stack: one entry point (/web-dev:develop) for new and existing projects, with project setup, feature development, API integration and UI development."
+    },
+    {
+      "name": "web-quality",
+      "source": "./web-quality",
+      "description": "Measurement-first web quality for single-page apps on React + Vite: /web-quality:audit measures a page in a real browser and its build (Core Web Vitals, bundle budgets, response headers, accessibility, SEO), separates measured findings from hypotheses, and routes fixes to the performance, accessibility, seo and security skills."
     }
   ]
 }

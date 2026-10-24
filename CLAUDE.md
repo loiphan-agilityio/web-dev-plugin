@@ -6,10 +6,16 @@ TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui.
 What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and how to run the
 demo in `README.md`.
 
+It also ships **web-quality**, a second plugin in the same marketplace: an entry skill, `audit`,
+that measures a page and its build and routes findings to `performance`, `accessibility`, `seo`
+and `security`. Its own rules are under "Rules for changing web-quality" below; everything else
+here (Git, LF, evals only on request) applies to both.
+
 ## Layout
 
 ```
-.claude-plugin/marketplace.json   marketplace: lists web-dev/ as the plugin web-dev
+.claude-plugin/marketplace.json   marketplace: lists web-dev/ and web-quality/ as the plugins of
+                                  those names
 .claude/                          for maintaining this repo, not part of the plugin: agents/
                                   (companion-auditor, skill-reviewer, version-scout), settings.json
 .github/workflows/                the same checks on GitHub Actions: ci.yml (pull requests, pushes
@@ -31,6 +37,15 @@ web-dev/                          the plugin (its README.md is the user guide)
   agents/                         codebase-explorer (shipped with the plugin)
   evals/                          routing and e2e cases for `claude plugin eval`, run.sh, fixtures
   docs/companion-audit.md         security and fit audit of the 8 companion skills
+web-quality/                      the second plugin (its README.md is the user guide)
+  .claude-plugin/plugin.json      name, version
+  CHANGELOG.md                    one entry per release (version bump + tag web-quality--v<version>)
+  skills/                         audit (entry), performance, accessibility, seo, security; each
+                                  keeps its depth in references/
+  references/thresholds.md        Core Web Vitals, bundle budgets, Lighthouse targets, WCAG AA
+  scripts/                        check-headers.mjs, bundle-budget.mjs (read-only, JSON out), and
+                                  their tests in scripts/test/
+  evals/                          routing cases, run.sh, fixtures
 examples/                         demo output, local only (ignored by git)
 docs/evidence/                    reports, logs and screenshots from a demo run, local only (ignored)
 ```
@@ -45,7 +60,9 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 | `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (clones `main`: network; `BOILERPLATE_REPO` as above) into `web-dev/references/`, keeping each file's preamble. Run it after a guideline change is merged in the boilerplate, then review and commit the diff. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
-| `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` | The plugin manifest is valid. |
+| `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` (and `web-quality/...`) | Each plugin manifest is valid. |
+| `node --test web-quality/scripts/test/*.test.mjs` | web-quality's measurement scripts against local servers and temporary builds, no network. Also a CI job. |
+| `bash evals/run.sh --tag routing` in `web-quality/` | web-quality's routing evals. Paid, as above. |
 
 The boilerplate pins pnpm in `packageManager`; run pnpm from inside a project made from it so
 corepack picks that version.
@@ -94,6 +111,28 @@ corepack picks that version.
 - `examples/` and `docs/evidence/` are demo output: they stay local and are never committed
   (`.gitignore`). Fix a problem in a demo app by fixing the skill or the boilerplate and running the
   demo again, not by editing the app by hand.
+
+## Rules for changing web-quality
+
+- **Measure, then claim.** A skill tells Claude to measure first and to label each finding
+  measured, config or hypothesis; keep that in every new step. Numbers are judged only against
+  `web-quality/references/thresholds.md`: change a threshold there, with its source, not in a skill.
+- **Every code block is run before it is written down.** A browser snippet runs in a real browser
+  on the boilerplate's deploy (the tab visible: a hidden tab records no paint); a project file
+  (a Playwright spec, a config line) runs in a project created from the boilerplate with its gates
+  green. A block that shows a pattern not run that way is marked ` ```ts sketch ` and says so.
+- **Facts about a host or a browser are observed, not assumed:** run `check-headers.mjs` or `curl`
+  on the deployed URL and write what it returned (the skills say, for example, that Netlify's draft
+  deploys send no `X-Robots-Tag`).
+- **Scripts stay read-only and print JSON** (`{ checks: [{ id, status, detail }] }`), exit 2 with
+  the cause on stderr when they cannot run, use only Node's standard library, and get a test in
+  `scripts/test/` for every check, including its failing case. A new check gets its line in the
+  skill that reads it.
+- **Commands a skill runs** follow the web-dev rule above: `${CLAUDE_SKILL_DIR}/../../scripts/...`
+  in `allowed-tools`, never `Bash(*)`, `git` or `npx`. Lighthouse stays optional: the user runs it,
+  or Chrome DevTools MCP does.
+- **Release:** bump `version` in `web-quality/.claude-plugin/plugin.json`, add the entry to
+  `web-quality/CHANGELOG.md`, tag the release commit `web-quality--v<version>`.
 
 ## Git
 

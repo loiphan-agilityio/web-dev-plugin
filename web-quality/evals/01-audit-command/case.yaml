@@ -1,0 +1,23 @@
+schema_version: "1.0"
+name: audit-command
+description: The command on a built app measures the bundle with the plugin's script and reports the JS budget overrun as measured, with what it could not check.
+tags: [routing, audit]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-quality:audit Check this app's quality before we launch. It is built in dist/ and not deployed yet."
+  max_turns: 12
+  timeout_seconds: 420
+  allowed_tools: [Skill, Bash, Read, Glob, Grep]
+graders:
+  - type: tool_used
+    name: measures-the-bundle
+    tool: Bash
+    input_match: 'bundle-budget\.mjs'
+    arm: both
+  - type: llm
+    name: measured-report
+    criteria: |
+      - The report states the initial JavaScript is over its 300 kB gzip budget (about 340 kB) as a measured finding.
+      - It lists what was not checked (for example headers or Core Web Vitals without a deployed URL or browser) instead of claiming those pass.
+      - It does not present a code-only guess as a measurement.

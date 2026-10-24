@@ -1,9 +1,10 @@
-# Checks the web-dev plugin on GitHub Actions (the free jobs of .gitlab-ci.yml):
-# - manifests: the plugin and marketplace manifests are valid.
+# Checks the web-dev and web-quality plugins on GitHub Actions (the free jobs of .gitlab-ci.yml):
+# - manifests: both plugin manifests and the marketplace manifest are valid.
 # - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
 #   every eval case.yaml parses.
 # - verify: tools/verify.sh: the free checks, then the todos feature the skills quote passes every
 #   gate, e2e included, in a project created from the boilerplate (cloned from GitHub).
+# - web-quality-scripts: the tests of web-quality's measurement scripts (local servers, no network).
 # Runs on pull requests and pushes to main that touch the plugin, on release tags, and weekly, so
 # a dependency or boilerplate release that breaks what the skills quote shows up before a user
 # hits it. A branch is checked through its pull request, so each check runs once. evals.yml calls
@@ -13,15 +14,17 @@ name: CI
 on:
   push:
     branches: [main]
-    tags: ['web-dev--v*']
+    tags: ['web-dev--v*', 'web-quality--v*']
     paths:
       - 'web-dev/**'
+      - 'web-quality/**'
       - 'tools/**'
       - '.claude-plugin/**'
       - '.github/workflows/ci.yml'
   pull_request:
     paths:
       - 'web-dev/**'
+      - 'web-quality/**'
       - 'tools/**'
       - '.claude-plugin/**'
       - '.github/workflows/ci.yml'
@@ -55,6 +58,7 @@ jobs:
         with:
           node-version: 24
       - run: npx -y "$CLAUDE_CODE" plugin validate --strict web-dev/.claude-plugin/plugin.json
+      - run: npx -y "$CLAUDE_CODE" plugin validate --strict web-quality/.claude-plugin/plugin.json
       - run: npx -y "$CLAUDE_CODE" plugin validate --strict .
 
   skills-spec:
@@ -80,3 +84,13 @@ jobs:
       # pnpm 11 comes from each project's packageManager field.
       - run: corepack enable
       - run: bash tools/verify.sh
+
+  web-quality-scripts:
+    name: 'Test: web-quality scripts'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node --test web-quality/scripts/test/*.test.mjs

@@ -1,9 +1,10 @@
-# Checks the web-dev plugin:
-# - plugin-manifest: the plugin and marketplace manifests are valid.
+# Checks the web-dev and web-quality plugins:
+# - plugin-manifest: both plugin manifests and the marketplace manifest are valid.
 # - web-dev: tools/verify.sh: the free checks, then the todos feature the skills quote passes every
 #   gate in a project created from the boilerplate (cloned from GitHub).
 # - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
 #   every eval case.yaml parses.
+# - web-quality-scripts: the tests of web-quality's measurement scripts.
 # - companions (schedules only): the pinned companion skills still install, and shadcn is pinned.
 # - evals-routing, evals-e2e (manual jobs on release tags web-dev--v*, when the ANTHROPIC_API_KEY
 #   variable is set): the model evals. They cost API credits, so nothing starts them: they run only
@@ -20,7 +21,7 @@ workflow:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH
-    - if: $CI_COMMIT_TAG =~ /^web-dev--v/
+    - if: $CI_COMMIT_TAG =~ /^web-(dev|quality)--v/
 
 default:
   image: node:24
@@ -30,6 +31,7 @@ default:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - changes:
         - web-dev/**/*
+        - web-quality/**/*
         - tools/**/*
         - .claude-plugin/**/*
         - .gitlab-ci.yml
@@ -41,6 +43,7 @@ plugin-manifest:
     CLAUDE_CODE: '@anthropic-ai/claude-code@2.1.304'
   script:
     - npx -y "$CLAUDE_CODE" plugin validate --strict web-dev/.claude-plugin/plugin.json
+    - npx -y "$CLAUDE_CODE" plugin validate --strict web-quality/.claude-plugin/plugin.json
     - npx -y "$CLAUDE_CODE" plugin validate --strict .
 
 web-dev:
@@ -50,6 +53,11 @@ web-dev:
     - corepack enable
   script:
     - bash tools/verify.sh
+
+web-quality-scripts:
+  extends: .plugin-changes
+  script:
+    - node --test web-quality/scripts/test/*.test.mjs
 
 skills-spec:
   extends: .plugin-changes
