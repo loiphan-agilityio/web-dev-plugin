@@ -151,3 +151,7 @@ corepack picks that version.
 - Messages follow Conventional Commits (`feat(ui-development): ...`), checked by commitlint in the
   `commit-msg` hook. The `pre-commit` hook runs ShellCheck and `node --check` on staged scripts.
   Never commit with `--no-verify`.
+- `main` changes only through a squash-merged pull request whose four CI checks pass:
+  `.github/rulesets/main.json`, applied once by a repository admin with
+  `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. After
+  renaming a CI job, update its name there.
