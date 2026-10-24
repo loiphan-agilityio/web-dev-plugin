@@ -1,0 +1,22 @@
+schema_version: "1.0"
+name: performance-direct
+description: A bundle-size question reaches the performance skill (or the audit) and is answered from the measured initial load.
+tags: [routing, performance]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "Our JavaScript bundle feels too big. How much does the first load download, and is it within a sensible budget? The build is in dist/."
+  max_turns: 10
+  timeout_seconds: 300
+  allowed_tools: [Skill, Bash, Read, Glob, Grep]
+graders:
+  - type: tool_used
+    name: runs-a-web-quality-skill
+    tool: Skill
+    input_match: "performance|audit"
+    arm: both
+  - type: tool_used
+    name: measures-the-bundle
+    tool: Bash
+    input_match: 'bundle-budget\.mjs'
+    arm: both

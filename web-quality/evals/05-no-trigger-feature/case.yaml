@@ -1,0 +1,17 @@
+schema_version: "1.0"
+name: no-trigger-feature
+description: A feature request in a web app fires no web-quality skill.
+tags: [routing, no-trigger]
+execution:
+  prompt: "Write a React component for a dark mode toggle button that stores the choice in localStorage."
+  max_turns: 4
+  timeout_seconds: 180
+  allowed_tools: [Skill, Read, Write]
+graders:
+  - type: tool_used
+    name: no-web-quality-skill
+    tool: Skill
+    input_match: "audit|performance|accessibility|seo|security"
+    min: 0
+    max: 0
+    arm: both
