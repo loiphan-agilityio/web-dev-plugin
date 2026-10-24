@@ -16,7 +16,7 @@ graders:
   - type: tool_used
     name: scaffolds-landing
     tool: Bash
-    input_match: "create-project\.sh .*--landing"
+    input_match: 'create-project\.sh .*--landing'
     arm: both
   - type: file_exists
     name: no-plan

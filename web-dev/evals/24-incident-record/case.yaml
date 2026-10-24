@@ -27,7 +27,7 @@ graders:
   - type: tool_used
     name: checks-record
     tool: Bash
-    input_match: "check-contract\.mjs"
+    input_match: 'check-contract\.mjs'
     arm: both
   - type: llm
     name: blameless-and-labelled

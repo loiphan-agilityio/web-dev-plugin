@@ -32,7 +32,7 @@ graders:
   - type: tool_used
     name: checks-contracts
     tool: Bash
-    input_match: "check-contract\.mjs"
+    input_match: 'check-contract\.mjs'
     arm: both
   - type: file_exists
     name: no-feature-code
