@@ -32,7 +32,7 @@ measured under **Not checked**.
 
 | Area | Evidence | How |
 |---|---|---|
-| Loading, Core Web Vitals | LCP, CLS, FCP, TTFB, INP of a real load and interaction | `performance` skill, `references/measurement.md` (in-page `PerformanceObserver`; the tab must be visible) |
+| Loading, Core Web Vitals | LCP, CLS, FCP, TTFB, INP of a real load and interaction | `performance` skill, `../performance/references/measurement.md` (in-page `PerformanceObserver`; the tab must be visible) |
 | Bundle | initial JS, CSS and total kB gzip vs budget, largest lazy chunks | `node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs <dist>` |
 | Headers, caching, HTTPS | CSP, nosniff, clickjacking, Referrer-Policy, HSTS, cache of HTML and hashed assets, 404 for a gone asset, mixed content | `node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs <url>` |
 | Dependencies | known vulnerabilities | `pnpm audit --prod` (or the project's package manager) |
