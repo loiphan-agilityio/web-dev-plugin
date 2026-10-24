@@ -23,10 +23,10 @@ If the real backend uses another error body shape, change `ValidationBody` and t
 ## The mapping code
 
 `fromStatus` (status → error) and `toApiError` (every `HttpClientError` / `SchemaError` → `ApiError`)
-are in `src/lib/api/client.ts`; read both before changing a mapping. `toApiError` switches
-exhaustively on `HttpClientError.reason._tag` (`TransportError | EncodeError | InvalidUrlError |
-StatusCodeError | DecodeError | EmptyBodyError`), so a new Effect reason becomes a compile error, not
-a silent gap.
+are in `src/lib/api/client.ts`; read both before changing a mapping. `toApiError` matches
+every `HttpClientError` reason with `Match.tagsExhaustive` (`TransportError | EncodeError |
+InvalidUrlError | StatusCodeError | DecodeError | EmptyBodyError`), so a new Effect reason becomes a
+compile error, not a silent gap.
 
 ## Changing how a status maps
 
@@ -38,11 +38,11 @@ Add a `case` in `fromStatus` (e.g. 409 to a new `ConflictError`, 429, 5xx splits
    ```ts sketch
    export class ConflictError extends Schema.TaggedError<ConflictError>()('ConflictError', {}) {}
    ```
-2. `toUserMessage` in `errors.ts`: add a `case`. The switch is exhaustive over `error._tag`, so TypeScript flags it if you forget.
+2. `toUserMessage` in `errors.ts`: add a handler to its `Match.tagsExhaustive`; it is exhaustive over `ApiError`, so TypeScript flags it if you forget.
 3. `client.ts`: import it and return it from `fromStatus` (or `toApiError`).
 4. `query-client.ts`: decide whether it is transient. Only `NetworkError` and `ServerError` are retried; leave new 4xx cases out.
 5. `src/lib/forms.ts` (`setFormErrors`) needs a change only if the new error carries field messages; otherwise it already falls through to `errors.root.server` with `toUserMessage`.
-6. Add a mock (`<name>Mocks.<case>`) and a test. Existing `switch (error._tag)` in components fail typecheck until they handle the case; that is the point.
+6. Add a mock (`<name>Mocks.<case>`) and a test. Existing `Match.tagsExhaustive` over `ApiError` fail typecheck until they handle the case; that is the point. Never compare `_tag` by hand: anti-slop (in `pnpm lint`) rejects it.
 
 ## Tests per endpoint
 

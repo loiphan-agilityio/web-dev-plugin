@@ -37,6 +37,7 @@ export const todoFixtures: Todo[] = [
  */
 export const createTodosHandlers = (initial: Todo[] = todoFixtures) => {
   const todos = [...initial];
+
   return [
     http.get(url('/todos'), () => HttpResponse.json(todos)),
     // The type arguments are path params and request body: `request.json()` is typed, no cast.
@@ -44,6 +45,7 @@ export const createTodosHandlers = (initial: Todo[] = todoFixtures) => {
       const { title } = await request.json();
       const todo: Todo = { id: todos.length + 1, title, completed: false };
       todos.push(todo);
+
       return HttpResponse.json(todo, { status: 201 });
     }),
   ];
@@ -57,6 +59,7 @@ export const todosMocks = {
   listPending: () =>
     http.get(url('/todos'), async () => {
       await delay('infinite');
+
       return HttpResponse.json([]);
     }),
   listError: (status = 500) =>

@@ -82,7 +82,7 @@ export const TodoList = () => {
 - Use **`isPending`**, not `isLoading`. `isPending` is true only before the first result, so a background refetch keeps showing data.
 - Order matters: pending, error, empty, success. TypeScript narrows `data` after the first two returns.
 - `isRefetching` disables the retry button while the retry runs.
-- `error` is already typed as `ApiError` (registered in `src/lib/query-client.ts`); switch on `error._tag` if one error needs special UI (e.g. `NotFoundError` on a detail page).
+- `error` is already typed as `ApiError` (registered in `src/lib/query-client.ts`); branch with `error instanceof NotFoundError` (or `Match`) if one error needs special UI (e.g. a detail page), never on `_tag` by hand.
 
 ## Page composition
 
