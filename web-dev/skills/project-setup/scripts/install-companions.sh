@@ -51,9 +51,10 @@ if (( ${#failed[@]} > 0 )); then
   printf '  %s\n' "${failed[@]}" >&2
   exit 1
 fi
-# A project from the boilerplate already ships skills-lock.json, so its presence proves nothing:
-# the lock must record every companion above (its repository, commit and path) as installed now.
-# The lock keys a skill by the name in its SKILL.md (vercel-react-best-practices), not its folder.
+# A project from the boilerplate already ships skills-lock.json, listing all eight, so neither the
+# lock nor its entries prove an install: each companion must be in the lock at its pinned commit
+# and path, and its skill must be in .claude/skills/ now. The lock keys a skill by the name in its
+# SKILL.md (vercel-react-best-practices), not its folder, so the installed skills are read by name.
 # shellcheck disable=SC2016 # the single quotes keep the JavaScript ${...} from bash
 if ! node -e '
   const fs = require("node:fs");
@@ -61,16 +62,24 @@ if ! node -e '
     console.error(`error: the skills CLI did not write skills-lock.json in ${process.cwd()}`);
     process.exit(1);
   }
-  const locked = Object.values(JSON.parse(fs.readFileSync("skills-lock.json", "utf8")).skills ?? {});
-  const wrong = process.argv.slice(1).filter((companion) => {
+  const locked = Object.entries(JSON.parse(fs.readFileSync("skills-lock.json", "utf8")).skills ?? {});
+  const dir = ".claude/skills";
+  const installed = new Set(
+    (fs.existsSync(dir) ? fs.readdirSync(dir) : [])
+      .map((folder) => `${dir}/${folder}/SKILL.md`)
+      .filter((file) => fs.existsSync(file))
+      .map((file) => /^name:\s*["\x27]?([^"\x27\r\n]+)/m.exec(fs.readFileSync(file, "utf8"))?.[1]?.trim()),
+  );
+  const missing = process.argv.slice(1).filter((companion) => {
     const [, source, ref, path] = /^([^/]+\/[^/]+)\/tree\/([0-9a-f]+)\/(.+)$/.exec(companion) ?? [];
-    return !locked.some(
-      (skill) => skill.source === source && skill.ref === ref && skill.skillPath === `${path}/SKILL.md`,
+    const entry = locked.find(
+      ([, skill]) => skill.source === source && skill.ref === ref && skill.skillPath === `${path}/SKILL.md`,
     );
+    return !entry || !installed.has(entry[0]);
   });
-  if (wrong.length > 0) {
-    console.error("error: skills-lock.json does not record these companions at their pinned commit:");
-    for (const companion of wrong) console.error(`  ${companion}`);
+  if (missing.length > 0) {
+    console.error("error: these companions are not installed in .claude/skills/ at their pinned commit:");
+    for (const companion of missing) console.error(`  ${companion}`);
     process.exit(1);
   }
 ' "${companions[@]}"; then
