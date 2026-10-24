@@ -7,9 +7,10 @@
 //
 // Budgets are kB of gzip over the initial load; the defaults (JS 300, CSS 100, total 1500) are
 // web-quality's (references/thresholds.md). Read-only. Exits 0 with the report, 1 with --fail when
-// a budget is exceeded, 2 when <dist> has no index.html (the cause on stderr, nothing on stdout).
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+// a budget is exceeded, 2 when it cannot measure (no index.html, a file index.html loads is not in
+// <dist>, a bad option; the cause on stderr, nothing on stdout).
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { join, posix, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { pathToFileURL } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -40,15 +41,27 @@ export const bundleBudget = (distDir, { js = 300, css = 100, total = 1500 } = {}
   if (!existsSync(index)) throw new Error(`${index} does not exist: build the app first`);
   const html = readFileSync(index, 'utf8');
   // What the browser fetches before the app runs: entry scripts, stylesheets and the chunks Vite
-  // preloads for them. Absolute paths are site-root relative; external URLs are not ours.
-  const initialFiles = [
+  // preloads for them; external URLs are not ours. A path is site-root relative, and a Vite `base`
+  // other than / prefixes it (`/app/assets/x.js`): <dist> is that base, so leading folders are
+  // dropped until the file is found. One never found stops the measurement, which would else count
+  // it as 0 kB and pass.
+  const refs = [
     ...new Set(
       [...html.matchAll(/<(?:script|link)\b[^>]*\b(?:src|href)=["']([^"']+)["'][^>]*>/gi)]
         .filter(([tag]) => /<script|rel=["']?(?:stylesheet|modulepreload)/i.test(tag))
-        .map(([, ref]) => ref.replace(/^\//, '').split(/[?#]/)[0])
-        .filter((ref) => !/^[a-z]+:/i.test(ref) && existsSync(join(dist, ref))),
+        .map(([, ref]) => ref.split(/[?#]/)[0] ?? '')
+        .filter((ref) => !/^([a-z]+:|\/\/)/i.test(ref)),
     ),
   ];
+  const locate = (/** @type {string} */ ref) => {
+    const parts = posix.normalize(ref).replace(/^\/+/, '').split('/');
+    return parts.map((_, i) => parts.slice(i).join('/')).find((file) => existsSync(join(dist, file)));
+  };
+  const unfound = refs.filter((ref) => locate(ref) === undefined);
+  if (unfound.length > 0) {
+    throw new Error(`index.html loads ${unfound.join(', ')}, not found in ${dist}: measure the folder the site serves`);
+  }
+  const initialFiles = [...new Set(refs.map((ref) => locate(ref) ?? ''))];
   const initial = initialFiles.map((file) => measure(dist, file));
   const sum = (/** @type {Asset[]} */ assets) => assets.reduce((all, asset) => all + asset.gzip, 0);
   const initialJs = initial.filter((asset) => asset.file.endsWith('.js'));
@@ -78,23 +91,47 @@ export const bundleBudget = (distDir, { js = 300, css = 100, total = 1500 } = {}
   };
 };
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  const { values, positionals } = parseArgs({
-    allowPositionals: true,
-    options: {
-      js: { type: 'string' },
-      css: { type: 'string' },
-      total: { type: 'string' },
-      fail: { type: 'boolean' },
-    },
-  });
+// Run as a script, not imported by a test. Node resolves the module's real path, so compare it with
+// the real path of argv[1]: through a symlink or junction the two spellings differ.
+const isMain = () => {
+  try {
+    return import.meta.url === pathToFileURL(realpathSync(process.argv[1] ?? '')).href;
+  } catch {
+    return false;
+  }
+};
+
+if (isMain()) {
+  const usage = 'usage: bundle-budget.mjs <dist> [--js <kB>] [--css <kB>] [--total <kB>] [--fail]';
+  /** @type {{ values: { js?: string, css?: string, total?: string, fail?: boolean }, positionals: string[] }} */
+  let args;
+  try {
+    args = parseArgs({
+      allowPositionals: true,
+      options: {
+        js: { type: 'string' },
+        css: { type: 'string' },
+        total: { type: 'string' },
+        fail: { type: 'boolean' },
+      },
+    });
+  } catch (error) {
+    console.error(`bundle-budget: ${error instanceof Error ? error.message : error}\n${usage}`);
+    process.exit(2);
+  }
+  const { values, positionals } = args;
   const [dist] = positionals;
   if (!dist || !existsSync(dist) || !statSync(dist).isDirectory()) {
-    console.error('usage: bundle-budget.mjs <dist> [--js <kB>] [--css <kB>] [--total <kB>] [--fail]');
+    console.error(usage);
     process.exit(2);
   }
   try {
-    const number = (/** @type {string | undefined} */ value) => (value === undefined ? undefined : Number(value));
+    const number = (/** @type {string | undefined} */ value) => {
+      if (value === undefined) return undefined;
+      const kb = Number(value);
+      if (!Number.isFinite(kb) || kb <= 0) throw new Error(`a budget is a number of kB above 0, not ${value}`);
+      return kb;
+    };
     const report = bundleBudget(dist, { js: number(values.js), css: number(values.css), total: number(values.total) });
     console.log(JSON.stringify(report, null, 2));
     if (values.fail && report.checks.some((check) => check.status === 'fail')) process.exit(1);
