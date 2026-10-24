@@ -34,7 +34,7 @@ In `queries.ts` ([references/react-query.md](references/react-query.md)): keys i
 
 ## 4. Errors in the UI
 
-`runEffect` rejects with the typed `ApiError` (registered once through `Register.defaultError`). Switch on `error._tag`, show `toUserMessage(error)`, and put field errors on forms with `setFormErrors(form.setError, error)`. A mutation outside a form (a row's toggle or delete) handles its error in `mutate`'s `onError` at the call site; a form's call site is in `../feature-development/references/forms.md`. Statuses, tags and which tests each needs: [references/errors.md](references/errors.md).
+`runEffect` rejects with the typed `ApiError` (registered once through `Register.defaultError`). Switch on `error._tag`, show `toUserMessage(error)`, and put field errors on forms with `setFormErrors(form.setError, error, form.getValues())`. A mutation outside a form (a row's toggle or delete) handles its error in `mutate`'s `onError` at the call site; a form's call site is in `../feature-development/references/forms.md`. Statuses, tags and which tests each needs: [references/errors.md](references/errors.md).
 
 ## 5. Mocks and tests
 

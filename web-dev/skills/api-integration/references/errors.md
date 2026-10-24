@@ -57,4 +57,4 @@ Test client: no retries (`createTestQueryClient` in `src/test/query-client.ts`, 
 ## Showing errors
 
 - Queries: `query.error` is `ApiError`; render `toUserMessage(query.error)` plus a retry button (`query.refetch()`). Empty and error must look different.
-- Mutations in forms: `mutate(values, { onError: (error) => setFormErrors(form.setError, error) })`. Field errors land under the inputs, everything else on `errors.root.server`.
+- Mutations in forms: `mutate(values, { onError: (error) => setFormErrors(form.setError, error, form.getValues()) })`. Field errors land under the inputs, everything else on `errors.root.server`.

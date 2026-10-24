@@ -75,7 +75,7 @@ Name `use<Action><Name>`. Invalidate exactly the keys the write changes: the lis
 
 Call-site error handling: `TodoForm/index.tsx` (the feature-development skill's `references/forms.md`,
 `../../feature-development/references/forms.md`) calls `createTodo.mutate(values, { onSuccess, onError })`,
-with `form.reset()` and `toast.success(...)` in `onSuccess` and `setFormErrors(form.setError, error)`
+with `form.reset()` and `toast.success(...)` in `onSuccess` and `setFormErrors(form.setError, error, form.getValues())`
 in `onError`.
 
 Callbacks that touch the component (form reset, toast) go to `mutate`; the hook's own `onSuccess` only invalidates. A mutation outside a form (a row's toggle or delete button) handles its errors the same way, at the call site: `onError: (error) => { if (error._tag === 'NotFoundError') … else toast.error(toUserMessage(error)); }`.
