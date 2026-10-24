@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Validates every skill in web-dev/skills against the Agent Skills specification
-# (https://agentskills.io/specification) with its reference validator, skills-ref:
-# frontmatter is valid YAML, only the spec's fields, `name` matches the folder, lengths in range.
-# Then parses every web-dev/evals/*/case.yaml: `claude plugin eval` skips a case whose YAML does
+# Validates every skill of both plugins (web-dev/skills, web-quality/skills) against the Agent
+# Skills specification (https://agentskills.io/specification) with its reference validator,
+# skills-ref: frontmatter is valid YAML, only the spec's fields, `name` matches the folder,
+# lengths in range.
+# Then parses every <plugin>/evals/*/case.yaml: `claude plugin eval` skips a case whose YAML does
 # not parse (a regex escape such as `\.` inside double quotes is enough), so it would never run.
 #
 #   tools/validate-skills.sh
@@ -20,11 +21,12 @@ fi
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 failed=0
-for skill in "$here"/../web-dev/skills/*/; do
+for skill in "$here"/../web-dev/skills/*/ "$here"/../web-quality/skills/*/; do
   "$agentskills" validate "$skill" || failed=1
 done
 
-"${PYTHON:-python3}" - "$here"/../web-dev/evals/*/case.yaml <<'PY' || failed=1
+cases=("$here"/../web-dev/evals/*/case.yaml "$here"/../web-quality/evals/*/case.yaml)
+"${PYTHON:-python3}" - "${cases[@]}" <<'PY' || failed=1
 import sys
 
 import yaml
