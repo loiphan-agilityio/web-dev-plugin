@@ -65,10 +65,13 @@ for (const [file, sections] of Object.entries(contracts[kind])) {
     continue;
   }
 
-  const text = readFileSync(path, 'utf8');
+  const raw = readFileSync(path, 'utf8');
+  const unfilled = (raw.match(/<!-- fill/g) ?? []).length;
+  // What a comment holds is not part of the contract: the templates' examples (`- [ ] AC-1 ...`)
+  // sit inside their fill comments.
+  const text = raw.replace(/<!--[\s\S]*?-->/g, '');
   const headings = new Set([...text.matchAll(/^## +(.+?)\s*$/gm)].map((match) => match[1]));
   const missing = sections.filter((section) => !headings.has(section));
-  const unfilled = (text.match(/<!-- fill/g) ?? []).length;
 
   texts[file] = text;
   add(
@@ -92,8 +95,9 @@ const items = (text, prefix) =>
 if (kind === 'ticket') {
   const criteria = items(texts['spec.md'], 'AC-');
   const tasks = items(texts['plan.md'], 'T');
-  const plan = texts['plan.md'] ?? '';
-  const uncited = criteria.filter((id) => !new RegExp(`\\b${id}\\b`).test(plan));
+  // A criterion counts as planned only when a task line cites it, not the Tests section alone.
+  const taskLines = (texts['plan.md'] ?? '').match(/^- \[[ xX]\] T\d+\b.*$/gm)?.join('\n') ?? '';
+  const uncited = criteria.filter((id) => !new RegExp(`\\b${id}\\b`).test(taskLines));
 
   add(
     'criteria',
@@ -108,7 +112,7 @@ if (kind === 'ticket') {
     criteria.length > 0 && uncited.length === 0,
     uncited.length > 0
       ? `plan.md cites no task for ${uncited.join(', ')}`
-      : 'every criterion is cited in plan.md',
+      : 'every criterion is cited by a task in plan.md',
   );
 } else {
   const status = /^## +Status\s*$\s*^\**(open|mitigated|resolved)\b/im.exec(texts['report.md'] ?? '');
