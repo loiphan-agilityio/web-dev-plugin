@@ -6,7 +6,7 @@ A git install is a cached copy, so a change reaches users only with a new versio
 ## 0.5.0
 
 - **The boilerplate is pinned to a commit.** `create-project.sh` fetches react-vite-boilerplate at
-  the commit this release was verified against (`pinned=`, now `cfcaa03`) instead of its `main`,
+  the commit this release was verified against (`pinned=`, now `56740b5`) instead of its `main`,
   so a plugin version always creates the project its skills quote, however the boilerplate moves.
   `BOILERPLATE_REF` picks another commit, branch or tag (`main` for the latest);
   `BOILERPLATE_REPO` without a ref uses that repository's checked-out branch, as before. CI's
