@@ -41,7 +41,7 @@ Never build the project by hand, from memory or from another template instead: r
 
 ## 5. Companion skills
 
-`bash ${CLAUDE_SKILL_DIR}/scripts/install-companions.sh` from the target root. It installs 8 companions pinned by commit into `.claude/skills/` and writes `skills-lock.json` (both belong in git), and exits 1 if a companion failed, the lock is missing, or the shadcn companion still calls `shadcn@latest`. It needs network; a failure goes under **Not done** and the run continues, since the project skills and the `CLAUDE.md` files work without companions. What each companion gets wrong for this stack: `../../references/companions.md`.
+`bash ${CLAUDE_SKILL_DIR}/scripts/install-companions.sh` from the target root. It installs 8 companions pinned by commit into `.claude/skills/` and writes `skills-lock.json` (both belong in git), and exits 1 if a companion failed, the lock does not record each companion at its pinned commit, or the shadcn companion still calls `shadcn@latest`. It needs network; a failure goes under **Not done** and the run continues, since the project skills and the `CLAUDE.md` files work without companions. What each companion gets wrong for this stack: `../../references/companions.md`.
 
 ## 6. Gates
 

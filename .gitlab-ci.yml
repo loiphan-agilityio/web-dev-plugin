@@ -64,7 +64,8 @@ companions:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
     # Upstream repos can move or delete a pinned path; the script fails on a missing companion, a
-    # missing skills-lock.json or an unpinned shadcn@latest.
+    # skills-lock.json that does not record each companion at its pinned commit (the boilerplate
+    # ships one, so its presence proves nothing) or an unpinned shadcn@latest.
     - bash web-dev/skills/project-setup/scripts/create-project.sh /tmp/app --no-auth
     - cd /tmp/app
     - bash "$CI_PROJECT_DIR/web-dev/skills/project-setup/scripts/install-companions.sh"
