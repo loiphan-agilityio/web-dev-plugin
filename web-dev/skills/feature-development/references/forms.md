@@ -24,6 +24,7 @@ const resolver = effectTsResolver(NewTodo);
 
 export const TodoForm = () => {
   const createTodo = useCreateTodo();
+
   // Type arguments, so the field types come from the schema: inferred from defaultValues, a
   // literal union such as 'low' | 'medium' | 'high' would widen to string and break the resolver.
   const form = useForm<NewTodoInput, unknown, NewTodo>({

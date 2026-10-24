@@ -4,7 +4,7 @@
 #   gate in a project created from the boilerplate (cloned from GitHub).
 # - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
 #   every eval case.yaml parses.
-# - web-quality-scripts: the tests of web-quality's measurement scripts.
+# - plugin-scripts: the tests of web-dev's contract check and web-quality's measurement scripts.
 # - companions (schedules only): the pinned companion skills still install, and shadcn is pinned.
 # - evals-routing, evals-e2e (manual jobs on release tags web-dev--v*, when the ANTHROPIC_API_KEY
 #   variable is set): the model evals. They cost API credits, so nothing starts them: they run only
@@ -54,10 +54,10 @@ web-dev:
   script:
     - bash tools/verify.sh
 
-web-quality-scripts:
+plugin-scripts:
   extends: .plugin-changes
   script:
-    - node --test web-quality/scripts/test/*.test.mjs
+    - node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs
 
 skills-spec:
   extends: .plugin-changes

@@ -3,6 +3,38 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.4.0
+
+New:
+
+- `ticket` (`/web-dev:ticket <id> ...`): writes the contract of a ticket in
+  `docs/tickets/<id>/`: `intent.md` (the problem, users, outcome, non-goals, source), `spec.md`
+  (testable `AC-<n>` criteria, data, API, UI states, open questions) and `plan.md` (`T<n>` tasks
+  citing the criteria, files, tests, gates, risks), grounded in the project's code. It commits them
+  on a branch for review and pushes only when asked. Several tickets are written in parallel, one
+  subagent each, each writing only its own folder.
+- `incident` (`/web-dev:incident <id>`): writes `docs/incidents/<id>/report.md`, `rca.md` (each
+  claim measured or hypothesis) and `actions.md` (follow-ups `A<n>` that can become tickets),
+  blameless, and commits them the same way.
+- `scripts/check-contract.mjs`: checks either contract (every section, no template marker left,
+  every criterion cited by a task, an incident status and follow-ups), JSON out; tested in
+  `scripts/test/` against the shipped templates too.
+- `project-setup` asks whether to build a landing page or a web app (`create-project.sh
+  --landing`, needs react-vite-boilerplate with `create/templates/landing`): one public
+  marketing page with its icons, manifest, Open Graph tags, `robots.txt` and `sitemap.xml`, built
+  and tested without mocks, with no authentication question.
+- `develop` routes landing pages, ticket contracts and incidents.
+
+Changed:
+
+- `project-setup` runs `pnpm check:report` (react-vite-boilerplate's checklist of every gate with
+  the unit and e2e pass rates and coverage) and puts its table in the Result.
+- `feature-development` builds from `docs/tickets/<id>/` when the contract exists: its criteria,
+  in its task order, ticking each item, and re-checks the contract at the end.
+- The quoted todos feature and the error guidance pass the boilerplate's anti-slop rules: branch
+  on `instanceof` or `Match.tagsExhaustive`, never on `_tag` by hand; `references/` synced.
+- Evals 22 to 24 cover the new routes (maintainers only; not run).
+
 ## 0.3.3
 
 Fixes, each reproduced before the change (the bash 3.2 one by reading the code: no bash 3.2 on

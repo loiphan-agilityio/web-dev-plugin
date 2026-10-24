@@ -2,7 +2,7 @@
 name: performance
 description: This skill should be used when the user asks to "make the page faster", "fix LCP", "improve INP", "reduce layout shift", "check Core Web Vitals", "reduce the bundle size", "the app loads slowly" or "set a performance budget" in a web app, or when the web-quality audit routes a loading or responsiveness finding here. It measures Core Web Vitals in a real browser and the build's initial load against budgets, finds the cause, fixes it in a React + Vite app and re-measures. Not for backend or database performance.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/ and scripts/. Needs Node 22 or newer and a browser tool that can run JavaScript in a page for the live metrics."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(pnpm build) Bash(pnpm build:mock)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm build:mock)
 ---
 
 # performance
@@ -22,8 +22,10 @@ Thresholds: `../../references/thresholds.md`.
 3. **Responsiveness:** INP on the page's main interactions (`references/measurement.md`, INP).
 4. **Delivery:** `node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs <url>` for caching of the
    HTML and hashed assets and the 404 of a gone asset.
-5. Field data when the site has it (PageSpeed Insights or a DevTools trace show the Chrome UX
-   Report).
+5. **Field data** on a public URL: `node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs <url>`
+   (PageSpeed Insights: real users' LCP, INP and CLS at the 75th percentile when the Chrome UX
+   Report has them, and Google's lab run). It cannot reach localhost or a deploy behind a password;
+   a 429 means the shared quota is spent and `PAGESPEED_API_KEY` is needed.
 
 ## 2. Find the cause
 

@@ -2,7 +2,7 @@
 name: feature-development
 description: This skill should be used when the user asks to "implement this ticket", "build the X page", "add a form for X", "create a CRUD screen" or "develop the feature in this issue" in an app built from the web-dev template (React, Effect, TanStack Query, React Hook Form, shadcn/ui). It turns one ticket into a tested feature folder with schemas, business rules, API calls, queries, form, the four UI states, routes, tests and stories. Not for a new project (project-setup), one endpoint alone (api-integration) or a design with no ticket (ui-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the api-integration and ui-development skills' references. Needs Node 22.22 or newer and pnpm."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(pnpm format) Bash(npm run lint:fix) Bash(npm run format) Bash(yarn lint:fix) Bash(yarn format) Bash(bun run lint:fix) Bash(bun run format)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *) Bash(pnpm check:report) Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(pnpm format) Bash(npm run lint:fix) Bash(npm run format) Bash(yarn lint:fix) Bash(yarn format) Bash(bun run lint:fix) Bash(bun run format)
 ---
 
 # feature-development
@@ -15,7 +15,7 @@ Paths and commands below are the app folder's (`apps/web` in a project from the 
 
 ## 1. Understand the ticket
 
-Read the ticket (`glab` or `gh` for an issue URL, else ask the user to paste it). List its acceptance criteria and sort every gap:
+Read the ticket. When `docs/tickets/<id>/` holds its contract (`intent.md`, `spec.md`, `plan.md`, written by the `ticket` skill), that folder is the ticket: its `AC-<n>` items are the acceptance criteria, its **Open questions** are already sorted (build around them as below), and you build in the order of its `T<n>` tasks. Tick each task and criterion (`- [x]`) once its tests pass, and run `node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs docs/tickets/<id>` at the end; the contract changes in the same branch as the code. Otherwise read the issue (`glab` or `gh` for an issue URL, else ask the user to paste it). List its acceptance criteria and sort every gap:
 
 - **Open question:** the answer changes data, a business rule or the backend contract (what counts as "due soon", whether a delete is soft). Exclude the criterion that depends on it, ask in one message, and keep building the rest. A plausible guess passes review and is wrong in production.
 - **Unstated detail:** presentation only, easy to change (a label, an on-screen sort order). Build the simplest option that fits the existing screens; list it under **Next**.

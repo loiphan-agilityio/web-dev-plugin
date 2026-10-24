@@ -1,0 +1,29 @@
+schema_version: "1.0"
+name: setup-landing
+description: A landing page request in an empty folder goes to project-setup with --landing, asks nothing about authentication and writes no plan.
+tags: [routing]
+execution:
+  prompt: "/web-dev:develop Create a landing page for Acme, our invoicing tool, in this folder."
+  max_turns: 14
+  timeout_seconds: 900
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: runs-project-setup
+    tool: Skill
+    input_match: "project-setup"
+    arm: both
+  - type: tool_used
+    name: scaffolds-landing
+    tool: Bash
+    input_match: 'create-project\.sh .*--landing'
+    arm: both
+  - type: file_exists
+    name: no-plan
+    path: "**/docs/plan.md"
+    exists: false
+  - type: llm
+    name: no-auth-question
+    criteria: |
+      - The answer does not ask whether to include authentication: a landing page has no sign-in.
+      - It reports a landing page created, or the reason it could not be.

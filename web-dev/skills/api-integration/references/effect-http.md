@@ -15,6 +15,7 @@ export const Todo = Schema.Struct({
   title: Schema.String,
   completed: Schema.Boolean,
 });
+
 export type Todo = typeof Todo.Type;
 
 export const TodoList = Schema.Array(Todo);
@@ -31,7 +32,9 @@ export const NewTodo = Schema.Struct({
     ),
   ),
 });
+
 export type NewTodo = typeof NewTodo.Type;
+
 export type NewTodoInput = typeof NewTodo.Encoded;
 ```
 
@@ -50,11 +53,13 @@ import { type NewTodo, Todo, TodoList } from './schemas';
 
 export const listTodos = Effect.fn('todos.list')(function* () {
   const api = yield* ApiClient;
+
   return yield* api.get('/todos', TodoList);
 });
 
 export const createTodo = Effect.fn('todos.create')(function* (input: NewTodo) {
   const api = yield* ApiClient;
+
   return yield* api.post('/todos', input, Todo);
 });
 ```

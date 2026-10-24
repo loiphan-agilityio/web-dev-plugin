@@ -1,8 +1,9 @@
 # web-dev: Claude Code plugin for web development
 
-One entry point, `/web-dev:develop <request>`, and four skills that let Claude build web apps on
+One entry point, `/web-dev:develop <request>`, four skills that let Claude build web apps on
 a modern React stack and follow its conventions on the first try, in a new folder or in an
-existing React project.
+existing React project, and two that write the contracts around the code: ticket specs and
+incident records.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
 shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Playwright 1.64 · Storybook 10 · pnpm 11 ·
@@ -11,14 +12,16 @@ GitHub Actions + Netlify (in the boilerplate)
 | Skill | Use it for | Example prompt |
 |---|---|---|
 | `develop` | The entry point. Runs `scripts/detect-project.mjs`, sorts the request and picks a workflow: **A** a whole app in a new folder (plans features, data model, API and mock data in `docs/plan.md`, runs the skills below and all gates, opens the app on a mocked API; decides instead of asking), **B** a change in a React project not made from the template (maps it with the `codebase-explorer` agent, builds on its own code, runs its own gates with `scripts/verify-project.sh`), **C** one feature, endpoint or screen in an app from the template | "/web-dev:develop Build an employee management app with CRUD, search and forms" · "/web-dev:develop Add a department filter to the employees list" |
-| `project-setup` | A new project from the react-vite-boilerplate (pnpm + Turborepo monorepo, the app in `apps/web`): asks whether to include authentication (email + password sign-in, protected routes, MSW mocks), creates it with the boilerplate's generator (`scripts/create-project.sh`), installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal, with login" |
+| `project-setup` | A new project from the react-vite-boilerplate (pnpm + Turborepo monorepo, the app in `apps/web`): asks whether it is a landing page or a web app, and for a web app whether to include authentication (email + password sign-in, protected routes, MSW mocks), creates it with the boilerplate's generator (`scripts/create-project.sh`), installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal, with login" |
 | `feature-development` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `api-integration` for endpoints beyond list + create and `ui-development` for a design | "Implement this ticket: <paste or issue URL>" |
+| `ticket` | Tickets → `docs/tickets/<id>/intent.md`, `spec.md` (testable `AC-<n>` criteria, open questions) and `plan.md` (`T<n>` tasks citing them), grounded in the code, checked by `scripts/check-contract.mjs` and committed on a branch for review; several tickets in parallel, one subagent each. `feature-development` then builds from the folder | "/web-dev:ticket 412 413 414" · "Write the contract for issue #412" |
+| `incident` | An incident → `docs/incidents/<id>/report.md`, `rca.md` (claims labelled measured or hypothesis) and `actions.md` (follow-ups `A<n>`), checked and committed on a branch; follow-ups can become tickets | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
 | `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `ui-development` | A design (screenshot, mockup, Figma frame, DESIGN.md) → a UI that matches it: theme tokens, shadcn components, states, tests, a visual check in the browser. With no design it asks once for an optional DESIGN.md or Figma link, then uses the current theme | "Make the settings page look like design/settings.png" |
 
 Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD (it comes with the
-boilerplate). Not yet: bug fixes, review without edits, commits and PR/MR (`develop` says so and
-changes nothing).
+boilerplate). Not yet: bug fixes, review without edits, commits and PR/MR beyond the contract commit
+of `ticket` and `incident` (`develop` says so and changes nothing).
 
 ## Install
 
@@ -38,7 +41,7 @@ claude plugin install web-dev@web-dev-plugin
 
 The URL is the repository's git URL (`https://github.com/loiphan-agilityio/web-dev-plugin.git`
 works too). It installs from the default branch, `main`; append `#<ref>` to pick another
-branch or pin a release tag (`#web-dev--v0.3.3`). The clone runs with your
+branch or pin a release tag (`#web-dev--v0.4.0`). The clone runs with your
 own git credentials and never prompts: an SSH key loaded in `ssh-agent`, or for an `https://`
 URL a credential your git helper already stores.
 

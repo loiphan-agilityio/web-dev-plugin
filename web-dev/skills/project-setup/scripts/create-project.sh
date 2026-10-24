@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Creates a project from the react-vite-boilerplate (a pnpm + Turborepo monorepo, the app in
-# apps/web) with the boilerplate's own generator, create/index.js, with or without its
-# authentication overlay.
+# apps/web) with the boilerplate's own generator, create/index.js: a web app with or without its
+# authentication overlay, or a landing page (its landing overlay: one public marketing page, no
+# sign-in, built without mocks).
 #
-#   create-project.sh <target-dir> --auth | --no-auth
+#   create-project.sh <target-dir> --auth | --no-auth | --landing
 #
 # There is no default: the generator asks only on a terminal, and Claude's shell is not one, so the
 # skill asks the user and passes the answer. Clones the boilerplate's default branch
@@ -16,11 +17,11 @@
 set -euo pipefail
 
 repo="${BOILERPLATE_REPO:-https://github.com/loiphan-agilityio/react-vite-boilerplate.git}"
-usage="usage: create-project.sh <target-dir> --auth|--no-auth"
+usage="usage: create-project.sh <target-dir> --auth|--no-auth|--landing"
 target="${1:?$usage}"
-auth="${2:-}"
-if [[ "$auth" != --auth && "$auth" != --no-auth ]]; then
-  echo "error: pass --auth or --no-auth (ask the user which); $usage" >&2
+kind="${2:-}"
+if [[ "$kind" != --auth && "$kind" != --no-auth && "$kind" != --landing ]]; then
+  echo "error: pass --auth, --no-auth or --landing (ask the user which); $usage" >&2
   exit 1
 fi
 
@@ -37,8 +38,17 @@ name=()
 if grep -q -- '--name' "$tmp/src/create/index.js"; then
   name=(--name "$(node -p 'require("node:path").basename(require("node:path").resolve(process.argv[1]))' "$target")")
 fi
+# A generator with the landing overlay asks "landing page or web app?" too: answer it. An older one
+# has only the web app.
+choice=("$kind")
+if grep -q -- "'landing'" "$tmp/src/create/index.js"; then
+  if [[ "$kind" == --landing ]]; then choice=(--landing --no-auth); else choice=(--app "$kind"); fi
+elif [[ "$kind" == --landing ]]; then
+  echo "error: $repo has no landing page overlay (create/templates/landing); create a web app instead" >&2
+  exit 1
+fi
 # The generator prints next steps with the temporary path; the skill gives its own.
-node "$tmp/src/create/index.js" "$tmp/out" --from "$tmp/src" "$auth" ${name[@]+"${name[@]}"} >/dev/null
+node "$tmp/src/create/index.js" "$tmp/out" --from "$tmp/src" "${choice[@]}" ${name[@]+"${name[@]}"} >/dev/null
 
 mkdir -p "$target"
 target="$(cd "$target" && pwd)"
@@ -68,4 +78,9 @@ if [[ -n "$conflicts" ]]; then
 fi
 
 (cd "$tmp/out" && tar -cf - .) | (cd "$target" && tar -xf -)
-echo "created the project in $target ($(wc -l <<< "$files" | tr -d ' ') files, $([[ "$auth" == --auth ]] && echo with || echo without) authentication); the app is apps/web$kept"
+case "$kind" in
+  --auth) what="a web app with authentication" ;;
+  --no-auth) what="a web app without authentication" ;;
+  *) what="a landing page" ;;
+esac
+echo "created the project in $target ($(wc -l <<< "$files" | tr -d ' ') files, $what); the app is apps/web$kept"

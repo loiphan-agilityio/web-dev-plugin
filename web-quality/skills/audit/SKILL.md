@@ -1,8 +1,8 @@
 ---
 name: audit
-description: This skill should be used when the user types "/web-quality:audit", asks to "audit my site", "check web quality", "run a Lighthouse-style review", "is my app production ready", "check performance, accessibility and SEO" or "why is my page slow" for a web page or single-page app, deployed or local. It measures the page in a real browser and its build (Core Web Vitals, bundle budgets, response headers, accessibility, SEO), reports measured findings apart from hypotheses, and routes fixes to the performance, accessibility, seo and security skills. Not for writing a new feature (web-dev) or a backend-only review.
+description: This skill should be used when the user types "/web-quality:audit", asks to "audit my site", "check web quality", "run a Lighthouse-style review", "is my app production ready", "check performance, accessibility and SEO", "check my landing page before launch", "run PageSpeed Insights" or "why is my page slow" for a web page or single-page app, deployed or local. It measures the page in a real browser and its build (Core Web Vitals, bundle budgets, response headers, accessibility, SEO, PageSpeed Insights field data), has a launch checklist for landing pages (axe, Lighthouse, PageSpeed), reports measured findings apart from hypotheses, and routes fixes to the performance, accessibility, seo and security skills. Not for writing a new feature (web-dev) or a backend-only review.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/ and scripts/. Needs Node 22 or newer; the live measurements need a browser tool that can run JavaScript in a page (the Claude desktop browser, Claude in Chrome or Chrome DevTools MCP)."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(pnpm build) Bash(pnpm build:mock) Bash(pnpm audit) Bash(pnpm audit --prod)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm build:mock) Bash(pnpm audit) Bash(pnpm audit --prod)
 ---
 
 # audit
@@ -35,12 +35,37 @@ measured under **Not checked**.
 | Loading, Core Web Vitals | LCP, CLS, FCP, TTFB, INP of a real load and interaction | `performance` skill, `../performance/references/measurement.md` (in-page `PerformanceObserver`; the tab must be visible) |
 | Bundle | initial JS, CSS and total kB gzip vs budget, largest lazy chunks | `node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs <dist>` |
 | Headers, caching, HTTPS | CSP, nosniff, clickjacking, Referrer-Policy, HSTS, cache of HTML and hashed assets, 404 for a gone asset, mixed content | `node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs <url>` |
+| Field data, Google's lab run | Core Web Vitals of real Chrome users (CrUX, 75th percentile) and Lighthouse scores from Google's servers | `node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs <url>` (public URLs only: below) |
 | Dependencies | known vulnerabilities | `pnpm audit --prod` (or the project's package manager) |
 | Accessibility | automated rules, keyboard, focus, names, contrast | `accessibility` skill: axe in the browser or a Playwright spec, then the manual checks |
 | SEO | title, description, canonical, robots, sitemap, social cards per route | `seo` skill: read the rendered `<head>` of each page |
 
 With Lighthouse available (Chrome DevTools MCP's `lighthouse_audit`, or the Lighthouse CLI the user
 runs), add its scores to the report; they do not replace the checks above.
+
+**PageSpeed Insights** (`pagespeed.mjs`, mobile by default, `--strategy desktop`) loads the page
+from Google's servers, so it reaches only a public URL: not localhost, a private network or a deploy
+behind a password (the script refuses the first two). Its field checks are the only **measured**
+Core Web Vitals of real users; when `field-data` says there is no Chrome UX Report data (a new or
+quiet site), the in-browser numbers stand. Without `PAGESPEED_API_KEY` the API's shared quota often
+answers 429 (exit 2): put PageSpeed under **Not checked** and say the key fixes it.
+
+## Landing page checklist
+
+A page whose job is to be found and convert (no sign-in; in the boilerplate, a project created with
+`--landing`) gets every row below before launch, each against `../../references/thresholds.md`:
+
+| Check | Target | How |
+|---|---|---|
+| axe, WCAG 2.x A and AA | 0 violations | the boilerplate's `apps/web/e2e/accessibility.spec.ts` (`@axe-core/playwright`), part of `pnpm test:e2e`; else the `accessibility` skill adds it |
+| Keyboard and screen reader | every link and control reachable, visible focus, one `<h1>`, headings in order | `accessibility` skill, the manual checks |
+| Lighthouse, mobile lab | Accessibility 100, SEO ≥ 95, Performance ≥ 90, Best Practices ≥ 95 | in a project from the boilerplate, CI's `lighthouse` job on each Netlify draft (`pnpm lighthouse <url>`: fails under 100 and 95, warns on the other two); else Lighthouse as above |
+| PageSpeed Insights | the same scores from Google's run; field LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 once CrUX has data | `pagespeed.mjs <production url>` |
+| SEO head | title, description, canonical, Open Graph, `robots.txt` and `sitemap.xml` with the real domain | `seo` skill |
+| Initial load | under the bundle budgets, a content page well under them | `bundle-budget.mjs` |
+
+A landing page with an axe violation, Accessibility under 100 or SEO under 95 is not ready: report
+each as **high** at least.
 
 ## 3. Judge
 

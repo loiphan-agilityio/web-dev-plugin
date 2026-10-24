@@ -1,0 +1,36 @@
+schema_version: "1.0"
+name: incident-record
+description: An incident write-up goes to the incident skill, which writes the three files, labels claims and runs the check; it fixes no code.
+tags: [routing]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: |
+    /web-dev:incident INC-7. Yesterday 09:05-09:40 UTC the customers page showed "Something went wrong"
+    for everyone. The 09:00 deploy renamed the `email` field to `mail` in the API response; we rolled
+    back at 09:38. Support got 14 tickets. Nobody was paged: a user told us.
+  max_turns: 16
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: runs-incident
+    tool: Skill
+    input_match: "incident"
+    arm: both
+  - type: file_exists
+    name: report
+    path: "**/docs/incidents/INC-7/report.md"
+  - type: file_exists
+    name: actions
+    path: "**/docs/incidents/INC-7/actions.md"
+  - type: tool_used
+    name: checks-record
+    tool: Bash
+    input_match: 'check-contract\.mjs'
+    arm: both
+  - type: llm
+    name: blameless-and-labelled
+    criteria: |
+      - The record names the change (the renamed field) and the missing alert, not a person at fault.
+      - Its status is resolved or mitigated, and its follow-ups include a check that would catch a response that no longer matches the schema, and an alert.
