@@ -50,12 +50,18 @@ pnpm install --frozen-lockfile
 
 # The PostToolUse hook of a session in the app formats the file Claude wrote, and nothing outside
 # the project. Its command runs as Claude Code runs it: hook input on stdin, CLAUDE_PROJECT_DIR set.
+# Claude Code passes native paths. In Git Bash, $PWD is /c/...: MSYS converts it in an environment
+# variable but not inside the JSON, so the hook would see the file outside the project and skip it.
+native() {
+  if command -v cygpath >/dev/null; then cygpath -m "$1"; else printf '%s' "$1"; fi
+}
 cd "$app"
 hook="$(node -p "require('./.claude/settings.json').hooks.PostToolUse[0].hooks[0].command")"
 unformatted='export const x = {a:1}'
 echo "$unformatted" | tee src/hook-check.ts >"$tmp/outside.ts"
 for f in "$PWD/src/hook-check.ts" "$tmp/outside.ts"; do
-  printf '{"tool_input":{"file_path":"%s"}}' "$f" | CLAUDE_PROJECT_DIR="$PWD" bash -c "$hook"
+  printf '{"tool_input":{"file_path":"%s"}}' "$(native "$f")" |
+    CLAUDE_PROJECT_DIR="$(native "$PWD")" bash -c "$hook"
 done
 pnpm exec prettier --check src/hook-check.ts
 rm src/hook-check.ts
