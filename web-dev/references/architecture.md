@@ -25,6 +25,11 @@ ApiClient → effect/http`
   never on `_tag` by hand (anti-slop rejects it).
 - **Retries live in TanStack Query only** (queries: once, and only for `NetworkError` or a
   `ServerError` with a 5xx status; mutations: never). Do not add `HttpClient.retryTransient`.
+- **Unexpected errors are reported in one place:** `createQueryClient` reports a 5xx
+  `ServerError` or an `InvalidResponseError` from any query or mutation, and RouterProvider's
+  `onError` (`reportRouteError`) a route that throws, both through `reportError`, all in
+  `src/lib/report-error.ts`. A feature shows its error state and never logs or reports an API
+  error itself; a 4xx or a `NetworkError` is the user's to see, not a bug.
 - **Query keys come from a key factory** in `queries.ts`; mutations invalidate exactly the
   keys they change, and return that promise from `onSuccess`.
 - **Every data screen renders four distinct states:** loading (`isPending`, not `isLoading`),
