@@ -139,8 +139,9 @@ flowchart LR
   `apps/web/netlify.toml`), so every project created from it carries it. The plugin writes no
   pipeline: `develop` answers CI/CD work with "not yet".
 - `pnpm check` is six gates: lint, typecheck, unit tests with coverage, build, Storybook build and
-  Playwright e2e. The e2e gate builds with `--mode mock` and serves `dist/` with `vite preview`,
-  so it tests the same build CI deploys.
+  Playwright e2e. The e2e gate builds with `--mode mock` into `dist-e2e/` (apart from `build`'s
+  `dist/`, which runs alongside) and serves it with `vite preview`, so it tests the same build CI
+  deploys.
 - One e2e spec per feature walks its main flow; states and error paths stay in the unit tests,
   which are faster and drive MSW per test.
 - The deployed app runs on mocks (MSW in the browser) until it has a backend: a POC from one
