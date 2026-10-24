@@ -70,6 +70,7 @@ describe('check-headers', () => {
     }
     assert.equal(got.https, 'warn');
     assert.equal(got['csp-object-src'], undefined);
+    assert.match(report.checks.find((check) => check.id === 'robots-header')?.detail ?? '', /no X-Robots-Tag/);
   });
 
   it('fails a page without protection headers whose missing assets get index.html', async () => {

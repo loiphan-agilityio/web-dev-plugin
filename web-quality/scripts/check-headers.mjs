@@ -143,6 +143,13 @@ export const checkHeaders = async (input) => {
       ? { id: 'permissions-policy', status: 'pass', detail: permissions }
       : { id: 'permissions-policy', status: 'info', detail: 'no Permissions-Policy header' },
   );
+  const robots = headers.get('x-robots-tag');
+  add({
+    id: 'robots-header',
+    status: 'info',
+    // Expected on preview and staging deploys (noindex), absent on production.
+    detail: robots ? `X-Robots-Tag: ${robots}` : 'no X-Robots-Tag header (a preview deploy should send noindex)',
+  });
   for (const name of ['server', 'x-powered-by']) {
     const value = headers.get(name);
     if (value && /\d/.test(value)) {
