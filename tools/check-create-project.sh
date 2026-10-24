@@ -50,6 +50,8 @@ expect no-auth 0 'without authentication' -- "$tmp/plain" --no-auth
 holds auth-wired "$tmp/auth/apps/web/src/lib/runtime.ts" 'AuthToken.fromGetter(tokenStore.get'
 holds auth-routes "$tmp/auth/apps/web/src/app/routes.tsx" 'protectedRoutes('
 holds no-auth-base "$tmp/plain/apps/web/src/lib/runtime.ts" 'AuthToken.none'
+# Named after the target, not the generator's temporary folder (a boilerplate with create --name).
+holds named "$tmp/plain/package.json" '"name": "plain"'
 holds keeps-claude "$tmp/auth/.claude/mine.txt" mine
 holds keeps-settings "$tmp/auth/.claude/settings.json" mine
 holds settings "$tmp/plain/.claude/settings.json" 'DIR\\"/.claude/hooks/format.mjs'
