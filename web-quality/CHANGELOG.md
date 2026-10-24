@@ -3,6 +3,14 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.2
+
+- `pagespeed.mjs` sends `strategy` and `category` as the enum values of the API's discovery
+  document (`MOBILE`, `BEST_PRACTICES`, ...), the only form the schema guarantees; it sent the
+  response's lowercase keys (`best-practices`). The response fields it reads were checked against
+  the same document (`loadingExperience`, `origin_fallback`, `metrics.*.percentile`) and the
+  metric keys against Google's examples and release notes (`INTERACTION_TO_NEXT_PAINT`).
+
 ## 0.2.1
 
 - `spa-seo.md`: the boilerplate's Netlify drafts now send `X-Robots-Tag: noindex` (its CI adds a
