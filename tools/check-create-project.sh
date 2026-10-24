@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Checks what project-setup's create-project.sh creates and refuses, in a temporary directory: both
-# variants of the boilerplate with their Claude Code settings, the merge into a folder that holds
+# Checks what project-setup's create-project.sh creates and refuses, in a temporary directory: the
+# three variants of the boilerplate (web app with or without auth, landing page) with their Claude Code settings, the merge into a folder that holds
 # .git/ and .claude/ (its own settings.json kept), and the refusals. Clones the boilerplate
 # (network; BOILERPLATE_REPO points it at another clone URL) and installs nothing.
 # tools/verify.sh calls it, then runs the gates in a project it creates.
@@ -41,10 +41,11 @@ echo mine >"$tmp/auth/.claude/settings.json"
 touch "$tmp/blocked/apps"
 
 echo "check-create-project:"
-expect no-choice 1 'pass --auth or --no-auth' -- "$tmp/none"
+expect no-choice 1 'pass --auth, --no-auth or --landing' -- "$tmp/none"
 [[ ! -e "$tmp/none" ]] || fail "no-choice created $tmp/none"
 expect auth 0 'with authentication.*kept the existing .claude/settings.json' -- "$tmp/auth" --auth
 expect no-auth 0 'without authentication' -- "$tmp/plain" --no-auth
+expect landing 0 'a landing page' -- "$tmp/landing" --landing
 # A prefix: the boilerplate wires `fromGetter(tokenStore.get, tokenStore.reject)` since its auth
 # variant drops a token the API rejects, and `fromGetter(tokenStore.get)` before that.
 holds auth-wired "$tmp/auth/apps/web/src/lib/runtime.ts" 'AuthToken.fromGetter(tokenStore.get'
@@ -57,8 +58,11 @@ holds keeps-settings "$tmp/auth/.claude/settings.json" mine
 holds settings "$tmp/plain/.claude/settings.json" 'DIR\\"/.claude/hooks/format.mjs'
 holds app-settings "$tmp/plain/apps/web/.claude/settings.json" '/../../.claude/hooks/format.mjs'
 holds format-hook "$tmp/plain/.claude/hooks/format.mjs" prettier
+holds landing-page "$tmp/landing/apps/web/src/app/home-page.tsx" 'people'
+holds landing-sitemap "$tmp/landing/apps/web/public/robots.txt" 'Sitemap:'
+[[ ! -e "$tmp/landing/apps/web/src/features/auth" ]] || fail "landing has src/features/auth"
 [[ ! -e "$tmp/plain/apps/web/src/features/auth" ]] || fail "no-auth has src/features/auth"
-for dir in "$tmp/auth" "$tmp/plain"; do
+for dir in "$tmp/auth" "$tmp/plain" "$tmp/landing"; do
   [[ ! -e "$dir/create" ]] || fail "$dir still has the generator (create/)"
   ! grep -q template-only "$dir/CLAUDE.md" || fail "$dir/CLAUDE.md keeps the template-only block"
   holds "tier $(basename "$dir")" <(node "$plugin/scripts/detect-project.mjs" "$dir/apps/web") \
