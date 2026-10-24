@@ -9,7 +9,7 @@ the user guide is [`web-dev/README.md`](web-dev/README.md).
 flowchart LR
   repo["this repository"] --> mkt[".claude-plugin/marketplace.json"]
   mkt --> plugin["web-dev/<br/>plugin web-dev"]
-  plugin --> skills["5 skills<br/>skills/"]
+  plugin --> skills["7 skills<br/>skills/"]
   plugin --> shared["references/, scripts/,<br/>agents/"]
   skills -->|project-setup runs the<br/>boilerplate generator| app["new monorepo, app in apps/web<br/>with or without auth + CLAUDE.md"]
   skills -->|install-companions.sh| comp["8 companion skills<br/>pinned by commit"]
@@ -22,7 +22,7 @@ project. The plugin is read in place from the clone, so `git pull` updates it. C
 skills reach the shared files as `../../references/` and `../../scripts/`, which resolve in both
 layouts.
 
-## 2. One entry point, five skills
+## 2. One entry point, six skills
 
 ```mermaid
 flowchart TD
@@ -66,6 +66,8 @@ flowchart TD
 | `feature-development` | A ticket, story or issue | `api-integration` for endpoint detail, `ui-development` for the UI when there is a design |
 | `api-integration` | One endpoint on its own | — (when loaded by `feature-development`, it hands the UI and the Result back) |
 | `ui-development` | A design with no ticket | — (when loaded by `feature-development`, it hands data work back) |
+| `ticket` | Tickets to write up before any code (`/web-dev:ticket`) | — (`feature-development` builds from the contract later) |
+| `incident` | An incident report or postmortem (`/web-dev:incident`) | `ticket` for its follow-ups, when the user asks |
 
 Each skill still triggers on its own words ("Implement this ticket", "Add PATCH /todos/:id"), so a
 user who knows which one they need skips the routing. `develop` and `feature-development` tell

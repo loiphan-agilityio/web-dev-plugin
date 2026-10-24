@@ -7,7 +7,7 @@ allowed-tools: Bash(node --version) Bash(pnpm --version) Bash(bash ${CLAUDE_SKIL
 
 # project-setup
 
-Create the project from the react-vite-boilerplate with the boilerplate's own generator (`create/index.js` in that repository), and leave it green. Every new project starts as the boilerplate's `main`, lockfile included, and authentication is the boilerplate's tested overlay, not code written here. The result is a pnpm + Turborepo monorepo: the app is `apps/web` (package `web`), the shadcn/ui kit `packages/ui` (`@repo/ui`). The project's root `CLAUDE.md` (the monorepo) and `apps/web/CLAUDE.md` (the app) are its convention source from then on.
+Create the project from the react-vite-boilerplate with the boilerplate's own generator (`create/index.js` in that repository), and leave it green. Every new project starts as the boilerplate at the commit this plugin version pins (`create-project.sh`), lockfile included, and authentication is the boilerplate's tested overlay, not code written here. The result is a pnpm + Turborepo monorepo: the app is `apps/web` (package `web`), the shadcn/ui kit `packages/ui` (`@repo/ui`). The project's root `CLAUDE.md` (the monorepo) and `apps/web/CLAUDE.md` (the app) are its convention source from then on.
 
 Run the scripts exactly as written below, each as one plain command: `allowed-tools` approves these exact forms, so the setup runs without a permission prompt, headless included.
 

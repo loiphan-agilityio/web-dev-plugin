@@ -37,8 +37,8 @@ runs, the pinned versions and the companion skills. web-quality installs from th
 
 | Path | What it is |
 |---|---|
-| [`web-quality/`](web-quality/) | The web-quality plugin: the `audit` entry skill, four skills (performance, accessibility, seo, security), thresholds, two measurement scripts with tests, and evals. |
-| [`web-dev/`](web-dev/) | The plugin: the `develop` entry skill, four skills, shared references, scripts and evals. New projects come from the react-vite-boilerplate repository. |
+| [`web-quality/`](web-quality/) | The web-quality plugin: the `audit` entry skill, four skills (performance, accessibility, seo, security), thresholds, three measurement scripts with tests, and evals. |
+| [`web-dev/`](web-dev/) | The plugin: the `develop` entry skill, six skills, shared references, scripts and evals. New projects come from the react-vite-boilerplate repository. |
 | `examples/`, `docs/evidence/` | Demo output and what a run collected (reports, logs, screenshots), local only: not in the repository. |
 | [`spec.md`](spec.md) | What the skills must do, and the POC steps. |
 | [`DESIGN.md`](DESIGN.md) | How the plugin, the skills and the generated app are built, and why. |
