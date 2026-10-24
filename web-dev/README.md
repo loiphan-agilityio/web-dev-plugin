@@ -41,7 +41,7 @@ claude plugin install web-dev@web-dev-plugin
 
 The URL is the repository's git URL (`https://github.com/loiphan-agilityio/web-dev-plugin.git`
 works too). It installs from the default branch, `main`; append `#<ref>` to pick another
-branch or pin a release tag (`#web-dev--v0.5.2`). The clone runs with your
+branch or pin a release tag (`#web-dev--v0.5.3`). The clone runs with your
 own git credentials and never prompts: an SSH key loaded in `ssh-agent`, or for an `https://`
 URL a credential your git helper already stores.
 
@@ -79,7 +79,7 @@ claude "Scaffold a new web app called billing-portal"
 
 `project-setup` asks whether to include authentication, creates the project from the
 react-vite-boilerplate (`scripts/create-project.sh` clones it and runs its generator), runs
-`pnpm install`, installs the companion skills and runs `pnpm check`. The generated root `CLAUDE.md`
+`pnpm install`, installs the companion skills and runs `pnpm check:report`. The generated root `CLAUDE.md`
 and `apps/web/CLAUDE.md` hold the project conventions from then on; run the web-dev skills from
 `apps/web`.
 
@@ -248,16 +248,20 @@ skills/                  ← the product
   feature-development/  SKILL.md, references/ (the todos feature, outside-template)
   api-integration/  SKILL.md, references/ (effect-http, errors, msw, react-query, outside-template)
   ui-development/  SKILL.md, references/ (design-mapping, visual-check, outside-template)
+  ticket/  SKILL.md, references/ (intent, spec and plan templates)
+  incident/  SKILL.md, references/ (report, rca and actions templates)
 references/              ← shared guidelines the skills read (stack, coding standards, architecture,
                            companions)
-scripts/                 ← detect-project.mjs, verify-project.sh, run by the skills in projects
+scripts/                 ← detect-project.mjs, verify-project.sh, check-contract.mjs, run by the
+                           skills in projects; check-contract's tests in scripts/test/
 agents/                  ← codebase-explorer, shipped with the plugin
 evals/                   ← routing cases for `claude plugin eval`, fixtures, check-detect.sh
 docs/companion-audit.md  ← audit of the companion skills
 ```
 
 Outside the plugin, at the repository root: `tools/` (maintainer scripts: `verify.sh`,
-`extract-snippets.mjs`, `check-guidelines.mjs`, `check-create-project.sh`, `sync-references.sh`) and `.claude/` (maintainer agents and settings).
+`extract-snippets.mjs`, `check-guidelines.mjs`, `check-create-project.sh`, `sync-references.sh`,
+`lint.sh`, `validate-skills.sh`) and `.claude/` (maintainer agents and settings).
 Neither ships with the plugin.
 
 **Change the boilerplate or bump a dependency:**

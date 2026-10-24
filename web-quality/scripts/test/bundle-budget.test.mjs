@@ -74,4 +74,30 @@ describe('bundle-budget', () => {
     assert.equal(run.stdout, '');
     assert.match(run.stderr, /index\.html does not exist/);
   });
+
+  it('finds the files of a site served under a base path (/app/), and stops on one it cannot find', () => {
+    const dist = makeDist(10_000);
+    dirs.push(dist);
+    const html = join(dist, 'index.html');
+    writeFileSync(html, '<script type="module" src="/app/assets/index-AAAA1111.js"></script>');
+    assert.deepEqual(
+      bundleBudget(dist).initial.files.map((file) => file.file),
+      ['assets/index-AAAA1111.js'],
+    );
+    writeFileSync(html, '<script type="module" src="/assets/gone-EEEE5555.js"></script>');
+    const run = spawnSync(process.execPath, [cli, dist, '--fail'], { encoding: 'utf8' });
+    assert.equal(run.status, 2);
+    assert.equal(run.stdout, '');
+    assert.match(run.stderr, /gone-EEEE5555[.]js, not found/);
+  });
+
+  it('exits 2 for an unknown option or a budget that is not a positive number', () => {
+    const dist = makeDist(10_000);
+    dirs.push(dist);
+    for (const args of [['--budget', '10'], ['--js', 'abc'], ['--css', '0']]) {
+      const run = spawnSync(process.execPath, [cli, dist, ...args, '--fail'], { encoding: 'utf8' });
+      assert.equal(run.status, 2, args.join(' '));
+      assert.equal(run.stdout, '');
+    }
+  });
 });

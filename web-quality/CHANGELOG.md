@@ -3,6 +3,19 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.4
+
+Fixes from an audit, each reproduced before the change:
+
+- `bundle-budget.mjs` measures a site served under a base path (`/app/assets/...` measured 0 kB
+  and passed); a file index.html loads but dist lacks stops with exit 2; an unknown option or a
+  budget that is not a positive number exits 2 instead of a stack trace or a NaN budget.
+- `check-headers.mjs`: `object-src` falls back to `default-src`; the HTTPS-only checks (HSTS,
+  mixed content) and the report-only and version-header checks have tests.
+- The three scripts run when reached through a symlink or junction (they exited 0 silently).
+- The skills build on mocks with `pnpm --filter web build:mock` from the root (`build:mock` exists
+  only in apps/web), and `pnpm check` and `pnpm update` have their allowed-tools rules.
+
 ## 0.2.3
 
 - Removed the routing eval `07-landing-checklist` added in 0.2.0, at the maintainer's request

@@ -10,6 +10,7 @@
 // Read-only: GET requests to <url>, one same-origin asset it references and one asset path that
 // does not exist. Each check is { id, status: pass|fail|warn|info, detail }. Exits 0 with the
 // report, 2 when <url> is missing or cannot be fetched (the cause on stderr, nothing on stdout).
+import { realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 const YEAR = 31_536_000;
@@ -69,7 +70,8 @@ const cspChecks = (policy, source) => {
   if (/'unsafe-eval'/.test(scripts)) {
     checks.push({ id: 'csp-script-eval', status: 'warn', detail: "script-src allows 'unsafe-eval'" });
   }
-  if (csp.get('object-src') !== "'none'") {
+  // A directive missing from the policy falls back to default-src, as script-src does above.
+  if ((csp.get('object-src') ?? csp.get('default-src')) !== "'none'") {
     checks.push({ id: 'csp-object-src', status: 'warn', detail: "no object-src 'none'" });
   }
   if (!csp.has('base-uri')) {
@@ -206,7 +208,17 @@ export const checkHeaders = async (input) => {
   return { url: input, finalUrl: final.href, status: page.status, checks };
 };
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+// Run as a script, not imported by a test. Node resolves the module's real path, so compare it with
+// the real path of argv[1]: through a symlink or junction the two spellings differ.
+const isMain = () => {
+  try {
+    return import.meta.url === pathToFileURL(realpathSync(process.argv[1] ?? '')).href;
+  } catch {
+    return false;
+  }
+};
+
+if (isMain()) {
   const url = process.argv[2];
   if (!url) {
     console.error('usage: check-headers.mjs <url>');

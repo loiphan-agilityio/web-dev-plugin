@@ -27,7 +27,7 @@ Before writing, read the project's `CLAUDE.md` (and `apps/web/CLAUDE.md` in a mo
 
 - **intent.md:** the problem in the user's terms, with the evidence the ticket gives; no solution.
 - **spec.md:** each acceptance criterion as `- [ ] AC-<n> Given ..., when ..., then ...`, one behaviour each, so a test can pin it. Sort every gap as `feature-development` does (its step 1): a gap that changes data, a business rule or the API contract goes under **Open questions**, naming the criterion it blocks; never guess it. Data and API list only what this ticket adds or changes, against the existing code.
-- **plan.md:** tasks `- [ ] T<n> ...` in build order, each citing the criteria it covers (`(AC-1, AC-3)`) and what it depends on; mark `parallel` on a task that touches no file of another open task. **Files** are real paths in the project's layout (`src/features/<name>/...`). **Gates:** `pnpm check:report` in a project from the boilerplate (its checklist is the evidence), else the project's own lint, test and build commands.
+- **plan.md:** tasks `- [ ] T<n> ...` in build order, each citing the criteria it covers (`(AC-1, AC-3)`) and what it depends on; mark `parallel` on a task that touches no file of another open task. **Files** are real paths in the project's layout (`src/features/<name>/...`). **Gates:** in a project from the boilerplate, `pnpm check:report` at the monorepo root (`pnpm -w check:report` from `apps/web`; its checklist is the evidence), else the project's own lint, test and build commands.
 
 ### Several tickets: in parallel
 

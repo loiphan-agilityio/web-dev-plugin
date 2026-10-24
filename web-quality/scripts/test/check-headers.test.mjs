@@ -116,4 +116,78 @@ describe('check-headers', () => {
     assert.equal(got['csp-script-inline'], undefined);
     assert.equal(got.clickjacking, 'pass');
   });
+
+  it('reads object-src from default-src when the policy has none', async () => {
+    const report = await checkHeaders(
+      await urlOf({ headers: { 'content-security-policy': "default-src 'none'; script-src 'self'; base-uri 'none'" } }),
+    );
+    assert.equal(statuses(report)['csp-object-src'], undefined);
+  });
+});
+
+/**
+ * An HTTPS site, which a local test server cannot be without a certificate: fetch answers with
+ * real Responses whose url is https, `pages` mapping a path to its headers and body.
+ * @param {Record<string, { status?: number, headers?: Record<string, string>, body?: string }>} pages
+ */
+const overHttps = async (pages, run) => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const url = new URL(String(input));
+    const page = pages[url.pathname] ?? { status: 404, body: 'not found' };
+    const response = new Response(page.body ?? '', { status: page.status ?? 200, headers: page.headers });
+    Object.defineProperty(response, 'url', { value: url.href });
+    return response;
+  };
+  try {
+    return await run();
+  } finally {
+    globalThis.fetch = original;
+  }
+};
+
+describe('check-headers over HTTPS', () => {
+  const csp = "default-src 'self'; object-src 'none'; base-uri 'self'";
+
+  it('passes HSTS and a page without http:// subresources', async () => {
+    const report = await overHttps(
+      { '/': { headers: { 'strict-transport-security': 'max-age=31536000', 'content-security-policy': csp }, body: '<img src="/a.png">' } },
+      () => checkHeaders('https://site.test/'),
+    );
+    const got = statuses(report);
+    assert.equal(got.https, 'pass');
+    assert.equal(got.hsts, 'pass');
+    assert.equal(got['mixed-content'], 'pass');
+  });
+
+  it('warns without HSTS and fails an http:// subresource', async () => {
+    const report = await overHttps(
+      { '/': { headers: { 'content-security-policy': csp }, body: '<script src="http://cdn.test/x.js"></script>' } },
+      () => checkHeaders('https://site.test/'),
+    );
+    const got = statuses(report);
+    assert.equal(got.hsts, 'warn');
+    assert.equal(got['mixed-content'], 'fail');
+    assert.match(report.checks.find((check) => check.id === 'mixed-content')?.detail ?? '', /cdn.test/);
+  });
+
+  it('notes a report-only policy alone, and server headers that name a version', async () => {
+    const report = await overHttps(
+      {
+        '/': {
+          headers: {
+            'content-security-policy-report-only': csp,
+            server: 'nginx/1.25.3',
+            'x-powered-by': 'Express 4.18',
+          },
+        },
+      },
+      () => checkHeaders('https://site.test/'),
+    );
+    const got = statuses(report);
+    assert.equal(got.csp, 'fail');
+    assert.equal(got['csp-report-only'], 'info');
+    assert.equal(got['server-version'], 'info');
+    assert.equal(got['x-powered-by-version'], 'info');
+  });
 });

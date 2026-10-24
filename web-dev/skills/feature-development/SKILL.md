@@ -2,7 +2,7 @@
 name: feature-development
 description: This skill should be used when the user asks to "implement this ticket", "build the X page", "add a form for X", "create a CRUD screen" or "develop the feature in this issue" in an app built from the web-dev template (React, Effect, TanStack Query, React Hook Form, shadcn/ui). It turns one ticket into a tested feature folder with schemas, business rules, API calls, queries, form, the four UI states, routes, tests and stories. Not for a new project (project-setup), one endpoint alone (api-integration) or a design with no ticket (ui-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the api-integration and ui-development skills' references. Needs Node 22.22 or newer and pnpm."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *) Bash(pnpm check:report) Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(pnpm format) Bash(npm run lint:fix) Bash(npm run format) Bash(yarn lint:fix) Bash(yarn format) Bash(bun run lint:fix) Bash(bun run format)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *) Bash(pnpm check:report) Bash(pnpm -w check:report) Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(pnpm format) Bash(npm run lint:fix) Bash(npm run format) Bash(yarn lint:fix) Bash(yarn format) Bash(bun run lint:fix) Bash(bun run format)
 ---
 
 # feature-development
@@ -74,7 +74,7 @@ Follow `references/stories.md`. Every component gets a `<Name>.stories.tsx` in i
 
 ## 9. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then `pnpm check` again. A gate that stays red goes in the Result.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). In a project from the boilerplate, run `pnpm -w check:report` instead of `pnpm check`: the same gates, run at the workspace root from any folder of it, ending with the checklist (each gate, the unit and e2e pass rates, line coverage) that goes in the Result. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then `pnpm check` again. A gate that stays red goes in the Result.
 
 ## Result
 
@@ -82,7 +82,7 @@ Skip it under `develop`'s Workflow A or B (`develop` reports); otherwise end wit
 
 ```
 ## Result
-**Did:** what was built (files, routes, the test file and story file for each component and the page) and the `pnpm check` outcome
+**Did:** what was built (files, routes, the test file and story file for each component and the page) and the `pnpm check` outcome (in a project from the boilerplate, the `check:report` checklist)
 **Saw:** facts observed (ticket details, existing code reused, surprises, code/doc mismatches)
 **Not done:** criteria excluded from scope, and anything skipped
 **Blocked by:** the unanswered questions behind each exclusion

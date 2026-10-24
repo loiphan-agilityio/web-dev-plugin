@@ -25,7 +25,8 @@ here (Git, LF, evals only on request) applies to both.
 .gitlab-ci.yml                    runs tools/verify.sh on merge requests, pushes, schedules
 tools/                            maintainer scripts, not shipped: verify.sh,
                                   extract-snippets.mjs, check-guidelines.mjs,
-                                  check-create-project.sh, sync-references.sh
+                                  check-create-project.sh, sync-references.sh, lint.sh,
+                                  validate-skills.sh
 web-dev/                          the plugin (its README.md is the user guide)
   .claude-plugin/plugin.json      name, version
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
@@ -46,7 +47,8 @@ web-quality/                      the second plugin (its README.md is the user g
   skills/                         audit (entry), performance, accessibility, seo, security; each
                                   keeps its depth in references/
   references/thresholds.md        Core Web Vitals, bundle budgets, Lighthouse targets, WCAG AA
-  scripts/                        check-headers.mjs, bundle-budget.mjs (read-only, JSON out), and
+  scripts/                        check-headers.mjs, bundle-budget.mjs, pagespeed.mjs (read-only,
+                                  JSON out), and
                                   their tests in scripts/test/
   evals/                          routing cases, run.sh, fixtures
 examples/                         demo output, local only (ignored by git)

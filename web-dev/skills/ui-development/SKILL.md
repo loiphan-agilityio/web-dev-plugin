@@ -42,7 +42,7 @@ Tailwind 4 is CSS-first: the theme lives in `packages/ui/src/styles/globals.css`
 
 - Flex and grid with `gap-*`; absolute positioning only for overlays. Frame widths become `max-w-*` or responsive widths.
 - Mobile-first: base classes for the narrow layout, `sm:` / `md:` / `lg:` for wider. A desktop-only design collapses below `sm:` (columns stack, side nav moves on top, wide tables stack or scroll), noted as an assumption.
-- Semantic HTML inside the layout's `header` / `nav` / `main`: a page uses `section` / `article`, `ul` / `li` for lists, one `h1` and ordered headings. `CardTitle` renders a `div`, so the heading goes inside it, as in `src/app/home-page.tsx`.
+- Semantic HTML inside the layout's `header` / `nav` / `main`: a page uses `section` / `article`, `ul` / `li` for lists, one `h1` and ordered headings. `CardTitle` renders a `div`, so a card that names a section puts the heading inside it: `<CardTitle><h3>{title}</h3></CardTitle>`.
 - Data screens render the four states (`../feature-development/references/ui-states.md`), styled to the design: skeletons shaped like its rows, the empty state with the next action.
 - Spacing and type round to the 4px rhythm and type scale; an intentional off-scale value goes under **Design gaps**, as does low-contrast text (the token stays).
 - Keep shadcn's hover, `focus-visible` and `disabled` styles.

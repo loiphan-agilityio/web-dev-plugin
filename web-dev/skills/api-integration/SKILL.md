@@ -30,7 +30,7 @@ In `schemas.ts`, an Effect Schema for the response and for a sent body, with `ty
 
 ## 3. Queries
 
-In `queries.ts` ([references/react-query.md](references/react-query.md)): keys in the key factory (`todoKeys`), a `queryOptions` factory for a read, a mutation hook for a write, always through `runEffect`, with `signal` for queries. Mutations invalidate exactly the keys they change and return the `invalidateQueries` promise from `onSuccess`, so "success" never shows stale data. Retries live in `createQueryClient` only (queries once, for `NetworkError` or a 5xx `ServerError`; mutations never); `HttpClient.retryTransient` would multiply them past the 3 s `findBy*` timeout.
+In `queries.ts` ([references/react-query.md](references/react-query.md)): keys in the key factory (`todoKeys`), a `queryOptions` factory for a read, a mutation hook for a write, always through `runEffect`, with `signal` for queries. Mutations invalidate exactly the keys they change and return the `invalidateQueries` promise from `onSuccess`, so "success" never shows stale data. Retries live in `createQueryClient` only (queries once, for `NetworkError` or a 5xx `ServerError`; mutations never); `HttpClient.retryTransient` would multiply them past the 5 s `findBy*` timeout.
 
 ## 4. Errors in the UI
 
