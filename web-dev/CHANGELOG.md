@@ -3,6 +3,34 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.3.3
+
+Fixes, each reproduced before the change (the bash 3.2 one by reading the code: no bash 3.2 on
+the machine that made it):
+
+- `detect-project.mjs` finds the package manager of a package inside a pnpm or yarn workspace:
+  it walks up to the workspace root (`pnpm-workspace.yaml`, or a `package.json` with
+  `workspaces`) for the first `packageManager` field or lockfile, where it reported `npm`.
+  Outside a workspace only the folder itself counts.
+- `detect-project.mjs` reads pnpm catalogs past a column-0 comment, in the `catalogs: default:`
+  form and as named catalogs (`catalog:<name>`); a catalog version it still cannot resolve is
+  left out of `otherMajors` instead of reported as `catalog:<name>`.
+- `develop`: detect's exit 2 for a path that is a file ("is not a folder") is reported with a
+  question, no longer a folder to create. Workflow B reports `verify-project.sh` exit 2 (nothing
+  was verified) under **Not done**, never as passed.
+- `verify-project.sh` runs on bash 3.2 (macOS) when `package.json` has no scripts; `set -u`
+  aborted on the empty array.
+- `install-companions.sh` fails unless `skills-lock.json` records each companion at its pinned
+  commit and path; it only checked that the file existed, which a project from the boilerplate
+  always does.
+- `README.md` pins the current release, `#web-dev--v0.3.3`, in the install example.
+- Eval 13 no longer scores whether `develop` fired: on a one-arm run the grader counted, so a
+  correct run scored 0.67 against the 0.66 threshold (maintainers only).
+- `evals/run.sh` runs on bash 3.2 when both `--max-cost-usd` and `--ablation` are given
+  (maintainers only).
+- `DESIGN.md` names `packages/ui` for the shadcn components and theme, and two registration
+  files per feature (maintainers only).
+
 ## 0.3.2
 
 Fixes, each reproduced before the change:
