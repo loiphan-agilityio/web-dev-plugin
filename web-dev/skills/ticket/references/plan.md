@@ -19,8 +19,8 @@
 
 ## Gates
 
-<!-- fill: the commands that must pass before review (pnpm check:report in a project from the
-boilerplate) and what counts as done. -->
+<!-- fill: the commands that must pass before review (in a project from the boilerplate,
+`pnpm -w check:report`, which runs at the monorepo root from any folder) and what counts as done. -->
 
 ## Risks
 
