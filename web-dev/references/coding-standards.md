@@ -21,7 +21,8 @@ Lint enforces it, and `func-style` has no autofix, so write it this way from the
   `onClick={() => setOpen(true)}` (`no-confusing-void-expression`).
 - Inline type imports (`import { type Item, NewItem } from './schemas'`); `pnpm lint:fix`
   fixes most of the rest and formats.
-- anti-slop (`pnpm lint:slop`, part of `pnpm lint`) rejects low-evidence code: a type assertion
+- anti-slop (part of `pnpm lint` here and at the root; `pnpm lint:slop` at the root runs it
+  alone) rejects low-evidence code: a type assertion
   without a `// SAFETY:` comment on the invariant, `as unknown as`, `unknown` or `object` in a
   function's parameters or return type (parse at the boundary instead; a catch argument is named
   `cause`), `typeof` narrowing outside a parser, `vi.mock` of a module, comparing or building
