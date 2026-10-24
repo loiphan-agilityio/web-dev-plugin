@@ -80,5 +80,7 @@ trap 'rm -rf "$tmp"' EXIT
 out="$here/results/$(date -u +%Y-%m-%dT%H-%M-%SZ)"
 mkdir -p "$out"
 echo "$run_key" > "$out/run.txt"
+# ${defaults[@]+...}: empty when both options were given, and bash 3.2 (macOS) with `set -u`
+# aborts on a bare "${defaults[@]}" of an empty array.
 claude plugin eval "$tmp/web-dev" --scaffold --allow-tools Bash Write Edit \
-  --output-dir "$out" --report "$out/report.html" "${defaults[@]}" "$@"
+  --output-dir "$out" --report "$out/report.html" ${defaults[@]+"${defaults[@]}"} "$@"
