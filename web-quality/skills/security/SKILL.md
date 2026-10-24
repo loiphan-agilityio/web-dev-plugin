@@ -2,7 +2,7 @@
 name: security
 description: This skill should be used when the user asks to "check security headers", "add a Content Security Policy", "security review of the frontend", "check for XSS", "audit dependencies", "harden the deploy" or "apply web best practices" in a web app, or when the web-quality audit routes a security or best-practices finding here. It checks what the deployed page sends, the dependencies' advisories and the frontend code's risky patterns (XSS sinks, open redirects, token storage, secrets in the bundle), then fixes them in a React + Vite app. Not a penetration test and not a backend review.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/ and scripts/. Needs Node 22 or newer; the header checks need a deployed URL or a preview."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(pnpm audit) Bash(pnpm audit --prod) Bash(pnpm build) Bash(pnpm build:mock)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(pnpm audit) Bash(pnpm audit --prod) Bash(pnpm build) Bash(pnpm build:mock) Bash(pnpm --filter web build:mock) Bash(pnpm check) Bash(pnpm update *)
 ---
 
 # security

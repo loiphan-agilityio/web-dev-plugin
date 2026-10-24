@@ -2,7 +2,7 @@
 name: audit
 description: This skill should be used when the user types "/web-quality:audit", asks to "audit my site", "check web quality", "run a Lighthouse-style review", "is my app production ready", "check performance, accessibility and SEO", "check my landing page before launch", "run PageSpeed Insights" or "why is my page slow" for a web page or single-page app, deployed or local. It measures the page in a real browser and its build (Core Web Vitals, bundle budgets, response headers, accessibility, SEO, PageSpeed Insights field data), has a launch checklist for landing pages (axe, Lighthouse, PageSpeed), reports measured findings apart from hypotheses, and routes fixes to the performance, accessibility, seo and security skills. Not for writing a new feature (web-dev) or a backend-only review.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/ and scripts/. Needs Node 22 or newer; the live measurements need a browser tool that can run JavaScript in a page (the Claude desktop browser, Claude in Chrome or Chrome DevTools MCP)."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm build:mock) Bash(pnpm audit) Bash(pnpm audit --prod)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm build:mock) Bash(pnpm --filter web build:mock) Bash(pnpm audit) Bash(pnpm audit --prod) Bash(pnpm check)
 ---
 
 # audit
@@ -18,7 +18,7 @@ Read `../../references/thresholds.md` first: every number below is judged agains
 - **A URL** (production, a preview deploy): measure it directly. Production gives the real headers
   and caching; a preview deploy is the place to check a fix before it ships.
 - **A local project:** build it as it ships (`pnpm build`; a project from the boilerplate that still
-  runs on mocks ships `pnpm build:mock`) and serve `dist/` (`pnpm --filter web preview --port 4173
+  runs on mocks ships `pnpm --filter web build:mock`, from its root) and serve `dist/` (`pnpm --filter web preview --port 4173
   --strictPort`, through the browser tool's preview or by the user). `vite preview` does not apply
   the hosting's headers (`netlify.toml`), so check headers on a deployed URL, and without one read
   the hosting config and mark those findings **config**.
@@ -59,7 +59,7 @@ A page whose job is to be found and convert (no sign-in; in the boilerplate, a p
 |---|---|---|
 | axe, WCAG 2.x A and AA | 0 violations | the boilerplate's `apps/web/e2e/accessibility.spec.ts` (`@axe-core/playwright`), part of `pnpm test:e2e`; else the `accessibility` skill adds it |
 | Keyboard and screen reader | every link and control reachable, visible focus, one `<h1>`, headings in order | `accessibility` skill, the manual checks |
-| Lighthouse, mobile lab | Accessibility 100, SEO ≥ 95, Performance ≥ 90, Best Practices ≥ 95 | in a project from the boilerplate, CI's `lighthouse` job on each Netlify draft (`pnpm lighthouse <url>`: fails under 100 and 95, warns on the other two); else Lighthouse as above |
+| Lighthouse, mobile lab | Accessibility 100, SEO ≥ 95, Performance ≥ 90, Best Practices ≥ 95 | in a project from the boilerplate, CI's `lighthouse` job on each Netlify draft (`pnpm lighthouse <url>`: fails under accessibility 100 and SEO 95, warns under 90 on the other two, so a best-practices score of 90 to 94 needs this checklist's eye); else Lighthouse as above |
 | PageSpeed Insights | the same scores from Google's run; field LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 once CrUX has data | `pagespeed.mjs <production url>` |
 | SEO head | title, description, canonical, Open Graph, `robots.txt` and `sitemap.xml` with the real domain | `seo` skill |
 | Initial load | under the bundle budgets, a content page well under them | `bundle-budget.mjs` |
