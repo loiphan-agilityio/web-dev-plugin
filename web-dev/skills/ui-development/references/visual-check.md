@@ -44,7 +44,7 @@ Neither browser, or it cannot load the page (headless and CI runs land here):
      ]
    }
    ```
-   If port 5173 is taken, pick another free one in both places. When the session runs at the monorepo root (under `develop`'s Workflow A), the runtime args start with `"--filter", "web"`: the root `dev:mock` runs turbo, which rejects Vite's flags. Name the file under **Did**: it is a new project file the user may want to commit.
+   If port 5173 is taken, pick another free one in both places. Whenever the session runs at the monorepo root (under `develop`'s Workflow A, or any session started there), the runtime args start with `"--filter", "web"`: the root `dev:mock` runs turbo, which rejects Vite's flags. When the project is a subfolder of the session's folder (Workflow A, `new-app.md` A0), `"--dir", "<app-name>"` comes before those, since pnpm finds no `package.json` in the session's folder. Name the file under **Did**: it is a new project file the user may want to commit.
 2. **`preview_start` with `name: "dev-mock"`**, then `navigate` to the page's route on that origin. If the server does not come up, read `preview_logs` and go to section 2.
 3. **Widths:** `resize_window` with the design's width (custom `width` and `height`), then preset `mobile` (375px); `computer` with action `"screenshot"` at each. Reset with preset `desktop` when done.
 4. Continue at step 5 below.

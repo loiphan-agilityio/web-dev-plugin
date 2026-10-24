@@ -133,8 +133,8 @@ e2e. Its app,
   Effect code reads it as the `AppConfig` service, so a test can provide other values.
 - **Auth hook**: `AuthToken` (`src/lib/api/auth.ts`) is where `ApiClient` gets a bearer token.
   Without authentication the app provides `AuthToken.none`; with it, `src/lib/runtime.ts`
-  provides `AuthToken.fromGetter(tokenStore.get)` from `src/features/auth`. Both are tested in
-  `client.test.ts`.
+  provides `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)` from `src/features/auth`,
+  which drops the token when any request gets a 401 to it. Both are tested in `client.test.ts`.
 - **Permissions**, in two layers. Each skill's `allowed-tools` frontmatter approves the exact
   commands it runs, for the turn that invokes it: the plugin's scripts by their
   `${CLAUDE_SKILL_DIR}` path (`detect-project.mjs`, `create-project.sh`, `install-companions.sh`,

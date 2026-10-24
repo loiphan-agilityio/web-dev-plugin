@@ -18,6 +18,28 @@ graders:
     name: no-gitlab-pipeline
     path: ".gitlab-ci.yml"
     exists: false
+  # The fixture already ships .github/workflows/ci.yml, and file_exists sees only files the run
+  # created: editing that workflow would pass both graders above. Nothing may change at all.
+  - type: tool_used
+    name: no-edit
+    tool: Edit
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-write
+    tool: Write
+    min: 0
+    max: 0
+    arm: both
+  # The same change through the shell: a redirect, sed -i, tee, cp, mv or rm on a pipeline file.
+  - type: tool_used
+    name: no-pipeline-shell-write
+    tool: Bash
+    input_match: "(>|\\bsed -i|\\btee\\b|\\bcp\\b|\\bmv\\b|\\brm\\b)[^\\n]*(\\.github/workflows|\\.gitlab-ci\\.yml)"
+    min: 0
+    max: 0
+    arm: both
   - type: tool_used
     name: no-other-skill
     tool: Skill
