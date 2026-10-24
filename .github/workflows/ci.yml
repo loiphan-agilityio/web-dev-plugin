@@ -4,7 +4,8 @@
 #   every eval case.yaml parses.
 # - verify: tools/verify.sh: the free checks, then the todos feature the skills quote passes every
 #   gate, e2e included, in a project created from the boilerplate (cloned from GitHub).
-# - web-quality-scripts: the tests of web-quality's measurement scripts (local servers, no network).
+# - plugin-scripts: the tests of web-dev's contract check and web-quality's measurement scripts
+#   (local servers, no network).
 # Runs on pull requests and pushes to main that touch the plugin, on release tags, and weekly, so
 # a dependency or boilerplate release that breaks what the skills quote shows up before a user
 # hits it. A branch is checked through its pull request, so each check runs once. evals.yml calls
@@ -85,12 +86,12 @@ jobs:
       - run: corepack enable
       - run: bash tools/verify.sh
 
-  web-quality-scripts:
-    name: 'Test: web-quality scripts'
+  plugin-scripts:
+    name: 'Test: plugin scripts'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - run: node --test web-quality/scripts/test/*.test.mjs
+      - run: node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs
