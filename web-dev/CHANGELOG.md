@@ -23,6 +23,12 @@ the machine that made it):
 - `install-companions.sh` fails unless `skills-lock.json` records each companion at its pinned
   commit and path; it only checked that the file existed, which a project from the boilerplate
   always does.
+- `project-setup` names the project after its target folder: `create-project.sh` passes
+  `--name` to the boilerplate's generator, which runs in a temporary folder (needs
+  react-vite-boilerplate with `create --name`; an older generator is called as before).
+- Forms pass `form.getValues()` to `setFormErrors`, so a server message for a name the form has
+  no input for shows above the submit button (react-vite-boilerplate's three-argument
+  `setFormErrors`; `forms.md` says to drop it on an older boilerplate).
 - `README.md` pins the current release, `#web-dev--v0.3.3`, in the install example.
 - Eval 13 no longer scores whether `develop` fired: on a one-arm run the grader counted, so a
   correct run scored 0.67 against the 0.66 threshold (maintainers only).
@@ -30,6 +36,8 @@ the machine that made it):
   (maintainers only).
 - `DESIGN.md` names `packages/ui` for the shadcn components and theme, and two registration
   files per feature (maintainers only).
+- `pnpm lint` runs `tools/lint.sh` with bash: through cmd.exe on Windows its loop failed
+  (maintainers only).
 
 ## 0.3.2
 
