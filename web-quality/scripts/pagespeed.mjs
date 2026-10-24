@@ -14,6 +14,7 @@
 // when <url> is missing or not public, or the API cannot be reached or answers an error (the cause
 // on stderr, nothing on stdout).
 import { parseArgs } from 'node:util';
+import { realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 const API = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
@@ -139,7 +140,17 @@ export const pageSpeed = async (input, { strategy = 'mobile', apiUrl = API, key 
   };
 };
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+// Run as a script, not imported by a test. Node resolves the module's real path, so compare it with
+// the real path of argv[1]: through a symlink or junction the two spellings differ.
+const isMain = () => {
+  try {
+    return import.meta.url === pathToFileURL(realpathSync(process.argv[1] ?? '')).href;
+  } catch {
+    return false;
+  }
+};
+
+if (isMain()) {
   /** @type {{ values: { strategy?: string }, positionals: string[] }} */
   let args;
   try {
