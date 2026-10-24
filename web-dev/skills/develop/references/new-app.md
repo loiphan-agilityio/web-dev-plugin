@@ -14,7 +14,7 @@ description -> docs/plan.md -> project-setup -> feature-development x N (one sub
 
 The app name comes from the description (`library-manager`): lowercase, dashes. A2 creates a monorepo: from then on the **app folder** is its `apps/web`, where A3 and A4 build (read `apps/web/CLAUDE.md`: where its paths differ from the skills' examples, it wins); `docs/plan.md`, A5 and A6 stay at the project root. In a `template` folder the app folder is the folder itself.
 
-When the project is a `<app-name>/` subfolder, the session stays in this folder, which has no `package.json`: every `pnpm` command of A3, A5 and A6 takes `--dir <app-name>` first (`pnpm --dir library-manager check`), or pnpm fails with "No package.json found".
+When the project is a `<app-name>/` subfolder, this folder has no `package.json` (pnpm fails with "No package.json found"): after A2, run `cd <app-name>` as a command of its own, and have each A3 subagent do the same first. From there the project root is the working folder, and every command of A3 to A5 runs exactly as the skills write it, the same as in a project created here. Only A6's `.claude/launch.json` stays in this folder, so its dev server takes `--dir <app-name>`.
 
 ## A1. Plan: `docs/plan.md`
 
@@ -41,7 +41,7 @@ Give each subagent a self-contained brief, since it does not see this conversati
 
 - the project folder, its app folder (A0) where the feature goes, `docs/plan.md`, and the ticket's number and title;
 - "Invoke the `feature-development` skill (Skill tool) for this ticket and follow it as under `develop`'s Workflow A: the plan answers the ticket's questions; a gap it does not cover gets a default appended to the plan's **Assumptions**, and every criterion stays in scope. Mock handlers serve the plan's mock data. Ignore any design (it is applied later to the whole app). Write no `## Result` block.";
-- "Finish with `pnpm lint:fix`, then `pnpm check`, each as a plain command from the project folder (from this folder, with the project in a subfolder: `pnpm --dir <app-name> lint:fix`, `pnpm --dir <app-name> check`). Reply in at most 15 lines: files and routes created, the `pnpm check` outcome with test count and coverage, the assumptions you added, and anything not done or any gate you could not run."
+- "Finish with `pnpm lint:fix`, then `pnpm check`, each as a plain command from the project folder (with the project in a subfolder of your starting folder, run `cd <app-name>` first, as a command of its own). Reply in at most 15 lines: files and routes created, the `pnpm check` outcome with test count and coverage, the assumptions you added, and anything not done or any gate you could not run."
 
 Then read the report: a red or missing gate, or a ticket only partly built, is fixed before the next ticket (resume that subagent with SendMessage, or fix it here). Keep its gate line for the final Result. Without an Agent tool, invoke `feature-development` (Skill tool) here for each ticket, under the same rules.
 
@@ -51,7 +51,7 @@ With a design (images in `design/`, a `DESIGN.md` about the look, or a Figma lin
 
 ## A5. Gates
 
-`pnpm lint:fix`, then `pnpm check` (`pnpm --dir <app-name> lint:fix` and `pnpm --dir <app-name> check` for a subfolder project, A0), each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until all six gates pass; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result, and the POC is not called done.
+`pnpm lint:fix`, then `pnpm check` from the project root (inside `<app-name>/` for a subfolder project, A0), each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). Fix the cause until all six gates pass; a rule, a type and an assertion stay as strict as they are. A gate that stays red goes in the Result, and the POC is not called done.
 
 ## A6. Run it
 

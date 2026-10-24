@@ -2,7 +2,7 @@
 name: develop
 description: This skill should be used when the user types "/web-dev:develop", describes a whole web app, POC or MVP to build ("build an employee management app with CRUD and search"), or asks for a feature, endpoint or screen in an existing React project that is not built on the web-dev stack (axios, zod, Redux). It detects the project, picks the workflow and runs the other web-dev skills. Not for non-React projects, Next.js or SSR, bug fixes, code review or PR/MR work.
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's scripts/, references/ and agents/ beside skills/ and runs the other web-dev skills. Needs Node 22.22 or newer."
-allowed-tools: Bash(node --version) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/detect-project.mjs *) Bash(bash ${CLAUDE_SKILL_DIR}/../../scripts/verify-project.sh *) Bash(mkdir -p *) Bash(pnpm install) Bash(pnpm lint:fix) Bash(pnpm check) Bash(pnpm --dir * lint:fix) Bash(pnpm --dir * check)
+allowed-tools: Bash(node --version) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/detect-project.mjs *) Bash(bash ${CLAUDE_SKILL_DIR}/../../scripts/verify-project.sh *) Bash(mkdir -p *) Bash(pnpm install) Bash(pnpm lint:fix) Bash(pnpm check)
 ---
 
 # develop
