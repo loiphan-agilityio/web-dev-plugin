@@ -224,7 +224,7 @@ A model test calls the function with plain values: no render, no MSW. Cover each
 - MSW 3 imports: `msw/http`, `msw/utils/delay`. Root `msw` imports of `http`/`HttpResponse`/`delay` are rejected by lint.
 - Don't make a test pass by weakening it: no removing assertions, no `.skip`, no loosening queries. If a test exposes a bug, fix the code.
 - Test data for a new feature goes in its `mocks.ts` fixtures, not inline in each test.
-- Run one file while iterating: `pnpm test <path> --coverage.enabled=false` (`pnpm test` measures coverage, and one file alone stays under the 80% threshold, so the run fails even when its tests pass), or keep `pnpm test:watch` running in a terminal of its own (it re-runs the tests that import each saved file); run `pnpm check` before finishing.
+- Run one file while iterating: `pnpm test <path> --coverage.enabled=false` (`pnpm test` measures coverage, and one file alone stays under the 80% threshold, so the run fails even when its tests pass), or keep `pnpm test:watch` running in a terminal of its own (it re-runs the tests that import each saved file); run `pnpm check` before finishing. Both run in the app folder; from the monorepo root they take `--filter web` (`pnpm --filter web test <path> --coverage.enabled=false`, `pnpm --filter web test:watch`), since the root `test` runs turbo, which rejects Vitest's flags, and the root has no `test:watch`.
 
 ## End-to-end
 

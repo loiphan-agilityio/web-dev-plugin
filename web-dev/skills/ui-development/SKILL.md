@@ -2,7 +2,7 @@
 name: ui-development
 description: This skill should be used when the user asks to "implement this design", "make it look like this screenshot", "build this screen from this Figma link", "style it with our DESIGN.md" or "match the mockup" in an app built from the web-dev template (shadcn/ui, Tailwind 4). It turns a design into theme tokens, shadcn components, every data state, tests and a browser check. Not for a ticket without a design (feature-development), one endpoint (api-integration) or a new project (project-setup).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm; the visual check needs a browser tool."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *)
 ---
 
 # ui-development
@@ -10,6 +10,8 @@ allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnp
 Build or restyle a screen so it matches a design. The design is a visual target: the app gets real markup, tokens and components, never the screenshot or Figma frame as an image, and never a temporary Figma asset URL (it expires). Real assets in the design (logo, photos) are downloaded into `src/assets/` and imported, or into `public/` when they need a fixed URL; one that cannot be fetched gets a neutral placeholder.
 
 Before starting, read the project's `CLAUDE.md` and `../../references/stack-guidelines.md` (version traps). In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`. Under `develop`'s Workflow A, take the default instead of asking (no design: the current theme; a new font: keep Geist; a palette change: apply it; a structural gap: step 3's mobile rules) and record it under **Design gaps**.
+
+Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From the monorepo root, as under `develop`'s Workflow A, `pnpm lint:fix` and `pnpm check` work as written; the app's own commands take `--filter web` (`pnpm --filter web exec shadcn add <name>`, `pnpm --filter web test <path> --coverage.enabled=false`), since the root scripts run turbo, which rejects their flags.
 
 ## 0. Get the design
 

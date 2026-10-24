@@ -2,7 +2,7 @@
 name: api-integration
 description: This skill should be used when the user asks to "add an endpoint", "call the API", "hook this up to the backend", "add a mutation", "handle the 404/422 from the API", "mock this endpoint", "add an ApiError case" or "invalidate the cache after a write" in an app built from the web-dev template (Effect HttpClient, TanStack Query, MSW). It wires one endpoint with its schema, Effect.fn, query or mutation, MSW handlers and error tests. Not for a new project (project-setup) or a whole feature with screens and routes (feature-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm --filter web test *)
 ---
 
 # api-integration
@@ -15,6 +15,8 @@ component -> useQuery(xQueryOptions()) / useXMutation() -> runEffect(effect, sig
 ```
 
 Before writing code, read `node_modules/effect/AGENTS.md` in full, `../../references/stack-guidelines.md` (version traps), and the current `src/lib/api/client.ts`, `errors.ts` and the feature's `api.ts` / `queries.ts` / `mocks.ts` when they exist: match them. In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`.
+
+Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From the monorepo root, as under `develop`'s Workflow A, Effect's guide is `apps/web/node_modules/effect/AGENTS.md` and one test file runs with `pnpm --filter web test <path> --coverage.enabled=false` (the root `test` runs turbo, which rejects Vitest's flags); `pnpm lint:fix` and `pnpm check` work as written.
 
 **Loaded by `feature-development`:** do steps 1 to 5 for the endpoint, leave the page, routes and nav to it, and put what was done into its Result; its gate step runs the gates.
 
