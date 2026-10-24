@@ -45,6 +45,19 @@ printf '{"dependencies":{"react":"^19.3.1"}}\n' > "$tmp/pnpm-ws/apps/web/package
 printf '{"workspaces":["packages/*"]}\n' > "$tmp/yarn-ws/package.json"
 : > "$tmp/yarn-ws/yarn.lock"
 printf '{"dependencies":{"react":"^19.3.1"}}\n' > "$tmp/yarn-ws/packages/app/package.json"
+# pnpm catalogs on another major, so reading them shows in otherMajors: a column-0 comment inside
+# `catalog:`, the `catalogs:` form with `default` and a named catalog, and a catalog that names
+# nothing in the workspace file (no version known: left out).
+mkdir -p "$tmp/catalog-comment/app" "$tmp/catalogs/app" "$tmp/catalog-unknown/app"
+printf 'packages:\n  - app\ncatalog:\n  vite: ^8.3.4\n# React stays on 18 here\n  react: ^18.3.1\n' \
+  > "$tmp/catalog-comment/pnpm-workspace.yaml"
+printf '{"dependencies":{"react":"catalog:","vite":"catalog:"}}\n' > "$tmp/catalog-comment/app/package.json"
+printf 'packages:\n  - app\ncatalogs:\n  default:\n    react: ^18.3.1\n\n  legacy:\n    typescript: ~5.9.3\n' \
+  > "$tmp/catalogs/pnpm-workspace.yaml"
+printf '{"dependencies":{"react":"catalog:"},"devDependencies":{"typescript":"catalog:legacy"}}\n' \
+  > "$tmp/catalogs/app/package.json"
+printf 'packages:\n  - app\n' > "$tmp/catalog-unknown/pnpm-workspace.yaml"
+printf '{"dependencies":{"react":"catalog:stable"}}\n' > "$tmp/catalog-unknown/app/package.json"
 
 echo "check-detect:"
 expect empty new
@@ -70,6 +83,20 @@ expect_no_other_majors() {
 expect_no_other_majors range "installed react 19 matches the guidelines"
 # Not installed: react, typescript and tailwindcss are `catalog:`, pinned in pnpm-workspace.yaml.
 expect_no_other_majors template/apps/web "the boilerplate's catalog: versions match the guidelines"
+expect_no_other_majors catalog-unknown/app "an unresolved catalog:stable is not reported"
+
+expect_other_majors() {
+  local name="$1" want="$2" got
+  got="$(node "$detect" "$tmp/$name" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).otherMajors.join("; ")')"
+  if [[ "$got" == "$want" ]]; then
+    echo "  ok   $name: otherMajors $got"
+  else
+    echo "  FAIL $name: otherMajors \"$got\", expected \"$want\"" >&2
+    failed=1
+  fi
+}
+expect_other_majors catalog-comment/app "react ^18.3.1 (guidelines: 19)"
+expect_other_majors catalogs/app "react ^18.3.1 (guidelines: 19); typescript ~5.9.3 (guidelines: 6)"
 
 expect_package_manager() {
   local name="$1" want="$2" got
