@@ -1,6 +1,6 @@
 schema_version: "1.0"
 name: feature-direct-template
-description: A ticket typed without the command, in a template app. develop and feature-development both cover it; the case records whether develop fired at all and checks that the work lands in feature-development without a new scaffold.
+description: A ticket typed without the command, in a template app. develop and feature-development both cover it, so the case does not grade whether develop fired (the trace shows it); it checks that the work lands in feature-development without a new scaffold.
 tags: [routing, overlap]
 context:
   scaffold_script: setup.sh
@@ -15,10 +15,6 @@ graders:
     tool: Skill
     input_match: "feature-development"
     arm: both
-  - type: tool_used
-    name: fired-develop
-    tool: Skill
-    input_match: "develop([^m]|$)"
   - type: tool_used
     name: no-new-scaffold
     tool: Bash
