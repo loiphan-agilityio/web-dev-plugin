@@ -25,11 +25,13 @@ const API = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
  * audits are deterministic. Performance and best practices below target warn, and fail only in
  * Lighthouse's red band (under 50): one lab run varies.
  */
+// `id` is the key under lighthouseResult.categories; `param` the request's `category` value, the
+// enum of the API's discovery document (pagespeedonline v5: ACCESSIBILITY, BEST_PRACTICES, ...).
 const CATEGORIES = [
-  { id: 'performance', target: 90, strict: false },
-  { id: 'accessibility', target: 100, strict: true },
-  { id: 'best-practices', target: 95, strict: false },
-  { id: 'seo', target: 95, strict: true },
+  { id: 'performance', param: 'PERFORMANCE', target: 90, strict: false },
+  { id: 'accessibility', param: 'ACCESSIBILITY', target: 100, strict: true },
+  { id: 'best-practices', param: 'BEST_PRACTICES', target: 95, strict: false },
+  { id: 'seo', param: 'SEO', target: 95, strict: true },
 ];
 
 /**
@@ -66,8 +68,9 @@ export const pageSpeed = async (input, { strategy = 'mobile', apiUrl = API, key 
 
   const request = new URL(apiUrl);
   request.searchParams.set('url', target.href);
-  request.searchParams.set('strategy', strategy);
-  for (const { id } of CATEGORIES) request.searchParams.append('category', id);
+  // The discovery document's enum (MOBILE, DESKTOP), as for `category`.
+  request.searchParams.set('strategy', strategy.toUpperCase());
+  for (const { param } of CATEGORIES) request.searchParams.append('category', param);
   if (key) request.searchParams.set('key', key);
 
   // A run takes 10 to 60 seconds.

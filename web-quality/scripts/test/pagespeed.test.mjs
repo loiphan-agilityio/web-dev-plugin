@@ -63,8 +63,9 @@ describe('pagespeed', () => {
   it('asks for the four categories on mobile and passes a page that meets every target', async () => {
     const report = await run(response({ field: vitals(1800, 120, 5) }));
     const got = statuses(report);
-    assert.deepEqual(lastQuery?.getAll('category'), ['performance', 'accessibility', 'best-practices', 'seo']);
-    assert.equal(lastQuery?.get('strategy'), 'mobile');
+    // The enum values of the API's discovery document, not the response's lowercase keys.
+    assert.deepEqual(lastQuery?.getAll('category'), ['PERFORMANCE', 'ACCESSIBILITY', 'BEST_PRACTICES', 'SEO']);
+    assert.equal(lastQuery?.get('strategy'), 'MOBILE');
     assert.equal(lastQuery?.get('url'), 'https://www.example.com/');
     for (const id of ['lab-performance', 'lab-accessibility', 'lab-best-practices', 'lab-seo', 'field-lcp', 'field-inp', 'field-cls']) {
       assert.equal(got[id], 'pass', id);
