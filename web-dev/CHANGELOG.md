@@ -3,6 +3,21 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.3.2
+
+Fixes, each reproduced before the change:
+
+- At the monorepo root (`develop`'s Workflow A), the app's own commands take `--filter web`:
+  one test file (`pnpm --filter web test <path> --coverage.enabled=false`), `test:watch` and
+  `exec shadcn add`, which the root's turbo scripts rejected or lacked. Effect's guide is
+  `apps/web/node_modules/effect/AGENTS.md` there. `allowed-tools` cover the new forms.
+- Workflow A in a folder that already holds other files builds in `<app-name>/` and now runs
+  `cd <app-name>` before the gates (each A3 subagent too); its gates and dev server ran where pnpm
+  found no `package.json`. The dev server in `.claude/launch.json` takes `--dir <app-name>`.
+- Eval 15 fails a run that changes the pipeline the fixture ships, through Edit, Write or the
+  shell; it only caught new pipeline files.
+- `tools/verify.sh` passes native paths to the format hook on Windows (maintainers only).
+
 ## 0.3.1
 
 Fixes, each reproduced before the change:
