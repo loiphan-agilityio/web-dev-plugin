@@ -26,15 +26,12 @@ the plugin alone.
 | `19-setup-asks-for-auth` | empty | a setup request that does not say whether to include authentication: asks, and runs no `create-project.sh` |
 | `20-e2e-feature-template` | `template` | **output quality**, run to the end: a test and a story per component, `pnpm check` runs, the Result has a Route line and claims only what the trace shows |
 | `21-e2e-app-empty` | empty | **the main promise**, run to the end: one message gives `docs/plan.md`, the scaffold, every planned feature with a page test and story, `pnpm check`, and a Result that asks nothing and claims only what the trace shows |
-| `22-setup-landing` | empty | a landing page request: `create-project.sh --landing`, no authentication question, no plan |
-| `23-ticket-contracts-parallel` | `template` | two tickets: the `ticket` skill, one subagent per ticket, both contracts checked with `check-contract.mjs`, no feature code |
-| `24-incident-record` | `template` | an incident write-up: the `incident` skill writes `docs/incidents/INC-7/`, runs the check, blames no one and fixes no code |
 
 `fixtures/` builds the folders; each case's `setup.sh` calls one. `fixtures/check-detect.sh`
 checks the tier `scripts/detect-project.mjs` gives each fixture, without a model; `verify.sh`
 runs it.
 
-Tags: `routing` (cases 01 to 19 and 22 to 24, short runs that stop once the route is clear), `e2e` (cases 20 and 21,
+Tags: `routing` (cases 01 to 19, short runs that stop once the route is clear), `e2e` (cases 20 and 21,
 a full feature, or a whole app, with install and gates: slow, several dollars a run for 20 and more for 21), and finer tags within
 them: `workflow-a`, `workflow-b`, `workflow-c`, `existing-project`, `no-trigger` (the plugin
 must not fire), `edge`, `failure`, `overlap`.

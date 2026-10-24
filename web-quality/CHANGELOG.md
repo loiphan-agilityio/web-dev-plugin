@@ -3,6 +3,11 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.3
+
+- Removed the routing eval `07-landing-checklist` added in 0.2.0, at the maintainer's request
+  (maintainers only).
+
 ## 0.2.2
 
 - `pagespeed.mjs` sends `strategy` and `category` as the enum values of the API's discovery
