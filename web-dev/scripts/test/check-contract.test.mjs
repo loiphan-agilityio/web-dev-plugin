@@ -102,6 +102,18 @@ describe('check-contract.mjs', () => {
     assert.match(result.checks.find((c) => c.id === 'traceability').detail, /AC-2/);
   });
 
+  it('fails a criterion that only the Tests section names', () => {
+    const { status, result } = check(
+      contract('ticket', {
+        ...ticket,
+        'plan.md': `${ticket['plan.md'].replace('(AC-2)', '')}\n## Notes\n\nAC-2 is pinned in a test.\n`,
+      }),
+    );
+
+    assert.equal(status, 1);
+    assert.match(result.checks.find((c) => c.id === 'traceability').detail, /AC-2/);
+  });
+
   it('fails a spec with no criteria and a plan with no tasks', () => {
     const { status, result } = check(
       contract('ticket', {
@@ -166,6 +178,11 @@ describe('check-contract.mjs', () => {
 
         assert.doesNotMatch(detail, /missing/, `${kind}/${file}: ${detail}`);
         assert.match(detail, /fill/);
+      }
+
+      // The examples inside the templates' comments are not criteria, tasks or follow-ups.
+      for (const id of kind === 'ticket' ? ['criteria', 'tasks'] : ['status', 'follow-ups']) {
+        assert.equal(statusOf(result, id), 'fail', `${kind} ${id}`);
       }
     }
   });
