@@ -7,16 +7,29 @@
 #   create-project.sh <target-dir> --auth | --no-auth | --landing
 #
 # There is no default: the generator asks only on a terminal, and Claude's shell is not one, so the
-# skill asks the user and passes the answer. Clones the boilerplate's default branch
-# (BOILERPLATE_REPO overrides the URL: a fork, a mirror, a local repository), generates into a
-# temporary folder, then copies the result into <target-dir>. Refuses to overwrite: if any project
+# skill asks the user and passes the answer. Fetches the boilerplate at the commit pinned below,
+# generates into a temporary folder, then copies the result into <target-dir>. Refuses to overwrite: if any project
 # file already exists in the target, or a file sits where the project has a directory, it lists the
 # conflicts and exits 1 without copying anything. Existing .git/ and .claude/ are left alone: the
 # project's .claude/settings.json (the commands the skills run, allowed without a prompt, and the
 # hook that formats each file Claude writes) is copied only when the target has none.
+#
+# BOILERPLATE_REPO fetches from another URL (a fork, a mirror, a local repository), its default
+# branch unless BOILERPLATE_REF names another commit, branch or tag (`main` tries the latest).
 set -euo pipefail
 
+# The boilerplate commit this plugin release was verified against (tools/verify.sh runs every gate
+# on it): the code every skill quotes. A plugin version therefore always creates the same project,
+# whatever the boilerplate's main has become. Moved by a maintainer: see CLAUDE.md.
+pinned=cfcaa03e9d799806ce3b13969d6426463369619e
 repo="${BOILERPLATE_REPO:-https://github.com/loiphan-agilityio/react-vite-boilerplate.git}"
+if [[ -n "${BOILERPLATE_REF:-}" ]]; then
+  ref="$BOILERPLATE_REF"
+elif [[ -n "${BOILERPLATE_REPO:-}" ]]; then
+  ref=HEAD
+else
+  ref="$pinned"
+fi
 usage="usage: create-project.sh <target-dir> --auth|--no-auth|--landing"
 target="${1:?$usage}"
 kind="${2:-}"
@@ -27,9 +40,12 @@ fi
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-git clone --quiet --depth 1 "$repo" "$tmp/src"
+# fetch, not clone: a clone takes only a branch or a tag, and the pin is a commit.
+git init --quiet "$tmp/src"
+git -C "$tmp/src" fetch --quiet --depth 1 "$repo" "$ref"
+git -C "$tmp/src" -c advice.detachedHead=false checkout --quiet FETCH_HEAD
 if [[ ! -f "$tmp/src/create/index.js" ]]; then
-  echo "error: $repo has no create/index.js on its default branch" >&2
+  echo "error: $repo has no create/index.js at $ref" >&2
   exit 1
 fi
 # The generator names the project after its output folder, a temporary one here: pass the target's
