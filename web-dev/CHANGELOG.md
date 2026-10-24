@@ -3,6 +3,21 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.5.3
+
+Fixes from an audit, each reproduced before the change:
+
+- `install-companions.sh` fails when a companion is not installed. The boilerplate ships
+  skills-lock.json with all eight entries, so the lock check passed with nothing installed; each
+  companion must now also have its SKILL.md, by name, in `.claude/skills/`.
+- `feature-development` ends with `pnpm -w check:report` in a project from the boilerplate
+  (`check:report` exists only at the root; `-w` runs it there from `apps/web`) and puts the
+  checklist in its Result; `ticket`'s plans name the same command.
+- Docs match the code: a project starts at the pinned commit, not `main`; setup runs
+  `check:report`; the `findBy*` timeout is 5 s; skill and script counts; `CardTitle` example.
+- The boilerplate is pinned at `1fa4708` (anti-slop in apps/web's lint, the CSP for an http API,
+  check-report's reports); `references/coding-standards.md` synced.
+
 ## 0.5.2
 
 - Removed the eval cases added in 0.4.0 (22 setup-landing, 23 ticket-contracts-parallel, 24
