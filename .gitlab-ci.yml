@@ -52,6 +52,9 @@ web-dev:
     # pnpm 11 comes from the project's packageManager field.
     - corepack enable
   script:
+    # The pinned boilerplate commit (create-project.sh); a scheduled pipeline tries the
+    # boilerplate's main instead, so a change there that breaks the quoted code shows up early.
+    - if [ "$CI_PIPELINE_SOURCE" = schedule ]; then export BOILERPLATE_REF=main; fi
     - bash tools/verify.sh
 
 plugin-scripts:

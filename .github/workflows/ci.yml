@@ -6,8 +6,8 @@
 #   gate, e2e included, in a project created from the boilerplate (cloned from GitHub).
 # - plugin-scripts: the tests of web-dev's contract check and web-quality's measurement scripts
 #   (local servers, no network).
-# Runs on pull requests and pushes to main that touch the plugin, on release tags, and weekly, so
-# a dependency or boilerplate release that breaks what the skills quote shows up before a user
+# Runs on every pull request, on pushes to main that touch the plugin, on release tags, and weekly,
+# so a dependency or boilerplate release that breaks what the skills quote shows up before a user
 # hits it. A branch is checked through its pull request, so each check runs once. evals.yml calls
 # this workflow before the model evals; companions.yml checks the companion skills.
 name: CI
@@ -22,13 +22,9 @@ on:
       - 'tools/**'
       - '.claude-plugin/**'
       - '.github/workflows/ci.yml'
+  # Every pull request, with no paths filter: main requires these checks, and GitHub never reports a
+  # check whose workflow did not start, so a filtered-out pull request could not be merged.
   pull_request:
-    paths:
-      - 'web-dev/**'
-      - 'web-quality/**'
-      - 'tools/**'
-      - '.claude-plugin/**'
-      - '.github/workflows/ci.yml'
   schedule:
     - cron: '0 3 * * 1'
   workflow_dispatch:
@@ -84,7 +80,11 @@ jobs:
           node-version: 24
       # pnpm 11 comes from each project's packageManager field.
       - run: corepack enable
+      # The pinned boilerplate commit (create-project.sh); the weekly run tries the boilerplate's
+      # main instead, so a change there that breaks the quoted code shows up before the pin moves.
       - run: bash tools/verify.sh
+        env:
+          BOILERPLATE_REF: ${{ github.event_name == 'schedule' && 'main' || '' }}
 
   plugin-scripts:
     name: 'Test: plugin scripts'

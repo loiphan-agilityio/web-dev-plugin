@@ -59,8 +59,8 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 |---|---|
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the tools they and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
-| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the three boilerplate variants (landing page, web app with or without auth) and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate (clones it: network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged. Same as CI. |
-| `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (clones `main`: network; `BOILERPLATE_REPO` as above) into `web-dev/references/`, keeping each file's preamble. Run it after a guideline change is merged in the boilerplate, then review and commit the diff. |
+| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the three boilerplate variants (landing page, web app with or without auth) and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate at its pinned commit (network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged (that repository's checked-out branch), `BOILERPLATE_REF=main` the latest boilerplate. Same as CI, whose weekly run uses `main`. |
+| `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (the pinned commit: network; `BOILERPLATE_REPO` and `BOILERPLATE_REF` as above) into `web-dev/references/`, keeping each file's preamble. Run it after moving the pin past a guideline change, then review and commit the diff. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` (and `web-quality/...`) | Each plugin manifest is valid. |
@@ -92,8 +92,15 @@ corepack picks that version.
   `../../scripts/`, `../../agents/`), which holds both for the installed plugin and for a project
   that copies `skills/`, `references/`, `scripts/` and `agents/` into its `.claude/`.
 - **Change the boilerplate first, then the skills.** Run `pnpm check` in the boilerplate, push it,
-  run `verify.sh` (it clones the default branch; `BOILERPLATE_REPO=file://<clone>` tries a local
-  commit first), then update every snippet that quotes a changed file.
+  run `verify.sh` with `BOILERPLATE_REPO=file://<clone>` (that clone's checked-out branch), then
+  update every snippet that quotes a changed file.
+- **The boilerplate is pinned to a commit** (`pinned=` in
+  `web-dev/skills/project-setup/scripts/create-project.sh`): every project a plugin release creates,
+  and every check here, uses that commit, so a release never scaffolds code its skills do not
+  match. After a boilerplate change is merged, move the pin to the merge commit
+  (`git ls-remote <boilerplate> refs/heads/main`), run `sync-references.sh` and `verify.sh`, and
+  ship the pin in the same pull request as the skill changes that need it. CI's weekly run tries
+  the boilerplate's `main` (`BOILERPLATE_REF=main`) to show drift before the pin moves.
 - **Companion skills are pinned to an audited commit** in `install-companions.sh`. Upgrading one
   means reading the diff and updating the SHA there, in `web-dev/README.md` and in
   `web-dev/docs/companion-audit.md`, and its overrides in `web-dev/references/companions.md`.
@@ -144,3 +151,7 @@ corepack picks that version.
 - Messages follow Conventional Commits (`feat(ui-development): ...`), checked by commitlint in the
   `commit-msg` hook. The `pre-commit` hook runs ShellCheck and `node --check` on staged scripts.
   Never commit with `--no-verify`.
+- `main` changes only through a squash-merged pull request whose four CI checks pass:
+  `.github/rulesets/main.json`, applied once by a repository admin with
+  `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. After
+  renaming a CI job, update its name there.

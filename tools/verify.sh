@@ -4,9 +4,9 @@
 #
 # 0. Checks that detect-project.mjs gives each eval fixture its tier, and what project-setup's
 #    create-project.sh creates from the boilerplate and refuses (check-create-project.sh).
-# 1. Creates a project with create-project.sh --no-auth (clones the boilerplate: network;
-#    BOILERPLATE_REPO points it at another clone URL), checks that the plugin's shared references/
-#    match its apps/web/CLAUDE.md (check-guidelines.mjs), that its app names no todos (a new
+# 1. Creates a project with create-project.sh --no-auth (the boilerplate at its pinned commit:
+#    network; BOILERPLATE_REPO and BOILERPLATE_REF pick another, see create-project.sh), checks
+#    that the plugin's shared references/ match its apps/web/CLAUDE.md (check-guidelines.mjs), that its app names no todos (a new
 #    project starts empty; the todos feature is only the skills' worked example), and checks the
 #    hook in apps/web/.claude/settings.json that formats each file Claude writes.
 # 2. Writes the todos feature quoted in the skills' markdown into apps/web (every block marked

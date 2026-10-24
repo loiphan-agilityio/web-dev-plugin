@@ -3,9 +3,10 @@
 # into web-dev/references/ (check-guidelines.mjs --write keeps each file's preamble). Run it after a
 # guideline change is merged in the boilerplate, then review the diff and commit it.
 #
-#   tools/sync-references.sh   creates a project with create-project.sh --no-auth (clones the
-#                              boilerplate: network; BOILERPLATE_REPO points it at another clone
-#                              URL), the same CLAUDE.md that verify.sh compares
+#   tools/sync-references.sh   creates a project with create-project.sh --no-auth (the
+#                              boilerplate at its pinned commit: network; BOILERPLATE_REPO and
+#                              BOILERPLATE_REF pick another), the same CLAUDE.md that verify.sh
+#                              compares
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

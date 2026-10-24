@@ -3,6 +3,19 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.5.0
+
+- **The boilerplate is pinned to a commit.** `create-project.sh` fetches react-vite-boilerplate at
+  the commit this release was verified against (`pinned=`, now `56740b5`) instead of its `main`,
+  so a plugin version always creates the project its skills quote, however the boilerplate moves.
+  `BOILERPLATE_REF` picks another commit, branch or tag (`main` for the latest);
+  `BOILERPLATE_REPO` without a ref uses that repository's checked-out branch, as before. CI's
+  weekly run tries the boilerplate's `main` to show drift before the pin moves (maintainers).
+- `references/architecture.md` (synced): unexpected errors are reported in one place, the
+  boilerplate's `reportError` (`src/lib/report-error.ts`): a 5xx or an `InvalidResponseError`
+  from any query or mutation, and a route that throws. A feature never logs or reports an API
+  error itself.
+
 ## 0.4.1
 
 Fixes, found by writing a real contract with the `ticket` skill:
