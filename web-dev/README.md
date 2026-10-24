@@ -38,7 +38,7 @@ claude plugin install web-dev@web-dev-plugin
 
 The URL is the repository's git URL (`https://github.com/loiphan-agilityio/web-dev-plugin.git`
 works too). It installs from the default branch, `main`; append `#<ref>` to pick another
-branch or pin a release tag (`#web-dev--v0.2.0`). The clone runs with your
+branch or pin a release tag (`#web-dev--v0.3.3`). The clone runs with your
 own git credentials and never prompts: an SSH key loaded in `ssh-agent`, or for an `https://`
 URL a credential your git helper already stores.
 
