@@ -1,0 +1,40 @@
+schema_version: "1.0"
+name: ticket-contracts-parallel
+description: Two tickets pasted at once go to the ticket skill, which writes each contract in its own subagent and checks both folders; no feature code is written.
+tags: [routing]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: |
+    /web-dev:ticket Write the contracts for these two tickets in apps/web.
+    412: Customers page. List customers from GET /customers (id, name, email) with a search box.
+    413: Add customer. A form that posts name and email to POST /customers; email must be unique.
+  max_turns: 20
+  timeout_seconds: 900
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: runs-ticket
+    tool: Skill
+    input_match: "ticket"
+    arm: both
+  - type: tool_used
+    name: one-subagent-per-ticket
+    tool: Agent
+    min: 2
+    arm: both
+  - type: file_exists
+    name: contract-412
+    path: "**/docs/tickets/412/plan.md"
+  - type: file_exists
+    name: contract-413
+    path: "**/docs/tickets/413/spec.md"
+  - type: tool_used
+    name: checks-contracts
+    tool: Bash
+    input_match: "check-contract\.mjs"
+    arm: both
+  - type: file_exists
+    name: no-feature-code
+    path: "**/src/features/customers/**"
+    exists: false
