@@ -3,6 +3,12 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.5.2
+
+- Removed the eval cases added in 0.4.0 (22 setup-landing, 23 ticket-contracts-parallel, 24
+  incident-record) and the Evals workflow's sandbox step from 0.5.1, at the maintainer's request;
+  the earlier cases and workflow are unchanged (maintainers only).
+
 ## 0.5.1
 
 - The Evals workflow installs the shell sandbox `claude plugin eval` requires (bubblewrap and

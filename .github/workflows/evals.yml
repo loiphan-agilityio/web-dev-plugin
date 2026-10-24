@@ -45,19 +45,6 @@ jobs:
       EVALS_CHECKS_DONE: '1'
       EVALS_ARGS: ${{ inputs.args }}
     steps:
-      # `claude plugin eval` runs the agent's shell tools only inside an OS sandbox and refuses the
-      # run otherwise; on Linux that needs bubblewrap and socat (Claude Code: "apt install
-      # bubblewrap socat"), which the runner image does not ship, and Ubuntu 24.04 lets bubblewrap
-      # create its user namespace only with AppArmor's restriction off (without it: "bwrap: setting
-      # up uid map: Permission denied"). First, so a run on another ref still proves the sandbox
-      # works before the ref check stops it.
-      - name: Install the shell sandbox
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq bubblewrap socat
-          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-          bwrap --ro-bind / / --dev /dev --proc /proc true
-          echo "bubblewrap $(bwrap --version | cut -d' ' -f2) and socat run"
       - name: Check the ref and the API key
         run: |
           if [[ "$GITHUB_REF" != refs/tags/web-dev--v* ]]; then
