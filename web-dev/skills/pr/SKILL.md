@@ -31,7 +31,7 @@ The ticket id comes from the user, else the branch name (`feat/412-search`, `doc
 
 ## 4. Write and check the description
 
-Write it to `pr-body.md` in the git directory (`git rev-parse --git-dir`), outside the work tree so it is never committed. Copy the sections of `references/pr.md` in order and replace every `<!-- fill ... -->`:
+Write it to `pr-body.md` in a new temporary folder outside the repository (`mktemp -d`), so it is never committed: Claude Code does not write inside `.git/`. Copy the sections of `references/pr.md` in order and replace every `<!-- fill ... -->`:
 
 - **Why:** the problem and the outcome, from the ticket's `intent.md`, in one to three lines; no solution.
 - **Changes:** from `git diff --stat origin/<base>...HEAD` and the commits: what changed, by area, one bullet each, and what a reviewer should try. Only what the diff holds.

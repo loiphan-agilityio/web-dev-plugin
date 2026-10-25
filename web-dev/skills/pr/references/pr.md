@@ -1,5 +1,5 @@
-<!-- The PR or MR description: the pr skill writes it to pr-body.md in the git directory. The
-title is separate: a Conventional Commit, `<type>(<scope>): <summary>`. -->
+<!-- The PR or MR description: the pr skill writes it to pr-body.md in a temporary folder outside
+the repository. The title is separate: a Conventional Commit, `<type>(<scope>): <summary>`. -->
 
 ## Why
 

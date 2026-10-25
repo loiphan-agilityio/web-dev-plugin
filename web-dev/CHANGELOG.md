@@ -3,6 +3,12 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.6.1
+
+- `pr` writes the PR description to `pr-body.md` in a temporary folder outside the repository
+  (`mktemp -d`) instead of the git directory: Claude Code does not write inside `.git/`, as a run
+  that opened a real PR showed.
+
 ## 0.6.0
 
 - New skill `pr` (`/web-dev:pr`): opens a pull request (`gh`) or merge request (`glab`) for the
