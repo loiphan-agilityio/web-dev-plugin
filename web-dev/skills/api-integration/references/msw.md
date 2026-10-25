@@ -119,8 +119,7 @@ server.use(todosMocks.createInvalid({ title: 'x' }));
 ### Toasts
 
 A toast is asserted as text (`findByText`): the render helpers mount the `Toaster`. Never mock
-`sonner`. Details, and what to add in an app from the plugin's 0.1.0 template that lacks it:
-`../../feature-development/references/testing.md`, section Rules.
+`sonner`. Details: `../../feature-development/references/testing.md`, section Rules.
 
 ### Other rules
 
