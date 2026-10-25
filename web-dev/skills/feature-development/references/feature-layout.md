@@ -36,7 +36,7 @@ Import from `@/...` for anything outside the feature, relative paths inside it.
 ## schemas.ts
 
 The full file is in the api-integration skill, `references/effect-http.md`, section "Schema
-(`features/<name>/schemas.ts`)" (`../api-integration/references/effect-http.md`). Name the value and
+(`features/<name>/schemas.ts`)" (`../../api-integration/references/effect-http.md`). Name the value and
 the type the same, and derive types (`typeof X.Type`), never hand-write them. When a schema
 transforms (`Schema.Trim`), export both sides: `Type` (`NewTodo`) is what the API gets,
 `Encoded` (`NewTodoInput`) is what the form holds, and `useForm` takes both. Validation messages
@@ -61,14 +61,14 @@ export const openFirst = (todos: readonly Todo[]) =>
 ## api.ts
 
 The full file is in the api-integration skill, `references/effect-http.md`, section "Effect.fn
-(`features/<name>/api.ts`)" (installed next to this skill: `../api-integration/references/effect-http.md`).
+(`features/<name>/api.ts`)" (installed next to this skill: `../../api-integration/references/effect-http.md`).
 It is kept in one place for both skills. Shape: one `Effect.fn('<name>.<action>')` per call that
 does `const api = yield* ApiClient` and returns `api.get(path, Schema)` or `api.post(path, input, Schema)`.
 
 ## queries.ts
 
 The full file is in the api-integration skill, `references/react-query.md`, sections "Keys and query
-options" and "Mutation hook" (`../api-integration/references/react-query.md`). Shape: a key factory
+options" and "Mutation hook" (`../../api-integration/references/react-query.md`). Shape: a key factory
 (`todoKeys`), a `queryOptions` factory per read (`todoListQueryOptions`) whose `queryFn` passes
 `signal` to `runEffect`, and a `use<Action><Name>` hook per write that returns the
 `invalidateQueries` promise from `onSuccess`.
@@ -76,7 +76,7 @@ options" and "Mutation hook" (`../api-integration/references/react-query.md`). S
 ## mocks.ts
 
 The full file is in the api-integration skill, `references/msw.md`, section "Feature mocks
-(`features/<name>/mocks.ts`)" (`../api-integration/references/msw.md`). Shape: `create<Name>Handlers(initial)`
+(`features/<name>/mocks.ts`)" (`../../api-integration/references/msw.md`). Shape: `create<Name>Handlers(initial)`
 with in-memory state per call, `<name>Handlers` for the default list, and `<name>Mocks` for one-off states
 (pending with `delay('infinite')`, error status, 422 with field errors).
 

@@ -30,7 +30,7 @@ compile error, not a silent gap.
 
 ## Changing how a status maps
 
-Add a `case` in `fromStatus` (e.g. 409 to a new `ConflictError`, 429, 5xx splits). Anything not listed falls to `ServerError { status }`, which TanStack Query retries once.
+Add a `case` in `fromStatus` (e.g. 409 to a new `ConflictError`, 429, 5xx splits). Anything not listed falls to `ServerError { status }`, which TanStack Query retries once only for a 5xx.
 
 ## Adding a new ApiError case
 
@@ -40,7 +40,7 @@ Add a `case` in `fromStatus` (e.g. 409 to a new `ConflictError`, 429, 5xx splits
    ```
 2. `toUserMessage` in `errors.ts`: add a handler to its `Match.tagsExhaustive`; it is exhaustive over `ApiError`, so TypeScript flags it if you forget.
 3. `client.ts`: import it and return it from `fromStatus` (or `toApiError`).
-4. `query-client.ts`: decide whether it is transient. Only `NetworkError` and `ServerError` are retried; leave new 4xx cases out.
+4. `query-client.ts`: decide whether it is transient. Only `NetworkError` and a 5xx `ServerError` are retried; leave new 4xx cases out.
 5. `src/lib/forms.ts` (`setFormErrors`) needs a change only if the new error carries field messages; otherwise it already falls through to `errors.root.server` with `toUserMessage`.
 6. Add a mock (`<name>Mocks.<case>`) and a test. Existing `Match.tagsExhaustive` over `ApiError` fail typecheck until they handle the case; that is the point.
 

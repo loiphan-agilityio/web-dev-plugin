@@ -98,7 +98,7 @@ export const TodosPage = () => (
 );
 ```
 
-The page only composes; each child owns its own query/mutation. Both use the same `todoListQueryOptions()`, so the cache is shared.
+The page only composes; each child owns its own query/mutation. `TodoList` reads `todoListQueryOptions()`; `TodoForm`'s `useCreateTodo` invalidates `todoKeys.lists()`, so the list refetches after a create.
 
 ## Styling and a11y rules
 
