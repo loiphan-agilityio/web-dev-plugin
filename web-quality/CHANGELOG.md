@@ -3,6 +3,15 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.6
+
+- On Windows, `pagespeed.mjs` and `check-headers.mjs` could crash with exit 127
+  (`Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)`) instead of exiting 2 when a request
+  failed, such as PageSpeed's 429 for the shared keyless quota: `process.exit()` ran while fetch
+  still held the HTTPS connection. `cannotRun` now sets `process.exitCode`, and each script returns
+  from its `main()`; output and exit codes are otherwise unchanged.
+- Restored the 0.2.4 heading this changelog lost in 0.2.5.
+
 ## 0.2.5
 
 - The three scripts share `scripts/lib/cli.mjs` (when to run, printing a report, exiting 2), with
@@ -13,6 +22,7 @@ A git install is a cached copy, so a change reaches users only with a new versio
   step is for other projects.
 - Eval docs: runs happen when the maintainer asks, not as part of a release (maintainers only).
 
+## 0.2.4
 
 Fixes from an audit, each reproduced before the change:
 

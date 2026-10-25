@@ -140,18 +140,18 @@ export const pageSpeed = async (input, { strategy = 'mobile', apiUrl = API, key 
   };
 };
 
-if (isMain(import.meta.url)) {
+const main = async () => {
   /** @type {{ values: { strategy?: string }, positionals: string[] }} */
   let args;
   try {
     args = parseArgs({ allowPositionals: true, options: { strategy: { type: 'string', default: 'mobile' } } });
   } catch (error) {
-    cannotRun('pagespeed', error);
+    return cannotRun('pagespeed', error);
   }
   const [url] = args.positionals;
   const { strategy } = args.values;
   if (!url || (strategy !== 'mobile' && strategy !== 'desktop')) {
-    cannotRun('usage', 'pagespeed.mjs <url> [--strategy mobile|desktop]');
+    return cannotRun('usage', 'pagespeed.mjs <url> [--strategy mobile|desktop]');
   }
   try {
     printReport(
@@ -164,4 +164,6 @@ if (isMain(import.meta.url)) {
   } catch (error) {
     cannotRun(`pagespeed: ${url}`, error);
   }
-}
+};
+
+if (isMain(import.meta.url)) await main();

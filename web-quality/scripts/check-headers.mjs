@@ -207,12 +207,14 @@ export const checkHeaders = async (input) => {
   return { url: input, finalUrl: final.href, status: page.status, checks };
 };
 
-if (isMain(import.meta.url)) {
+const main = async () => {
   const url = process.argv[2];
-  if (!url) cannotRun('usage', 'check-headers.mjs <url>');
+  if (!url) return cannotRun('usage', 'check-headers.mjs <url>');
   try {
     printReport(await checkHeaders(url));
   } catch (error) {
     cannotRun(`check-headers: ${url}`, error);
   }
-}
+};
+
+if (isMain(import.meta.url)) await main();
