@@ -122,7 +122,8 @@ e2e. Its app,
   `ApiError` (`NetworkError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`,
   `ValidationError`, `ServerError`, `InvalidResponseError`). Tested in `client.test.ts`.
 - **`runEffect`** (`src/lib/api/run.ts`): runs an effect for TanStack Query, passes the abort
-  signal, rejects with the typed error so `query.error._tag` is safe to switch on.
+  signal, rejects with the typed error, which a component branches on with `instanceof` the error class or
+  Effect's `Match` (never `_tag` by hand: anti-slop rejects it).
 - **Forms**: React Hook Form + `effectTsResolver(schema)` (`@hookform/resolvers` 6, Effect 4) +
   shadcn `Field`; `setFormErrors` puts server field errors under the right inputs.
 - **MSW worker**: `public/mockServiceWorker.js` is not in the boilerplate; the `postinstall` script
@@ -197,12 +198,12 @@ brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "n
 
 ## Companion skills
 
-Popular third-party skills for parts of the stack, installed next to the five
+Popular third-party skills for parts of the stack, installed next to the web-dev
 skills by `install-companions.sh` and pinned to an audited commit. Each was read in full for security
 and fit; the findings are in [`docs/companion-audit.md`](docs/companion-audit.md), and what Claude
 must ignore in each one is in [`references/companions.md`](references/companions.md), which every
 skill reads before following a companion. When a companion disagrees with the project, the
-project's `CLAUDE.md` and the five project skills win. The installer is pinned too:
+project's `CLAUDE.md` and the web-dev skills win. The installer is pinned too:
 `install-companions.sh` runs `skills@1.7.2`, not whatever `npx skills` serves that day.
 
 | Skill | Source | Commit | License | What it is for |
@@ -231,14 +232,6 @@ re-run the script after updating it.
 
 ## Maintaining
 
-`../.gitattributes` (the repository root) keeps every file LF, so the shell scripts still run from a CRLF checkout
-(`core.autocrlf=true`).
-
-Run `pnpm install` once at the repository root: it installs the git hooks (husky). Commit
-messages follow Conventional Commits (commitlint); the `pre-commit` hook checks staged scripts.
-`pnpm lint` at the root checks every script at once. Projects from the boilerplate get the same
-hooks (see its `CLAUDE.md`).
-
 ```
 .claude-plugin/          ← plugin.json (name web-dev, version); ../.claude-plugin/ is the marketplace
 skills/                  ← the product
@@ -264,47 +257,7 @@ Outside the plugin, at the repository root: `tools/` (maintainer scripts: `verif
 `lint.sh`, `validate-skills.sh`) and `.claude/` (maintainer agents and settings).
 Neither ships with the plugin.
 
-**Change the boilerplate or bump a dependency:**
-
-1. Change the boilerplate (react-vite-boilerplate), run `pnpm check` in it and push.
-2. `bash ../tools/verify.sh` — the shared references and fixture tiers, then a project created
-   from the boilerplate, with the todos feature quoted in the skills (every ` ```tsx file=... `
-   block, written out by `extract-snippets.mjs`) wired into its `apps/web`, all gates.
-   `BOILERPLATE_REPO=file://<clone>` runs it on a local commit before the push.
-3. Update every snippet in the skills that quotes a changed file. Snippets are copied from the
-   boilerplate's `apps/web`, never written from memory; keep it that way. A block that shows a
-   pattern found in neither the boilerplate nor the todos feature (a detail key, `setQueryData`) is marked
-   ` ```ts sketch ` and says so in the text. A todos block keeps its `file=` path; a new todos
-   file gets a block with its own `file=` path, or `verify.sh` never tests it.
-4. Release: bump `version` in `.claude-plugin/plugin.json` (installs from git are cached copies,
-   so without a bump nobody receives the change), add the entry to `CHANGELOG.md`, tag the
-   commit `web-dev--v<version>`, and run
-   `claude plugin validate --strict .claude-plugin/plugin.json` (and `claude plugin validate --strict ..`
-   for the marketplace).
-
-**Version traps** (Effect 4, React Router 8, MSW 3, TanStack Query 5, Tailwind 4, Vitest 5,
-Storybook 10) are written once, in `references/stack-guidelines.md`; code style and the data flow
-in `coding-standards.md` and `architecture.md` beside it. Skills point there and keep only the
-traps specific to their own step. The boilerplate's `apps/web/CLAUDE.md` carries the same sections
-word for word, so a project from it keeps them without the plugin. The boilerplate is the source:
-change a section there, then `bash tools/sync-references.sh` copies it into `references/`;
-`check-guidelines.mjs` (run by `verify.sh`) fails when the copies differ.
-
-**Routing** (`skills/develop/SKILL.md`, the skills' descriptions, `scripts/detect-project.mjs`)
-is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `evals/README.md`);
-`verify.sh` checks the tier of every fixture without a model; the model evals run only
-on request (`evals/README.md`, When evals run).
-
-**CI** on GitHub Actions (`../.github/workflows/`: `ci.yml` for the free checks, also weekly
-instead of a pipeline schedule; `companions.yml` weekly; `evals.yml`, the model evals, only from
-a manual run on a release tag) and on GitLab
-(`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
-and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,
-and `verify.sh`. Schedules also run `install-companions.sh` in a new project from the boilerplate, so a
-companion whose repo moved or deleted the pinned path shows up. Add a weekly schedule in GitLab (Build >
-Pipeline schedules) so a boilerplate change that breaks the code the skills quote shows up before a
-user hits it. On another Git host, run the same commands from your own CI.
-
-**Upgrade a companion:** read the diff between the pinned and the new commit, re-check it
-against the conventions, then change the SHA in `install-companions.sh`, in the table above and in
-`docs/companion-audit.md`, and update its overrides in `references/companions.md`. The same holds for the `skills` CLI version.
+The rules for changing all of it live in one place, the repository's [`CLAUDE.md`](../CLAUDE.md):
+the hooks (`pnpm install` once at the root), LF files, changing the boilerplate and moving its pin,
+snippets quoted from it, the shared references and `sync-references.sh`, releases, routing evals
+(run only on request), CI, and upgrading a companion.

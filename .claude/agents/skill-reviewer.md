@@ -1,6 +1,6 @@
 ---
 name: skill-reviewer
-description: Read-only final review of the five skills in web-dev/skills/ before the merge request — correctness of every snippet against the reference app, version traps, consistency between skills, conflicts with companion skills, and trigger quality of descriptions.
+description: Read-only final review of the skills in web-dev/skills/ before the merge request — correctness of every snippet against the reference app, version traps, consistency between skills, conflicts with companion skills, and trigger quality of descriptions.
 model: opus
 effort: high
 tools: Read, Grep, Glob, Bash
@@ -23,13 +23,13 @@ You review; you do not edit. Your findings are applied by the main session.
 2. **Version traps.** Any v3 Effect API (`Context.Tag`, `Effect.Service`, `@effect/platform`,
    `Schema.decodeUnknown(`, `ParseError`), `standardSchemaResolver` with `toStandardSchemaV1` for forms, `zodResolver`, `isLoading` for
    first load, `react-router-dom`, `tailwind.config`, MSW `rest.`, Jest APIs.
-3. **Consistency.** Names, paths, gate commands and layout identical across the five skills
+3. **Consistency.** Names, paths, gate commands and layout identical across the skills
    and the boilerplate's `apps/web/CLAUDE.md`.
 4. **Companions.** `web-dev/references/companions.md` covers every companion in
    `install-companions.sh` and states its overrides; no skill tells Claude to follow a companion
    where the convention says otherwise.
 5. **Triggering.** Each description says what and when, with natural user phrasing, and the
-   five descriptions do not overlap enough to compete for the same prompt. In particular
+   descriptions do not overlap enough to compete for the same prompt. In particular
    `ui-development` must not fire for a ticket without a design (`feature-development`) or for
    endpoint work (`api-integration`).
 6. **Gates.** Run `tools/verify.sh` (a project from the boilerplate in a temp directory) and

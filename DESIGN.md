@@ -98,8 +98,8 @@ flowchart LR
   (`no-restricted-imports`, a pattern for `src/features/**`) rejects its `api`, `mocks` and
   `components`.
 - `ApiClient` is the only way to call the backend. It decodes every body with an Effect Schema
-  and maps every failure to a typed `ApiError`, so a component can switch on
-  `query.error._tag`.
+  and maps every failure to a typed `ApiError`, so a component branches on the error class
+  (`instanceof`, or Effect's `Match`).
 - `runEffect` is the only bridge from Effect to TanStack Query; it passes the abort signal.
   Retries live in TanStack Query only (queries once, for network errors and 5xx answers).
 - Forms use React Hook Form with `effectTsResolver(schema)` and
