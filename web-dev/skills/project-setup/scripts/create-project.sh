@@ -52,7 +52,7 @@ fi
 # name instead (`.` counts as the folder it names). It asks "landing page or web app?" and, for a
 # web app, about authentication: answer both.
 name="$(node -p 'require("node:path").basename(require("node:path").resolve(process.argv[1]))' "$target")"
-if [[ "$kind" == --landing ]]; then choice=(--landing --no-auth); else choice=(--app "$kind"); fi
+if [[ "$kind" == --landing ]]; then choice=(--landing); else choice=(--app "$kind"); fi
 # The generator prints next steps with the temporary path; the skill gives its own.
 node "$tmp/src/create/index.js" "$tmp/out" --from "$tmp/src" "${choice[@]}" --name "$name" >/dev/null
 
