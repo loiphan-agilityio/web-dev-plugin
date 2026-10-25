@@ -72,11 +72,6 @@ export const useCreateTodo = () => {
 
 Name `use<Action><Name>`. Invalidate exactly the keys the write changes: the lists the item can appear in, and the detail key of that item for update/delete. Return the promise.
 
-Call-site error handling: `TodoForm/index.tsx` (the feature-development skill's `references/forms.md`,
-`../../feature-development/references/forms.md`) calls `createTodo.mutate(values, { onSuccess, onError })`,
-with `form.reset()` and `toast.success(...)` in `onSuccess` and `setFormErrors(form.setError, error, form.getValues())`
-in `onError`.
-
 Callbacks that touch the component (form reset, toast) go to `mutate`; the hook's own `onSuccess` only invalidates. A mutation outside a form (a row's toggle or delete button) handles its errors the same way, at the call site: `onError: (error) => { if (error instanceof NotFoundError) … else toast.error(toUserMessage(error)); }`.
 
 ## Invalidate vs setQueryData

@@ -53,8 +53,3 @@ Test the success path plus every error the endpoint can really produce; not all 
 - Never assert on error class internals; assert what the user sees (`toUserMessage` text, `role="alert"`).
 
 Test client: no retries (`createTestQueryClient` in `src/test/query-client.ts`, used by `render.tsx` and Storybook, sets `retry: false`), so a failing request shows its error immediately. The retry policy itself belongs in a `createQueryClient` test, not in endpoint tests.
-
-## Showing errors
-
-- Queries: `query.error` is `ApiError`; render `toUserMessage(query.error)` plus a retry button (`query.refetch()`). Empty and error must look different.
-- Mutations in forms: `mutate(values, { onError: (error) => setFormErrors(form.setError, error, form.getValues()) })`. Field errors land under the inputs, everything else on `errors.root.server`.

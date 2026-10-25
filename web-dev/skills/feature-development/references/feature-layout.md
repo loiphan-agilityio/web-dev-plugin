@@ -31,7 +31,7 @@ components/
 - A file in the folder serves that component only. When a second component needs it, it leaves the folder: a business rule goes to `model.ts`, markup becomes its own component folder.
 - `src/components/` (shared app components) uses the same layout. `packages/ui/src/components/` keeps the flat kebab-case files the shadcn CLI writes; `src/app/` keeps its kebab-case files.
 
-Import from `@/...` for anything outside the feature, relative paths inside it. From another feature, import only its `schemas`, `model`, `queries` or `routes`: lint rejects its `api`, `mocks` and `components`. Use inline type imports (`import { type NewTodo, Todo } from './schemas'`); lint enforces it.
+Import from `@/...` for anything outside the feature, relative paths inside it.
 
 ## schemas.ts
 
@@ -65,8 +65,6 @@ The full file is in the api-integration skill, `references/effect-http.md`, sect
 It is kept in one place for both skills. Shape: one `Effect.fn('<name>.<action>')` per call that
 does `const api = yield* ApiClient` and returns `api.get(path, Schema)` or `api.post(path, input, Schema)`.
 
-`ApiClient` prefixes `apiUrl` from `AppConfig`, decodes the body with the schema you pass, and maps every failure to an `ApiError`. No `fetch`, no axios, no `HttpClient.retryTransient`. Methods used in the example: `api.get(path, schema)` and `api.post(path, body, schema)`; read `src/lib/api/client.ts` for the rest (put, patch, delete) before using them.
-
 ## queries.ts
 
 The full file is in the api-integration skill, `references/react-query.md`, sections "Keys and query
@@ -81,10 +79,6 @@ The full file is in the api-integration skill, `references/msw.md`, section "Fea
 (`features/<name>/mocks.ts`)" (`../api-integration/references/msw.md`). Shape: `create<Name>Handlers(initial)`
 with in-memory state per call, `<name>Handlers` for the default list, and `<name>Mocks` for one-off states
 (pending with `delay('infinite')`, error status, 422 with field errors).
-
-- `create<Name>Handlers(initial)` copies its input, so each call has private state.
-- `<name>Handlers` (default data) is registered globally; tests override with `server.use(...)`.
-- `<name>Mocks.*` are one-off responses: pending, error, 422. The 422 body shape (`{ message, errors: { field: message } }`) is what `ValidationError.fields` is built from; confirm it against `src/lib/api/client.ts` and the real API.
 
 ## routes.tsx
 
