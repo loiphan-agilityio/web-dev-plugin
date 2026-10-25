@@ -2,8 +2,8 @@
 
 One entry point, `/web-dev:develop <request>`, skills that let Claude build web apps on
 a modern React stack and follow its conventions on the first try, in a new folder or in an
-existing React project, and skills that write the contracts around the code: ticket specs and
-incident records.
+existing React project, and skills that write the contracts around the code: ticket specs,
+incident records and pull request descriptions.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
 shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Playwright 1.64 · Storybook 10 · pnpm 11 ·
@@ -16,12 +16,13 @@ GitHub Actions + Netlify (in the boilerplate)
 | `feature-development` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `api-integration` for endpoints beyond list + create and `ui-development` for a design | "Implement this ticket: <paste or issue URL>" |
 | `ticket` | Tickets → `docs/tickets/<id>/intent.md`, `spec.md` (testable `AC-<n>` criteria, open questions) and `plan.md` (`T<n>` tasks citing them), grounded in the code, checked by `scripts/check-contract.mjs` and committed on a branch for review; several tickets in parallel, one subagent each. `feature-development` then builds from the folder | "/web-dev:ticket 412 413 414" · "Write the contract for issue #412" |
 | `incident` | An incident → `docs/incidents/<id>/report.md`, `rca.md` (claims labelled measured or hypothesis) and `actions.md` (follow-ups `A<n>`), checked and committed on a branch; follow-ups can become tickets | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
+| `pr` | The current branch → a pull request (`gh`) or merge request (`glab`) described by its contract: why, what changed, the ticket contract it implements and the `pnpm check:report` checklist, checked by `scripts/check-contract.mjs`. Opened as a draft and marked ready only when CI passes; it never pushes a protected branch and never merges | "/web-dev:pr" · "Open a PR for ticket 412" |
 | `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `ui-development` | A design (screenshot, mockup, Figma frame, DESIGN.md) → a UI that matches it: theme tokens, shadcn components, states, tests, a visual check in the browser. With no design it asks once for an optional DESIGN.md or Figma link, then uses the current theme | "Make the settings page look like design/settings.png" |
 
 Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD (it comes with the
-boilerplate). Not yet: bug fixes, review without edits, commits and PR/MR beyond the contract commit
-of `ticket` and `incident` (`develop` says so and changes nothing).
+boilerplate). Not yet: bug fixes, review without edits, and commits beyond the contract commit of
+`ticket` and `incident` (`develop` says so and changes nothing); a PR or MR goes through `pr`.
 
 ## Install
 

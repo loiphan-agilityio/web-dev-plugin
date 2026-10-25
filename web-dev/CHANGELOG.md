@@ -3,6 +3,19 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.6.0
+
+- New skill `pr` (`/web-dev:pr`): opens a pull request (`gh`) or merge request (`glab`) for the
+  current branch, described by the PR contract in `skills/pr/references/pr.md`: Why, Changes,
+  Ticket (a link to `docs/tickets/<id>/` and the criteria it covers, or `none: <why>`) and
+  Evidence (the `pnpm check:report` checklist). It stops on a protected branch, uncommitted
+  changes or a failing gate, opens the PR as a draft, waits for CI and marks it ready only when
+  CI passes; it never merges.
+- `check-contract.mjs <file.md>` checks a PR description: the four sections filled, the linked
+  ticket contracts present and passing their own checks, every cited criterion in their spec,
+  and a checklist with every gate passing.
+- `develop` routes a PR or MR request to `pr`; `ticket` and `incident` point to it for the PR.
+
 ## 0.5.6
 
 - `project-setup` turns the git hooks on with `pnpm run prepare` after `git init`: in the installed

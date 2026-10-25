@@ -52,7 +52,7 @@ The contract goes through review like code. Commit it on a branch, never on `mai
 2. `git add docs/tickets/<id>` for each contract, and `git diff --cached --name-only` to confirm only those files;
 3. `git commit -m "docs(ticket): intent, spec and plan for <id>"` (a Conventional Commit: projects from the boilerplate run commitlint).
 
-Push (`git push -u origin <branch>`) and open a PR or MR only when the user asks; a project from the boilerplate refuses a push to a protected branch in its `pre-push` hook. These git commands are not in `allowed-tools` on purpose: each one asks first.
+Push (`git push -u origin <branch>`) only when the user asks, and open a PR or MR with the `pr` skill when they ask for one; a project from the boilerplate refuses a push to a protected branch in its `pre-push` hook. These git commands are not in `allowed-tools` on purpose: each one asks first.
 
 ## Result
 
