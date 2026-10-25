@@ -31,14 +31,16 @@ export const printReport = (report) => {
 };
 
 /**
- * Stops a script that could not measure: the cause on stderr, nothing on stdout, exit 2.
+ * Reports that a script could not measure: the cause on stderr, nothing on stdout, exit code 2.
+ * The caller returns right after. It sets the exit code instead of calling process.exit(): on
+ * Windows, process.exit() while fetch still holds an HTTPS connection aborts Node with exit 127
+ * ("Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)").
  * @param {string} prefix the script's name, and what it measured when that helps
  * @param {unknown} cause
  * @param {string} [hint] a line to add, such as the usage
- * @returns {never}
  */
 export const cannotRun = (prefix, cause, hint) => {
   console.error(`${prefix}: ${cause instanceof Error ? cause.message : cause}`);
   if (hint) console.error(hint);
-  process.exit(2);
+  process.exitCode = 2;
 };

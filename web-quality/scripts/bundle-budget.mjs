@@ -92,7 +92,7 @@ export const bundleBudget = (distDir, { js = 300, css = 100, total = 1500 } = {}
   };
 };
 
-if (isMain(import.meta.url)) {
+const main = () => {
   const usage = 'bundle-budget.mjs <dist> [--js <kB>] [--css <kB>] [--total <kB>] [--fail]';
   /** @type {{ values: { js?: string, css?: string, total?: string, fail?: boolean }, positionals: string[] }} */
   let args;
@@ -107,11 +107,11 @@ if (isMain(import.meta.url)) {
       },
     });
   } catch (error) {
-    cannotRun('bundle-budget', error, `usage: ${usage}`);
+    return cannotRun('bundle-budget', error, `usage: ${usage}`);
   }
   const { values, positionals } = args;
   const [dist] = positionals;
-  if (!dist || !existsSync(dist) || !statSync(dist).isDirectory()) cannotRun('usage', usage);
+  if (!dist || !existsSync(dist) || !statSync(dist).isDirectory()) return cannotRun('usage', usage);
   try {
     const number = (/** @type {string | undefined} */ value) => {
       if (value === undefined) return undefined;
@@ -121,8 +121,10 @@ if (isMain(import.meta.url)) {
     };
     const report = bundleBudget(dist, { js: number(values.js), css: number(values.css), total: number(values.total) });
     console.log(JSON.stringify(report, null, 2));
-    if (values.fail && report.checks.some((check) => check.status === 'fail')) process.exit(1);
+    if (values.fail && report.checks.some((check) => check.status === 'fail')) process.exitCode = 1;
   } catch (error) {
     cannotRun('bundle-budget', error);
   }
-}
+};
+
+if (isMain(import.meta.url)) main();
