@@ -49,22 +49,12 @@ if [[ ! -f "$tmp/src/create/index.js" ]]; then
   exit 1
 fi
 # The generator names the project after its output folder, a temporary one here: pass the target's
-# name instead (`.` counts as the folder it names). A generator from before --name has none.
-name=()
-if grep -q -- '--name' "$tmp/src/create/index.js"; then
-  name=(--name "$(node -p 'require("node:path").basename(require("node:path").resolve(process.argv[1]))' "$target")")
-fi
-# A generator with the landing overlay asks "landing page or web app?" too: answer it. An older one
-# has only the web app.
-choice=("$kind")
-if grep -q -- "'landing'" "$tmp/src/create/index.js"; then
-  if [[ "$kind" == --landing ]]; then choice=(--landing --no-auth); else choice=(--app "$kind"); fi
-elif [[ "$kind" == --landing ]]; then
-  echo "error: $repo has no landing page overlay (create/templates/landing); create a web app instead" >&2
-  exit 1
-fi
+# name instead (`.` counts as the folder it names). It asks "landing page or web app?" and, for a
+# web app, about authentication: answer both.
+name="$(node -p 'require("node:path").basename(require("node:path").resolve(process.argv[1]))' "$target")"
+if [[ "$kind" == --landing ]]; then choice=(--landing --no-auth); else choice=(--app "$kind"); fi
 # The generator prints next steps with the temporary path; the skill gives its own.
-node "$tmp/src/create/index.js" "$tmp/out" --from "$tmp/src" "${choice[@]}" ${name[@]+"${name[@]}"} >/dev/null
+node "$tmp/src/create/index.js" "$tmp/out" --from "$tmp/src" "${choice[@]}" --name "$name" >/dev/null
 
 mkdir -p "$target"
 target="$(cd "$target" && pwd)"
