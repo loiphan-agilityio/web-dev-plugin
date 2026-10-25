@@ -3,7 +3,16 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## 0.2.4
+## 0.2.5
+
+- The three scripts share `scripts/lib/cli.mjs` (when to run, printing a report, exiting 2), with
+  output and exit codes unchanged; the `Check` type is defined once.
+- `audit`'s landing checklist takes its targets from `thresholds.md` instead of copying them;
+  `core-web-vitals.md` no longer credits `netlify.toml` with Netlify's default HTML revalidation.
+- `accessibility`: a project from the boilerplate already has the axe spec; the reference's install
+  step is for other projects.
+- Eval docs: runs happen when the maintainer asks, not as part of a release (maintainers only).
+
 
 Fixes from an audit, each reproduced before the change:
 

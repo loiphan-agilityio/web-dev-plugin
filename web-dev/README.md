@@ -41,7 +41,7 @@ claude plugin install web-dev@web-dev-plugin
 
 The URL is the repository's git URL (`https://github.com/loiphan-agilityio/web-dev-plugin.git`
 works too). It installs from the default branch, `main`; append `#<ref>` to pick another
-branch or pin a release tag (`#web-dev--v0.5.3`). The clone runs with your
+branch or pin a release tag (`#web-dev--v0.5.4`). The clone runs with your
 own git credentials and never prompts: an SSH key loaded in `ssh-agent`, or for an `https://`
 URL a credential your git helper already stores.
 
@@ -160,7 +160,7 @@ e2e. Its app,
   helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`); `pnpm lint` also runs `prettier --check`.
 - **Code style in ESLint**: arrow functions only (`func-style`, `prefer-arrow-callback`; `function*` stays for Effect), destructuring, shorthand, template literals, `??` / `?.` and the rest of `typescript-eslint`'s `stylisticTypeChecked`, so code the skills write later reads like the template.
 
-`feature-development/references/` (with `api.ts` and `mocks.ts` in `api-integration/references/`) quotes a full feature (todos: list + create form, a test file per component) and the
+`feature-development/references/` (with `schemas.ts`, `api.ts`, `queries.ts` and `mocks.ts` in `api-integration/references/`) quotes a full feature (todos: list + create form, a test file per component) and the
 wiring diff for the two files a feature registers in.
 
 ## End-to-end tests and CI/CD (from the boilerplate)
