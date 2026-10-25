@@ -84,8 +84,8 @@ Requirement 4, one message to a whole app: the demo in `README.md` ("Demo") give
   its own (requirements 7 and 8), and the skills leave it as it is.
 - Applying the skeleton to an existing project: `create-project.sh` refuses a folder with
   conflicting files. An existing project gets features through Workflow B instead.
-- Not yet: bug fixes, review without edits, commits, PR/MR and CI work (`develop` reports them as
-  not covered and changes nothing), and projects that are not React or use Next.js / SSR.
+- Not yet: bug fixes, review without edits, and commits or PR/MR beyond the contract commit of
+  `ticket` and `incident` (`develop` reports them as not covered and changes nothing).
 
 ## Distribution
 
