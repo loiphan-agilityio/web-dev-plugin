@@ -17,7 +17,8 @@ flowchart LR
 ```
 
 A developer adds the marketplace once and installs the plugin; the skills then load in every
-project. The plugin is read in place from the clone, so `git pull` updates it. Copying
+project. A git install is a cached copy that updates when `version` changes; a marketplace added
+from a local clone is read in place, so `git pull` updates it. Copying
 `skills/`, `references/`, `scripts/` and `agents/` into a project's `.claude/` works too: the
 skills reach the shared files as `../../references/` and `../../scripts/`, which resolve in both
 layouts.
