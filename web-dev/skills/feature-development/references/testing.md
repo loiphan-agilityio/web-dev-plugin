@@ -214,7 +214,7 @@ A model test calls the function with plain values: no render, no MSW. Cover each
 
 - Query by role and label (`getByRole`, `findByRole`, `getByLabelText`); no test ids. Use `findBy*` for anything after a request.
 - Routes are lazy, so after a click on a link the old page stays on screen until the new route loads. Wait for something only the new page has (`await screen.findByRole('heading', { name: 'Edit task' })`) before asserting or typing; otherwise a query can match a field of the old page. The same holds for the header on the first render of `renderRoute`.
-- Prefer a native `<select>` (`native-select`) and `user.selectOptions(...)`; the Radix `select` needs browser APIs jsdom lacks (`references/forms.md`, Other controls).
+- Prefer a native `<select>` (`native-select`) and `user.selectOptions(...)`; the Radix `select` needs browser APIs jsdom lacks (`forms.md`, Other controls).
 - When a ticket changes a component (a badge becomes a select), update its existing tests and stories in the same change, and say which in the Result.
 - Assert behaviour (what the user sees), not implementation (hook calls, cache keys).
 - A toast is text on screen: `expect(await screen.findByText('Todo added')).toBeInTheDocument()`. The render helpers mount the `Toaster`; never `vi.mock('sonner')`.
