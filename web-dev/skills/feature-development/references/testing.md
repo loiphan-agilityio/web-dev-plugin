@@ -161,10 +161,9 @@ Every other component (detail, item row, dialog, edit form): its own folder, wit
 
 ## server.use ordering
 
-- A **later** `server.use()` call wins over an earlier one.
-- Within **one** call, the **first** matching handler wins.
-- So "working handlers, then a failing override" is two calls, later one the override: a page test whose list must load while the create fails needs `server.use(...create<Name>Handlers([]))` then `server.use(<name>Mocks.createInvalid(...))`. The error-then-recover list test does the reverse: error first, working handlers second.
-- Never put a one-off override and the full handler set in the same call expecting the override to win unless it is listed first.
+A later `server.use()` call wins, and within one call the first matching handler wins, so working
+handlers plus a failing override are two calls: `../../api-integration/references/msw.md`,
+Precedence trap.
 
 ## Schema tests
 
@@ -219,9 +218,7 @@ A model test calls the function with plain values: no render, no MSW. Cover each
 - Prefer a native `<select>` (`native-select`) and `user.selectOptions(...)`; the Radix `select` needs browser APIs jsdom lacks (`references/forms.md`, Other controls).
 - When a ticket changes a component (a badge becomes a select), update its existing tests and stories in the same change, and say which in the Result.
 - Assert behaviour (what the user sees), not implementation (hook calls, cache keys).
-- A toast is text on screen: `expect(await screen.findByText('Todo added')).toBeInTheDocument()`. The render helpers mount the `Toaster`; never `vi.mock('sonner')`. In an app from the plugin's 0.1.0 template that lacks it, add the `<Toaster />` to `src/test/render.tsx`, and the `matchMedia` stub and `toast.dismiss()` to `src/test/setup.ts`, as in the boilerplate's `apps/web/src/test/`.
-- Vitest 5 globals (`describe`, `it`, `expect`) are on; `clearMocks` is default true; `vi.mock` only at file top level. There is no Jest; do not use `jest.*`.
-- MSW 3 imports: `msw/http`, `msw/utils/delay`. Root `msw` imports of `http`/`HttpResponse`/`delay` are rejected by lint.
+- A toast is text on screen: `expect(await screen.findByText('Todo added')).toBeInTheDocument()`. The render helpers mount the `Toaster`; never `vi.mock('sonner')`.
 - Don't make a test pass by weakening it: no removing assertions, no `.skip`, no loosening queries. If a test exposes a bug, fix the code.
 - Test data for a new feature goes in its `mocks.ts` fixtures, not inline in each test.
 - Run one file while iterating: `pnpm test <path> --coverage.enabled=false` (`pnpm test` measures coverage, and one file alone stays under the 80% threshold, so the run fails even when its tests pass), or keep `pnpm test:watch` running in a terminal of its own (it re-runs the tests that import each saved file); run `pnpm check` before finishing. Both run in the app folder; from the monorepo root one file takes `--filter web` (`pnpm --filter web test <path> --coverage.enabled=false`), since the root `test` runs turbo, which rejects Vitest's flags, while the root's `pnpm test:watch` already runs the app's (a project made before the boilerplate added it lacks it: `pnpm --filter web test:watch`).
