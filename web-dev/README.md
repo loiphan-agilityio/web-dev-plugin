@@ -1,8 +1,8 @@
 # web-dev: Claude Code plugin for web development
 
-One entry point, `/web-dev:develop <request>`, four skills that let Claude build web apps on
+One entry point, `/web-dev:develop <request>`, skills that let Claude build web apps on
 a modern React stack and follow its conventions on the first try, in a new folder or in an
-existing React project, and two that write the contracts around the code: ticket specs and
+existing React project, and skills that write the contracts around the code: ticket specs and
 incident records.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
@@ -102,8 +102,9 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
 
 ## Contributing
 
-1. Edit a skill in `skills/<name>/` (or the boilerplate, then the skills that quote it; see
-   Maintaining).
+1. Edit a skill in `skills/<name>/` (or the boilerplate, then the skills that quote it). The
+   repository's [`CLAUDE.md`](../CLAUDE.md) has the layout and every rule for changing it: the
+   hooks, the boilerplate pin, quoted snippets, the shared references, releases, CI, companions.
 2. Try it in a scratch folder: `claude --plugin-dir <clone>/web-dev`, then `/web-dev:develop …`.
 3. Run the checks from the repository root: `pnpm lint`, `bash tools/verify.sh`, and
    `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1`).
@@ -229,35 +230,3 @@ every one of them to `pnpm exec shadcn`, the CLI pinned by the project's lockfil
 any `shadcn@latest` is left. Because
 `skills-lock.json` keeps the upstream hash, `npx skills check` reports that skill as modified;
 re-run the script after updating it.
-
-## Maintaining
-
-```
-.claude-plugin/          ← plugin.json (name web-dev, version); ../.claude-plugin/ is the marketplace
-skills/                  ← the product
-  develop/  SKILL.md (entry point, routing), references/ (new-app, existing-project, plan)
-  project-setup/  SKILL.md, scripts/ (create-project: a new project from the boilerplate;
-                  install-companions)
-  feature-development/  SKILL.md, references/ (the todos feature, outside-template)
-  api-integration/  SKILL.md, references/ (effect-http, errors, msw, react-query, outside-template)
-  ui-development/  SKILL.md, references/ (design-mapping, visual-check, outside-template)
-  ticket/  SKILL.md, references/ (intent, spec and plan templates)
-  incident/  SKILL.md, references/ (report, rca and actions templates)
-references/              ← shared guidelines the skills read (stack, coding standards, architecture,
-                           companions)
-scripts/                 ← detect-project.mjs, verify-project.sh, check-contract.mjs, run by the
-                           skills in projects; check-contract's tests in scripts/test/
-agents/                  ← codebase-explorer, shipped with the plugin
-evals/                   ← routing cases for `claude plugin eval`, fixtures, check-detect.sh
-docs/companion-audit.md  ← audit of the companion skills
-```
-
-Outside the plugin, at the repository root: `tools/` (maintainer scripts: `verify.sh`,
-`extract-snippets.mjs`, `check-guidelines.mjs`, `check-create-project.sh`, `sync-references.sh`,
-`lint.sh`, `validate-skills.sh`) and `.claude/` (maintainer agents and settings).
-Neither ships with the plugin.
-
-The rules for changing all of it live in one place, the repository's [`CLAUDE.md`](../CLAUDE.md):
-the hooks (`pnpm install` once at the root), LF files, changing the boilerplate and moving its pin,
-snippets quoted from it, the shared references and `sync-references.sh`, releases, routing evals
-(run only on request), CI, and upgrading a companion.

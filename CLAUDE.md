@@ -1,8 +1,8 @@
 # web-dev
 
 This repository ships the **web-dev** Claude Code plugin: an entry skill, `develop`, that inspects
-the project and routes a request to four skills that build web apps on React 19, Vite 8,
-TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui, and two skills that write
+the project and routes a request to the skills that build web apps on React 19, Vite 8,
+TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui, and the skills that write
 the contracts around the code: `ticket` (docs/tickets/<id>/) and `incident` (docs/incidents/<id>/).
 What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and how to run the
 demo in `README.md`.
