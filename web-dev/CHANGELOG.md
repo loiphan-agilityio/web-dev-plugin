@@ -3,6 +3,12 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.5.5
+
+- The boilerplate is pinned at `8cdfd3e`: `pnpm check:report` removes the temp folder it
+  writes the vitest and e2e JSON to (each run left a `check-report-*` folder behind).
+- Restored the 0.5.3 heading this changelog lost in 0.5.4.
+
 ## 0.5.4
 
 A clean-up of redundant, unneeded and drifted text and code, over eight audit passes until one
@@ -21,6 +27,7 @@ found nothing left; each change was checked against the code or the pinned boile
   README's maintainer section points to the repository's `CLAUDE.md`.
 - The boilerplate is pinned at `4c7b41a` (its `run.ts` no longer suggests branching on `_tag`).
 
+## 0.5.3
 
 Fixes from an audit, each reproduced before the change:
 
