@@ -3,7 +3,6 @@
 import { realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
-/** One finding of a script: { id, status, detail }. */
 /** @typedef {{ id: string, status: 'pass' | 'fail' | 'warn' | 'info', detail: string }} Check */
 
 /**
