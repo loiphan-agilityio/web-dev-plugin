@@ -19,7 +19,7 @@ import { cannotRun, isMain, printReport } from './lib/cli.mjs';
 
 const API = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 
-/** @typedef {{ id: string, status: 'pass' | 'fail' | 'warn' | 'info', detail: string }} Check */
+/** @typedef {import('./lib/cli.mjs').Check} Check */
 
 /**
  * Lighthouse targets from references/thresholds.md. Accessibility and SEO below target fail: their
@@ -142,7 +142,7 @@ export const pageSpeed = async (input, { strategy = 'mobile', apiUrl = API, key 
 
 if (isMain(import.meta.url)) {
   /** @type {{ values: { strategy?: string }, positionals: string[] }} */
-  let args = { values: {}, positionals: [] };
+  let args;
   try {
     args = parseArgs({ allowPositionals: true, options: { strategy: { type: 'string', default: 'mobile' } } });
   } catch (error) {

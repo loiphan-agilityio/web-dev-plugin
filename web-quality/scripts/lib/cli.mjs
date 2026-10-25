@@ -3,6 +3,9 @@
 import { realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
+/** One finding of a script: { id, status, detail }. */
+/** @typedef {{ id: string, status: 'pass' | 'fail' | 'warn' | 'info', detail: string }} Check */
+
 /**
  * Whether the module at `moduleUrl` (its import.meta.url) runs as the script, not imported by a
  * test. Node resolves the module's real path, so argv[1] is compared by its real path too: through
@@ -19,7 +22,7 @@ export const isMain = (moduleUrl) => {
 
 /**
  * Prints a report as JSON, with how many of its checks have each status.
- * @param {{ checks: { status: 'pass' | 'fail' | 'warn' | 'info' }[] }} report
+ * @param {{ checks: Check[] }} report
  */
 export const printReport = (report) => {
   const count = (/** @type {string} */ status) =>
@@ -32,9 +35,11 @@ export const printReport = (report) => {
  * Stops a script that could not measure: the cause on stderr, nothing on stdout, exit 2.
  * @param {string} prefix the script's name, and what it measured when that helps
  * @param {unknown} cause
+ * @param {string} [hint] a line to add, such as the usage
  * @returns {never}
  */
-export const cannotRun = (prefix, cause) => {
+export const cannotRun = (prefix, cause, hint) => {
   console.error(`${prefix}: ${cause instanceof Error ? cause.message : cause}`);
+  if (hint) console.error(hint);
   process.exit(2);
 };

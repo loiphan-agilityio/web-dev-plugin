@@ -15,7 +15,7 @@ import { cannotRun, isMain, printReport } from './lib/cli.mjs';
 const YEAR = 31_536_000;
 const MISSING_ASSET = '/assets/__web-quality-missing__.js';
 
-/** @typedef {{ id: string, status: 'pass' | 'fail' | 'warn' | 'info', detail: string }} Check */
+/** @typedef {import('./lib/cli.mjs').Check} Check */
 
 /** @type {(cacheControl: string | null) => number | undefined} */
 const maxAge = (cacheControl) => {

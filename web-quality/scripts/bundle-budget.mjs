@@ -95,7 +95,7 @@ export const bundleBudget = (distDir, { js = 300, css = 100, total = 1500 } = {}
 if (isMain(import.meta.url)) {
   const usage = 'bundle-budget.mjs <dist> [--js <kB>] [--css <kB>] [--total <kB>] [--fail]';
   /** @type {{ values: { js?: string, css?: string, total?: string, fail?: boolean }, positionals: string[] }} */
-  let args = { values: {}, positionals: [] };
+  let args;
   try {
     args = parseArgs({
       allowPositionals: true,
@@ -107,7 +107,7 @@ if (isMain(import.meta.url)) {
       },
     });
   } catch (error) {
-    cannotRun('bundle-budget', `${error instanceof Error ? error.message : error}\nusage: ${usage}`);
+    cannotRun('bundle-budget', error, `usage: ${usage}`);
   }
   const { values, positionals } = args;
   const [dist] = positionals;
