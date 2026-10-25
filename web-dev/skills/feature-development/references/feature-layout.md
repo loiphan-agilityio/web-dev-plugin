@@ -142,9 +142,3 @@ index 69fcd8a..d83556e 100644
 ```
 
 Forgetting the handlers line is the usual failure: `pnpm dev:mock` returns unhandled requests. Forgetting the route gives a 404 in `renderRoute`.
-
-## Reuse checklist before creating anything
-
-1. `src/features/*/` — another feature may already own the schema or query you need; import its `queries.ts`, don't duplicate the call.
-2. `src/components/` — shared app components.
-3. `packages/ui/src/components/` (`@repo/ui/components/<name>`) — installed shadcn components. Missing one: `pnpm exec shadcn add <name>` in `apps/web`; never hand-edit this folder (it is generated and lint-ignored).

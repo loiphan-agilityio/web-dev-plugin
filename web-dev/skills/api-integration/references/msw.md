@@ -12,8 +12,6 @@ import { setupWorker } from 'msw/browser';      // src/mocks/browser.ts
 import type { RequestHandler } from 'msw';      // types may still come from the root
 ```
 
-The test server (`src/test/setup.ts`) calls `server.listen({ onUnhandledFrame: 'error' })`: a request with no handler fails the test. `afterEach` runs `server.resetHandlers()`, which drops every `server.use()` override.
-
 ## Feature mocks (`features/<name>/mocks.ts`)
 
 ```ts file=src/features/todos/mocks.ts

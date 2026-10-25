@@ -79,10 +79,9 @@ export const TodoList = () => {
 | Empty | success, no rows | plain text that says the next action; **no** `role="alert"` or destructive styling |
 | Success | data present | semantic list/table with an accessible name (`aria-label="Todos"`) |
 
-- Use **`isPending`**, not `isLoading`. `isPending` is true only before the first result, so a background refetch keeps showing data.
 - Order matters: pending, error, empty, success. TypeScript narrows `data` after the first two returns.
 - `isRefetching` disables the retry button while the retry runs.
-- `error` is already typed as `ApiError` (registered in `src/lib/query-client.ts`); branch with `error instanceof NotFoundError` (or `Match`) if one error needs special UI (e.g. a detail page), never on `_tag` by hand.
+- `error` is already typed as `ApiError` (registered in `src/lib/query-client.ts`); branch on the error class only when one error needs its own UI (a detail page's 404).
 
 ## Page composition
 
@@ -103,7 +102,6 @@ The page only composes; each child owns its own query/mutation. Both use the sam
 
 ## Styling and a11y rules
 
-- Tokens, not raw colors: `text-muted-foreground`, `bg-background`, `border`. No `tailwind.config.js` exists (Tailwind 4, tokens in `packages/ui/src/styles/globals.css`).
 - `cn` from `@repo/ui/lib/utils` for conditional classes; do not import `clsx` or `tailwind-merge` (lint rejects them).
 - `type="button"` on every non-submit `Button`, otherwise it submits an enclosing form.
 - Icon-only buttons need `aria-label`.
