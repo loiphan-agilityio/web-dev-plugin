@@ -1,6 +1,7 @@
 # Automated accessibility checks with axe and Playwright
 
-For a project with Playwright (a project from the boilerplate has it in `apps/web`): add axe and one
+A project from the boilerplate already has the package and this spec (`apps/web/e2e/accessibility.spec.ts`):
+extend it with the pages and states below. For another project with Playwright: add axe and one
 spec that fails on any WCAG 2.x A or AA violation axe can detect.
 
 ```bash
