@@ -3,6 +3,13 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.5.6
+
+- `project-setup` turns the git hooks on with `pnpm run prepare` after `git init`: in the installed
+  project, `pnpm install` found nothing to do and skipped husky, so no hook ran and a push to `dev`
+  went through. It checks that `.husky/_/pre-push` exists before it says the hooks are on.
+- The boilerplate is pinned at `98752d7` (its `apps/web/CLAUDE.md` says the same).
+
 ## 0.5.5
 
 - The boilerplate is pinned at `8cdfd3e`: `pnpm check:report` removes the temp folder it
