@@ -108,7 +108,7 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
    hooks, the boilerplate pin, quoted snippets, the shared references, releases, CI, companions.
 2. Try it in a scratch folder: `claude --plugin-dir <clone>/web-dev`, then `/web-dev:develop …`.
 3. Run the checks from the repository root: `pnpm lint`, `bash tools/verify.sh`, and
-   `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1`).
+   `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1 pyyaml==6.0.3`).
 4. A change to routing (a description, `develop`'s tables, `detect-project.mjs`) gets an eval
    case: write it, do not run it (`evals/README.md`, When evals run).
 5. Open a merge request with a Conventional Commit message; CI runs the checks again.
@@ -186,7 +186,7 @@ brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "n
 
 | Package | Version | Note |
 |---|---|---|
-| typescript | ~6.0 | typescript-eslint 8.71 supports `<6.1`, so not 7.x yet. `baseUrl` is deprecated in 6; `paths` only. |
+| typescript | ~6.0 | typescript-eslint 8 supports `<6.1`, so not 7.x yet. `baseUrl` is deprecated in 6; `paths` only. |
 | eslint | 10 | ESLint 9 is end-of-life. `eslint-plugin-jsx-a11y` 6.10.2 declares `<=9` but works on 10 (checked against a file with a11y violations); allowed in `pnpm-workspace.yaml`. |
 | effect | 4.0.5 | Forms use `effectTsResolver` from `@hookform/resolvers` 6, the first version built for Effect 4 (5.x supported Effect 3 only). |
 | react-router | 8.5 | No `react-router-dom`. React Router mutates lazy route objects once loaded, so route trees are factories (`createRoutes()`). |
