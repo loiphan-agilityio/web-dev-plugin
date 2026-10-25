@@ -1,7 +1,5 @@
 # TanStack Query 5 with runEffect
 
-Object syntax only. `isPending` is the first-load state (not `isLoading`). Retries come from `createQueryClient` only.
-
 Code blocks are copied from the boilerplate's `apps/web` or the verified todos feature; blocks marked `sketch` show standard TanStack Query 5 patterns that are in neither.
 
 ## `runEffect`: the bridge
@@ -9,7 +7,7 @@ Code blocks are copied from the boilerplate's `apps/web` or the verified todos f
 `runEffect(effect, signal?)` in `src/lib/api/run.ts` runs an effect on the app runtime and returns a
 Promise for `queryFn` / `mutationFn`.
 
-- A typed failure is thrown as the `ApiError` itself: branch on it with the error classes (`query.error instanceof NotFoundError`) or `Match`, never on `_tag` by hand (anti-slop rejects it).
+- A typed failure is thrown as the `ApiError` itself: branch on it with the error classes (`query.error instanceof NotFoundError`) or `Match`.
 - Pass the query's `signal` so cancellation interrupts the fiber and aborts the fetch. Mutations have no signal.
 - `E extends ApiError` means an `Effect.fn` that can fail with anything else will not compile here.
 

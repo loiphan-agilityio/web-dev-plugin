@@ -38,5 +38,3 @@ block), lint and typecheck included. Read each rule's
 - **Wait for content first** (the `toBeVisible` line): analyzing a loading skeleton misses the page.
 - **Do not disable rules to pass.** When a third-party widget fails and cannot be fixed, exclude
   that element with `.exclude('<selector>')` and say why in a comment.
-- In a project from the boilerplate, the Storybook a11y addon runs the same engine on each story;
-  e2e covers whole pages and their states.

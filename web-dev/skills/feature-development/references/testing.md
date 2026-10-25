@@ -161,8 +161,7 @@ Every other component (detail, item row, dialog, edit form): its own folder, wit
 
 ## server.use ordering
 
-A later `server.use()` call wins, and within one call the first matching handler wins, so working
-handlers plus a failing override are two calls: `../../api-integration/references/msw.md`,
+Working handlers plus a failing override in one test: `../../api-integration/references/msw.md`,
 Precedence trap.
 
 ## Schema tests
