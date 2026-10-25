@@ -21,7 +21,7 @@ set -euo pipefail
 # The boilerplate commit this plugin release was verified against (tools/verify.sh runs every gate
 # on it): the code every skill quotes. A plugin version therefore always creates the same project,
 # whatever the boilerplate's main has become. Moved by a maintainer: see CLAUDE.md.
-pinned=4c7b41a197d34d11dfef100e392ec453d73dbb62
+pinned=8cdfd3e56b0a381e5665422bd0f06f2b24bff645
 repo="${BOILERPLATE_REPO:-https://github.com/loiphan-agilityio/react-vite-boilerplate.git}"
 if [[ -n "${BOILERPLATE_REF:-}" ]]; then
   ref="$BOILERPLATE_REF"
