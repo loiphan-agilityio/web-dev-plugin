@@ -9,11 +9,12 @@
 // web-quality's (references/thresholds.md). Read-only. Exits 0 with the report, 1 with --fail when
 // a budget is exceeded, 2 when it cannot measure (no index.html, a file index.html loads is not in
 // <dist>, a bad option; the cause on stderr, nothing on stdout).
-import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, posix, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { pathToFileURL } from 'node:url';
 import { gzipSync } from 'node:zlib';
+
+import { cannotRun, isMain } from './lib/cli.mjs';
 
 /** @typedef {{ file: string, bytes: number, gzip: number }} Asset */
 
@@ -91,20 +92,10 @@ export const bundleBudget = (distDir, { js = 300, css = 100, total = 1500 } = {}
   };
 };
 
-// Run as a script, not imported by a test. Node resolves the module's real path, so compare it with
-// the real path of argv[1]: through a symlink or junction the two spellings differ.
-const isMain = () => {
-  try {
-    return import.meta.url === pathToFileURL(realpathSync(process.argv[1] ?? '')).href;
-  } catch {
-    return false;
-  }
-};
-
-if (isMain()) {
-  const usage = 'usage: bundle-budget.mjs <dist> [--js <kB>] [--css <kB>] [--total <kB>] [--fail]';
+if (isMain(import.meta.url)) {
+  const usage = 'bundle-budget.mjs <dist> [--js <kB>] [--css <kB>] [--total <kB>] [--fail]';
   /** @type {{ values: { js?: string, css?: string, total?: string, fail?: boolean }, positionals: string[] }} */
-  let args;
+  let args = { values: {}, positionals: [] };
   try {
     args = parseArgs({
       allowPositionals: true,
@@ -116,15 +107,11 @@ if (isMain()) {
       },
     });
   } catch (error) {
-    console.error(`bundle-budget: ${error instanceof Error ? error.message : error}\n${usage}`);
-    process.exit(2);
+    cannotRun('bundle-budget', `${error instanceof Error ? error.message : error}\nusage: ${usage}`);
   }
   const { values, positionals } = args;
   const [dist] = positionals;
-  if (!dist || !existsSync(dist) || !statSync(dist).isDirectory()) {
-    console.error(usage);
-    process.exit(2);
-  }
+  if (!dist || !existsSync(dist) || !statSync(dist).isDirectory()) cannotRun('usage', usage);
   try {
     const number = (/** @type {string | undefined} */ value) => {
       if (value === undefined) return undefined;
@@ -136,7 +123,6 @@ if (isMain()) {
     console.log(JSON.stringify(report, null, 2));
     if (values.fail && report.checks.some((check) => check.status === 'fail')) process.exit(1);
   } catch (error) {
-    console.error(`bundle-budget: ${error instanceof Error ? error.message : error}`);
-    process.exit(2);
+    cannotRun('bundle-budget', error);
   }
 }

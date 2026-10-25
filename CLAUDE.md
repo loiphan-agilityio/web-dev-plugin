@@ -48,8 +48,8 @@ web-quality/                      the second plugin (its README.md is the user g
                                   keeps its depth in references/
   references/thresholds.md        Core Web Vitals, bundle budgets, Lighthouse targets, WCAG AA
   scripts/                        check-headers.mjs, bundle-budget.mjs, pagespeed.mjs (read-only,
-                                  JSON out), and
-                                  their tests in scripts/test/
+                                  JSON out), the command-line plumbing they share in lib/cli.mjs,
+                                  and their tests in scripts/test/
   evals/                          routing cases, run.sh, fixtures
 examples/                         demo output, local only (ignored by git)
 docs/evidence/                    reports, logs and screenshots from a demo run, local only (ignored)
