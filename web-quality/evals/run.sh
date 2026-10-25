@@ -17,7 +17,7 @@ has_ablation=false
 for arg in "$@"; do
   case "$arg" in
     --case | --case=*)
-      echo "run.sh: no single-case runs; fix the skill, and the next release run checks every case" >&2
+      echo "run.sh: no single-case runs; fix the skill, and the next requested run checks every case" >&2
       exit 2
       ;;
     --max-cost-usd | --max-cost-usd=*) has_cap=true ;;

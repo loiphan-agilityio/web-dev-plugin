@@ -3,7 +3,24 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## 0.5.3
+## 0.5.4
+
+A clean-up of redundant, unneeded and drifted text and code, over eight audit passes until one
+found nothing left; each change was checked against the code or the pinned boilerplate.
+
+- Fixed what had drifted: `feature-development` said `pnpm test:watch` needs `--filter web` at the
+  root (the root has it); `effect-http.md` described `HttpClient.mapRequestEffect`, gone from the
+  client; `companions.md` used the two-argument `setFormErrors`; `errors.md` said every
+  `ServerError` is retried (a 5xx only); `design-mapping.md` named `components/ui`; `plan.md`'s
+  example broke the "Authentication: yes/no" rule; four relative links did not resolve.
+- `create-project.sh` always passes `--name` and the kind (no fallbacks for a generator the pin
+  rules out); `detect-project.mjs` outputs only what something reads (no `markers`,
+  `missingGates`).
+- Rules live in one place: references point to `stack-guidelines.md`, `architecture.md` and
+  `msw.md` instead of restating them; the notes for the untagged 0.1.0 template are gone; the
+  README's maintainer section points to the repository's `CLAUDE.md`.
+- The boilerplate is pinned at `4c7b41a` (its `run.ts` no longer suggests branching on `_tag`).
+
 
 Fixes from an audit, each reproduced before the change:
 

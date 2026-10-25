@@ -16,10 +16,9 @@ both the automated result and the manual checks you did, and say which you could
 
 ## 1. Automated checks
 
-- **axe in a Playwright test** (the project has Playwright, as a project from the boilerplate does):
-  `references/automated-checks.md` adds `@axe-core/playwright` and a spec that fails on any WCAG
-  2.x A/AA violation, then runs it. Run it on each important page and state (a dialog open, a form
-  with errors).
+- **axe in a Playwright test:** follow `references/automated-checks.md` (a project from the
+  boilerplate already has the spec; another project adds it), one test per important page and
+  state (a dialog open, a form with errors).
 - **Already in a project from the boilerplate:** `eslint-plugin-jsx-a11y` in `pnpm lint` (static
   JSX rules) and the Storybook a11y addon, which runs axe on each story in Storybook's
   Accessibility panel.

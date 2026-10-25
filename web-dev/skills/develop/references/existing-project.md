@@ -4,7 +4,7 @@ The project's architecture and conventions win over the template's. Change only 
 
 ## B1. One change (feature, api, ui)
 
-1. **Map.** Launch the `codebase-explorer` agent (Agent tool; `web-dev:codebase-explorer` when installed as a plugin) with the request and the detect JSON; without an Agent tool, follow `../../agents/codebase-explorer.md` directly. Done when its **project map** is in hand: the file for each role (HTTP client, query layer, forms, validation, routing, UI kit, shared components, test helpers, mocks), the conventions and the gate commands.
+1. **Map.** Launch the `codebase-explorer` agent (Agent tool; `web-dev:codebase-explorer` when installed as a plugin) with the request and the detect JSON; without an Agent tool, follow `../../../agents/codebase-explorer.md` directly. Done when its **project map** is in hand: the file for each role (HTTP client, query layer, forms, validation, routing, UI kit, shared components, test helpers, mocks), the conventions and the gate commands.
 2. **Reuse.** Name the existing file or component each part of the request builds on. A missing role gets the smallest addition that fits the project, never the template's whole layer.
 3. **Plan.** List the files to change and to create, and nothing else: no refactor, rename, reformat or upgrade outside the request.
 4. **Implement.** Invoke the skill for the kind (`feature-development`, `api-integration` or `ui-development`; Skill tool) with the project map. Its `references/outside-template.md` says which of its rules hold here.

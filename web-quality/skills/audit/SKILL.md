@@ -59,8 +59,8 @@ A page whose job is to be found and convert (no sign-in; in the boilerplate, a p
 |---|---|---|
 | axe, WCAG 2.x A and AA | 0 violations | the boilerplate's `apps/web/e2e/accessibility.spec.ts` (`@axe-core/playwright`), part of `pnpm test:e2e`; else the `accessibility` skill adds it |
 | Keyboard and screen reader | every link and control reachable, visible focus, one `<h1>`, headings in order | `accessibility` skill, the manual checks |
-| Lighthouse, mobile lab | Accessibility 100, SEO ≥ 95, Performance ≥ 90, Best Practices ≥ 95 | in a project from the boilerplate, CI's `lighthouse` job on each Netlify draft (`pnpm lighthouse <url>`: fails under accessibility 100 and SEO 95, warns under 90 on the other two, so a best-practices score of 90 to 94 needs this checklist's eye); else Lighthouse as above |
-| PageSpeed Insights | the same scores from Google's run; field LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 once CrUX has data | `pagespeed.mjs <production url>` |
+| Lighthouse, mobile lab | `thresholds.md`, Lighthouse scores | in a project from the boilerplate, CI's `lighthouse` job on each Netlify draft (`pnpm lighthouse <url>`: fails under accessibility 100 and SEO 95, warns under 90 on the other two, so a best-practices score of 90 to 94 needs this checklist's eye); else Lighthouse as above |
+| PageSpeed Insights | the same scores from Google's run; `thresholds.md`, Core Web Vitals (Good) once CrUX has data | `pagespeed.mjs <production url>` |
 | SEO head | title, description, canonical, Open Graph, `robots.txt` and `sitemap.xml` with the real domain | `seo` skill |
 | Initial load | under the bundle budgets, a content page well under them | `bundle-budget.mjs` |
 

@@ -14,12 +14,12 @@
 // when <url> is missing or not public, or the API cannot be reached or answers an error (the cause
 // on stderr, nothing on stdout).
 import { parseArgs } from 'node:util';
-import { realpathSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+
+import { cannotRun, isMain, printReport } from './lib/cli.mjs';
 
 const API = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 
-/** @typedef {{ id: string, status: 'pass' | 'fail' | 'warn' | 'info', detail: string }} Check */
+/** @typedef {import('./lib/cli.mjs').Check} Check */
 
 /**
  * Lighthouse targets from references/thresholds.md. Accessibility and SEO below target fail: their
@@ -140,48 +140,28 @@ export const pageSpeed = async (input, { strategy = 'mobile', apiUrl = API, key 
   };
 };
 
-// Run as a script, not imported by a test. Node resolves the module's real path, so compare it with
-// the real path of argv[1]: through a symlink or junction the two spellings differ.
-const isMain = () => {
-  try {
-    return import.meta.url === pathToFileURL(realpathSync(process.argv[1] ?? '')).href;
-  } catch {
-    return false;
-  }
-};
-
-if (isMain()) {
+if (isMain(import.meta.url)) {
   /** @type {{ values: { strategy?: string }, positionals: string[] }} */
   let args;
   try {
     args = parseArgs({ allowPositionals: true, options: { strategy: { type: 'string', default: 'mobile' } } });
   } catch (error) {
-    console.error(`pagespeed: ${error instanceof Error ? error.message : error}`);
-    process.exit(2);
+    cannotRun('pagespeed', error);
   }
   const [url] = args.positionals;
   const { strategy } = args.values;
   if (!url || (strategy !== 'mobile' && strategy !== 'desktop')) {
-    console.error('usage: pagespeed.mjs <url> [--strategy mobile|desktop]');
-    process.exit(2);
+    cannotRun('usage', 'pagespeed.mjs <url> [--strategy mobile|desktop]');
   }
   try {
-    const report = await pageSpeed(url, {
-      strategy,
-      apiUrl: process.env.PAGESPEED_API_URL || API,
-      key: process.env.PAGESPEED_API_KEY || undefined,
-    });
-    const count = (/** @type {Check['status']} */ status) =>
-      report.checks.filter((check) => check.status === status).length;
-    console.log(
-      JSON.stringify(
-        { ...report, summary: { pass: count('pass'), fail: count('fail'), warn: count('warn'), info: count('info') } },
-        null,
-        2,
-      ),
+    printReport(
+      await pageSpeed(url, {
+        strategy,
+        apiUrl: process.env.PAGESPEED_API_URL || API,
+        key: process.env.PAGESPEED_API_KEY || undefined,
+      }),
     );
   } catch (error) {
-    console.error(`pagespeed: ${url}: ${error instanceof Error ? error.message : error}`);
-    process.exit(2);
+    cannotRun(`pagespeed: ${url}`, error);
   }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs the quality gates a project actually has, with its own package manager, and reports the
-# ones it lacks instead of inventing them. For a project without a `check` script (tiers
+# ones it lacks instead of inventing them. For a project not made from the boilerplate (tiers
 # `same-stack` and `other-stack`); an app from the boilerplate runs `pnpm check`.
 #
 #   verify-project.sh [dir]     dir defaults to the current directory

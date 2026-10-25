@@ -9,7 +9,7 @@ the user guide is [`web-dev/README.md`](web-dev/README.md).
 flowchart LR
   repo["this repository"] --> mkt[".claude-plugin/marketplace.json"]
   mkt --> plugin["web-dev/<br/>plugin web-dev"]
-  plugin --> skills["7 skills<br/>skills/"]
+  plugin --> skills["skills<br/>skills/"]
   plugin --> shared["references/, scripts/,<br/>agents/"]
   skills -->|project-setup runs the<br/>boilerplate generator| app["new monorepo, app in apps/web<br/>with or without auth + CLAUDE.md"]
   skills -->|install-companions.sh| comp["8 companion skills<br/>pinned by commit"]
@@ -17,12 +17,13 @@ flowchart LR
 ```
 
 A developer adds the marketplace once and installs the plugin; the skills then load in every
-project. The plugin is read in place from the clone, so `git pull` updates it. Copying
+project. A git install is a cached copy that updates when `version` changes; a marketplace added
+from a local clone is read in place, so `git pull` updates it. Copying
 `skills/`, `references/`, `scripts/` and `agents/` into a project's `.claude/` works too: the
 skills reach the shared files as `../../references/` and `../../scripts/`, which resolve in both
 layouts.
 
-## 2. One entry point, six skills
+## 2. One entry point, the skills behind it
 
 ```mermaid
 flowchart TD
@@ -98,8 +99,8 @@ flowchart LR
   (`no-restricted-imports`, a pattern for `src/features/**`) rejects its `api`, `mocks` and
   `components`.
 - `ApiClient` is the only way to call the backend. It decodes every body with an Effect Schema
-  and maps every failure to a typed `ApiError`, so a component can switch on
-  `query.error._tag`.
+  and maps every failure to a typed `ApiError`, so a component branches on the error class
+  (`instanceof`, or Effect's `Match`).
 - `runEffect` is the only bridge from Effect to TanStack Query; it passes the abort signal.
   Retries live in TanStack Query only (queries once, for network errors and 5xx answers).
 - Forms use React Hook Form with `effectTsResolver(schema)` and

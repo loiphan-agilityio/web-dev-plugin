@@ -94,9 +94,7 @@ export const TodoForm = () => {
 
 ## Server errors
 
-`setFormErrors` (`src/lib/forms.ts`), in short:
-
-A `ValidationError` with field messages puts each one under its input with `setError(field, { type: 'server', message })`; anything else goes to `errors.root.server` with `toUserMessage(error)`. Read the file in the project for the code.
+`setFormErrors` (`src/lib/forms.ts`; read it in the project for the code), in short:
 
 - A `ValidationError` with `fields` puts each message under the field named by the server key. Those keys must equal your form field names; if the API names them differently, map before calling `setError`, or tell the user the contract mismatches.
 - The third argument, `form.getValues()`, sends a message for a name the form has no input for (`account`, a server-only rule) to `errors.root.server` too; without it that message is set but never shown. A boilerplate from before 0.3.3 of this plugin takes two arguments: drop the third there.

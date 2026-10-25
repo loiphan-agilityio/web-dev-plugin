@@ -8,7 +8,7 @@
 // Tiers:
 //   new          an empty folder (or one holding only .git/, .claude/, design/, DESIGN.md), or a
 //                non-empty folder without package.json (the app goes in a subfolder)
-//   template     an app from the boilerplate (apps/web) or the 0.1.0 template: ApiClient,
+//   template     an app from the boilerplate (apps/web): ApiClient,
 //                src/test/render.tsx and effect
 //   same-stack   the template's stack (React, Vite, Effect, TanStack Query, React Hook Form),
 //                another layout
@@ -131,13 +131,10 @@ const packageManager =
     .map(packageManagerIn)
     .find((name) => name !== undefined) ?? (pkg ? 'npm' : null);
 
+// What makes an app from the boilerplate (the `template` tier).
 const markers = {
   apiClient: readText(join(dir, 'src/lib/api/client.ts')).includes('ApiClient'),
   testRender: existsSync(join(dir, 'src/test/render.tsx')),
-  featuresDir: existsSync(join(dir, 'src/features')),
-  shadcn: existsSync(join(dir, 'components.json')),
-  claudeMd: existsSync(join(dir, 'CLAUDE.md')),
-  agentsMd: existsSync(join(dir, 'AGENTS.md')),
 };
 const workspaces =
   pkg?.workspaces !== undefined || /^packages:/m.test(readText(join(dir, 'pnpm-workspace.yaml')));
@@ -274,7 +271,6 @@ const otherMajors = Object.entries(expectedMajors)
   .filter(([name, major]) => majorOf(actualVersion(name)) !== major)
   .map(([name, major]) => `${name} ${actualVersion(name)} (guidelines: ${major})`);
 
-const gates = ['check', 'lint', 'typecheck', 'test', 'build'];
 const result = {
   dir,
   state,
@@ -283,8 +279,6 @@ const result = {
   packageManager,
   versions,
   otherMajors,
-  markers,
   scripts: Object.keys(pkg?.scripts ?? {}),
-  missingGates: pkg ? gates.slice(1).filter((name) => pkg.scripts?.[name] === undefined) : [],
 };
 console.log(JSON.stringify(result, null, 2));

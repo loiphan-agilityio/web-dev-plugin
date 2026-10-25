@@ -31,12 +31,12 @@ components/
 - A file in the folder serves that component only. When a second component needs it, it leaves the folder: a business rule goes to `model.ts`, markup becomes its own component folder.
 - `src/components/` (shared app components) uses the same layout. `packages/ui/src/components/` keeps the flat kebab-case files the shadcn CLI writes; `src/app/` keeps its kebab-case files.
 
-Import from `@/...` for anything outside the feature, relative paths inside it. From another feature, import only its `schemas`, `model`, `queries` or `routes`: lint rejects its `api`, `mocks` and `components`. Use inline type imports (`import { type NewTodo, Todo } from './schemas'`); lint enforces it.
+Import from `@/...` for anything outside the feature, relative paths inside it.
 
 ## schemas.ts
 
 The full file is in the api-integration skill, `references/effect-http.md`, section "Schema
-(`features/<name>/schemas.ts`)" (`../api-integration/references/effect-http.md`). Name the value and
+(`features/<name>/schemas.ts`)" (`../../api-integration/references/effect-http.md`). Name the value and
 the type the same, and derive types (`typeof X.Type`), never hand-write them. When a schema
 transforms (`Schema.Trim`), export both sides: `Type` (`NewTodo`) is what the API gets,
 `Encoded` (`NewTodoInput`) is what the form holds, and `useForm` takes both. Validation messages
@@ -61,16 +61,14 @@ export const openFirst = (todos: readonly Todo[]) =>
 ## api.ts
 
 The full file is in the api-integration skill, `references/effect-http.md`, section "Effect.fn
-(`features/<name>/api.ts`)" (installed next to this skill: `../api-integration/references/effect-http.md`).
+(`features/<name>/api.ts`)" (installed next to this skill: `../../api-integration/references/effect-http.md`).
 It is kept in one place for both skills. Shape: one `Effect.fn('<name>.<action>')` per call that
 does `const api = yield* ApiClient` and returns `api.get(path, Schema)` or `api.post(path, input, Schema)`.
-
-`ApiClient` prefixes `apiUrl` from `AppConfig`, decodes the body with the schema you pass, and maps every failure to an `ApiError`. No `fetch`, no axios, no `HttpClient.retryTransient`. Methods used in the example: `api.get(path, schema)` and `api.post(path, body, schema)`; read `src/lib/api/client.ts` for the rest (put, patch, delete) before using them.
 
 ## queries.ts
 
 The full file is in the api-integration skill, `references/react-query.md`, sections "Keys and query
-options" and "Mutation hook" (`../api-integration/references/react-query.md`). Shape: a key factory
+options" and "Mutation hook" (`../../api-integration/references/react-query.md`). Shape: a key factory
 (`todoKeys`), a `queryOptions` factory per read (`todoListQueryOptions`) whose `queryFn` passes
 `signal` to `runEffect`, and a `use<Action><Name>` hook per write that returns the
 `invalidateQueries` promise from `onSuccess`.
@@ -78,13 +76,9 @@ options" and "Mutation hook" (`../api-integration/references/react-query.md`). S
 ## mocks.ts
 
 The full file is in the api-integration skill, `references/msw.md`, section "Feature mocks
-(`features/<name>/mocks.ts`)" (`../api-integration/references/msw.md`). Shape: `create<Name>Handlers(initial)`
+(`features/<name>/mocks.ts`)" (`../../api-integration/references/msw.md`). Shape: `create<Name>Handlers(initial)`
 with in-memory state per call, `<name>Handlers` for the default list, and `<name>Mocks` for one-off states
 (pending with `delay('infinite')`, error status, 422 with field errors).
-
-- `create<Name>Handlers(initial)` copies its input, so each call has private state.
-- `<name>Handlers` (default data) is registered globally; tests override with `server.use(...)`.
-- `<name>Mocks.*` are one-off responses: pending, error, 422. The 422 body shape (`{ message, errors: { field: message } }`) is what `ValidationError.fields` is built from; confirm it against `src/lib/api/client.ts` and the real API.
 
 ## routes.tsx
 
@@ -142,9 +136,3 @@ index 69fcd8a..d83556e 100644
 ```
 
 Forgetting the handlers line is the usual failure: `pnpm dev:mock` returns unhandled requests. Forgetting the route gives a 404 in `renderRoute`.
-
-## Reuse checklist before creating anything
-
-1. `src/features/*/` — another feature may already own the schema or query you need; import its `queries.ts`, don't duplicate the call.
-2. `src/components/` — shared app components.
-3. `packages/ui/src/components/` (`@repo/ui/components/<name>`) — installed shadcn components. Missing one: `pnpm exec shadcn add <name>` in `apps/web`; never hand-edit this folder (it is generated and lint-ignored).

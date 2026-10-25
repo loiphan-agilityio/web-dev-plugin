@@ -27,7 +27,7 @@ What the shipped components actually read, so you know what a value change moves
 
 - The base layer sets the default border color and focus outline for everything: `@apply border-border outline-ring/50;`.
 - Ghost and outline buttons hover with `hover:bg-muted`, not `bg-accent` (`button.tsx`). A design whose button hover differs from its menu highlight changes `--muted`, which also moves skeletons, `CardFooter` (`bg-muted/50`) and every subtle surface; if that is wrong for the rest of the design, keep `--muted` and record the hover difference under **Design gaps**.
-- The destructive button is tinted, not solid: `bg-destructive/10 text-destructive hover:bg-destructive/20`. A solid red button in the design is a variant difference: use the closest variant and record it under **Design gaps** rather than restyling `components/ui`.
+- The destructive button is tinted, not solid: `bg-destructive/10 text-destructive hover:bg-destructive/20`. A solid red button in the design is a variant difference: use the closest variant and record it under **Design gaps** rather than restyling `packages/ui/src/components`.
 - `Card` draws its outline with `ring-1 ring-foreground/10`, not `--border`, so the card outline follows `--foreground`.
 - Toasts read `"--normal-bg": "var(--popover)"` and `"--normal-border": "var(--border)"` (`sonner.tsx`).
 - Charts and a sidebar have their own variables (`--chart-1` … `--chart-5`, `--sidebar-*`); set them only when the design has those parts.
@@ -93,7 +93,7 @@ In `@theme inline`:
 
 ## Icons (lucide-react)
 
-Named imports from `lucide-react`, as `sonner.tsx` does, written in the app's style (single quotes and a semicolon, `.prettierrc.json`; generated `components/ui` files use double quotes):
+Named imports from `lucide-react`, as `sonner.tsx` does, written in the app's style (single quotes and a semicolon, `.prettierrc.json`; generated `packages/ui/src/components` files use double quotes):
 
 ```tsx sketch
 import { CircleCheckIcon, InfoIcon } from 'lucide-react';

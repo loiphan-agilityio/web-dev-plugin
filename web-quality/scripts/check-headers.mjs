@@ -10,13 +10,12 @@
 // Read-only: GET requests to <url>, one same-origin asset it references and one asset path that
 // does not exist. Each check is { id, status: pass|fail|warn|info, detail }. Exits 0 with the
 // report, 2 when <url> is missing or cannot be fetched (the cause on stderr, nothing on stdout).
-import { realpathSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { cannotRun, isMain, printReport } from './lib/cli.mjs';
 
 const YEAR = 31_536_000;
 const MISSING_ASSET = '/assets/__web-quality-missing__.js';
 
-/** @typedef {{ id: string, status: 'pass' | 'fail' | 'warn' | 'info', detail: string }} Check */
+/** @typedef {import('./lib/cli.mjs').Check} Check */
 
 /** @type {(cacheControl: string | null) => number | undefined} */
 const maxAge = (cacheControl) => {
@@ -208,35 +207,12 @@ export const checkHeaders = async (input) => {
   return { url: input, finalUrl: final.href, status: page.status, checks };
 };
 
-// Run as a script, not imported by a test. Node resolves the module's real path, so compare it with
-// the real path of argv[1]: through a symlink or junction the two spellings differ.
-const isMain = () => {
-  try {
-    return import.meta.url === pathToFileURL(realpathSync(process.argv[1] ?? '')).href;
-  } catch {
-    return false;
-  }
-};
-
-if (isMain()) {
+if (isMain(import.meta.url)) {
   const url = process.argv[2];
-  if (!url) {
-    console.error('usage: check-headers.mjs <url>');
-    process.exit(2);
-  }
+  if (!url) cannotRun('usage', 'check-headers.mjs <url>');
   try {
-    const report = await checkHeaders(url);
-    const count = (/** @type {Check['status']} */ status) =>
-      report.checks.filter((check) => check.status === status).length;
-    console.log(
-      JSON.stringify(
-        { ...report, summary: { pass: count('pass'), fail: count('fail'), warn: count('warn'), info: count('info') } },
-        null,
-        2,
-      ),
-    );
+    printReport(await checkHeaders(url));
   } catch (error) {
-    console.error(`check-headers: ${url}: ${error instanceof Error ? error.message : error}`);
-    process.exit(2);
+    cannotRun(`check-headers: ${url}`, error);
   }
 }

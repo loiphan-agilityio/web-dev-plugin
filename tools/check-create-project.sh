@@ -46,12 +46,10 @@ expect no-choice 1 'pass --auth, --no-auth or --landing' -- "$tmp/none"
 expect auth 0 'with authentication.*kept the existing .claude/settings.json' -- "$tmp/auth" --auth
 expect no-auth 0 'without authentication' -- "$tmp/plain" --no-auth
 expect landing 0 'a landing page' -- "$tmp/landing" --landing
-# A prefix: the boilerplate wires `fromGetter(tokenStore.get, tokenStore.reject)` since its auth
-# variant drops a token the API rejects, and `fromGetter(tokenStore.get)` before that.
-holds auth-wired "$tmp/auth/apps/web/src/lib/runtime.ts" 'AuthToken.fromGetter(tokenStore.get'
+holds auth-wired "$tmp/auth/apps/web/src/lib/runtime.ts" 'AuthToken.fromGetter(tokenStore.get, tokenStore.reject)'
 holds auth-routes "$tmp/auth/apps/web/src/app/routes.tsx" 'protectedRoutes('
 holds no-auth-base "$tmp/plain/apps/web/src/lib/runtime.ts" 'AuthToken.none'
-# Named after the target, not the generator's temporary folder (a boilerplate with create --name).
+# Named after the target, not the generator's temporary folder.
 holds named "$tmp/plain/package.json" '"name": "plain"'
 holds keeps-claude "$tmp/auth/.claude/mine.txt" mine
 holds keeps-settings "$tmp/auth/.claude/settings.json" mine

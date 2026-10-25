@@ -80,9 +80,9 @@ No try/catch and no status handling here. The error channel is already `ApiError
 ## How ApiClient works inside
 
 Read `ApiClient.layer` in `src/lib/api/client.ts`. It takes Effect's `HttpClient`, maps every
-request (`prependUrl(apiUrl)` with `apiUrl` from `AppConfig`, `acceptJson`, then the `AuthToken`
-bearer token through `HttpClient.mapRequestEffect`), applies
-`filterStatusOk`, decodes the body with `HttpClientResponse.schemaBodyJson(schema)` and turns every
+request (`prependUrl(apiUrl)` with `apiUrl` from `AppConfig`, `acceptJson`), applies
+`filterStatusOk`, adds the `AuthToken` token to each request with `HttpClientRequest.bearerToken`
+(a 401 tells `auth.rejected` which token the API refused), decodes the body with `HttpClientResponse.schemaBodyJson(schema)` and turns every
 failure into an `ApiError` with `Effect.catch(toApiError)`. Bodies are sent with
 `HttpClientRequest.bodyJsonUnsafe(body)`, which serialises with `JSON.stringify` and does not
 validate. That is why callers pass already-decoded values.

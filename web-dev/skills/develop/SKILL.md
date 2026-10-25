@@ -21,7 +21,7 @@ Run detect (`<target>`: the folder the request names, else the current directory
 | `tier` | The folder holds | Workflow |
 |---|---|---|
 | `new` | nothing (`state: empty`), or files without `package.json` (`state: other`) | A |
-| `template` | an app from the boilerplate (its `apps/web`), or from the plugin's 0.1.0 template | A for a whole app, else C |
+| `template` | an app from the boilerplate (its `apps/web`) | A for a whole app, else C |
 | `same-stack` | the template's stack in another layout | B |
 | `other-stack` | React on another stack (`reasons` names what is missing) | B |
 | `unsupported` | not React, React behind an SSR framework (Next.js, Remix, Gatsby, Astro), or a monorepo root | stop: report `reasons` |

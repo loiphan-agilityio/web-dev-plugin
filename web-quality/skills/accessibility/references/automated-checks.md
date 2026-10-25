@@ -1,14 +1,15 @@
 # Automated accessibility checks with axe and Playwright
 
-For a project with Playwright (a project from the boilerplate has it in `apps/web`): add axe and one
+A project from the boilerplate already has the package and this spec (`apps/web/e2e/accessibility.spec.ts`):
+extend it with the pages and states below. For another project with Playwright: add axe (with its package manager) and one
 spec that fails on any WCAG 2.x A or AA violation axe can detect.
 
 ```bash
-pnpm --filter web add -D @axe-core/playwright
+pnpm add -D @axe-core/playwright
 ```
 
 ```ts
-// apps/web/e2e/accessibility.spec.ts
+// e2e/accessibility.spec.ts
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
@@ -37,5 +38,3 @@ block), lint and typecheck included. Read each rule's
 - **Wait for content first** (the `toBeVisible` line): analyzing a loading skeleton misses the page.
 - **Do not disable rules to pass.** When a third-party widget fails and cannot be fixed, exclude
   that element with `.exclude('<selector>')` and say why in a comment.
-- In a project from the boilerplate, the Storybook a11y addon runs the same engine on each story;
-  e2e covers whole pages and their states.

@@ -18,7 +18,7 @@ if (!skillsDir || !appDir) {
 const markdownFiles = (dir) =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) return entry.name === 'assets' ? [] : markdownFiles(path);
+    if (entry.isDirectory()) return markdownFiles(path);
     return entry.name.endsWith('.md') ? [path] : [];
   });
 

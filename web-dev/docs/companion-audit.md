@@ -8,8 +8,8 @@ Install form: `npx -y skills@1.7.2 add https://github.com/<repo>/tree/<sha>/<pat
 
 The installer is pinned as well: `skills@1.7.2` (published 2026-10-09, the release current at the
 audit) supports `add <url>/tree/<sha>/<path>`, `-a claude-code` and `-y`, has no install scripts,
-and needs Node >= 22.20. Upgrading it follows the same rule as a companion: read the changelog,
-then change the version in `install-companions.sh` and here.
+and needs Node >= 22.20. Upgrading it follows the same rule as a companion (the repository's `CLAUDE.md`):
+read the changelog, then change the version everywhere that rule lists.
 
 ## Pinned companions
 

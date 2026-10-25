@@ -1,8 +1,8 @@
 # web-dev
 
 This repository ships the **web-dev** Claude Code plugin: an entry skill, `develop`, that inspects
-the project and routes a request to four skills that build web apps on React 19, Vite 8,
-TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui, and two skills that write
+the project and routes a request to the skills that build web apps on React 19, Vite 8,
+TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui, and the skills that write
 the contracts around the code: `ticket` (docs/tickets/<id>/) and `incident` (docs/incidents/<id>/).
 What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and how to run the
 demo in `README.md`.
@@ -48,8 +48,8 @@ web-quality/                      the second plugin (its README.md is the user g
                                   keeps its depth in references/
   references/thresholds.md        Core Web Vitals, bundle budgets, Lighthouse targets, WCAG AA
   scripts/                        check-headers.mjs, bundle-budget.mjs, pagespeed.mjs (read-only,
-                                  JSON out), and
-                                  their tests in scripts/test/
+                                  JSON out), the command-line plumbing they share in lib/cli.mjs,
+                                  and their tests in scripts/test/
   evals/                          routing cases, run.sh, fixtures
 examples/                         demo output, local only (ignored by git)
 docs/evidence/                    reports, logs and screenshots from a demo run, local only (ignored)
@@ -64,8 +64,8 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 | `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the three boilerplate variants (landing page, web app with or without auth) and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate at its pinned commit (network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged (that repository's checked-out branch), `BOILERPLATE_REF=main` the latest boilerplate. Same as CI, whose weekly run uses `main`. |
 | `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (the pinned commit: network; `BOILERPLATE_REPO` and `BOILERPLATE_REF` as above) into `web-dev/references/`, keeping each file's preamble. Run it after moving the pin past a guideline change, then review and commit the diff. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
-| `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1`) | Every skill passes the Agent Skills specification's validator: valid YAML frontmatter, only spec fields, `name` matches its folder. Also a CI job. |
-| `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` (and `web-quality/...`) | Each plugin manifest is valid. |
+| `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1 pyyaml==6.0.3`) | Every skill passes the Agent Skills specification's validator (valid YAML frontmatter, only spec fields, `name` matches its folder), and every eval `case.yaml` parses. Also a CI job. |
+| `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` (and `web-quality/...`, and `.` for the marketplace) | Each plugin manifest and the marketplace manifest are valid. |
 | `node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs` | web-dev's contract check against temporary folders (the shipped templates included), and web-quality's measurement scripts against local servers and temporary builds, no network. Also a CI job. |
 | `bash evals/run.sh --tag routing` in `web-quality/` | web-quality's routing evals. Paid, as above. |
 
@@ -105,7 +105,8 @@ corepack picks that version.
   the boilerplate's `main` (`BOILERPLATE_REF=main`) to show drift before the pin moves.
 - **Companion skills are pinned to an audited commit** in `install-companions.sh`. Upgrading one
   means reading the diff and updating the SHA there, in `web-dev/README.md` and in
-  `web-dev/docs/companion-audit.md`, and its overrides in `web-dev/references/companions.md`.
+  `web-dev/docs/companion-audit.md`, and its overrides in `web-dev/references/companions.md`. The
+  same for the `skills` CLI version (`skills_cli` in that script): read its changelog first.
 - **Commands a skill runs** are listed in its `allowed-tools` frontmatter, and the plugin's
   scripts are spelled `${CLAUDE_SKILL_DIR}/...` in `SKILL.md` exactly as in that rule, so one
   message runs without a permission prompt (headless and untrusted folders included). A new

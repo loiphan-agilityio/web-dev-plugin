@@ -2,14 +2,13 @@
 # Installs the companion skills next to this project's skills, pinned to audited commits.
 # Run from the project root. Needs network access and Node (npx).
 #
-# Each entry was read in full and audited for security and fit on 2026-10-18; the README of
-# the skills repo lists what each one is for and where the project conventions override it.
-# To upgrade one: read the diff between the old and new SHA, then change the SHA here.
+# Each entry was read in full and audited for security and fit on 2026-10-18; where this stack
+# overrides one: web-dev/references/companions.md. To upgrade one, or the skills CLI below, follow
+# the repository's CLAUDE.md (Companion skills are pinned): it lists every place to change.
 set -euo pipefail
 
 # The installer is pinned too: a pinned skill fetched by whatever `skills` npm serves today is
-# only as safe as that release. To upgrade, read its changelog and check `add <url> -a -y` still
-# behaves the same, then change the version here and in the README.
+# only as safe as that release; check `add <url> -a -y` still behaves the same after an upgrade.
 skills_cli="skills@1.7.2"
 
 companions=(

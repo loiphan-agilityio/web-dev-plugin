@@ -1,8 +1,8 @@
 # web-dev: Claude Code plugin for web development
 
-One entry point, `/web-dev:develop <request>`, four skills that let Claude build web apps on
+One entry point, `/web-dev:develop <request>`, skills that let Claude build web apps on
 a modern React stack and follow its conventions on the first try, in a new folder or in an
-existing React project, and two that write the contracts around the code: ticket specs and
+existing React project, and skills that write the contracts around the code: ticket specs and
 incident records.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
@@ -41,7 +41,7 @@ claude plugin install web-dev@web-dev-plugin
 
 The URL is the repository's git URL (`https://github.com/loiphan-agilityio/web-dev-plugin.git`
 works too). It installs from the default branch, `main`; append `#<ref>` to pick another
-branch or pin a release tag (`#web-dev--v0.5.3`). The clone runs with your
+branch or pin a release tag (`#web-dev--v0.5.4`). The clone runs with your
 own git credentials and never prompts: an SSH key loaded in `ssh-agent`, or for an `https://`
 URL a credential your git helper already stores.
 
@@ -77,8 +77,9 @@ cp -r <plugin-dir>/{skills,references,scripts,agents} .claude/
 claude "Scaffold a new web app called billing-portal"
 ```
 
-`project-setup` asks whether to include authentication, creates the project from the
-react-vite-boilerplate (`scripts/create-project.sh` clones it and runs its generator), runs
+`project-setup` asks whether to build a landing page or a web app (and, for a web app, about
+authentication), creates the project from the react-vite-boilerplate (`scripts/create-project.sh`
+fetches it at the pinned commit and runs its generator), runs
 `pnpm install`, installs the companion skills and runs `pnpm check:report`. The generated root `CLAUDE.md`
 and `apps/web/CLAUDE.md` hold the project conventions from then on; run the web-dev skills from
 `apps/web`.
@@ -102,11 +103,12 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
 
 ## Contributing
 
-1. Edit a skill in `skills/<name>/` (or the boilerplate, then the skills that quote it; see
-   Maintaining).
+1. Edit a skill in `skills/<name>/` (or the boilerplate, then the skills that quote it). The
+   repository's [`CLAUDE.md`](../CLAUDE.md) has the layout and every rule for changing it: the
+   hooks, the boilerplate pin, quoted snippets, the shared references, releases, CI, companions.
 2. Try it in a scratch folder: `claude --plugin-dir <clone>/web-dev`, then `/web-dev:develop …`.
 3. Run the checks from the repository root: `pnpm lint`, `bash tools/verify.sh`, and
-   `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1`).
+   `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1 pyyaml==6.0.3`).
 4. A change to routing (a description, `develop`'s tables, `detect-project.mjs`) gets an eval
    case: write it, do not run it (`evals/README.md`, When evals run).
 5. Open a merge request with a Conventional Commit message; CI runs the checks again.
@@ -122,7 +124,8 @@ e2e. Its app,
   `ApiError` (`NetworkError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`,
   `ValidationError`, `ServerError`, `InvalidResponseError`). Tested in `client.test.ts`.
 - **`runEffect`** (`src/lib/api/run.ts`): runs an effect for TanStack Query, passes the abort
-  signal, rejects with the typed error so `query.error._tag` is safe to switch on.
+  signal, rejects with the typed error, which a component branches on with `instanceof` the error class or
+  Effect's `Match` (never `_tag` by hand: anti-slop rejects it).
 - **Forms**: React Hook Form + `effectTsResolver(schema)` (`@hookform/resolvers` 6, Effect 4) +
   shadcn `Field`; `setFormErrors` puts server field errors under the right inputs.
 - **MSW worker**: `public/mockServiceWorker.js` is not in the boilerplate; the `postinstall` script
@@ -144,12 +147,9 @@ e2e. Its app,
   `verify-project.sh`) and the pnpm gates. Claude Code applies it even in a folder that was never
   trusted, `-p` included, so one message runs to the end with no prompt and no settings file;
   file edits need `--permission-mode acceptEdits` headless. For later turns, the project's
-  `.claude/settings.json` allows exactly the pnpm commands the skills run (`install`, `lint`,
-  `lint:fix`, `typecheck`, `test`, `test:e2e`, `test:e2e:install`, `build`,
-  `build-storybook`, `check`, `dev:mock`,
-  `exec shadcn add` / `info`), and its `PostToolUse` hook (`.claude/hooks/format.mjs`) runs
-  Prettier on every file Claude writes or edits inside the project, so code is formatted as it is
-  written. A project from the boilerplate has two: the root's, for sessions started there
+  `.claude/settings.json` allows the pnpm commands the skills run, and its `PostToolUse` hook
+  (`.claude/hooks/format.mjs`) runs Prettier on every file Claude writes or edits inside the
+  project, so code is formatted as it is written. A project from the boilerplate has two: the root's, for sessions started there
   (Workflow A), and `apps/web/.claude/settings.json`, for sessions in the app (Claude
   Code reads the file only from the folder a session starts in). `create-project.sh` copies the
   root one only when the project has none, and Claude Code applies it once the folder is trusted (open it with `claude` and accept the prompt).
@@ -160,7 +160,7 @@ e2e. Its app,
   helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`); `pnpm lint` also runs `prettier --check`.
 - **Code style in ESLint**: arrow functions only (`func-style`, `prefer-arrow-callback`; `function*` stays for Effect), destructuring, shorthand, template literals, `??` / `?.` and the rest of `typescript-eslint`'s `stylisticTypeChecked`, so code the skills write later reads like the template.
 
-`feature-development/references/` (with `api.ts` and `mocks.ts` in `api-integration/references/`) quotes a full feature (todos: list + create form, a test file per component, 10 tests) and the
+`feature-development/references/` (with `schemas.ts`, `api.ts`, `queries.ts` and `mocks.ts` in `api-integration/references/`) quotes a full feature (todos: list + create form, a test file per component) and the
 wiring diff for the two files a feature registers in.
 
 ## End-to-end tests and CI/CD (from the boilerplate)
@@ -186,7 +186,7 @@ brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "n
 
 | Package | Version | Note |
 |---|---|---|
-| typescript | ~6.0 | typescript-eslint 8.71 supports `<6.1`, so not 7.x yet. `baseUrl` is deprecated in 6; `paths` only. |
+| typescript | ~6.0 | typescript-eslint 8 supports `<6.1`, so not 7.x yet. `baseUrl` is deprecated in 6; `paths` only. |
 | eslint | 10 | ESLint 9 is end-of-life. `eslint-plugin-jsx-a11y` 6.10.2 declares `<=9` but works on 10 (checked against a file with a11y violations); allowed in `pnpm-workspace.yaml`. |
 | effect | 4.0.5 | Forms use `effectTsResolver` from `@hookform/resolvers` 6, the first version built for Effect 4 (5.x supported Effect 3 only). |
 | react-router | 8.5 | No `react-router-dom`. React Router mutates lazy route objects once loaded, so route trees are factories (`createRoutes()`). |
@@ -197,12 +197,12 @@ brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "n
 
 ## Companion skills
 
-Popular third-party skills for parts of the stack, installed next to the five
+Popular third-party skills for parts of the stack, installed next to the web-dev
 skills by `install-companions.sh` and pinned to an audited commit. Each was read in full for security
 and fit; the findings are in [`docs/companion-audit.md`](docs/companion-audit.md), and what Claude
 must ignore in each one is in [`references/companions.md`](references/companions.md), which every
 skill reads before following a companion. When a companion disagrees with the project, the
-project's `CLAUDE.md` and the five project skills win. The installer is pinned too:
+project's `CLAUDE.md` and the web-dev skills win. The installer is pinned too:
 `install-companions.sh` runs `skills@1.7.2`, not whatever `npx skills` serves that day.
 
 | Skill | Source | Commit | License | What it is for |
@@ -228,83 +228,3 @@ every one of them to `pnpm exec shadcn`, the CLI pinned by the project's lockfil
 any `shadcn@latest` is left. Because
 `skills-lock.json` keeps the upstream hash, `npx skills check` reports that skill as modified;
 re-run the script after updating it.
-
-## Maintaining
-
-`../.gitattributes` (the repository root) keeps every file LF, so the shell scripts still run from a CRLF checkout
-(`core.autocrlf=true`).
-
-Run `pnpm install` once at the repository root: it installs the git hooks (husky). Commit
-messages follow Conventional Commits (commitlint); the `pre-commit` hook checks staged scripts.
-`pnpm lint` at the root checks every script at once. Projects from the boilerplate get the same
-hooks (see its `CLAUDE.md`).
-
-```
-.claude-plugin/          ← plugin.json (name web-dev, version); ../.claude-plugin/ is the marketplace
-skills/                  ← the product
-  develop/  SKILL.md (entry point, routing), references/ (new-app, existing-project, plan)
-  project-setup/  SKILL.md, scripts/ (create-project: a new project from the boilerplate;
-                  install-companions)
-  feature-development/  SKILL.md, references/ (the todos feature, outside-template)
-  api-integration/  SKILL.md, references/ (effect-http, errors, msw, react-query, outside-template)
-  ui-development/  SKILL.md, references/ (design-mapping, visual-check, outside-template)
-  ticket/  SKILL.md, references/ (intent, spec and plan templates)
-  incident/  SKILL.md, references/ (report, rca and actions templates)
-references/              ← shared guidelines the skills read (stack, coding standards, architecture,
-                           companions)
-scripts/                 ← detect-project.mjs, verify-project.sh, check-contract.mjs, run by the
-                           skills in projects; check-contract's tests in scripts/test/
-agents/                  ← codebase-explorer, shipped with the plugin
-evals/                   ← routing cases for `claude plugin eval`, fixtures, check-detect.sh
-docs/companion-audit.md  ← audit of the companion skills
-```
-
-Outside the plugin, at the repository root: `tools/` (maintainer scripts: `verify.sh`,
-`extract-snippets.mjs`, `check-guidelines.mjs`, `check-create-project.sh`, `sync-references.sh`,
-`lint.sh`, `validate-skills.sh`) and `.claude/` (maintainer agents and settings).
-Neither ships with the plugin.
-
-**Change the boilerplate or bump a dependency:**
-
-1. Change the boilerplate (react-vite-boilerplate), run `pnpm check` in it and push.
-2. `bash ../tools/verify.sh` — the shared references and fixture tiers, then a project created
-   from the boilerplate, with the todos feature quoted in the skills (every ` ```tsx file=... `
-   block, written out by `extract-snippets.mjs`) wired into its `apps/web`, all gates.
-   `BOILERPLATE_REPO=file://<clone>` runs it on a local commit before the push.
-3. Update every snippet in the skills that quotes a changed file. Snippets are copied from the
-   boilerplate's `apps/web`, never written from memory; keep it that way. A block that shows a
-   pattern found in neither the boilerplate nor the todos feature (a detail key, `setQueryData`) is marked
-   ` ```ts sketch ` and says so in the text. A todos block keeps its `file=` path; a new todos
-   file gets a block with its own `file=` path, or `verify.sh` never tests it.
-4. Release: bump `version` in `.claude-plugin/plugin.json` (installs from git are cached copies,
-   so without a bump nobody receives the change), add the entry to `CHANGELOG.md`, tag the
-   commit `web-dev--v<version>`, and run
-   `claude plugin validate --strict .claude-plugin/plugin.json` (and `claude plugin validate --strict ..`
-   for the marketplace).
-
-**Version traps** (Effect 4, React Router 8, MSW 3, TanStack Query 5, Tailwind 4, Vitest 5,
-Storybook 10) are written once, in `references/stack-guidelines.md`; code style and the data flow
-in `coding-standards.md` and `architecture.md` beside it. Skills point there and keep only the
-traps specific to their own step. The boilerplate's `apps/web/CLAUDE.md` carries the same sections
-word for word, so a project from it keeps them without the plugin. The boilerplate is the source:
-change a section there, then `bash tools/sync-references.sh` copies it into `references/`;
-`check-guidelines.mjs` (run by `verify.sh`) fails when the copies differ.
-
-**Routing** (`skills/develop/SKILL.md`, the skills' descriptions, `scripts/detect-project.mjs`)
-is tested by `evals/` with `claude plugin eval`, through `evals/run.sh` (see `evals/README.md`);
-`verify.sh` checks the tier of every fixture without a model; the model evals run only
-on request (`evals/README.md`, When evals run).
-
-**CI** on GitHub Actions (`../.github/workflows/`: `ci.yml` for the free checks, also weekly
-instead of a pipeline schedule; `companions.yml` weekly; `evals.yml`, the model evals, only from
-a manual run on a release tag) and on GitLab
-(`../.gitlab-ci.yml`), in `node:24`, on merge requests and pushes that touch the plugin
-and on pipeline schedules: `claude plugin validate --strict` for the plugin and the marketplace,
-and `verify.sh`. Schedules also run `install-companions.sh` in a new project from the boilerplate, so a
-companion whose repo moved or deleted the pinned path shows up. Add a weekly schedule in GitLab (Build >
-Pipeline schedules) so a boilerplate change that breaks the code the skills quote shows up before a
-user hits it. On another Git host, run the same commands from your own CI.
-
-**Upgrade a companion:** read the diff between the pinned and the new commit, re-check it
-against the conventions, then change the SHA in `install-companions.sh`, in the table above and in
-`docs/companion-audit.md`, and update its overrides in `references/companions.md`. The same holds for the `skills` CLI version.

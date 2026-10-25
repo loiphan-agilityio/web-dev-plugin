@@ -12,8 +12,6 @@ import { setupWorker } from 'msw/browser';      // src/mocks/browser.ts
 import type { RequestHandler } from 'msw';      // types may still come from the root
 ```
 
-`onUnhandledRequest` was renamed `onUnhandledFrame`. The test server (`src/test/setup.ts`) calls `server.listen({ onUnhandledFrame: 'error' })`: a request with no handler fails the test. `afterEach` runs `server.resetHandlers()`, which drops every `server.use()` override.
-
 ## Feature mocks (`features/<name>/mocks.ts`)
 
 ```ts file=src/features/todos/mocks.ts
@@ -116,15 +114,7 @@ server.use(...createTodosHandlers([]));
 server.use(todosMocks.createInvalid({ title: 'x' }));
 ```
 
-### Toasts
-
-A toast is asserted as text (`findByText`): the render helpers mount the `Toaster`. Never mock
-`sonner`. Details, and what to add in an app from the plugin's 0.1.0 template that lacks it:
-`../../feature-development/references/testing.md`, section Rules.
-
 ### Other rules
 
-- Never `vi.stubGlobal('fetch')` or `vi.mock` an `api.ts`; the real `ApiClient` -> MSW path is what the tests cover.
-- Do not import `http` / `HttpResponse` / `delay` from the root `msw` (lint error); many snippets online and in companion skills do.
 - A test that needs the request body or params asserts on the handler side (read `request.json()` in the handler and respond accordingly) or on the resulting UI.
 - Test names describe behaviour ("shows an empty state that is not an error"); query by role/label, not test ids.

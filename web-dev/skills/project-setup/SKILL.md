@@ -38,7 +38,7 @@ Run the scripts exactly as written below, each as one plain command: `allowed-to
 `bash ${CLAUDE_SKILL_DIR}/scripts/create-project.sh <target-dir> --auth`, or `--no-auth`, or `--landing` for a landing page. It fetches the boilerplate at the commit this plugin version pins (the one its skills were verified against), runs its generator into a temporary folder and copies the result into the target, keeping an existing `.git/` and `.claude/`. The project brings `.claude/settings.json` at its root and in `apps/web` (the commands the skills run, allowed without a prompt, and a hook that runs Prettier on each file Claude writes); an existing root one is kept, and the script says so: say which under **Did**. It copies nothing when:
 
 - a project file already exists in the target: it lists them and exits 1. Show the list and ask how to proceed; the user's files stay as they are;
-- the clone fails (no network, no access to the repository), the repository has no generator (or, for `--landing`, no landing overlay), or the generator stops (it names a patch that no longer matches the boilerplate): report the output.
+- the fetch fails (no network, no access to the repository, a `BOILERPLATE_REF` that does not exist), the repository has no generator, or the generator stops (it names a patch that no longer matches the boilerplate): report the output.
 
 Never build the project by hand, from memory or from another template instead: report the failure under **Blocked by**.
 

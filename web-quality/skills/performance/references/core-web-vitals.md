@@ -55,7 +55,8 @@ and the render delay after it.
 
 - Hashed files under `assets/` are safe to cache a year as `immutable`; `index.html` must
   revalidate (`max-age=0, must-revalidate`) so a deploy is seen at once. `check-headers.mjs` checks
-  both. The boilerplate's `apps/web/netlify.toml` does this.
+  both. The boilerplate's `apps/web/netlify.toml` sets the `assets/*` rule; `index.html` relies on
+  Netlify's default revalidation, so another host needs that rule added.
 - A missing hashed file must be a 404, not `index.html` with 200: `check-headers.mjs`
   (`missing-asset`).
 - Compression (gzip or Brotli) is the host's job; static hosts and CDNs do it. Check

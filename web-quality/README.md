@@ -1,6 +1,6 @@
 # web-quality: Claude Code plugin for measured web quality
 
-One entry point, `/web-quality:audit`, and four skills that find what keeps a web page from being
+One entry point, `/web-quality:audit`, and skills that find what keeps a web page from being
 fast, accessible, findable and safe, from evidence rather than rules of thumb: it measures the page
 in a real browser and its build, keeps measured findings apart from hypotheses read in the code,
 fixes them, and measures again. Built after
