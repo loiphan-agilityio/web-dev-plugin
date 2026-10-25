@@ -4,7 +4,7 @@ Source: the todos feature (`components/TodoList/__tests__/TodoList.test.tsx`, `c
 
 ## Harness (already in the template)
 
-`src/test/setup.ts` stubs `matchMedia` (jsdom has none; the Toaster needs it), starts MSW with `onUnhandledFrame: 'error'`, clears sonner's toasts before each test and resets handlers after it.
+`src/test/setup.ts` stubs `matchMedia` (jsdom has none; the Toaster needs it), starts MSW with `onUnhandledFrame: 'error'` (a request with no handler fails the test), clears sonner's toasts before each test and resets handlers after it.
 
 Read the file in the project when a test behaves oddly; do not copy it into a feature.
 
@@ -220,7 +220,7 @@ A model test calls the function with plain values: no render, no MSW. Cover each
 - A toast is text on screen: `expect(await screen.findByText('Todo added')).toBeInTheDocument()`. The render helpers mount the `Toaster`; never `vi.mock('sonner')`.
 - Don't make a test pass by weakening it: no removing assertions, no `.skip`, no loosening queries. If a test exposes a bug, fix the code.
 - Test data for a new feature goes in its `mocks.ts` fixtures, not inline in each test.
-- Run one file while iterating: `pnpm test <path> --coverage.enabled=false` (`pnpm test` measures coverage, and one file alone stays under the 80% threshold, so the run fails even when its tests pass), or keep `pnpm test:watch` running in a terminal of its own (it re-runs the tests that import each saved file); run `pnpm check` before finishing. Both run in the app folder; from the monorepo root one file takes `--filter web` (`pnpm --filter web test <path> --coverage.enabled=false`), since the root `test` runs turbo, which rejects Vitest's flags, while the root's `pnpm test:watch` already runs the app's (a project made before the boilerplate added it lacks it: `pnpm --filter web test:watch`).
+- Run one file while iterating: `pnpm test <path> --coverage.enabled=false` (`pnpm test` measures coverage, and one file alone stays under the 80% threshold, so the run fails even when its tests pass), or keep `pnpm test:watch` running in a terminal of its own (it re-runs the tests that import each saved file); run `pnpm check` before finishing.
 
 ## End-to-end
 

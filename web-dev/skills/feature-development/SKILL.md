@@ -11,7 +11,7 @@ Turn one ticket into a tested feature in `src/features/<name>/`. `references/` h
 
 Before writing code, read the project's `CLAUDE.md`, `../../references/stack-guidelines.md` (version traps) and, for Effect code, `node_modules/effect/AGENTS.md` in full. In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`.
 
-Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From the monorepo root, as under `develop`'s Workflow A, `pnpm lint:fix`, `pnpm check`, `pnpm test` and `pnpm test:e2e:install` work as written, but the root scripts run turbo, which rejects the app's own flags: the rest take `--filter web` (`pnpm --filter web test <path> --coverage.enabled=false`, `pnpm --filter web test:watch`, `pnpm --filter web exec shadcn add <name>`), and Effect's guide is `apps/web/node_modules/effect/AGENTS.md`.
+Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From the monorepo root, as under `develop`'s Workflow A, `pnpm lint:fix`, `pnpm check`, `pnpm test`, `pnpm test:watch` and `pnpm test:e2e:install` work as written, but the root scripts run turbo, which rejects the app's own flags: the rest take `--filter web` (`pnpm --filter web test <path> --coverage.enabled=false`, `pnpm --filter web exec shadcn add <name>`), and Effect's guide is `apps/web/node_modules/effect/AGENTS.md`.
 
 ## 1. Understand the ticket
 
@@ -64,9 +64,9 @@ The feature exports a lazy route factory (`todoRoutes = (): RouteObject[] => [..
 
 ## 7. Tests
 
-Follow `references/testing.md`. Every component, including ones added later, gets its own test in its folder's `__tests__/` (`components/<Name>List/__tests__/<Name>List.test.tsx`), rendered alone with `renderWithProviders`. The page test (`renderRoute`) covers only flows that need the parts together. Drive states with `server.use(...)` (a later call wins; within one call the first match wins), never by mocking hooks or `api.ts`. Query by role and label. Minimum: list = the four states; form = client validation, success (input cleared), server 422 next to its field; page = the create flow; schemas = `Schema.decodeUnknownSync`; model = each rule and its edges, without rendering.
+Follow `references/testing.md`. Every component, including ones added later, gets its own test in its folder's `__tests__/` (`components/<Name>List/__tests__/<Name>List.test.tsx`), rendered alone with `renderWithProviders`. The page test (`renderRoute`) covers only flows that need the parts together. Drive states with `server.use(...)`, never by mocking hooks or `api.ts`. Query by role and label. Minimum: list = the four states; form = client validation, success (input cleared), server 422 next to its field; page = the create flow; schemas = `Schema.decodeUnknownSync`; model = each rule and its edges, without rendering.
 
-One Playwright spec per feature, `e2e/<name>.spec.ts` (`references/testing.md`, End-to-end): the main flow from the feature's path (or the nav link, when the root layout has a nav) through the list and the form, on the default mock handlers and their fixtures; with authentication, it signs in first. It runs in `pnpm check` and again in CI against the Netlify deploy, so it never assumes a host or port. While writing code, `pnpm test:watch` in a terminal of its own re-runs the affected tests on each save.
+One Playwright spec per feature, `e2e/<name>.spec.ts` (`references/testing.md`, End-to-end): the main flow from the feature's path (or the nav link, when the root layout has a nav) through the list and the form, on the default mock handlers and their fixtures; with authentication, it signs in first. It runs in `pnpm check` and again in CI against the Netlify deploy, so it never assumes a host or port.
 
 ## 8. Stories
 
