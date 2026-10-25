@@ -67,8 +67,8 @@ and `evals-e2e`, offered on release tags (`web-dev--v<version>`) once the free j
 
 ## Run
 
-From `web-dev/`, when the maintainer asks for a run, with `evals/run.sh`. It copies the plugin without
-`node_modules` (a plugin folder with a `node_modules` makes `claude plugin eval` fail with `E2BIG`) and runs `claude plugin
+From `web-dev/`, when the maintainer asks for a run, with `evals/run.sh`. It copies the plugin without its
+earlier results (`evals/results/`) and runs `claude plugin
 eval` on the copy with `--scaffold` (each case's `setup.sh` only writes fixture files), the tools
 the skills need (`Bash`, `Write`, `Edit`), one arm unless `--ablation with-without` is passed.
 Other options pass through:
