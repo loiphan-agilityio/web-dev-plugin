@@ -40,6 +40,7 @@ Every version is pinned in the boilerplate's lockfile.
 | 14 | **Tickets in parallel:** several tickets written at once | `ticket` skill: one subagent per ticket, each writing only its folder | Every folder passes `check-contract.mjs` |
 | 15 | **Incident contracts:** `/web-dev:incident <id>` writes `docs/incidents/<id>/report.md`, `rca.md`, `actions.md` | `incident` skill + `scripts/check-contract.mjs` | Status is open, mitigated or resolved; follow-ups `A<n>` listed |
 | 16 | **Anti-slop for TypeScript:** no `as any`, hand-written `_tag` checks or unexplained casts | The boilerplate's anti-slop Oxlint plugins (`tools/oxlint/anti-slop`, `pnpm lint`), and the quoted todos feature that `verify.sh` lints | `pnpm lint` passes with 0 anti-slop errors |
+| 17 | **PR contracts:** `/web-dev:pr` opens a pull or merge request described by why, what changed, the ticket contract it implements and the `pnpm check:report` checklist; it is not opened ready into a protected branch before CI passes | `pr` skill + `scripts/check-contract.mjs` (a description file) | `check-contract.mjs` passes: four sections filled, linked contracts pass, every gate passes (`scripts/test/`); the PR stays a draft while CI fails |
 | + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma, DESIGN.md; all optional) | `ui-development` skill | Theme tokens, shadcn components and the four data states, no raw colors |
 
 ### Each skill must
@@ -84,8 +85,9 @@ Requirement 4, one message to a whole app: the demo in `README.md` ("Demo") give
   its own (requirements 7 and 8), and the skills leave it as it is.
 - Applying the skeleton to an existing project: `create-project.sh` refuses a folder with
   conflicting files. An existing project gets features through Workflow B instead.
-- Not yet: bug fixes, review without edits, and commits or PR/MR beyond the contract commit of
-  `ticket` and `incident` (`develop` reports them as not covered and changes nothing).
+- Not yet: bug fixes, review without edits, and commits beyond the contract commit of `ticket` and
+  `incident` (`develop` reports them as not covered and changes nothing); a PR or MR goes through
+  `pr`, which never merges.
 
 ## Distribution
 

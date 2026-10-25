@@ -12,9 +12,10 @@ const root = mkdtempSync(join(tmpdir(), 'check-contract-'));
 
 after(() => rmSync(root, { recursive: true, force: true }));
 
-const check = (dir) => {
-  const { status, stdout, stderr } = spawnSync(process.execPath, [script, dir], {
+const check = (path, cwd) => {
+  const { status, stdout, stderr } = spawnSync(process.execPath, [script, path], {
     encoding: 'utf8',
+    cwd,
   });
 
   return { status, stderr, result: stdout ? JSON.parse(stdout) : undefined };
@@ -60,6 +61,38 @@ const incident = {
   'report.md': `# 412: Login down\n\n${sections('Summary', 'Impact', 'Timeline', 'Detection')}\n## Status\n\n**Resolved** at 10:02 UTC.\n`,
   'rca.md': `# 412: rca\n\n${sections('Root cause', 'Trigger', 'Contributing factors', 'Five whys', 'Why it was not caught')}`,
   'actions.md': `# 412: actions\n\n${sections('Fix', 'Prevention', 'Detection')}\n## Follow-ups\n\n- [ ] A1 Alert on 5xx rate — owner: unassigned\n`,
+};
+
+// What `pnpm check:report` prints at the end, for a PR description's Evidence.
+const checklistText = [
+  '| Gate | Status | Result | Time |',
+  '|---|---|---|---|',
+  '| Lint | pass | pass | 5s |',
+  '| Unit tests | pass | 100% (44/44 passed); line coverage 88.34% | 21s |',
+  '',
+  'All 2 gates pass.',
+  '',
+  'CI: pending',
+].join('\n');
+
+const pr = (ticketText, evidence = checklistText) =>
+  `## Why\n\nText.\n\n## Changes\n\n- Text.\n\n## Ticket\n\n${ticketText}\n\n## Evidence\n\n${evidence}\n`;
+
+/** A project folder holding ticket 412's contract (`files`; undefined skips one) and a PR description. */
+const project = (body, files = ticket) => {
+  count += 1;
+  const cwd = join(root, String(count));
+  const dir = join(cwd, 'docs', 'tickets', '412');
+
+  mkdirSync(dir, { recursive: true });
+
+  for (const [name, text] of Object.entries(files)) if (text !== undefined) writeFileSync(join(dir, name), text);
+
+  const file = join(cwd, 'pr-body.md');
+
+  writeFileSync(file, body);
+
+  return { cwd, file };
 };
 
 describe('check-contract.mjs', () => {
@@ -185,6 +218,76 @@ describe('check-contract.mjs', () => {
         assert.equal(statusOf(result, id), 'fail', `${kind} ${id}`);
       }
     }
+  });
+
+  it('passes a PR description that links a passing ticket contract and its criteria', () => {
+    const { cwd, file } = project(
+      pr('[412](https://github.com/o/r/blob/feat/412-search/docs/tickets/412/): `AC-1`, `AC-2`'),
+    );
+    const { status, result } = check(file, cwd);
+
+    assert.equal(status, 0, JSON.stringify(result));
+    assert.equal(result.kind, 'pr');
+    assert.match(result.checks.find((c) => c.id === 'evidence').detail, /All 2 gates pass/);
+  });
+
+  it('passes a PR with no ticket that says why, and fails one that says nothing', () => {
+    const none = project(pr('none: a dependency bump, no ticket'));
+    const silent = project(pr('See the commits.'));
+
+    assert.equal(check(none.file, none.cwd).status, 0);
+
+    const { status, result } = check(silent.file, silent.cwd);
+
+    assert.equal(status, 1);
+    assert.equal(statusOf(result, 'ticket'), 'fail');
+  });
+
+  it('fails a PR that links a missing contract, a failing one, or a criterion its spec lacks', () => {
+    for (const [body, files, reason] of [
+      [pr('docs/tickets/999/'), ticket, /999: no folder/],
+      [pr('docs/tickets/412/: `AC-1`'), { ...ticket, 'plan.md': undefined }, /412: its contract fails plan\.md/],
+      [pr('docs/tickets/412/: `AC-9`'), ticket, /list no AC-9/],
+    ]) {
+      const { cwd, file } = project(body, files);
+      const { status, result } = check(file, cwd);
+
+      assert.equal(status, 1);
+      assert.match(result.checks.find((c) => c.id === 'ticket').detail, reason);
+    }
+  });
+
+  it('reads the checklist pasted with its own `## Check report` heading', () => {
+    const { cwd, file } = project(pr('none: a chore', `## Check report\n\n${checklistText}`));
+
+    assert.equal(check(file, cwd).status, 0);
+  });
+
+  it('fails PR evidence with a failing gate or with no checklist', () => {
+    for (const [evidence, reason] of [
+      [checklistText.replace('| Lint | pass | pass |', '| Lint | FAIL | FAIL |'), /failing gates: Lint/],
+      ['Tests pass on my machine.', /no pnpm check:report checklist/],
+    ]) {
+      const { cwd, file } = project(pr('none: a chore', evidence));
+      const { status, result } = check(file, cwd);
+
+      assert.equal(status, 1);
+      assert.match(result.checks.find((c) => c.id === 'evidence').detail, reason);
+    }
+  });
+
+  it('holds the shipped PR template to every section, failing only on its fill markers', () => {
+    const { cwd, file } = project('');
+
+    copyFileSync(join(skills, 'pr', 'references', 'pr.md'), file);
+
+    const { status, result } = check(file, cwd);
+    const { detail } = result.checks.find((c) => c.id === 'pr-body.md');
+
+    assert.equal(status, 1);
+    assert.doesNotMatch(detail, /missing/);
+    assert.match(detail, /fill/);
+    assert.equal(statusOf(result, 'evidence'), 'fail');
   });
 
   it('exits 2 for a path that does not exist or holds no contract', () => {

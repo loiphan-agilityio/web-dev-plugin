@@ -33,7 +33,7 @@ Run the check. It fails on a missing file or section, a `<!-- fill` marker left,
 
 ## 4. Commit, and push only when asked
 
-Commit on a branch, never on `main`, `dev`, `staging` or `production`: `git switch -c docs/incident-<id>`, `git add docs/incidents/<id>`, `git diff --cached --name-only` to confirm only those files, then `git commit -m "docs(incident): report, rca and actions for <id>"`. Push and open a PR or MR only when the user asks; git commands are not in `allowed-tools` on purpose.
+Commit on a branch, never on `main`, `dev`, `staging` or `production`: `git switch -c docs/incident-<id>`, `git add docs/incidents/<id>`, `git diff --cached --name-only` to confirm only those files, then `git commit -m "docs(incident): report, rca and actions for <id>"`. Push only when the user asks, and open a PR or MR with the `pr` skill when they ask for one; git commands are not in `allowed-tools` on purpose.
 
 Offer to write the follow-ups as ticket contracts: `ticket` writes several in parallel, and each `A<n>` then names its ticket.
 

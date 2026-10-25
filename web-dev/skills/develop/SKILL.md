@@ -45,10 +45,11 @@ The tier decides whether the template's rules apply, so a failed detection stops
 | **landing** | a landing or marketing page for a product | `new` and `state: empty`: `project-setup` with `--landing`, then `ui-development` with the description (and design) to fit the page's copy and sections. `template`: C with `ui-development`. Otherwise: B |
 | **ticket contract** | intent, spec and plan for one or more tickets, before any code | any tier but `unsupported`: `ticket` (several tickets run in parallel, one subagent each) |
 | **incident** | an incident report, postmortem or root cause analysis | any tier but `unsupported`: `incident` |
+| **pr** | a pull or merge request for the current branch, to send it for review | any tier but `unsupported`: `pr` |
 | **feature** | a ticket, page, form or CRUD screen | `template`: C with `feature-development`. Otherwise: B |
 | **api** | one endpoint, an error case, a mock, cache invalidation | `template`: C with `api-integration`. Otherwise: B |
 | **ui** | a design to match, with no ticket | `template`: C with `ui-development`. Otherwise: B |
-| **not yet** | a bug fix, a review with no edits, a commit, push, PR/MR (beyond the contract commit `ticket` and `incident` make), or CI/CD work (pipelines come with the boilerplate, not the plugin) | say this version does not cover it; change nothing |
+| **not yet** | a bug fix, a review with no edits, a commit or push on its own (beyond the contract commit `ticket` and `incident` make, and the push `pr` makes), or CI/CD work (pipelines come with the boilerplate, not the plugin) | say this version does not cover it; change nothing |
 
 Sort a mixed request by its largest part (a whole app with a design is **app**; a ticket with a design is **feature**). The first line of the Result is `**Route:** <kind>, <tier>, workflow <A|B|C> (<reason>)`.
 
@@ -58,7 +59,7 @@ Ask once, in one message, before writing code, when:
 
 - a `same-stack` or `other-stack` project would need a new dependency (Effect, shadcn/ui, React Hook Form, a router);
 - in Workflow B or C, a criterion depends on data, a business rule or the backend contract, and neither the request nor the code answers it;
-- the work needs an action outside the folder (push, PR/MR, deploy): this version does none;
+- the work needs an action outside the folder (push, deploy): this version does none, except the push and the PR or MR that `pr` makes when the user asks for one;
 - a **setup** request that does not say whether it is a landing page or a web app, or whether a web app includes authentication: `project-setup` asks, as its step 2 says, and never picks it for the user.
 
 Everything else gets the simplest default, listed under **Assumptions**. Workflow A never asks: the user asked once and expects a running app (its plan decides authentication).
@@ -70,7 +71,7 @@ Everything else gets the simplest default, listed under **Assumptions**. Workflo
 - **C, one change in a `template` project:** invoke the skill from step 2 (Skill tool) and follow it through its gates and its Result. Put the **Route:** line on top of that Result; write no second one.
 - **setup in an empty folder:** invoke `project-setup`; its Result, with the **Route:** line on top, is the report.
 - **landing in an empty folder:** invoke `project-setup` with `--landing` (it asks nothing more), then `ui-development` for the page's copy and sections; one Result.
-- **ticket contract, incident:** invoke `ticket` or `incident`; its Result, with the **Route:** line on top, is the report.
+- **ticket contract, incident, pr:** invoke `ticket`, `incident` or `pr`; its Result, with the **Route:** line on top, is the report.
 
 ## Result
 

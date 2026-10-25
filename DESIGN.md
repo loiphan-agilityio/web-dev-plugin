@@ -69,6 +69,7 @@ flowchart TD
 | `ui-development` | A design with no ticket | — (when loaded by `feature-development`, it hands data work back) |
 | `ticket` | Tickets to write up before any code (`/web-dev:ticket`) | — (`feature-development` builds from the contract later) |
 | `incident` | An incident report or postmortem (`/web-dev:incident`) | `ticket` for its follow-ups, when the user asks |
+| `pr` | A branch to send for review as a pull or merge request (`/web-dev:pr`) | — (it links the ticket contract; review and merge stay with the user) |
 
 Each skill still triggers on its own words ("Implement this ticket", "Add PATCH /todos/:id"), so a
 user who knows which one they need skips the routing. `develop` and `feature-development` tell
