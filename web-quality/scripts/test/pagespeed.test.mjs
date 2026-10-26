@@ -5,6 +5,7 @@ import { after, before, describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { pageSpeed } from '../pagespeed.mjs';
+import { statuses } from './statuses.mjs';
 
 const script = fileURLToPath(new URL('../pagespeed.mjs', import.meta.url));
 
@@ -28,9 +29,6 @@ const vitals = (lcp, inp, cls) => ({
   INTERACTION_TO_NEXT_PAINT: { percentile: inp, category: 'FAST' },
   CUMULATIVE_LAYOUT_SHIFT_SCORE: { percentile: cls, category: 'FAST' },
 });
-
-/** @type {(report: Awaited<ReturnType<typeof pageSpeed>>) => Record<string, string>} */
-const statuses = (report) => Object.fromEntries(report.checks.map((check) => [check.id, check.status]));
 
 describe('pagespeed', () => {
   /** The fake API answers with `next`, and records the last request's query. */

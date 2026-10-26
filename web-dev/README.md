@@ -112,7 +112,9 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
    `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1 pyyaml==6.0.3`).
 4. A change to routing (a description, `develop`'s tables, `detect-project.mjs`) gets an eval
    case: write it, do not run it (`evals/README.md`, When evals run).
-5. Open a merge request with a Conventional Commit message; CI runs the checks again.
+5. Open a pull request with a Conventional Commit message; CI runs `verify.sh`, the skills
+   validator and the scripts' tests again (not `pnpm lint`: the pre-commit hook lints the staged
+   scripts).
 
 ## What a new project gives you
 
