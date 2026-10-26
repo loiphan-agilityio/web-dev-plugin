@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import { after, before, describe, it } from 'node:test';
 
 import { checkHeaders } from '../check-headers.mjs';
+import { statuses } from './statuses.mjs';
 
 /**
  * A local site: `headers` on every response, `html` at /, a hashed asset, and `spaFallback`
@@ -31,9 +32,6 @@ const serve = ({ headers = {}, html = '', spaFallback = false, assetCache } = {}
     server.listen(0, () => resolve(server));
   });
 };
-
-/** @type {(report: Awaited<ReturnType<typeof checkHeaders>>) => Record<string, string>} */
-const statuses = (report) => Object.fromEntries(report.checks.map((check) => [check.id, check.status]));
 
 describe('check-headers', () => {
   /** @type {import('node:http').Server[]} */

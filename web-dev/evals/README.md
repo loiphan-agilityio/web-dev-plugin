@@ -62,8 +62,9 @@ on the committed content of `skills/`, `agents/`, `references/`, `scripts/` and 
 Each run uses one arm (`--ablation none`), half the cost of two. The no-plugin baseline and its Δ
 (`--ablation with-without`) answer a different question, whether the plugin still adds anything,
 so ask for it only when a release changes a skill's description or `develop`'s routing (in CI:
-start the job with `EVALS_ARGS` set to `--ablation with-without`). The CI jobs are `evals-routing`
-and `evals-e2e`, offered on release tags (`web-dev--v<version>`) once the free jobs pass.
+start the job with `EVALS_ARGS` set to `--ablation with-without`). In CI it is the `Evals` workflow
+(`evals.yml`), started by hand on a release tag (`web-dev--v<version>`): one job per suite
+(`Evals: routing`, `Evals: e2e`), after the free checks of `ci.yml` pass.
 
 ## Run
 
@@ -81,7 +82,7 @@ bash evals/run.sh --tag routing --runs 3 --threshold 0.66 --max-cost-usd 25 --no
 bash evals/run.sh --tag e2e --runs 1 --max-cost-usd 40 --no-publish
 ```
 
-The first is the routing suite, the second the output-quality cases (20 and 21), the same
+The first is the routing suite, the second the output-quality cases (18 and 19), the same
 commands as CI. With `--ablation with-without`, the headline number is Δ, the score with the
 plugin minus the score without it.
 Results and the HTML report go to `evals/results/<timestamp>/` (ignored by git). Every run is a

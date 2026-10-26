@@ -14,7 +14,7 @@ import { join, posix, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { gzipSync } from 'node:zlib';
 
-import { cannotRun, isMain } from './lib/cli.mjs';
+import { cannotRun, isMain, printReport } from './lib/cli.mjs';
 
 /** @typedef {{ file: string, bytes: number, gzip: number }} Asset */
 
@@ -120,7 +120,7 @@ const main = () => {
       return kb;
     };
     const report = bundleBudget(dist, { js: number(values.js), css: number(values.css), total: number(values.total) });
-    console.log(JSON.stringify(report, null, 2));
+    printReport(report);
     if (values.fail && report.checks.some((check) => check.status === 'fail')) process.exitCode = 1;
   } catch (error) {
     cannotRun('bundle-budget', error);

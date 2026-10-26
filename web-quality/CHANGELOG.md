@@ -3,6 +3,11 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## Unreleased
+
+- `bundle-budget.mjs` prints its report through `printReport`, like `check-headers.mjs` and
+  `pagespeed.mjs`: the JSON now carries the same `summary` (how many checks have each status).
+
 ## 0.2.7
 
 - Dropped the `allowed-tools` rules each skill never uses: the `pnpm build` and `build:mock` forms
