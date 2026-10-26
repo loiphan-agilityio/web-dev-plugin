@@ -3,7 +3,7 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.2.8
 
 - The boilerplate deploys to Cloudflare Pages, no longer Netlify: `audit`, `security`,
   `core-web-vitals.md`, `spa-seo.md` and `headers-csp.md` name its `apps/web/public/_headers`
