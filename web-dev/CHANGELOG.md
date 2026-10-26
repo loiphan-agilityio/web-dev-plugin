@@ -19,6 +19,18 @@ A git install is a cached copy, so a change reaches users only with a new versio
   opens it instead of the boilerplate's welcome page (which read like a landing page, with
   nothing linking to the features), and `src/app/root-layout.tsx` gets a nav with a link per
   page. The welcome page, its assets and test go; `e2e/home.spec.ts` expects the list.
+## 0.8.0
+
+- Every result ends with the output checklist: each gate's status, the unit tests' pass rate (%),
+  build and lint. `verify-project.sh` (Workflow B, a project not made from the boilerplate) prints
+  it in the shape of `pnpm check:report`: a `| Gate | Status | Result | Time |` row for lint,
+  typecheck, unit tests (`97.5% (39/40 passed)`, read from Vitest's, Jest's or Mocha's summary,
+  summed over a monorepo's packages, prefixed lines included) and build, a `missing` row for each
+  gate the project has no script for, and `All N gates pass.` or the failing gates. A project with
+  its own `check` still runs only that, as one Check row with the pass rate read from its output.
+- `api-integration`, `ui-development` and `develop`'s Workflow A run `pnpm -w check:report`
+  (`pnpm check:report` at the root) in a project from the boilerplate and put its checklist in
+  their Result, as `project-setup` and `feature-development` already did.
 
 ## 0.7.1
 

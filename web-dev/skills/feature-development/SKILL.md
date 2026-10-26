@@ -74,7 +74,7 @@ Follow `references/stories.md`. Every component gets a `<Name>.stories.tsx` in i
 
 ## 9. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). In a project from the boilerplate, run `pnpm -w check:report` instead of `pnpm check`: the same gates, run at the workspace root from any folder of it, ending with the checklist (each gate, the unit and e2e pass rates, line coverage) that goes in the Result. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then `pnpm check` again. A gate that stays red goes in the Result.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect (the skill's `allowed-tools` and the project's allow-list cover exactly those). In a project from the boilerplate, run `pnpm -w check:report` instead of `pnpm check`: the same gates, run at the workspace root from any folder of it, ending with the checklist (each gate, the unit and e2e pass rates, line coverage) that goes in the Result. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then the same gate command again (`pnpm -w check:report` in a project from the boilerplate). A gate that stays red goes in the Result.
 
 ## Result
 
