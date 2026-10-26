@@ -19,6 +19,10 @@ A git install is a cached copy, so a change reaches users only with a new versio
   opens it instead of the boilerplate's welcome page (which read like a landing page, with
   nothing linking to the features), and `src/app/root-layout.tsx` gets a nav with a link per
   page. The welcome page, its assets and test go; `e2e/home.spec.ts` expects the list.
+- `verify-project.sh` prints its checklist as aligned text, which reads in a terminal, instead of
+  a Markdown table: a mark per gate (`✔` pass, `✘` fail, `–` no script), the gate, what was
+  measured (`97.5% (39/40 passed)`) and the time, in padded columns.
+
 ## 0.8.0
 
 - Every result ends with the output checklist: each gate's status, the unit tests' pass rate (%),

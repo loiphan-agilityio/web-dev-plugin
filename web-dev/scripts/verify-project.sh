@@ -95,8 +95,14 @@ fi
 
 log="$(mktemp)"
 trap 'rm -f "$log"' EXIT
-rows=()
+# One checklist row per gate, in parallel arrays (bash 3.2 has no others): the mark (✔ pass,
+# ✘ fail, – no script), the gate, what was measured, the time.
+marks=()
+labels=()
+results=()
+times=()
 failed=()
+row() { marks+=("$1"); labels+=("$2"); results+=("$3"); times+=("$4"); }
 # Guarded like `scripts`: `gates` is empty when the project has none of these scripts.
 for gate in ${gates[@]+"${gates[@]}"}; do
   echo "→ $pm run $gate"
@@ -108,24 +114,30 @@ for gate in ${gates[@]+"${gates[@]}"}; do
   result=""
   [[ "$gate" == test || "$gate" == check ]] && result="$(pass_rate "$log")"
   if (( ok )); then
-    rows+=("| $(name "$gate") | pass | ${result:-pass} | ${seconds}s |")
+    row ✔ "$(name "$gate")" "$result" "${seconds}s"
   else
     failed+=("$(name "$gate")")
-    rows+=("| $(name "$gate") | FAIL | FAIL${result:+: $result} | ${seconds}s |")
+    row ✘ "$(name "$gate")" "$result" "${seconds}s"
   fi
 done
 for gate in "${missing[@]+"${missing[@]}"}"; do
-  rows+=("| $(name "$gate") | missing | no \`$gate\` script in package.json | – |")
+  row – "$(name "$gate")" "no \`$gate\` script in package.json" ""
 done
 
+# Aligned columns for the terminal: each padded to its longest cell, the time right-aligned.
+widest() { local cell max=0; for cell in "$@"; do (( ${#cell} > max )) && max=${#cell}; done; echo "$max"; }
+label_width="$(widest "${labels[@]}")"
+result_width="$(widest "${results[@]}")"
+time_width="$(widest "${times[@]}")"
+
 echo
-echo "## Check report"
+echo "Check report ($pm)"
 echo
-echo "Package manager: $pm"
-echo
-echo "| Gate | Status | Result | Time |"
-echo "|---|---|---|---|"
-printf '%s\n' "${rows[@]+"${rows[@]}"}"
+for i in "${!labels[@]}"; do
+  line="$(printf '  %s %-*s  %-*s  %*s' "${marks[$i]}" "$label_width" "${labels[$i]}" \
+    "$result_width" "${results[$i]}" "$time_width" "${times[$i]}")"
+  echo "${line%"${line##*[![:space:]]}"}"
+done
 echo
 if (( ${#gates[@]} == 0 )); then
   echo "verify-project: the project has none of these gates; nothing was verified" >&2
