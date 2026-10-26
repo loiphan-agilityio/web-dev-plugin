@@ -3,7 +3,7 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.7.0
 
 - A web app always has authentication. `project-setup` asks one question, a landing page or a web
   app with authentication, instead of the kind and then authentication; `develop`'s Workflow A
