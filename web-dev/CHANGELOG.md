@@ -5,6 +5,12 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## Unreleased
 
+- `incident` names its three templates (`references/report.md`, `rca.md`, `actions.md`), which its
+  steps never pointed to, and `ticket` gives the full path of each of its three. skill-validator
+  reported them as files no skill text named.
+- `tools/validate-skills.sh` also runs skill-validator 1.8.0's `check --strict` on both plugins'
+  skills (CI downloads its release binary and checks it by SHA-256), so `tools/run-evals.sh` runs
+  it before any eval.
 - The model evals run only locally: `.github/workflows/evals.yml` and its `ANTHROPIC_API_KEY` are
   gone. `evals/run.sh` now goes through `tools/run-evals.sh`, which also refuses a HEAD that is
   not the release commit (`web-dev--v<version>`) and runs `pnpm lint` and `validate-skills.sh`

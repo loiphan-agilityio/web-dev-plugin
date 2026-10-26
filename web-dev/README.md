@@ -109,7 +109,8 @@ single skill on its own (`npx skills add … --skill <name>`) leaves it with bro
    hooks, the boilerplate pin, quoted snippets, the shared references, releases, CI, companions.
 2. Try it in a scratch folder: `claude --plugin-dir <clone>/web-dev`, then `/web-dev:develop …`.
 3. Run the checks from the repository root: `pnpm lint`, `bash tools/verify.sh`, and
-   `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1 pyyaml==6.0.3`).
+   `bash tools/validate-skills.sh` (needs `pip install skills-ref==0.1.1 pyyaml==6.0.3` and
+   skill-validator 1.8.0, see the script's header).
 4. A change to routing (a description, `develop`'s tables, `detect-project.mjs`) gets an eval
    case: write it, do not run it (`evals/README.md`, When evals run).
 5. Open a pull request with a Conventional Commit message; CI runs `verify.sh`, the skills
