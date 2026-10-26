@@ -47,18 +47,20 @@ Sitemap: https://www.example.com/sitemap.xml
 </urlset>
 ```
 
-A host that serves `index.html` for every path (the boilerplate's `netlify.toml` does, for client
-routing) still serves these files first, since a real file wins over the rewrite. Without them, the
-same rewrite answers `/robots.txt` with `index.html` and 200 `text/html`: check the content type,
-not the status.
+A host that serves `index.html` for every path (Cloudflare Pages does for the boilerplate, for
+client routing, since its build has no top-level `404.html`) still serves these files first, since
+a real file wins over the fallback. Without them, the same fallback answers with `index.html` and
+200 `text/html`: check the content type, not the status (observed: the boilerplate's `/robots.txt`
+is `text/plain`, and its `/sitemap.xml`, which it does not have, `text/html` with 200).
 
 A preview or staging deploy must not be indexed. `check-headers.mjs` reports its `X-Robots-Tag`
 (`robots-header`); without it, an indexer that finds a draft URL may index it. Send
 `X-Robots-Tag: noindex` from those deploys only (a host setting, or a header the deploy step adds
 for previews), never from a `robots.txt` or a config file that could reach production. The
-boilerplate's CI does the second: its deploy-draft job appends a `_headers` file with that rule to
-its own copy of the build, and production deploys the build without it (observed: every path of a
-`pr-<n>--` draft answers `X-Robots-Tag: noindex`, the live site none).
+boilerplate's CI does the second: its deploy-draft job appends that rule to the `_headers` of its
+own copy of the build, and production deploys the build without it (observed: the
+`pr-<n>.<project>.pages.dev` and `main-draft` previews answer `X-Robots-Tag: noindex`, the live
+site none).
 
 ## Canonical URLs
 

@@ -3,7 +3,7 @@ name: security-headers
 description: A header check on a URL reaches the security skill (or the audit) and reads the real headers with the plugin's script. Needs network.
 tags: [routing, security]
 execution:
-  prompt: "Check the security headers of https://react-vite-boilerplate-app.netlify.app/ and tell me what is missing."
+  prompt: "Check the security headers of https://react-vite-boilerplate-9od.pages.dev/ and tell me what is missing."
   max_turns: 8
   timeout_seconds: 300
   allowed_tools: [Skill, Bash, Read]

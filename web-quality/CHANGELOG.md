@@ -5,6 +5,16 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## Unreleased
 
+- The boilerplate deploys to Cloudflare Pages, no longer Netlify: `audit`, `security`,
+  `core-web-vitals.md`, `spa-seo.md` and `headers-csp.md` name its `apps/web/public/_headers`
+  instead of `netlify.toml`, and the facts they quote were observed again on its `*.pages.dev`
+  deploy: no HSTS there (covered by the `.dev` preload list, not on a custom domain), Pages'
+  default `index.html` revalidation, the SPA fallback answering a missing `/sitemap.xml` with 200
+  `text/html`, and previews (`pr-<n>`, `main-draft`) that differ from production only in
+  `noindex`. `headers-csp.md` warns that Pages keeps one `_headers` rule per path, so a second
+  `/*` block drops the first one's headers (the boilerplate's previews did until the pin
+  `ace5470`). `measurement.md`'s example numbers come from that deploy, and the
+  `security-headers` eval checks its URL.
 - `accessibility` names the boilerplate's lint as Oxlint's `jsx-a11y` rules: it has no ESLint.
 - `evals/run.sh` goes through `tools/run-evals.sh`, shared with web-dev: it now also refuses a HEAD
   that is not the release commit (`web-quality--v<version>`) and plugin content already evaluated
