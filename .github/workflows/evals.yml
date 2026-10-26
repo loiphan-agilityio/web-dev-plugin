@@ -1,4 +1,4 @@
-# The model evals (the evals jobs of .gitlab-ci.yml). They cost API credits, so nothing starts
+# The model evals. They cost API credits, so nothing starts
 # them: the maintainer runs this workflow by hand, on a release tag web-dev--v*, with the
 # ANTHROPIC_API_KEY secret set. The free checks of ci.yml run first, and the evals only after they
 # pass.

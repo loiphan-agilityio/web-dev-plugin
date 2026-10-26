@@ -1,4 +1,4 @@
-# Checks the web-dev and web-quality plugins on GitHub Actions (the free jobs of .gitlab-ci.yml):
+# Checks the web-dev and web-quality plugins on GitHub Actions:
 # - manifests: both plugin manifests and the marketplace manifest are valid.
 # - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
 #   every eval case.yaml parses.

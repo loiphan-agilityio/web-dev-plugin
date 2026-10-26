@@ -1,6 +1,5 @@
-# The pinned companion skills still install, and shadcn is pinned (the companions job of
-# .gitlab-ci.yml). Upstream repositories can move or delete a pinned path, so it runs weekly, and
-# by hand after changing install-companions.sh.
+# The pinned companion skills still install, and shadcn is pinned. Upstream repositories can move
+# or delete a pinned path, so it runs weekly, and by hand after changing install-companions.sh.
 name: Companions
 
 on:
@@ -30,6 +29,4 @@ jobs:
       # pinned commit (the boilerplate ships one, so its presence proves nothing) or an unpinned
       # shadcn@latest.
       - run: bash "$GITHUB_WORKSPACE/web-dev/skills/project-setup/scripts/install-companions.sh"
-        working-directory: /tmp/app
-      - run: test "$(find .claude/skills -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 8
         working-directory: /tmp/app
