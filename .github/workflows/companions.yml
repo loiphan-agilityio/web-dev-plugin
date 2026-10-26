@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: 24
       # A project from the boilerplate (cloned from GitHub), as project-setup creates one.
-      - run: bash web-dev/skills/project-setup/scripts/create-project.sh /tmp/app --no-auth
+      - run: bash web-dev/skills/project-setup/scripts/create-project.sh /tmp/app --auth
       # Fails on a missing companion, a skills-lock.json that does not record each companion at its
       # pinned commit (the boilerplate ships one, so its presence proves nothing) or an unpinned
       # shadcn@latest.
