@@ -50,3 +50,9 @@ ApiClient → effect/http`
   feature. Imports inside a feature are relative.
 - **Routes are factories** (`createRoutes()`, `<name>Routes()`): React Router mutates route
   objects when a lazy route loads, so each router needs fresh ones.
+- **Auth** (`src/features/auth`): email + password → JWT bearer token. `tokenStore` keeps it,
+  `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)` in `runtime.ts` sends it, and a 401 to
+  any request drops it. A route that needs a signed-in user goes inside `protectedRoutes([...])` in
+  `app/routes.tsx`; `RequireAuth` loads `/auth/me` and sends everyone else (and anyone whose token
+  is dropped) to `/login?redirect=…`. A test that renders a protected route sets
+  `tokenStore.set(mockToken)` in `beforeEach`. The mock API accepts `demo@example.com` / `password`.

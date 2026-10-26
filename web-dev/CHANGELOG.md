@@ -5,6 +5,16 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## Unreleased
 
+- A web app always has authentication. `project-setup` asks one question, a landing page or a web
+  app with authentication, instead of the kind and then authentication; `develop`'s Workflow A
+  always creates a web app, and its plan no longer has an "Authentication" assumption.
+  `create-project.sh` takes `--auth` or `--landing` and refuses `--no-auth`.
+- The todos feature the skills quote is wired for a web app with authentication: its route sits
+  inside `protectedRoutes([...])`, its handlers after `createAuthHandlers()`, its page test sets
+  the mock token and its e2e spec signs in. `verify.sh`, `sync-references.sh` and the eval
+  fixtures create their projects with `--auth`, and `references/architecture.md` gains the Auth
+  paragraph of the boilerplate's `apps/web/CLAUDE.md`.
+- Eval case 17 is now `17-setup-asks-for-kind`, and `03-setup-only` expects `--auth`.
 - Dropped the `allowed-tools` rules the skills never use: `pnpm typecheck` (`api-integration`,
   `feature-development`, `ui-development`), `node --version` and `pnpm install` (`develop`),
   `mkdir -p *` (`ticket`, `incident`: they write with the Write tool), and four formatter forms

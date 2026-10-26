@@ -34,7 +34,7 @@ web-dev/                          the plugin (its README.md is the user guide)
                                   api-integration, ui-development, ticket, incident, pr (their
                                   contract templates in references/)
     project-setup/scripts/        create-project.sh (a new project from the boilerplate: landing
-                                  page, or web app with or without auth), install-companions.sh
+                                  page, or web app, always with auth), install-companions.sh
   references/                     shared guidelines: stack-guidelines, coding-standards, architecture
   scripts/                        detect-project.mjs, verify-project.sh, check-contract.mjs (run
                                   by the skills), and check-contract's tests in scripts/test/
@@ -61,7 +61,7 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 |---|---|
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the tools they and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
-| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the three boilerplate variants (landing page, web app with or without auth) and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate at its pinned commit (network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged (that repository's checked-out branch), `BOILERPLATE_REF=main` the latest boilerplate. Same as CI, whose weekly run uses `main`. |
+| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the two boilerplate variants (landing page, web app with auth) and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate at its pinned commit (network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged (that repository's checked-out branch), `BOILERPLATE_REF=main` the latest boilerplate. Same as CI, whose weekly run uses `main`. |
 | `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (the pinned commit: network; `BOILERPLATE_REPO` and `BOILERPLATE_REF` as above) into `web-dev/references/`, keeping each file's preamble. Run it after moving the pin past a guideline change, then review and commit the diff. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1 pyyaml==6.0.3`) | Every skill passes the Agent Skills specification's validator (valid YAML frontmatter, only spec fields, `name` matches its folder), and every eval `case.yaml` parses. Also a CI job. |

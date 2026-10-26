@@ -54,7 +54,6 @@ As a user I want one place to see and add my tasks.
 overdue whenever the mocks run.
 
 ## Assumptions
-- Authentication: no (one user, all tasks are theirs).
 - "Overdue" uses the browser's local date; a task due today is not overdue.
 - Filtering and search happen in the browser: GET /tasks takes no query parameters.
 - "Due soon" is today through today + 7, inclusive, not done.

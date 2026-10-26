@@ -60,9 +60,9 @@ Ask once, in one message, before writing code, when:
 - a `same-stack` or `other-stack` project would need a new dependency (Effect, shadcn/ui, React Hook Form, a router);
 - in Workflow B or C, a criterion depends on data, a business rule or the backend contract, and neither the request nor the code answers it;
 - the work needs an action outside the folder (push, deploy): this version does none, except the push and the PR or MR that `pr` makes when the user asks for one;
-- a **setup** request that does not say whether it is a landing page or a web app, or whether a web app includes authentication: `project-setup` asks, as its step 2 says, and never picks it for the user.
+- a **setup** request that does not say whether it is a landing page or a web app (a web app comes with authentication): `project-setup` asks, as its step 2 says, and never picks it for the user.
 
-Everything else gets the simplest default, listed under **Assumptions**. Workflow A never asks: the user asked once and expects a running app (its plan decides authentication).
+Everything else gets the simplest default, listed under **Assumptions**. Workflow A never asks: the user asked once and expects a running app (always a web app, so with authentication).
 
 ## 4. Run the workflow
 

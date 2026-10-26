@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Checks what project-setup's create-project.sh creates and refuses, in a temporary directory: the
-# three variants of the boilerplate (web app with or without auth, landing page) with their Claude Code settings, the merge into a folder that holds
-# .git/ and .claude/ (its own settings.json kept), and the refusals. Clones the boilerplate
+# two variants of the boilerplate (web app, always with auth; landing page) with their Claude Code
+# settings, the merge into a folder that holds .git/ and .claude/ (its own settings.json kept), and
+# the refusals. Clones the boilerplate
 # (network; BOILERPLATE_REPO points it at another clone URL) and installs nothing.
 # tools/verify.sh calls it, then runs the gates in a project it creates.
 set -euo pipefail
@@ -41,32 +42,32 @@ echo mine >"$tmp/auth/.claude/settings.json"
 touch "$tmp/blocked/apps"
 
 echo "check-create-project:"
-expect no-choice 1 'pass --auth, --no-auth or --landing' -- "$tmp/none"
+expect no-choice 1 'pass --auth or --landing' -- "$tmp/none"
+expect no-auth-refused 1 'pass --auth or --landing' -- "$tmp/none" --no-auth
 [[ ! -e "$tmp/none" ]] || fail "no-choice created $tmp/none"
 expect auth 0 'with authentication.*kept the existing .claude/settings.json' -- "$tmp/auth" --auth
-expect no-auth 0 'without authentication' -- "$tmp/plain" --no-auth
+expect app 0 'with authentication' -- "$tmp/app" --auth
 expect landing 0 'a landing page' -- "$tmp/landing" --landing
 holds auth-wired "$tmp/auth/apps/web/src/lib/runtime.ts" 'AuthToken.fromGetter(tokenStore.get, tokenStore.reject)'
 holds auth-routes "$tmp/auth/apps/web/src/app/routes.tsx" 'protectedRoutes('
-holds no-auth-base "$tmp/plain/apps/web/src/lib/runtime.ts" 'AuthToken.none'
 # Named after the target, not the generator's temporary folder.
-holds named "$tmp/plain/package.json" '"name": "plain"'
+holds named "$tmp/app/package.json" '"name": "app"'
 holds keeps-claude "$tmp/auth/.claude/mine.txt" mine
 holds keeps-settings "$tmp/auth/.claude/settings.json" mine
-holds settings "$tmp/plain/.claude/settings.json" 'DIR\\"/.claude/hooks/format.mjs'
-holds app-settings "$tmp/plain/apps/web/.claude/settings.json" '/../../.claude/hooks/format.mjs'
-holds format-hook "$tmp/plain/.claude/hooks/format.mjs" prettier
+holds settings "$tmp/app/.claude/settings.json" 'DIR\\"/.claude/hooks/format.mjs'
+holds app-settings "$tmp/app/apps/web/.claude/settings.json" '/../../.claude/hooks/format.mjs'
+holds format-hook "$tmp/app/.claude/hooks/format.mjs" prettier
 holds landing-page "$tmp/landing/apps/web/src/app/home-page.tsx" 'people'
 holds landing-sitemap "$tmp/landing/apps/web/public/robots.txt" 'Sitemap:'
 [[ ! -e "$tmp/landing/apps/web/src/features/auth" ]] || fail "landing has src/features/auth"
-[[ ! -e "$tmp/plain/apps/web/src/features/auth" ]] || fail "no-auth has src/features/auth"
-for dir in "$tmp/auth" "$tmp/plain" "$tmp/landing"; do
+[[ -e "$tmp/app/apps/web/src/features/auth" ]] || fail "web app lacks src/features/auth"
+for dir in "$tmp/auth" "$tmp/app" "$tmp/landing"; do
   [[ ! -e "$dir/create" ]] || fail "$dir still has the generator (create/)"
   ! grep -q template-only "$dir/CLAUDE.md" || fail "$dir/CLAUDE.md keeps the template-only block"
   holds "tier $(basename "$dir")" <(node "$plugin/scripts/detect-project.mjs" "$dir/apps/web") \
     '"tier": "template"'
 done
 expect existing-kept 1 'apps/web/CLAUDE.md' -- "$tmp/auth" --auth
-expect file-for-dir 1 'apps (a file where the project has a directory)' -- "$tmp/blocked" --no-auth
+expect file-for-dir 1 'apps (a file where the project has a directory)' -- "$tmp/blocked" --auth
 [[ "$(ls -A "$tmp/blocked")" == apps ]] || fail "file-for-dir copied files into $tmp/blocked"
 exit "$failed"

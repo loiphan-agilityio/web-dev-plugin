@@ -1,9 +1,9 @@
 schema_version: "1.0"
-name: setup-asks-for-auth
-description: A setup request that does not say whether to include authentication asks first and creates nothing.
+name: setup-asks-for-kind
+description: A setup request that does not say landing page or web app asks that one question, not about authentication, and creates nothing.
 tags: [routing, edge]
 execution:
-  prompt: "/web-dev:develop Scaffold a new web app called billing-portal."
+  prompt: "/web-dev:develop Scaffold a new project called billing-portal."
   max_turns: 10
   timeout_seconds: 300
   allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
@@ -25,7 +25,8 @@ graders:
     path: "**/pnpm-workspace.yaml"
     exists: false
   - type: llm
-    name: asks-about-authentication
+    name: asks-about-kind
     criteria: |
-      - The answer asks whether the project should include authentication (sign-in), and says what each choice gives.
+      - The answer asks one question with two choices, a landing page or a web app with authentication, and says what each gives.
+      - It does not ask a separate question about authentication.
       - It does not pick one on its own, and does not claim a project was created.

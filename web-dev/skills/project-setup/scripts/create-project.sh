@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Creates a project from the react-vite-boilerplate (a pnpm + Turborepo monorepo, the app in
-# apps/web) with the boilerplate's own generator, create/index.js: a web app with or without its
+# apps/web) with the boilerplate's own generator, create/index.js: a web app with its
 # authentication overlay, or a landing page (its landing overlay: one public marketing page, no
-# sign-in, built without mocks).
+# sign-in, built without mocks). A web app always has authentication.
 #
-#   create-project.sh <target-dir> --auth | --no-auth | --landing
+#   create-project.sh <target-dir> --auth | --landing
 #
 # There is no default: the generator asks only on a terminal, and Claude's shell is not one, so the
 # skill asks the user and passes the answer. Fetches the boilerplate at the commit pinned below,
@@ -30,11 +30,11 @@ elif [[ -n "${BOILERPLATE_REPO:-}" ]]; then
 else
   ref="$pinned"
 fi
-usage="usage: create-project.sh <target-dir> --auth|--no-auth|--landing"
+usage="usage: create-project.sh <target-dir> --auth|--landing"
 target="${1:?$usage}"
 kind="${2:-}"
-if [[ "$kind" != --auth && "$kind" != --no-auth && "$kind" != --landing ]]; then
-  echo "error: pass --auth, --no-auth or --landing (ask the user which); $usage" >&2
+if [[ "$kind" != --auth && "$kind" != --landing ]]; then
+  echo "error: pass --auth or --landing (ask the user which); $usage" >&2
   exit 1
 fi
 
@@ -50,7 +50,7 @@ if [[ ! -f "$tmp/src/create/index.js" ]]; then
 fi
 # The generator names the project after its output folder, a temporary one here: pass the target's
 # name instead (`.` counts as the folder it names). It asks "landing page or web app?" and, for a
-# web app, about authentication: answer both.
+# web app, about authentication: answer both (a web app always gets it).
 name="$(node -p 'require("node:path").basename(require("node:path").resolve(process.argv[1]))' "$target")"
 if [[ "$kind" == --landing ]]; then choice=(--landing); else choice=(--app "$kind"); fi
 # The generator prints next steps with the temporary path; the skill gives its own.
@@ -84,9 +84,5 @@ if [[ -n "$conflicts" ]]; then
 fi
 
 (cd "$tmp/out" && tar -cf - .) | (cd "$target" && tar -xf -)
-case "$kind" in
-  --auth) what="a web app with authentication" ;;
-  --no-auth) what="a web app without authentication" ;;
-  *) what="a landing page" ;;
-esac
+if [[ "$kind" == --auth ]]; then what="a web app with authentication"; else what="a landing page"; fi
 echo "created the project in $target ($(wc -l <<< "$files" | tr -d ' ') files, $what); the app is apps/web$kept"

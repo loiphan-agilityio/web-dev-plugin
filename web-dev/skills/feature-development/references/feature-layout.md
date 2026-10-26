@@ -103,36 +103,44 @@ Factory, because React Router 8 empties a lazy route object once loaded. A modul
 
 ## Wiring (two edits outside the folder)
 
-The todos wiring diff, on a project from the boilerplate without authentication. With authentication, the route goes inside `protectedRoutes([...])` instead (`children: [...authRoutes(), protectedRoutes([{ index: true, Component: HomePage }, ...todoRoutes()])]`), unless the page is public. The boilerplate's `src/app/root-layout.tsx` has no nav; when the app has one, add a `<Link to="/todos">` there too.
+The todos wiring diff, on a web app from the boilerplate (every one has authentication): the route goes inside `protectedRoutes([...])`, next to the home page; a public page goes next to `...authRoutes()` instead, and the feature's handlers after `createAuthHandlers()`. The boilerplate's `src/app/root-layout.tsx` has no nav; when the app has one, add a `<Link to="/todos">` there too.
 
 ```diff file=wiring.diff
 diff --git a/src/app/routes.tsx b/src/app/routes.tsx
-index e5ca784..716fb95 100644
+index d8d9753..6af9058 100644
 --- a/src/app/routes.tsx
 +++ b/src/app/routes.tsx
-@@ -2,2 +2,4 @@ import type { RouteObject } from 'react-router';
+@@ -2,4 +2,5 @@ import type { RouteObject } from 'react-router';
  
+ import { authRoutes, protectedRoutes } from '@/features/auth/routes';
 +import { todoRoutes } from '@/features/todos/routes';
-+
+ 
  import { HomePage } from './home-page';
-@@ -17,3 +19,3 @@ export const createRoutes = (): RouteObject[] => [
+@@ -19,5 +20,8 @@ export const createRoutes = (): RouteObject[] => [
+     Component: RootLayout,
      ErrorBoundary: RouteError,
--    children: [{ index: true, Component: HomePage }],
-+    children: [{ index: true, Component: HomePage }, ...todoRoutes()],
+-    children: [...authRoutes(), protectedRoutes([{ index: true, Component: HomePage }])],
++    children: [
++      ...authRoutes(),
++      protectedRoutes([{ index: true, Component: HomePage }, ...todoRoutes()]),
++    ],
    },
+ ];
 diff --git a/src/mocks/handlers.ts b/src/mocks/handlers.ts
-index 69fcd8a..d83556e 100644
+index 98b02fa..24e4d3c 100644
 --- a/src/mocks/handlers.ts
 +++ b/src/mocks/handlers.ts
-@@ -2,2 +2,4 @@ import type { RequestHandler } from 'msw';
+@@ -2,4 +2,5 @@ import type { RequestHandler } from 'msw';
  
+ import { createAuthHandlers } from '@/features/auth/mocks';
 +import { todosHandlers } from '@/features/todos/mocks';
-+
+ 
  /**
-@@ -6,2 +8,2 @@ import type { RequestHandler } from 'msw';
+@@ -7,3 +8,3 @@ import { createAuthHandlers } from '@/features/auth/mocks';
+  * Storybook). Each feature exports its own from `src/features/<name>/mocks.ts`; spread them here.
   */
--export const handlers: RequestHandler[] = [];
-+export const handlers: RequestHandler[] = [...todosHandlers];
+-export const handlers: RequestHandler[] = [...createAuthHandlers()];
++export const handlers: RequestHandler[] = [...createAuthHandlers(), ...todosHandlers];
 ```
 
 Forgetting the handlers line is the usual failure: `pnpm dev:mock` returns unhandled requests. Forgetting the route gives a 404 in `renderRoute`.

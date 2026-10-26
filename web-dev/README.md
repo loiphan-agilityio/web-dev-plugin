@@ -12,7 +12,7 @@ GitHub Actions + Netlify (in the boilerplate)
 | Skill | Use it for | Example prompt |
 |---|---|---|
 | `develop` | The entry point. Runs `scripts/detect-project.mjs`, sorts the request and picks a workflow: **A** a whole app in a new folder (plans features, data model, API and mock data in `docs/plan.md`, runs the skills below and all gates, opens the app on a mocked API; decides instead of asking), **B** a change in a React project not made from the template (maps it with the `codebase-explorer` agent, builds on its own code, runs its own gates with `scripts/verify-project.sh`), **C** one feature, endpoint or screen in an app from the template | "/web-dev:develop Build an employee management app with CRUD, search and forms" · "/web-dev:develop Add a department filter to the employees list" |
-| `project-setup` | A new project from the react-vite-boilerplate (pnpm + Turborepo monorepo, the app in `apps/web`): asks whether it is a landing page or a web app, and for a web app whether to include authentication (email + password sign-in, protected routes, MSW mocks), creates it with the boilerplate's generator (`scripts/create-project.sh`), installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal, with login" |
+| `project-setup` | A new project from the react-vite-boilerplate (pnpm + Turborepo monorepo, the app in `apps/web`): asks one question, a landing page or a web app with authentication (email + password sign-in, protected routes, MSW mocks), creates it with the boilerplate's generator (`scripts/create-project.sh`), installs, adds companion skills, runs all gates | "Scaffold a new web app called billing-portal, with login" |
 | `feature-development` | A ticket → schemas, API calls, queries, form, the four UI states, routes, a unit test file and a story file per component. Loads `api-integration` for endpoints beyond list + create and `ui-development` for a design | "Implement this ticket: <paste or issue URL>" |
 | `ticket` | Tickets → `docs/tickets/<id>/intent.md`, `spec.md` (testable `AC-<n>` criteria, open questions) and `plan.md` (`T<n>` tasks citing them), grounded in the code, checked by `scripts/check-contract.mjs` and committed on a branch for review; several tickets in parallel, one subagent each. `feature-development` then builds from the folder | "/web-dev:ticket 412 413 414" · "Write the contract for issue #412" |
 | `incident` | An incident → `docs/incidents/<id>/report.md`, `rca.md` (claims labelled measured or hypothesis) and `actions.md` (follow-ups `A<n>`), checked and committed on a branch; follow-ups can become tickets | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
@@ -78,7 +78,7 @@ cp -r <plugin-dir>/{skills,references,scripts,agents} .claude/
 claude "Scaffold a new web app called billing-portal"
 ```
 
-`project-setup` asks whether to build a landing page or a web app (and, for a web app, about
+`project-setup` asks whether to build a landing page or a web app (a web app includes
 authentication), creates the project from the react-vite-boilerplate (`scripts/create-project.sh`
 fetches it at the pinned commit and runs its generator), runs
 `pnpm install`, installs the companion skills and runs `pnpm check:report`. The generated root `CLAUDE.md`
@@ -141,9 +141,10 @@ e2e. Its app,
 - **Config**: `src/lib/config.ts` validates every `VITE_*` value with Effect Schema at startup;
   Effect code reads it as the `AppConfig` service, so a test can provide other values.
 - **Auth hook**: `AuthToken` (`src/lib/api/auth.ts`) is where `ApiClient` gets a bearer token.
-  Without authentication the app provides `AuthToken.none`; with it, `src/lib/runtime.ts`
-  provides `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)` from `src/features/auth`,
-  which drops the token when any request gets a 401 to it. Both are tested in `client.test.ts`.
+  Every web app has authentication: `src/lib/runtime.ts` provides
+  `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)` from `src/features/auth`, which drops
+  the token when any request gets a 401 to it (`AuthToken.none`, no token, is tested too, in
+  `client.test.ts`).
 - **Permissions**, in two layers. Each skill's `allowed-tools` frontmatter approves the exact
   commands it runs, for the turn that invokes it: the plugin's scripts by their
   `${CLAUDE_SKILL_DIR}` path (`detect-project.mjs`, `create-project.sh`, `install-companions.sh`,

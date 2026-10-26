@@ -113,6 +113,7 @@ The form alone makes no `GET`, so the 422 override is one `server.use()` call. T
 ```tsx file=src/features/todos/components/TodosPage/__tests__/TodosPage.test.tsx
 import { screen, within } from '@testing-library/react';
 
+import { tokenStore } from '@/lib/api/token';
 import { server } from '@/mocks/server';
 import { renderRoute } from '@/test/render';
 
@@ -120,6 +121,12 @@ import { createTodosHandlers } from '../../../mocks';
 
 // TodoList and TodoForm test their own states; this checks they work together on the route.
 describe('TodosPage', () => {
+  // The route is behind protectedRoutes(): 'mock-token' is the token the auth mocks accept
+  // (`mockToken`, which another feature may not import).
+  beforeEach(() => {
+    tokenStore.set('mock-token');
+  });
+
   it('shows a new todo in the list after it is created', async () => {
     server.use(...createTodosHandlers([]));
     const { user } = renderRoute('/todos');
@@ -231,7 +238,11 @@ import { expect, test } from '@playwright/test';
 
 // The mocked API serves the fixtures in src/features/todos/mocks.ts, fresh on every page load.
 test('adds a todo from the todos page', async ({ page }) => {
+  // The route is behind protectedRoutes(): sign in with the account the mock API accepts.
   await page.goto('/todos');
+  await page.getByLabel('Email').fill('demo@example.com');
+  await page.getByLabel('Password').fill('password');
+  await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.getByRole('heading', { name: 'Todos' })).toBeVisible();
 
   const list = page.getByRole('list', { name: 'Todos' });
@@ -246,7 +257,7 @@ test('adds a todo from the todos page', async ({ page }) => {
 ```
 
 - Open the feature's path (`page.goto('/todos')`): the spec then also proves the lazy route and, on the deploy, the SPA redirect. When `src/app/root-layout.tsx` has a nav, start from `/` and click its link instead, so the spec proves the link too.
-- In an app with authentication the route sits inside `protectedRoutes([...])`: sign in first, as `e2e/home.spec.ts` does (`demo@example.com` / `password` on the mocks).
+- A route inside `protectedRoutes([...])` sends a signed-out user to `/login?redirect=<path>`: sign in, as `e2e/home.spec.ts` does (`demo@example.com` / `password` on the mocks), and the app returns to the path. A page test sets the token instead, in `beforeEach`: `tokenStore.set('mock-token')`, the value of the auth mocks' `mockToken`, since a feature may not import another feature's mocks (lint fails).
 - Assert on fixture values from `mocks.ts`; the same spec runs in CI against the Netlify deploy (`E2E_BASE_URL`), which serves the same mocks.
 - Locators by role and label, web-first assertions (`await expect(locator).toBeVisible()`), which wait on their own; never `page.waitForTimeout`.
 - One flow per feature. States, error paths and 422s belong to the unit tests above, which are faster and cover them exactly.

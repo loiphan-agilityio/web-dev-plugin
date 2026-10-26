@@ -44,7 +44,7 @@ Extend `createTodosHandlers(initial)` and `todosMocks` (pending, error, validati
 
 `pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then `pnpm check` again.
 
-Auth: `ApiClient` sends the bearer token `AuthToken` gives, `AuthToken.none` in a project without authentication, the token of `src/features/auth` with it. For an app with sign-in but no such feature, provide `AuthToken.fromGetter(...)` in `src/lib/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
+Auth: `ApiClient` sends the bearer token `AuthToken` gives: in a web app from the template, the token of `src/features/auth`. For an app with sign-in but no such feature, provide `AuthToken.fromGetter(...)` in `src/lib/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
 
 ## Result
 

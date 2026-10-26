@@ -23,7 +23,7 @@ the plugin alone.
 | `13-feature-direct-template` | `template` | a ticket without the command reaches `feature-development`, no new scaffold; whether `develop` fired too is not graded (the two overlap on purpose; the trace shows it) |
 | `14-app-other-folder` | files, no `package.json` | the app goes into a subfolder; `notes.md` stays as it is |
 | `15-ci-not-covered` | `template` | a CI request is not covered (pipelines come with the boilerplate): no file written or edited (the fixture already has a workflow), no other skill run, and the answer says so |
-| `17-setup-asks-for-auth` | empty | a setup request that does not say whether to include authentication: asks, and runs no `create-project.sh` |
+| `17-setup-asks-for-kind` | empty | a setup request that does not say landing page or web app: asks that one question (a web app includes authentication), no separate authentication question, and runs no `create-project.sh` |
 | `18-e2e-feature-template` | `template` | **output quality**, run to the end: a test and a story per component, `pnpm check` runs, the Result has a Route line and claims only what the trace shows |
 | `19-e2e-app-empty` | empty | **the main promise**, run to the end: one message gives `docs/plan.md`, the scaffold, every planned feature with a page test and story, `pnpm check`, and a Result that asks nothing and claims only what the trace shows |
 

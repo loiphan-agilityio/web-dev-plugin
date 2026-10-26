@@ -4,7 +4,7 @@
 #
 # 0. Checks that detect-project.mjs gives each eval fixture its tier, and what project-setup's
 #    create-project.sh creates from the boilerplate and refuses (check-create-project.sh).
-# 1. Creates a project with create-project.sh --no-auth (the boilerplate at its pinned commit:
+# 1. Creates a project with create-project.sh --auth (the boilerplate at its pinned commit:
 #    network; BOILERPLATE_REPO and BOILERPLATE_REF pick another, see create-project.sh), checks
 #    that the plugin's shared references/ match its apps/web/CLAUDE.md (check-guidelines.mjs), that its app names no todos (a new
 #    project starts empty; the todos feature is only the skills' worked example), and checks the
@@ -38,7 +38,7 @@ skills_root="$plugin_root/skills"
 bash "$plugin_root/evals/fixtures/check-detect.sh"
 bash "$here/check-create-project.sh"
 
-bash "$skills_root/project-setup/scripts/create-project.sh" "$tmp/app" --no-auth
+bash "$skills_root/project-setup/scripts/create-project.sh" "$tmp/app" --auth
 app="$tmp/app/apps/web"
 node "$here/check-guidelines.mjs" "$plugin_root/references" "$app/CLAUDE.md"
 if grep -rniI todo "$app/src"; then

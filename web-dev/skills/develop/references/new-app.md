@@ -25,13 +25,13 @@ Write the plan in the shape of `plan.md` (beside this file) before any code. It 
 - **API:** every endpoint with method, path, body, response and error statuses (404 for an unknown id, 422 for invalid input). REST, JSON, under `VITE_API_URL`.
 - **Features:** 2 to 5 tickets in build order, each with a title, a user story and testable acceptance criteria. Together they cover the description, nothing more. A usual shape: a list with filters and a create form, a detail page with edit and delete, a dashboard when the topic has numbers worth showing.
 - **Mock data:** 6 to 10 realistic records per entity, covering every allowed value and edge (an overdue item, an empty optional field).
-- **Assumptions:** every choice the description left open, one line each, the first one "Authentication: yes" or "Authentication: no" (A2).
+- **Assumptions:** every choice the description left open, one line each.
 
-Gaps get the reading a typical user of that product would expect. Sign-in and roles, payments, file uploads, real-time updates, email, i18n and SSR are out of scope by default; a description that asks for one gets its UI on a mocked API, noted under Assumptions. Sign-in, login or user accounts in the description mean "Authentication: yes": A2 creates the project with the boilerplate's sign-in feature, and the features' pages go inside `protectedRoutes([...])`; roles stay out. In a `template` folder, which skips A2, sign-in is a feature of its own on mocked endpoints, its token passed to `ApiClient` through `AuthToken.fromGetter` (see `api-integration`'s `references/effect-http.md`, Auth). The app runs on MSW mocks of this API, so keep the API realistic enough for a real backend to replace the mocks without touching the UI.
+Gaps get the reading a typical user of that product would expect. Roles, payments, file uploads, real-time updates, email, i18n and SSR are out of scope by default; a description that asks for one gets its UI on a mocked API, noted under Assumptions. Every app has the boilerplate's sign-in feature (A2 creates a web app, which always includes it): the features' pages go inside `protectedRoutes([...])`; roles stay out. A `template` folder, which skips A2, already has it. The app runs on MSW mocks of this API, so keep the API realistic enough for a real backend to replace the mocks without touching the UI.
 
 ## A2. Scaffold
 
-Invoke `project-setup` (Skill tool) for the folder from A0, with the plan's authentication answer (`--auth` or `--no-auth`; it asks nothing then), and follow it through its gates; skip its hand-over. A companion install that fails offline goes under **Not done** and the build continues. A project that could not be created (no network, the boilerplate unreachable) stops the run: report it; never build the app from another template.
+Invoke `project-setup` (Skill tool) for the folder from A0, as a web app (`--auth`; it asks nothing then), and follow it through its gates; skip its hand-over. A companion install that fails offline goes under **Not done** and the build continues. A project that could not be created (no network, the boilerplate unreachable) stops the run: report it; never build the app from another template.
 
 ## A3. Build each feature
 

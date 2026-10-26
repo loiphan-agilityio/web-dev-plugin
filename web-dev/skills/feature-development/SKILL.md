@@ -60,13 +60,13 @@ With a design, invoke `ui-development` (Skill tool) before writing UI code (unde
 
 ## 6. Routes and wiring
 
-The feature exports a lazy route factory (`todoRoutes = (): RouteObject[] => [...]`), a function because React Router 8 empties a lazy route object once loaded. Register it in two places (diff in `references/feature-layout.md`, Wiring): `src/app/routes.tsx` (`...todoRoutes()` in the root `children`, or inside `protectedRoutes([...])` in an app with authentication) and `src/mocks/handlers.ts` (`...todosHandlers`); a `<Link>` too when `src/app/root-layout.tsx` has a nav.
+The feature exports a lazy route factory (`todoRoutes = (): RouteObject[] => [...]`), a function because React Router 8 empties a lazy route object once loaded. Register it in two places (diff in `references/feature-layout.md`, Wiring): `src/app/routes.tsx` (`...todoRoutes()` inside `protectedRoutes([...])`, or next to `...authRoutes()` for a public page) and `src/mocks/handlers.ts` (`...todosHandlers`); a `<Link>` too when `src/app/root-layout.tsx` has a nav.
 
 ## 7. Tests
 
 Follow `references/testing.md`. Every component, including ones added later, gets its own test in its folder's `__tests__/` (`components/<Name>List/__tests__/<Name>List.test.tsx`), rendered alone with `renderWithProviders`. The page test (`renderRoute`) covers only flows that need the parts together. Drive states with `server.use(...)`, never by mocking hooks or `api.ts`. Query by role and label. Minimum: list = the four states; form = client validation, success (input cleared), server 422 next to its field; page = the create flow; schemas = `Schema.decodeUnknownSync`; model = each rule and its edges, without rendering.
 
-One Playwright spec per feature, `e2e/<name>.spec.ts` (`references/testing.md`, End-to-end): the main flow from the feature's path (or the nav link, when the root layout has a nav) through the list and the form, on the default mock handlers and their fixtures; with authentication, it signs in first. It runs in `pnpm check` and again in CI against the Netlify deploy, so it never assumes a host or port.
+One Playwright spec per feature, `e2e/<name>.spec.ts` (`references/testing.md`, End-to-end): the main flow from the feature's path (or the nav link, when the root layout has a nav) through the list and the form, on the default mock handlers and their fixtures; it signs in first. It runs in `pnpm check` and again in CI against the Netlify deploy, so it never assumes a host or port.
 
 ## 8. Stories
 
