@@ -1,15 +1,17 @@
 # Checks the web-dev and web-quality plugins on GitHub Actions:
 # - manifests: both plugin manifests and the marketplace manifest are valid.
 # - skills-spec: every skill passes skills-ref, the Agent Skills specification's validator, and
-#   every eval case.yaml parses.
+#   skill-validator's `check --strict` (links, unreferenced files, content), and every eval
+#   case.yaml parses.
 # - verify: tools/verify.sh: the free checks, then the todos feature the skills quote passes every
 #   gate, e2e included, in a project created from the boilerplate (cloned from GitHub).
 # - plugin-scripts: the tests of web-dev's contract check and web-quality's measurement scripts
 #   (local servers, no network).
 # Runs on every pull request, on pushes to main that touch the plugin, on release tags, and weekly,
 # so a dependency or boilerplate release that breaks what the skills quote shows up before a user
-# hits it. A branch is checked through its pull request, so each check runs once. evals.yml calls
-# this workflow before the model evals; companions.yml checks the companion skills.
+# hits it. A branch is checked through its pull request, so each check runs once. companions.yml
+# checks the companion skills. The model evals never run here: they are paid, so they run only on
+# the maintainer's machine (tools/run-evals.sh).
 name: CI
 
 on:
@@ -28,10 +30,8 @@ on:
   schedule:
     - cron: '0 3 * * 1'
   workflow_dispatch:
-  workflow_call:
 
 concurrency:
-  # A called run gets its own group, so it never waits for, or cancels, a run of its caller's ref.
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
@@ -68,6 +68,19 @@ jobs:
           python-version: '3.13'
       # The Agent Skills reference validator, pinned like every other tool here.
       - run: pip install --quiet skills-ref==0.1.1 pyyaml==6.0.3
+      # skill-validator's release binary, pinned by version and SHA-256 (the release's checksums
+      # file); validate-skills.sh runs its `check --strict`, which calls no model.
+      - name: Install skill-validator
+        env:
+          VERSION: 1.8.0
+          SHA256: a9b4cb3436682ff8d55dd0d164376c8479d35cb58c0adc3e93170fbde8baa04f
+        run: |
+          archive="skill-validator_${VERSION}_linux_amd64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/agent-ecosystem/skill-validator/releases/download/v$VERSION/$archive"
+          echo "$SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" skill-validator
+          echo "SKILL_VALIDATOR=$RUNNER_TEMP/skill-validator" >> "$GITHUB_ENV"
       - run: bash tools/validate-skills.sh
 
   verify:

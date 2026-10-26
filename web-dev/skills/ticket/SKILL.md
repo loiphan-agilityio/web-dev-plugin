@@ -34,7 +34,7 @@ Before writing, read the project's `CLAUDE.md` (and `apps/web/CLAUDE.md` in a mo
 With two or more tickets, write each in its own subagent (Agent tool, `general-purpose`), all started in one message, at most five at a time. They are safe to run together: each writes only its own `docs/tickets/<id>/`. Give each a self-contained brief, since it does not see this conversation:
 
 - the project's absolute path, the ticket's id and full text;
-- the absolute paths of the three templates (`${CLAUDE_SKILL_DIR}/references/intent.md`, `spec.md`, `plan.md`) and of the check script;
+- the absolute paths of the three templates (`${CLAUDE_SKILL_DIR}/references/intent.md`, `${CLAUDE_SKILL_DIR}/references/spec.md`, `${CLAUDE_SKILL_DIR}/references/plan.md`) and of the check script;
 - the rules of this step 2, and: write only `docs/tickets/<id>/`, never code, never commit;
 - done when the check exits 0; report the check's JSON and the open questions.
 

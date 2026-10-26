@@ -15,6 +15,8 @@ the 300 kB budget.
 | `06-no-trigger-unrelated` | empty | a shell question fires no skill |
 
 Every run is paid model time: run them only when the maintainer asks for an eval run, as the
-repository's `CLAUDE.md` says, with `bash evals/run.sh --tag routing` from `web-quality/`. It refuses single
-cases and uncommitted work, runs the free checks first, caps the cost and runs one arm unless
-`--ablation with-without` asks for the no-plugin baseline.
+repository's `CLAUDE.md` says, on this machine (never in CI), with `bash evals/run.sh --tag routing`
+from `web-quality/`. Through `tools/run-evals.sh`, it refuses single cases, uncommitted work, a HEAD
+that is not the release commit (`web-quality--v<version>`) and plugin content already evaluated,
+runs the free checks first (`pnpm lint`, `validate-skills.sh`, the scripts' tests), caps the cost
+and runs one arm unless `--ablation with-without` asks for the no-plugin baseline.

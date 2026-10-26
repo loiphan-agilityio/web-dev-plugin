@@ -23,6 +23,8 @@ Ask once, in one message, for what the record cannot be written without: when it
 
 ## 2. Write the record
 
+Start each file from its template: `${CLAUDE_SKILL_DIR}/references/report.md`, `${CLAUDE_SKILL_DIR}/references/rca.md` and `${CLAUDE_SKILL_DIR}/references/actions.md`.
+
 - **report.md:** times in UTC; impact in measured numbers with their source; **Status** starts with `open`, `mitigated` or `resolved`.
 - **rca.md:** label each claim **measured** (a log line, a diff, a metric) or **hypothesis** (what would confirm it). The root cause is the defect the team can change (a missing check, a config, a race), with the file or commit that holds it; the trigger is what set it off.
 - **actions.md:** the fix that resolved it (or what is left), then follow-ups `- [ ] A<n> ...`, each one action with an owner (`unassigned` until someone takes it). Prefer a test, a type, a lint rule or a gate that makes the root cause impossible or caught, and an alert that pages within minutes, over "be careful".

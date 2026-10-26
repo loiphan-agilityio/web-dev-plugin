@@ -5,6 +5,9 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## Unreleased
 
+- `evals/run.sh` goes through `tools/run-evals.sh`, shared with web-dev: it now also refuses a HEAD
+  that is not the release commit (`web-quality--v<version>`) and plugin content already evaluated
+  with the same options, and runs `pnpm lint` and `validate-skills.sh` before the scripts' tests.
 - `bundle-budget.mjs` prints its report through `printReport`, like `check-headers.mjs` and
   `pagespeed.mjs`: the JSON now carries the same `summary` (how many checks have each status).
 
