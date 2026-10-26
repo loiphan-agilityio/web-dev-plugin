@@ -3,6 +3,13 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## Unreleased
+
+- Workflow A makes the first ticket's list page the app's home: it is the index route, so `/`
+  opens it instead of the boilerplate's welcome page (which read like a landing page, with
+  nothing linking to the features), and `src/app/root-layout.tsx` gets a nav with a link per
+  page. The welcome page, its assets and test go; `e2e/home.spec.ts` expects the list.
+
 ## 0.7.1
 
 - `project-setup` asks the kind (landing page or web app with authentication) with the

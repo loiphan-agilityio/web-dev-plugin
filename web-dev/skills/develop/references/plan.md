@@ -34,7 +34,7 @@ Task
 ## Features
 ### TASK-1 Tasks page: list, filter and create
 As a user I want one place to see and add my tasks.
-- New page at /tasks, linked from the header as "Tasks".
+- The app's home page: `/` opens it, linked from the header nav as "Tasks".
 - Each row shows the title, a status badge, the priority and the due date ("No due date" when null).
   A task due before today that is not done is marked overdue.
 - Filter by status and search by title, both kept in the URL (?status=done&q=report).
@@ -63,7 +63,8 @@ overdue whenever the mocks run.
 
 - **Features** are tickets in build order: each one can be built and tested on top of the ones
   before it. The first is usually the list with its create form, because it defines the schema,
-  the API layer and the mocks the others extend.
+  the API layer and the mocks the others extend. Its list page is the app's home (`/`), in place
+  of the template's welcome page (`new-app.md`, A3).
 - **Acceptance criteria** name the visible result (a route, a label, a toast text, a state), so
   the tests can check them by role and text.
 - **The API** includes the error statuses each endpoint returns, so `api-integration` knows which
