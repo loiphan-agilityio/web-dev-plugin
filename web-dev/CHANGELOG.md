@@ -10,23 +10,6 @@ A git install is a cached copy, so a change reaches users only with a new versio
   `mkdir -p *` (`ticket`, `incident`: they write with the Write tool), and four formatter forms
   `feature-development` does not name (`pnpm format`, `npm run lint:fix`, `yarn lint:fix`,
   `bun run format`).
-
-## Unreleased
-
-- Dropped the `allowed-tools` rules the skills never use: `pnpm typecheck` (`api-integration`,
-  `feature-development`, `ui-development`), `node --version` and `pnpm install` (`develop`),
-  `mkdir -p *` (`ticket`, `incident`: they write with the Write tool), and four formatter forms
-  `feature-development` does not name (`pnpm format`, `npm run lint:fix`, `yarn lint:fix`,
-  `bun run format`).
-- The "Gates" bullet of `api-integration` and `ui-development`'s `outside-template.md` is shorter.
-
-## Unreleased
-
-- Dropped the `allowed-tools` rules the skills never use: `pnpm typecheck` (`api-integration`,
-  `feature-development`, `ui-development`), `node --version` and `pnpm install` (`develop`),
-  `mkdir -p *` (`ticket`, `incident`: they write with the Write tool), and four formatter forms
-  `feature-development` does not name (`pnpm format`, `npm run lint:fix`, `yarn lint:fix`,
-  `bun run format`).
 - The "Gates" bullet of `api-integration` and `ui-development`'s `outside-template.md` is shorter.
 - Renumbered eval cases 19, 20 and 21 to 17, 18 and 19, leaving 16 free.
 
