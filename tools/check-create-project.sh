@@ -64,8 +64,10 @@ holds landing-sitemap "$tmp/landing/apps/web/public/robots.txt" 'Sitemap:'
 for dir in "$tmp/auth" "$tmp/app" "$tmp/landing"; do
   [[ ! -e "$dir/create" ]] || fail "$dir still has the generator (create/)"
   ! grep -q template-only "$dir/CLAUDE.md" || fail "$dir/CLAUDE.md keeps the template-only block"
+  tier=template
+  [[ "$dir" != "$tmp/landing" ]] || tier=landing
   holds "tier $(basename "$dir")" <(node "$plugin/scripts/detect-project.mjs" "$dir/apps/web") \
-    '"tier": "template"'
+    "\"tier\": \"$tier\""
 done
 expect existing-kept 1 'apps/web/CLAUDE.md' -- "$tmp/auth" --auth
 expect file-for-dir 1 'apps (a file where the project has a directory)' -- "$tmp/blocked" --auth

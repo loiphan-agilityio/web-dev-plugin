@@ -21,9 +21,10 @@ expect() {
   fi
 }
 
-mkdir -p "$tmp/empty/.git" "$tmp/other" "$tmp/template" "$tmp/same-stack" "$tmp/other-stack" "$tmp/vue" "$tmp/broken"
+mkdir -p "$tmp/empty/.git" "$tmp/other" "$tmp/template" "$tmp/landing" "$tmp/same-stack" "$tmp/other-stack" "$tmp/vue" "$tmp/broken"
 (cd "$tmp/other" && bash "$here/notes-folder.sh")
 (cd "$tmp/template" && bash "$here/template-app.sh" >/dev/null)
+(cd "$tmp/landing" && bash "$here/landing-app.sh" >/dev/null)
 (cd "$tmp/same-stack" && bash "$here/same-stack-app.sh")
 (cd "$tmp/other-stack" && bash "$here/other-stack-app.sh")
 (cd "$tmp/vue" && bash "$here/vue-app.sh")
@@ -36,6 +37,14 @@ printf '{"workspaces":["apps/*"],"dependencies":{"react":"^19.3.1","vite":"^8.3.
 printf '{"dependencies":{"react":"^19.3.1","@remix-run/react":"^2.15.0"}}\n' > "$tmp/remix/package.json"
 printf '{"dependencies":{"react":">=18"}}\n' > "$tmp/range/package.json"
 printf '{"version":"19.3.1"}\n' > "$tmp/range/node_modules/react/package.json"
+# Near misses for the landing tier, which needs every part: the boilerplate's UI kit with the data
+# stack is no landing page, and neither is the UI kit without the test helpers.
+mkdir -p "$tmp/ui-with-effect/src/test" "$tmp/ui-no-helpers"
+printf '{"dependencies":{"react":"^19.3.1","@repo/ui":"workspace:*","effect":"^4.0.5","@tanstack/react-query":"^5.104.5","react-hook-form":"^7.90.0"},"devDependencies":{"vite":"^8.3.5"}}\n' \
+  > "$tmp/ui-with-effect/package.json"
+: > "$tmp/ui-with-effect/src/test/render.tsx"
+printf '{"dependencies":{"react":"^19.3.1","@repo/ui":"workspace:*"},"devDependencies":{"vite":"^8.3.5"}}\n' \
+  > "$tmp/ui-no-helpers/package.json"
 # Workspace packages with no packageManager field and no lockfile of their own: the workspace root
 # (pnpm-workspace.yaml, or package.json `workspaces`) holds the lockfile.
 mkdir -p "$tmp/pnpm-ws/apps/web" "$tmp/yarn-ws/packages/app"
@@ -64,6 +73,9 @@ expect empty new
 expect other new
 expect template/apps/web template
 expect template unsupported
+expect landing/apps/web landing
+expect ui-with-effect same-stack
+expect ui-no-helpers other-stack
 expect same-stack same-stack
 expect other-stack other-stack
 expect vue unsupported

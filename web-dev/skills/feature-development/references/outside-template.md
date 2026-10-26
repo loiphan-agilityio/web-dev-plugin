@@ -1,6 +1,6 @@
 # Outside the template
 
-For a project `develop` sorted as `same-stack` or `other-stack` (its Workflow B), with the project map it passes. The template's files do not exist here; the project's own files do the same jobs, and its conventions win over the skill's.
+For a project `develop` sorted as `same-stack`, `other-stack` or `landing` (its Workflow B; a `landing` project has the boilerplate's UI kit and test helpers, but no API layer, Effect, TanStack Query or React Hook Form), with the project map it passes. The template's files do not exist here; the project's own files do the same jobs, and its conventions win over the skill's.
 
 - **Still holds:** step 1 (sort the gaps; exclude a criterion that rests on an open question), four distinct states on every data screen, a server validation error next to its field when the API returns field errors, accessible markup (labels, roles, `type="button"`, `aria-label` on icon buttons), business rules as pure, tested functions beside the feature (in the project's own place for them when it has one), and a test for each new component and each criterion.
 - **The map's file for each role** replaces the template's: its HTTP client instead of `ApiClient` and `runEffect`, its query hooks or key factory, its form library and validation, its render helper and network mocking, its loading, empty and error components. Copy the shape of the feature the map names; read `references/` only for a library the project uses the same way (TanStack Query 5, React Hook Form 7, Effect Schema).

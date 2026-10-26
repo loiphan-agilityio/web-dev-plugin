@@ -160,10 +160,10 @@ e2e. Its app,
   root one only when the project has none, and Claude Code applies it once the folder is trusted (open it with `claude` and accept the prompt).
   `git init` and commits stay prompts on purpose.
 - **Coverage**: `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
-- **Guardrails in ESLint**: `no-restricted-imports` / `no-restricted-globals` reject the most
+- **Guardrails in Oxlint** (`oxlint.config.ts`, the only linter): `no-restricted-imports` / `no-restricted-globals` reject the most
   common version mistakes (`react-router-dom`, `zod`, `axios`, `@effect/platform`, root `msw`
   helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`); `pnpm lint` also runs `prettier --check`.
-- **Code style in ESLint**: arrow functions only (`func-style`, `prefer-arrow-callback`; `function*` stays for Effect), destructuring, shorthand, template literals, `??` / `?.` and the rest of `typescript-eslint`'s `stylisticTypeChecked`, so code the skills write later reads like the template.
+- **Code style in Oxlint**: arrow functions only (`func-style`, `prefer-arrow-callback`; `function*` stays for Effect), destructuring, shorthand, template literals, `??` / `?.` and the rest of typescript-eslint's stylistic type-checked rules (Oxlint's `--type-aware`), so code the skills write later reads like the template.
 
 `feature-development/references/` (with `schemas.ts`, `api.ts`, `queries.ts` and `mocks.ts` in `api-integration/references/`) quotes a full feature (todos: list + create form, a test file per component) and the
 wiring diff for the two files a feature registers in.
@@ -191,8 +191,8 @@ brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "n
 
 | Package | Version | Note |
 |---|---|---|
-| typescript | ~6.0 | typescript-eslint 8 supports `<6.1`, so not 7.x yet. `baseUrl` is deprecated in 6; `paths` only. |
-| eslint | 10 | ESLint 9 is end-of-life. `eslint-plugin-jsx-a11y` 6.10.2 declares `<=9` but works on 10 (checked against a file with a11y violations); allowed in `pnpm-workspace.yaml`. |
+| typescript | ~6.0 | The quoted code is verified on 6 (`verify.sh`), not 7.x yet. `baseUrl` is deprecated in 6; `paths` only. |
+| oxlint | 1.89 | The only linter; `oxlint-tsgolint` 7.0.2004 runs the type-aware rules. No ESLint, not even installed: TanStack Query's ESLint plugin needs it, so its rules do not run, and `apps/web/CLAUDE.md` states the query-key rule in words. |
 | effect | 4.0.5 | Forms use `effectTsResolver` from `@hookform/resolvers` 6, the first version built for Effect 4 (5.x supported Effect 3 only). |
 | react-router | 8.5 | No `react-router-dom`. React Router mutates lazy route objects once loaded, so route trees are factories (`createRoutes()`). |
 | msw | 3.0 | `http`/`HttpResponse` from `msw/http`, `delay` from `msw/utils/delay`, `onUnhandledFrame`. |

@@ -24,6 +24,6 @@ When the request asks for a separate app ("a new app", "a separate project"), ru
 
 `project-setup` only creates a project in a folder without the boilerplate's files (`create-project.sh` refuses any that exist):
 
-- **`template`:** already set up; scaffold nothing. A request for one piece the template ships (the companion skills, the git hooks) gets that piece, as `project-setup` steps 5 and 6 describe it; then `pnpm check`.
+- **`template`, `landing`:** already set up; scaffold nothing. A request for one piece the template ships (the companion skills, the git hooks) gets that piece, as `project-setup` steps 5 and 6 describe it; then `pnpm check`.
 - **`same-stack`, `other-stack`:** adding the template's stack or tooling to an existing project is not in this version. Change nothing; offer a new project from the boilerplate in a `<app-name>/` subfolder.
 - **`new`, `state: other`:** `project-setup` in a new `<app-name>/` subfolder; its Result, with the **Route:** line on top, is the report.

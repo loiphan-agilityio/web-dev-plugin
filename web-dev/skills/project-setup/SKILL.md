@@ -61,7 +61,7 @@ Skip under `develop`'s Workflow A (it builds on and reports at the end). Otherwi
 - the web-dev skills run from `apps/web` (`cd apps/web`): at the root, `develop` reports a monorepo root and stops;
 - next: `feature-development` (a ticket), `api-integration` (an endpoint), `ui-development` (a design), or `/web-dev:develop` for any of them.
 
-Setup traps: `../../references/stack-guidelines.md`. Read the project's files over recalling config: TypeScript 6 uses `paths` without `baseUrl`; pnpm 11 reads its settings from `pnpm-workspace.yaml`, where `eslint-plugin-jsx-a11y` is allowed on ESLint 10. When a `CLAUDE.md` and the files disagree, the files win; tell the user.
+Setup traps: `../../references/stack-guidelines.md`. Read the project's files over recalling config: TypeScript 6 uses `paths` without `baseUrl`; pnpm 11 reads its settings (catalog, overrides) from `pnpm-workspace.yaml`; the only linter is Oxlint (`oxlint.config.ts`). When a `CLAUDE.md` and the files disagree, the files win; tell the user.
 
 ## Result
 
