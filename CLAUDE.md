@@ -21,9 +21,9 @@ here (Git, LF, evals only on request) applies to both.
 .claude/                          for maintaining this repo, not part of the plugin: agents/
                                   (companion-auditor, skill-reviewer, version-scout), settings.json
 .github/workflows/                the checks, on GitHub Actions: ci.yml (pull requests, pushes
-                                  to main, tags, weekly), companions.yml (weekly), evals.yml
-                                  (by hand only)
-tools/                            maintainer scripts, not shipped: verify.sh,
+                                  to main, tags, weekly), companions.yml (weekly); no model
+                                  evals (they run only locally, tools/run-evals.sh)
+tools/                            maintainer scripts, not shipped: verify.sh, run-evals.sh,
                                   extract-snippets.mjs, check-guidelines.mjs,
                                   check-create-project.sh, sync-references.sh, lint.sh,
                                   validate-skills.sh
@@ -63,7 +63,7 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 | `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
 | `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the two boilerplate variants (landing page, web app with auth) and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate at its pinned commit (network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged (that repository's checked-out branch), `BOILERPLATE_REF=main` the latest boilerplate. Same as CI, whose weekly run uses `main`. |
 | `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (the pinned commit: network; `BOILERPLATE_REPO` and `BOILERPLATE_REF` as above) into `web-dev/references/`, keeping each file's preamble. Run it after moving the pin past a guideline change, then review and commit the diff. |
-| `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality). Paid: only when the user asks, see the rule below and `web-dev/evals/README.md`. |
+| `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality), through `tools/run-evals.sh`. Paid and local only: only when the user asks, on the release commit, after every free check (see the rule below and `web-dev/evals/README.md`). |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1 pyyaml==6.0.3`) | Every skill passes the Agent Skills specification's validator (valid YAML frontmatter, only spec fields, `name` matches its folder), and every eval `case.yaml` parses. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` (and `web-quality/...`, and `.` for the marketplace) | Each plugin manifest and the marketplace manifest are valid. |
 | `node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs` | web-dev's contract check against temporary folders (the shipped templates included), and web-quality's measurement scripts against local servers and temporary builds, no network. Also a CI job. |
@@ -116,10 +116,14 @@ corepack picks that version.
   `web-dev/CHANGELOG.md`, and tag the release commit `web-dev--v<version>`.
 - **Routing changes** (a skill's description, `develop`'s tables, `detect-project.mjs`) get an
   eval case in `web-dev/evals/`; a new fixture gets a line in `fixtures/check-detect.sh`.
-- **Run the model evals only when the user asks for an eval run** (they cost credits). Never on
-  your own initiative: not to try a fix, not for one case, not as part of a release, a commit or
-  a push, and never by adding a hook, schedule or automatic CI trigger. Check work with the free
-  tools (`pnpm lint`, `verify.sh`, `validate-skills.sh`).
+- **Run the model evals only when the user asks for an eval run** (they cost credits), and only
+  on this machine: never in CI, so no workflow holds an Anthropic API key. Never on your own
+  initiative: not while a skill is being built or changed, not to try a fix, not for one case or
+  a case that is not a real request, not as part of a commit or a push, and never by adding a
+  hook, schedule or CI job. Evals come last: the skill is finished and released (its tag
+  `<plugin>--v<version>` on HEAD) and every free check passes first (`pnpm lint`,
+  `validate-skills.sh`, the scripts' tests, `verify.sh`). `tools/run-evals.sh`, which each
+  plugin's `evals/run.sh` calls, refuses anything else before it spends.
 - Keep files LF (`.gitattributes`); the shell scripts fail on CRLF.
 - `examples/` and `docs/evidence/` are demo output: they stay local and are never committed
   (`.gitignore`). Fix a problem in a demo app by fixing the skill or the boilerplate and running the

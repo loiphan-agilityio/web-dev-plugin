@@ -39,32 +39,32 @@ must not fire), `edge`, `failure`, `overlap`.
 ## When evals run: only when the maintainer asks
 
 Every eval run is paid model time, a whole app (case 19) several dollars a run. Nothing runs them
-automatically: no hook, schedule, push, merge request or tag starts an eval, the CI jobs are
-manual buttons, and Claude never starts one unless the maintainer asks for an eval run in so many
-words. A release does not need one. When a run is asked for:
+automatically and none runs in CI: no hook, schedule, push, pull request, tag or workflow starts
+an eval, and no workflow holds an API key. They run on the maintainer's machine, and Claude never
+starts one unless the maintainer asks for an eval run in so many words. A release does not need
+one. When a run is asked for:
 
 1. **While building or changing a skill, never.** Write or update the case that covers the
    change (a routing change gets one, see `CLAUDE.md`), and check it with the free tools only:
    `pnpm lint`, `bash tools/verify.sh` (which runs `fixtures/check-detect.sh`), and
    `bash tools/validate-skills.sh`.
-2. **Only on finished work:** every skill change committed and the free checks and CI green.
+2. **Only on finished work, and last:** every skill change committed and released (HEAD is the
+   commit tagged `web-dev--v<version>`), CI green, and the free checks passing again locally.
    Then one routing run and, when the change touched a workflow, one e2e run.
 3. **Never for a single case**, to try a fix, or to check a case that is not a real request.
    `run.sh` refuses `--case`; a fixed case is checked by the next requested run with all the others.
 
-`run.sh` enforces this before it spends anything: it refuses `--case`, uncommitted changes under
-`web-dev/` or `tools/`, and plugin content already evaluated with the same options (delete that
-`results/` folder to rerun after an infrastructure failure); it runs `tools/verify.sh`
-first, and caps the run at `--max-cost-usd 30` when no cap is given. "Already evaluated" is keyed
+`run.sh` (through `tools/run-evals.sh`) enforces this before it spends anything: it refuses
+`--case`, uncommitted changes under `web-dev/` or `tools/`, a HEAD that is not the release commit,
+and plugin content already evaluated with the same options (delete that `results/` folder to rerun
+after an infrastructure failure); it runs `pnpm lint`, `tools/validate-skills.sh`, the scripts'
+tests and `tools/verify.sh` first, and caps the run at `--max-cost-usd 30` when no cap is given. "Already evaluated" is keyed
 on the committed content of `skills/`, `agents/`, `references/`, `scripts/` and `evals/`
 (READMEs excluded), so a commit that only edits docs or bumps the version reuses the last result.
 
 Each run uses one arm (`--ablation none`), half the cost of two. The no-plugin baseline and its Δ
 (`--ablation with-without`) answer a different question, whether the plugin still adds anything,
-so ask for it only when a release changes a skill's description or `develop`'s routing (in CI:
-start the job with `EVALS_ARGS` set to `--ablation with-without`). In CI it is the `Evals` workflow
-(`evals.yml`), started by hand on a release tag (`web-dev--v<version>`): one job per suite
-(`Evals: routing`, `Evals: e2e`), after the free checks of `ci.yml` pass.
+so ask for it only when a release changes a skill's description or `develop`'s routing.
 
 ## Run
 
@@ -82,8 +82,7 @@ bash evals/run.sh --tag routing --runs 3 --threshold 0.66 --max-cost-usd 25 --no
 bash evals/run.sh --tag e2e --runs 1 --max-cost-usd 40 --no-publish
 ```
 
-The first is the routing suite, the second the output-quality cases (18 and 19), the same
-commands as CI. With `--ablation with-without`, the headline number is Δ, the score with the
+The first is the routing suite, the second the output-quality cases (18 and 19). With `--ablation with-without`, the headline number is Δ, the score with the
 plugin minus the score without it.
 Results and the HTML report go to `evals/results/<timestamp>/` (ignored by git). Every run is a
 full Claude session on your account.

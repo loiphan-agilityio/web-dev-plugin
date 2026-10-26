@@ -5,6 +5,10 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## Unreleased
 
+- The model evals run only locally: `.github/workflows/evals.yml` and its `ANTHROPIC_API_KEY` are
+  gone. `evals/run.sh` now goes through `tools/run-evals.sh`, which also refuses a HEAD that is
+  not the release commit (`web-dev--v<version>`) and runs `pnpm lint` and `validate-skills.sh`
+  before `verify.sh`, so evals come last, on a finished release.
 - Workflow A makes the first ticket's list page the app's home: it is the index route, so `/`
   opens it instead of the boilerplate's welcome page (which read like a landing page, with
   nothing linking to the features), and `src/app/root-layout.tsx` gets a nav with a link per

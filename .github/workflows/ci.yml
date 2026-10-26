@@ -8,8 +8,9 @@
 #   (local servers, no network).
 # Runs on every pull request, on pushes to main that touch the plugin, on release tags, and weekly,
 # so a dependency or boilerplate release that breaks what the skills quote shows up before a user
-# hits it. A branch is checked through its pull request, so each check runs once. evals.yml calls
-# this workflow before the model evals; companions.yml checks the companion skills.
+# hits it. A branch is checked through its pull request, so each check runs once. companions.yml
+# checks the companion skills. The model evals never run here: they are paid, so they run only on
+# the maintainer's machine (tools/run-evals.sh).
 name: CI
 
 on:
@@ -28,10 +29,8 @@ on:
   schedule:
     - cron: '0 3 * * 1'
   workflow_dispatch:
-  workflow_call:
 
 concurrency:
-  # A called run gets its own group, so it never waits for, or cancels, a run of its caller's ref.
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
