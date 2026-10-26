@@ -3,6 +3,12 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.7.1
+
+- `project-setup` asks the kind (landing page or web app with authentication) with the
+  `AskUserQuestion` tool, as a choice in the terminal, and falls back to text only when that tool
+  is not available (a headless run): 0.7.0 could print it as text.
+
 ## 0.7.0
 
 - A web app always has authentication. `project-setup` asks one question, a landing page or a web

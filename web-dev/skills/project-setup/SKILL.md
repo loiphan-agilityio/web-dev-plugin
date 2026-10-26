@@ -18,7 +18,7 @@ Run the scripts exactly as written below, each as one plain command: `allowed-to
 ## 2. Target and kind
 
 - **Target:** the folder the user gave, or `<name>/` when they gave only a name. Ask only when they gave neither and the current folder holds more than `.git/` or `.claude/`.
-- **Kind:** a landing page or a web app, the user's choice. When the request does not settle it ("landing page", "marketing site", "one-page site" → landing; "web app", "dashboard", "app", "admin", anything with sign-in or data the user edits → web app), ask this one question, in the same message as any other, and create nothing until they answer:
+- **Kind:** a landing page or a web app, the user's choice. When the request does not settle it ("landing page", "marketing site", "one-page site" → landing; "web app", "dashboard", "app", "admin", anything with sign-in or data the user edits → web app), ask this one question with the `AskUserQuestion` tool (header `Kind`, one option per choice below, its label in bold and the rest as its description; any other question goes in the same call), and create nothing until they answer. Only when that tool is not available (a headless run), ask it as text, in the same message as any other question:
 
   > Build a landing page or a web app?
   > 1. **Landing page:** one public marketing page (hero, features, how it works, FAQ, a call to action), Open Graph tags, `sitemap.xml` and `robots.txt`; built and tested without mocks. No sign-in. Before launch, audit it with web-quality (axe, Lighthouse, PageSpeed).
