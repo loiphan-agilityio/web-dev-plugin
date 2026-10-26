@@ -20,10 +20,9 @@ here (Git, LF, evals only on request) applies to both.
                                   those names
 .claude/                          for maintaining this repo, not part of the plugin: agents/
                                   (companion-auditor, skill-reviewer, version-scout), settings.json
-.github/workflows/                the same checks on GitHub Actions: ci.yml (pull requests, pushes
+.github/workflows/                the checks, on GitHub Actions: ci.yml (pull requests, pushes
                                   to main, tags, weekly), companions.yml (weekly), evals.yml
                                   (by hand only)
-.gitlab-ci.yml                    runs tools/verify.sh on merge requests, pushes, schedules
 tools/                            maintainer scripts, not shipped: verify.sh,
                                   extract-snippets.mjs, check-guidelines.mjs,
                                   check-create-project.sh, sync-references.sh, lint.sh,

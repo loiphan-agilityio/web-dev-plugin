@@ -2,7 +2,7 @@
 name: api-integration
 description: This skill should be used when the user asks to "add an endpoint", "call the API", "hook this up to the backend", "add a mutation", "handle the 404/422 from the API", "mock this endpoint", "add an ApiError case" or "invalidate the cache after a write" in an app built from the web-dev template (Effect HttpClient, TanStack Query, MSW). It wires one endpoint with its schema, Effect.fn, query or mutation, MSW handlers and error tests. Not for a new project (project-setup) or a whole feature with screens and routes (feature-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm --filter web test *)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm --filter web test *)
 ---
 
 # api-integration

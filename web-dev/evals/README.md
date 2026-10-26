@@ -23,22 +23,22 @@ the plugin alone.
 | `13-feature-direct-template` | `template` | a ticket without the command reaches `feature-development`, no new scaffold; whether `develop` fired too is not graded (the two overlap on purpose; the trace shows it) |
 | `14-app-other-folder` | files, no `package.json` | the app goes into a subfolder; `notes.md` stays as it is |
 | `15-ci-not-covered` | `template` | a CI request is not covered (pipelines come with the boilerplate): no file written or edited (the fixture already has a workflow), no other skill run, and the answer says so |
-| `19-setup-asks-for-auth` | empty | a setup request that does not say whether to include authentication: asks, and runs no `create-project.sh` |
-| `20-e2e-feature-template` | `template` | **output quality**, run to the end: a test and a story per component, `pnpm check` runs, the Result has a Route line and claims only what the trace shows |
-| `21-e2e-app-empty` | empty | **the main promise**, run to the end: one message gives `docs/plan.md`, the scaffold, every planned feature with a page test and story, `pnpm check`, and a Result that asks nothing and claims only what the trace shows |
+| `17-setup-asks-for-auth` | empty | a setup request that does not say whether to include authentication: asks, and runs no `create-project.sh` |
+| `18-e2e-feature-template` | `template` | **output quality**, run to the end: a test and a story per component, `pnpm check` runs, the Result has a Route line and claims only what the trace shows |
+| `19-e2e-app-empty` | empty | **the main promise**, run to the end: one message gives `docs/plan.md`, the scaffold, every planned feature with a page test and story, `pnpm check`, and a Result that asks nothing and claims only what the trace shows |
 
 `fixtures/` builds the folders; each case's `setup.sh` calls one. `fixtures/check-detect.sh`
 checks the tier `scripts/detect-project.mjs` gives each fixture, without a model; `verify.sh`
 runs it.
 
-Tags: `routing` (cases 01 to 19, short runs that stop once the route is clear), `e2e` (cases 20 and 21,
-a full feature, or a whole app, with install and gates: slow, several dollars a run for 20 and more for 21), and finer tags within
+Tags: `routing` (cases 01 to 15 and 17, short runs that stop once the route is clear), `e2e` (cases 18 and 19,
+a full feature, or a whole app, with install and gates: slow, several dollars a run for 18 and more for 19), and finer tags within
 them: `workflow-a`, `workflow-b`, `workflow-c`, `existing-project`, `no-trigger` (the plugin
 must not fire), `edge`, `failure`, `overlap`.
 
 ## When evals run: only when the maintainer asks
 
-Every eval run is paid model time, a whole app (case 21) several dollars a run. Nothing runs them
+Every eval run is paid model time, a whole app (case 19) several dollars a run. Nothing runs them
 automatically: no hook, schedule, push, merge request or tag starts an eval, the CI jobs are
 manual buttons, and Claude never starts one unless the maintainer asks for an eval run in so many
 words. A release does not need one. When a run is asked for:

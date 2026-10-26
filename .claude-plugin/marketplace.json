@@ -8,7 +8,7 @@
     {
       "name": "web-dev",
       "source": "./web-dev",
-      "description": "Web development for a React + Effect + TanStack Query stack: one entry point (/web-dev:develop) for new and existing projects, with project setup, feature development, API integration and UI development."
+      "description": "Web development for a React + Effect + TanStack Query stack: one entry point (/web-dev:develop) for new and existing projects, with project setup, feature development, API integration and UI development, plus ticket, incident and pr skills that write the contracts around the code (ticket and incident documents, and a pull or merge request opened as a draft from its description)."
     },
     {
       "name": "web-quality",

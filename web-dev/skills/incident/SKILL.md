@@ -2,7 +2,7 @@
 name: incident
 description: This skill should be used when the user types "/web-dev:incident <id>", asks for "an incident report", "a postmortem", "a root cause analysis for the outage" or "write up what broke in production". It writes docs/incidents/<id>/report.md, rca.md and actions.md from the facts given and found (logs, alerts, the change that shipped, CI runs), each claim labelled measured or hypothesis, checks them with check-contract.mjs and commits them on a branch; its follow-ups can become ticket contracts. Not for the fix itself (this version does not fix bugs), a feature ticket (ticket), or code review.
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's scripts/. Needs Node 22.22 or newer and git."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *) Bash(mkdir -p *)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *)
 ---
 
 # incident

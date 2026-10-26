@@ -4,7 +4,9 @@ A Claude Code plugin for web apps on React 19, Vite 8, TypeScript 6, Effect 4, T
 (React Query), React Hook Form 7 and shadcn/ui. One entry point, `/web-dev:develop <request>`,
 inspects the folder (empty, an app from the boilerplate, or another React project), picks
 the workflow and runs the skills that do the work: **project setup**, **feature development**,
-**API integration** and **UI development**.
+**API integration** and **UI development**. Three more skills write the contracts around the
+code: **ticket** (`docs/tickets/<id>/`), **incident** (`docs/incidents/<id>/`) and **pr** (a pull
+or merge request described by its contract).
 
 Its companion plugin **web-quality** checks what was built: `/web-quality:audit <url or project>`
 measures a page in a real browser and its build (Core Web Vitals, bundle budgets, response
@@ -44,5 +46,5 @@ runs, the pinned versions and the companion skills. web-quality installs from th
 | [`DESIGN.md`](DESIGN.md) | How the plugin, the skills and the generated app are built, and why. |
 | [`CLAUDE.md`](CLAUDE.md) | Instructions for Claude Code when it works on this repository. |
 | [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) | Marketplace that lists `web-dev/` and `web-quality/` as the plugins `web-dev` and `web-quality`. |
-| [`.github/workflows/`](.github/workflows/) | The same checks on GitHub Actions: `ci.yml` on pull requests and pushes to `main` that touch the plugin, release tags and weekly; `companions.yml` weekly; `evals.yml` (the model evals) only when run by hand on a release tag. |
-| [`.gitlab-ci.yml`](.gitlab-ci.yml) | Runs the free checks on merge requests, pushes and schedules (`tools/verify.sh`: the code the skills quote, in a project from the boilerplate). On another host, run `tools/verify.sh` in your own CI. |
+| [`tools/`](tools/) | Maintainer scripts, not shipped: `verify.sh` (the checks CI runs), `sync-references.sh`, `validate-skills.sh`, `lint.sh` and the scripts they call. |
+| [`.github/workflows/`](.github/workflows/) | The checks, on GitHub Actions: `ci.yml` on pull requests and pushes to `main` that touch the plugin, release tags and weekly; `companions.yml` weekly; `evals.yml` (the model evals) only when run by hand on a release tag. On another host, run `tools/verify.sh` in your own CI. |

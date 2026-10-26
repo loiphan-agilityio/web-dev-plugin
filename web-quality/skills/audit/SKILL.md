@@ -2,7 +2,7 @@
 name: audit
 description: This skill should be used when the user types "/web-quality:audit", asks to "audit my site", "check web quality", "run a Lighthouse-style review", "is my app production ready", "check performance, accessibility and SEO", "check my landing page before launch", "run PageSpeed Insights" or "why is my page slow" for a web page or single-page app, deployed or local. It measures the page in a real browser and its build (Core Web Vitals, bundle budgets, response headers, accessibility, SEO, PageSpeed Insights field data), has a launch checklist for landing pages (axe, Lighthouse, PageSpeed), reports measured findings apart from hypotheses, and routes fixes to the performance, accessibility, seo and security skills. Not for writing a new feature (web-dev) or a backend-only review.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/ and scripts/. Needs Node 22 or newer; the live measurements need a browser tool that can run JavaScript in a page (the Claude desktop browser, Claude in Chrome or Chrome DevTools MCP)."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm build:mock) Bash(pnpm --filter web build:mock) Bash(pnpm audit) Bash(pnpm audit --prod) Bash(pnpm check)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm --filter web build:mock) Bash(pnpm audit) Bash(pnpm audit --prod) Bash(pnpm check)
 ---
 
 # audit
