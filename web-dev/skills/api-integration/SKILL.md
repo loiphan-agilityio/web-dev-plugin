@@ -2,7 +2,7 @@
 name: api-integration
 description: This skill should be used when the user asks to "add an endpoint", "call the API", "hook this up to the backend", "add a mutation", "handle the 404/422 from the API", "mock this endpoint", "add an ApiError case" or "invalidate the cache after a write" in an app built from the web-dev template (Effect HttpClient, TanStack Query, MSW). It wires one endpoint with its schema, Effect.fn, query or mutation, MSW handlers and error tests. Not for a new project (project-setup) or a whole feature with screens and routes (feature-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm --filter web test *)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm -w check:report) Bash(pnpm --filter web test *)
 ---
 
 # api-integration
@@ -42,7 +42,7 @@ Extend `createTodosHandlers(initial)` and `todosMocks` (pending, error, validati
 
 ## 6. Gates
 
-`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then `pnpm check` again.
+`pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. In a project from the boilerplate, run `pnpm -w check:report` instead of `pnpm check`: the same gates, run at the workspace root from any folder of it, ending with the checklist (each gate, the unit and e2e pass rates, line coverage) that goes in the Result. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then the same gate command again (`pnpm -w check:report` in a project from the boilerplate).
 
 Auth: `ApiClient` sends the bearer token `AuthToken` gives: in a web app from the template, the token of `src/features/auth`. For an app with sign-in but no such feature, provide `AuthToken.fromGetter(...)` in `src/lib/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
 
@@ -52,7 +52,7 @@ Skip it when `feature-development` loaded this skill or under `develop`'s Workfl
 
 ```
 ## Result
-**Did:** the endpoint, the files changed, the tests, and the `pnpm check` outcome
+**Did:** the endpoint, the files changed, the tests, and the `pnpm check` outcome (in a project from the boilerplate, the `check:report` checklist)
 **Saw:** facts observed, including the real gate output
 **Not done:** anything skipped
 **Blocked by:** contract details still unknown, or "nothing"
