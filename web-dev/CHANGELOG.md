@@ -3,7 +3,7 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.9.1
 
 - The boilerplate pin moves to `ace5470`: its CI adds `X-Robots-Tag: noindex` to the `/*` block
   of a preview's `_headers` instead of appending a second `/*` block, which Pages applied in place
