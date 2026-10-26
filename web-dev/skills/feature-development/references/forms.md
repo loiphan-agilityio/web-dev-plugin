@@ -86,7 +86,7 @@ export const TodoForm = () => {
 - **`useForm<Input, unknown, Output>`** with `Input = typeof Schema.Encoded` and `Output = typeof Schema.Type`. Without them TypeScript infers the field types from `defaultValues`, where `priority: 'medium'` widens to `string` and no longer matches the resolver: a typecheck error on `resolver`.
 - **Input vs Output.** The fields hold `typeof Schema.Encoded` (e.g. an untrimmed string); `handleSubmit` passes `typeof Schema.Type`, which is what `mutate` takes. A `Schema.Trim` makes the two differ.
 - **`noValidate`** turns off the browser's own bubbles so the schema messages are the only ones.
-- **`onSubmit={(event) => void onSubmit(event)}`**: `handleSubmit` returns a Promise and typescript-eslint `no-misused-promises` rejects passing it straight to a handler prop.
+- **`onSubmit={(event) => void onSubmit(event)}`**: `handleSubmit` returns a Promise and the type-aware `typescript/no-misused-promises` rejects passing it straight to a handler prop.
 - **`Controller` + `Field`**: `data-invalid={fieldState.invalid}` on `Field` (colors label and error), `aria-invalid={fieldState.invalid}` on the control (what screen readers and tests read). `FieldLabel htmlFor` must match the control `id`, because tests use `getByLabelText`.
 - **`FieldGroup` + `Field`** is the shadcn form layout. The old `Form` / `FormField` wrapper is gone; do not import it.
 - **Mutate callbacks**: `onSuccess` resets the form and toasts; `onError` calls `setFormErrors(form.setError, error, form.getValues())`. Pass them to `mutate`, not `useMutation`, so they die with the component.

@@ -10,6 +10,8 @@
 //                non-empty folder without package.json (the app goes in a subfolder)
 //   template     an app from the boilerplate (apps/web): ApiClient,
 //                src/test/render.tsx and effect
+//   landing      a landing page from the boilerplate (apps/web, create-project.sh --landing):
+//                @repo/ui and src/test/render.tsx, but no API layer and no Effect
 //   same-stack   the template's stack (React, Vite, Effect, TanStack Query, React Hook Form),
 //                another layout
 //   other-stack  a React app on another stack (axios, zod, Redux, another router...)
@@ -131,7 +133,7 @@ const packageManager =
     .map(packageManagerIn)
     .find((name) => name !== undefined) ?? (pkg ? 'npm' : null);
 
-// What makes an app from the boilerplate (the `template` tier).
+// What makes an app from the boilerplate (the `template` and `landing` tiers).
 const markers = {
   apiClient: readText(join(dir, 'src/lib/api/client.ts')).includes('ApiClient'),
   testRender: existsSync(join(dir, 'src/test/render.tsx')),
@@ -174,6 +176,21 @@ const tierOf = () => {
   if (!has('react')) {
     reasons.push('no react dependency');
     return 'unsupported';
+  }
+  // A landing page from the boilerplate keeps its UI kit and test helpers but drops the data
+  // stack. Every part is required, so a web app from the boilerplate (it has Effect and ApiClient)
+  // and a project from elsewhere (no @repo/ui) never land here.
+  if (
+    has('vite') &&
+    has('@repo/ui') &&
+    markers.testRender &&
+    !markers.apiClient &&
+    !has('effect')
+  ) {
+    reasons.push(
+      'landing page from the boilerplate: @repo/ui and src/test/render.tsx, no API layer or Effect',
+    );
+    return 'landing';
   }
   const stack = ['vite', 'effect', '@tanstack/react-query', 'react-hook-form'];
   const missing = stack.filter((name) => !has(name));

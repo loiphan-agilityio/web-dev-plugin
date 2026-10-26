@@ -1,0 +1,38 @@
+schema_version: "1.0"
+name: ui-landing
+description: A copy change in a landing page from the boilerplate. The page has no API layer, so the change goes to ui-development, not feature-development, with no new scaffold and no data library added.
+tags: [routing, workflow-c]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop In apps/web, change the landing page's hero headline to \"Plan your week in minutes\" and add a FAQ entry: \"Is there a free plan? Yes, for one user.\""
+  max_turns: 12
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: reaches-ui-development
+    tool: Skill
+    input_match: "ui-development"
+    arm: both
+  - type: tool_used
+    name: no-feature-development
+    tool: Skill
+    input_match: "feature-development"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-new-scaffold
+    tool: Bash
+    input_match: "create-project\\.sh"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-data-stack-added
+    tool: Bash
+    input_match: "pnpm (add|install) .*(effect|@tanstack/react-query|react-hook-form)"
+    min: 0
+    max: 0
+    arm: both

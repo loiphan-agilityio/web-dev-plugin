@@ -1,6 +1,6 @@
 ---
 name: codebase-explorer
-description: Read-only map of an existing React project before the web-dev skills change it - which file plays each role (HTTP client, query layer, forms, validation, routing, UI kit, shared components, test helpers, mocks), the conventions the code follows, and the commands that check it. Use when the develop skill works in a project not scaffolded from the web-dev template (tier `same-stack` or `other-stack`), or before changing an unfamiliar React codebase.
+description: Read-only map of an existing React project before the web-dev skills change it - which file plays each role (HTTP client, query layer, forms, validation, routing, UI kit, shared components, test helpers, mocks), the conventions the code follows, and the commands that check it. Use when the develop skill works in a project not scaffolded from the web-dev template (tier `same-stack`, `other-stack` or `landing`), or before changing an unfamiliar React codebase.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

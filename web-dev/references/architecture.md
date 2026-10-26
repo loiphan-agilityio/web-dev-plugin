@@ -30,8 +30,10 @@ ApiClient → effect/http`
   `onError` (`reportRouteError`) a route that throws, both through `reportError`, all in
   `src/lib/report-error.ts`. A feature shows its error state and never logs or reports an API
   error itself; a 4xx or a `NetworkError` is the user's to see, not a bug.
-- **Query keys come from a key factory** in `queries.ts`; mutations invalidate exactly the
-  keys they change, and return that promise from `onSuccess`.
+- **Query keys come from a key factory** in `queries.ts`, and a key holds every value its
+  `queryFn` reads (an id, a filter): a value left out serves another value's cached data, and no
+  lint rule checks it. Mutations invalidate exactly the keys they change, and return that promise
+  from `onSuccess`.
 - **Every data screen renders four distinct states:** loading (`isPending`, not `isLoading`),
   error (with `toUserMessage` and a retry), empty (with the next action), success. Empty and
   error never look the same.

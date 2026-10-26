@@ -1,6 +1,6 @@
 ---
 name: version-scout
-description: Read-only lookup of npm package versions, peer dependencies, changelogs and migration guides to answer concrete compatibility questions for the web stack (TypeScript, ESLint, Vite, Vitest, MSW, Effect, TanStack Query, React Hook Form, shadcn). Use when a decision depends on what a released version actually supports.
+description: Read-only lookup of npm package versions, peer dependencies, changelogs and migration guides to answer concrete compatibility questions for the web stack (TypeScript, Oxlint, Vite, Vitest, MSW, Effect, TanStack Query, React Hook Form, shadcn). Use when a decision depends on what a released version actually supports.
 model: haiku
 effort: low
 tools: Read, Grep, Glob, Bash, WebFetch

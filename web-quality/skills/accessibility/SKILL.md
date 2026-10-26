@@ -19,7 +19,7 @@ both the automated result and the manual checks you did, and say which you could
 - **axe in a Playwright test:** follow `references/automated-checks.md` (a project from the
   boilerplate already has the spec; another project adds it), one test per important page and
   state (a dialog open, a form with errors).
-- **Already in a project from the boilerplate:** `eslint-plugin-jsx-a11y` in `pnpm lint` (static
+- **Already in a project from the boilerplate:** Oxlint's `jsx-a11y` rules in `pnpm lint` (static
   JSX rules) and the Storybook a11y addon, which runs axe on each story in Storybook's
   Accessibility panel.
 - Lighthouse's Accessibility score, when available, is a third view of the same kind of rules.

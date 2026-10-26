@@ -5,6 +5,16 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## Unreleased
 
+- `detect-project.mjs` has a `landing` tier: a landing page from the boilerplate (its UI kit and
+  test helpers, no API layer or Effect), which since the pin below it no longer reads as
+  `template`. `develop` sends a landing or ui change there to `ui-development`, and anything that
+  needs data to Workflow B, which asks before adding a library; a setup request finds it already
+  set up. `check-detect.sh` checks it and two near misses; eval case 16 covers the route.
+- The boilerplate pin moves to `4699948`: Oxlint is its only linter (no ESLint), a landing page
+  has no API layer or mocks, lint runs each file once, and e2e runs write an Allure report.
+  `references/` follow (`sync-references.sh`): a query key holds every value its `queryFn` reads,
+  since no lint rule checks it any more. The README, `forms.md` and `project-setup` name Oxlint's
+  rules instead of ESLint's.
 - `incident` names its three templates (`references/report.md`, `rca.md`, `actions.md`), which its
   steps never pointed to, and `ticket` gives the full path of each of its three. skill-validator
   reported them as files no skill text named.

@@ -5,6 +5,7 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## Unreleased
 
+- `accessibility` names the boilerplate's lint as Oxlint's `jsx-a11y` rules: it has no ESLint.
 - `evals/run.sh` goes through `tools/run-evals.sh`, shared with web-dev: it now also refuses a HEAD
   that is not the release commit (`web-quality--v<version>`) and plugin content already evaluated
   with the same options, and runs `pnpm lint` and `validate-skills.sh` before the scripts' tests.
