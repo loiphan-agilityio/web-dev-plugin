@@ -3,6 +3,12 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.7
+
+- Dropped the `allowed-tools` rules each skill never uses: the `pnpm build` and `build:mock` forms
+  from `seo` and `security`, `pnpm build:mock` from `audit` and `performance` (their text runs
+  `pnpm --filter web build:mock`), and the two `--filter web` e2e forms from `accessibility`.
+
 ## 0.2.6
 
 - On Windows, `pagespeed.mjs` and `check-headers.mjs` could crash with exit 127

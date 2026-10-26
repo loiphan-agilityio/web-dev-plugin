@@ -2,7 +2,7 @@
 name: performance
 description: This skill should be used when the user asks to "make the page faster", "fix LCP", "improve INP", "reduce layout shift", "check Core Web Vitals", "reduce the bundle size", "the app loads slowly" or "set a performance budget" in a web app, or when the web-quality audit routes a loading or responsiveness finding here. It measures Core Web Vitals in a real browser and the build's initial load against budgets, finds the cause, fixes it in a React + Vite app and re-measures. Not for backend or database performance.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/ and scripts/. Needs Node 22 or newer and a browser tool that can run JavaScript in a page for the live metrics."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm build:mock) Bash(pnpm --filter web build:mock) Bash(pnpm check)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm --filter web build:mock) Bash(pnpm check)
 ---
 
 # performance

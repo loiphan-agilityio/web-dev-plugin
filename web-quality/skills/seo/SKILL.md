@@ -2,7 +2,7 @@
 name: seo
 description: This skill should be used when the user asks to "improve SEO", "check meta tags", "add page titles", "make it show up on Google", "add a sitemap", "add Open Graph tags", "fix social previews" or "add structured data" in a web app, or when the web-quality audit routes an SEO finding here. It reads each route's rendered head, checks titles, descriptions, canonical URLs, robots and sitemap, and social cards, fixes them in a React 19 + Vite single-page app, and says when a page needs prerendering. Not for keyword research or content strategy.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/. Needs a browser tool to read the rendered head of each route."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm build) Bash(pnpm build:mock) Bash(pnpm --filter web build:mock) Bash(pnpm check)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm check)
 ---
 
 # seo
