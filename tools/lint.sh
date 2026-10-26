@@ -8,7 +8,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 shellcheck tools/*.sh web-dev/skills/*/scripts/*.sh web-dev/scripts/*.sh web-dev/evals/*.sh \
   web-dev/evals/fixtures/*.sh web-dev/evals/*/setup.sh web-quality/evals/*.sh \
   web-quality/evals/fixtures/*.sh web-quality/evals/*/setup.sh
-for f in tools/*.mjs web-dev/scripts/*.mjs web-quality/scripts/*.mjs web-quality/scripts/lib/*.mjs \
+for f in tools/*.mjs web-dev/scripts/*.mjs web-dev/skills/*/scripts/*.mjs web-quality/scripts/*.mjs web-quality/scripts/lib/*.mjs \
   web-dev/scripts/test/*.mjs web-quality/scripts/test/*.mjs; do
   node --check "$f"
 done

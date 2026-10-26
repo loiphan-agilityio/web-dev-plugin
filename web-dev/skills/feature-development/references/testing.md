@@ -256,9 +256,9 @@ test('adds a todo from the todos page', async ({ page }) => {
 });
 ```
 
-- Open the feature's path (`page.goto('/todos')`): the spec then also proves the lazy route and, on the deploy, the SPA redirect. When `src/app/root-layout.tsx` has a nav, start from `/` and click its link instead, so the spec proves the link too.
+- Open the feature's path (`page.goto('/todos')`): the spec then also proves the lazy route and, on the deploy, that Pages serves `index.html` for the path. When `src/app/root-layout.tsx` has a nav, start from `/` and click its link instead, so the spec proves the link too.
 - A route inside `protectedRoutes([...])` sends a signed-out user to `/login?redirect=<path>`: sign in, as `e2e/home.spec.ts` does (`demo@example.com` / `password` on the mocks), and the app returns to the path. A page test sets the token instead, in `beforeEach`: `tokenStore.set('mock-token')`, the value of the auth mocks' `mockToken`, since a feature may not import another feature's mocks (lint fails).
-- Assert on fixture values from `mocks.ts`; the same spec runs in CI against the Netlify deploy (`E2E_BASE_URL`), which serves the same mocks.
+- Assert on fixture values from `mocks.ts`; the same spec runs in CI against the live Cloudflare Pages site after the production deploy (`E2E_BASE_URL`), which serves the same mocks.
 - Locators by role and label, web-first assertions (`await expect(locator).toBeVisible()`), which wait on their own; never `page.waitForTimeout`.
 - One flow per feature. States, error paths and 422s belong to the unit tests above, which are faster and cover them exactly.
 - `pnpm test:e2e` runs only the specs; `pnpm check` runs them as its last gate. A missing browser fails with "Executable doesn't exist": run `pnpm test:e2e:install`.
