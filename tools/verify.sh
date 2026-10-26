@@ -2,8 +2,9 @@
 # Proves that the code the skills quote passes every gate in a project created from the
 # react-vite-boilerplate, the project users get. Exits non-zero on the first failure.
 #
-# 0. Checks that detect-project.mjs gives each eval fixture its tier, and what project-setup's
-#    create-project.sh creates from the boilerplate and refuses (check-create-project.sh).
+# 0. Checks that detect-project.mjs gives each eval fixture its tier, what project-setup's
+#    create-project.sh creates from the boilerplate and refuses (check-create-project.sh), and
+#    what deploy-setup's sync-pipeline.mjs writes and refuses (check-sync-pipeline.sh).
 # 1. Creates a project with create-project.sh --auth (the boilerplate at its pinned commit:
 #    network; BOILERPLATE_REPO and BOILERPLATE_REF pick another, see create-project.sh), checks
 #    that the plugin's shared references/ match its apps/web/CLAUDE.md (check-guidelines.mjs), that its app names no todos (a new
@@ -37,6 +38,7 @@ plugin_root="$(cd "$here/../web-dev" && pwd)"
 skills_root="$plugin_root/skills"
 bash "$plugin_root/evals/fixtures/check-detect.sh"
 bash "$here/check-create-project.sh"
+bash "$here/check-sync-pipeline.sh"
 
 bash "$skills_root/project-setup/scripts/create-project.sh" "$tmp/app" --auth
 app="$tmp/app/apps/web"

@@ -1,0 +1,59 @@
+schema_version: "1.0"
+name: ci-template
+description: A CI request in an app from the boilerplate reaches deploy-setup, which compares the project with the boilerplate's pipeline through its script instead of writing a workflow, and stops before Cloudflare and GitHub when the folder has no GitHub remote.
+tags: [routing, workflow-c]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop In apps/web, set up CI on GitHub that runs our unit tests on every push."
+  max_turns: 12
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: tool_used
+    name: runs-deploy-setup
+    tool: Skill
+    input_match: "deploy-setup"
+    arm: both
+  - type: tool_used
+    name: runs-the-sync
+    tool: Bash
+    input_match: "sync-pipeline\\.mjs"
+    arm: both
+  # The pipeline comes from the boilerplate through the script; the fixture already has it, so
+  # nothing is written by hand.
+  - type: tool_used
+    name: no-hand-written-pipeline
+    tool: Write
+    input_match: "\\.github/workflows|\\.gitlab-ci\\.yml"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-pipeline-edit
+    tool: Edit
+    input_match: "\\.github/workflows"
+    min: 0
+    max: 0
+    arm: both
+  # The fixture is no git repository with a GitHub remote: nothing outside the folder is touched.
+  - type: tool_used
+    name: no-cloudflare-or-github-change
+    tool: Bash
+    input_match: "wrangler[^\\n]*(project create|login)|gh (secret|variable) (set|delete)|gh api -X"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-other-skill
+    tool: Skill
+    input_match: "feature-development|api-integration|ui-development|project-setup"
+    min: 0
+    max: 0
+    arm: both
+  - type: llm
+    name: reports-the-pipeline
+    criteria: |
+      - The answer says the project already has the boilerplate's pipeline (unit tests with coverage run on every pull request and push to main, among the other gates), found by comparing it with the boilerplate, not by writing a new workflow.
+      - It says the deploy setup (Cloudflare Pages projects, the GitHub secret and variables) was not done because the folder has no GitHub remote, and lists it as a next step.
+      - It does not claim anything was deployed or set on GitHub or Cloudflare.

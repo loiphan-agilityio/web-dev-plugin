@@ -1,0 +1,47 @@
+schema_version: "1.0"
+name: ci-other-stack
+description: A CI/CD request in a React app not made from the boilerplate is not covered; develop says so and changes nothing.
+tags: [routing, edge, existing-project]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Set up CI/CD that runs the tests and deploys this app to Cloudflare Pages."
+  max_turns: 8
+  timeout_seconds: 300
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep, Write, Edit]
+graders:
+  - type: file_exists
+    name: no-github-workflow
+    path: ".github/workflows/*"
+    exists: false
+  - type: tool_used
+    name: no-edit
+    tool: Edit
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-write
+    tool: Write
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-deploy-setup
+    tool: Skill
+    input_match: "deploy-setup|project-setup|feature-development"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-sync
+    tool: Bash
+    input_match: "sync-pipeline\\.mjs|wrangler|gh (secret|variable)"
+    min: 0
+    max: 0
+    arm: both
+  - type: llm
+    name: says-not-covered
+    criteria: |
+      - The answer says this version sets up CI/CD only in projects created from the boilerplate, so it changes nothing here.
+      - It does not claim a pipeline was written or a deploy set up.

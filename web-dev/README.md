@@ -7,7 +7,7 @@ incident records and pull request descriptions.
 
 **Stack:** React 19 · Vite 8 · TypeScript 6 · Effect 4 · TanStack Query 5 · React Hook Form 7 ·
 shadcn/ui (Tailwind CSS 4) · React Router 8 · Vitest 5 + React Testing Library + MSW 3 · Playwright 1.64 · Storybook 10 · pnpm 11 ·
-GitHub Actions + Netlify (in the boilerplate)
+GitHub Actions + Cloudflare Pages (in the boilerplate; `deploy-setup` connects them)
 
 | Skill | Use it for | Example prompt |
 |---|---|---|
@@ -17,11 +17,12 @@ GitHub Actions + Netlify (in the boilerplate)
 | `ticket` | Tickets → `docs/tickets/<id>/intent.md`, `spec.md` (testable `AC-<n>` criteria, open questions) and `plan.md` (`T<n>` tasks citing them), grounded in the code, checked by `scripts/check-contract.mjs` and committed on a branch for review; several tickets in parallel, one subagent each. `feature-development` then builds from the folder | "/web-dev:ticket 412 413 414" · "Write the contract for issue #412" |
 | `incident` | An incident → `docs/incidents/<id>/report.md`, `rca.md` (claims labelled measured or hypothesis) and `actions.md` (follow-ups `A<n>`), checked and committed on a branch; follow-ups can become tickets | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
 | `pr` | The current branch → a pull request (`gh`) or merge request (`glab`) described by its contract: why, what changed, the ticket contract it implements and the `pnpm check:report` checklist, checked by `scripts/check-contract.mjs`. Opened as a draft and marked ready only when CI passes; it never pushes a protected branch and never merges | "/web-dev:pr" · "Open a PR for ticket 412" |
+| `deploy-setup` | A project from the boilerplate → the boilerplate's CI/CD at the pinned commit (`scripts/sync-pipeline.mjs`: the workflow, Playwright and Allure, coverage, Cloudflare Pages headers, the CI tools; a project still on Netlify moves to Cloudflare Pages), every gate, then the Pages projects, the GitHub secret and variables and the branch ruleset, each command asked first. It never asks for the API token: the user sets that secret | "Set up CI/CD and deploy this app to Cloudflare Pages" · "Move our CI from Netlify to Cloudflare" |
 | `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `ui-development` | A design (screenshot, mockup, Figma frame, DESIGN.md) → a UI that matches it: theme tokens, shadcn components, states, tests, a visual check in the browser. With no design it asks once for an optional DESIGN.md or Figma link, then uses the current theme | "Make the settings page look like design/settings.png" |
 
-Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD (it comes with the
-boilerplate). Not yet: bug fixes, review without edits, and commits beyond the contract commit of
+Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD in a project not made from
+the boilerplate. Not yet: bug fixes, review without edits, and commits beyond the contract commit of
 `ticket` and `incident` (`develop` says so and changes nothing); a PR or MR goes through `pr`.
 
 ## Install
@@ -171,7 +172,8 @@ wiring diff for the two files a feature registers in.
 ## End-to-end tests and CI/CD (from the boilerplate)
 
 A project from the [react-vite-boilerplate](https://github.com/loiphan-agilityio/react-vite-boilerplate)
-brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "not yet"):
+brings them, and `deploy-setup` brings a project made from an older pin up to the pinned pipeline
+and connects it to Cloudflare and GitHub (CI/CD in any other project is "not yet"):
 
 - **End-to-end**: Playwright in `apps/web/e2e/`. `pnpm test:e2e` builds the app on mocks
   (`pnpm build:mock`) and serves it with `vite preview`; with `E2E_BASE_URL` set it tests that URL
@@ -180,12 +182,14 @@ brings them; the plugin writes no pipeline (`develop` answers CI/CD work with "n
   feature's main flow, quoted from `references/testing.md` and run by `tools/verify.sh`.
 - **Watch mode**: `pnpm test:watch` (`vitest --watch`) re-runs the tests that import a file each
   time it is saved, even where `CI` is set.
-- **CI/CD** (`.github/workflows/ci.yml`, `apps/web/netlify.toml`): checks and e2e in parallel, a
-  Netlify draft deploy of the builds they made (`pr-<n>` on a pull request), the same specs
-  against it, then production on `main`. Each deploy adds a commit status
-  (`Preview - Webapp Deployment`, `Prod - Webapp Deployment`) whose Details link opens it. It needs
-  the `NETLIFY_AUTH_TOKEN` secret and the `NETLIFY_SITE_ID` variable; the boilerplate's `CLAUDE.md`
-  has the setup.
+- **CI/CD** (`.github/workflows/ci.yml`, `apps/web/public/_headers`): the checks (lint,
+  typecheck, unit tests with coverage, build, Storybook, the mock build), a Cloudflare Pages
+  preview of the app and Storybook (`pr-<n>` on a pull request), Lighthouse on it, then on `main`
+  production and the Playwright specs against the live URL, with an Allure report. Each deploy
+  adds a commit status (`Preview - Webapp Deployment`, `Prod - Webapp Deployment`) whose Details
+  link opens it. It needs the `CLOUDFLARE_API_TOKEN` secret and the `CLOUDFLARE_ACCOUNT_ID` and
+  `CLOUDFLARE_PAGES_APP_PROJECT` variables (more for Storybook and the reports): `deploy-setup`
+  sets them, or see the boilerplate's `CLAUDE.md`.
 
 ## Pinned versions and why
 

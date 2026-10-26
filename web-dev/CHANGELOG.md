@@ -3,8 +3,23 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.9.0
 
+- A new skill, `deploy-setup`, sets up CI/CD in a project created from the boilerplate: its
+  `scripts/sync-pipeline.mjs` creates a reference project of the same kind at the pin and brings
+  the project's workflow, ruleset, Playwright and Allure configs, `_headers`, CI tools, the root
+  `CLAUDE.md`'s CI/CD section, the pipeline's `package.json` entries and `.gitignore` lines to it,
+  removes `netlify.toml`, and lists the other lines that still name Netlify with the boilerplate's
+  wording. It refuses to replace a file git cannot restore. The skill then runs every gate and,
+  asking before each command, creates the Cloudflare Pages projects, sets the GitHub variables
+  and the ruleset; the user sets the API token secret. `develop` routes a **ci** request in a
+  `template` or `landing` project to it (CI/CD elsewhere stays "not yet"); eval case 15 now expects
+  that route, case 20 the refusal in another stack. `tools/check-sync-pipeline.sh`, run by
+  `verify.sh`, checks the script against projects from the last Netlify commit.
+- The boilerplate pin moves to `8c19b5a`: the app and Storybook deploy to Cloudflare Pages instead
+  of Netlify (`apps/web/public/_headers` and `public/assets/404.html` replace `netlify.toml`), the
+  one e2e run is against production after its deploy, and the coverage and Allure reports are
+  published on Pages. `project-setup`, `feature-development` and its `testing.md` say so.
 - `detect-project.mjs` has a `landing` tier: a landing page from the boilerplate (its UI kit and
   test helpers, no API layer or Effect), which since the pin below it no longer reads as
   `template`. `develop` sends a landing or ui change there to `ui-development`, and anything that

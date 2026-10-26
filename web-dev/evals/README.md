@@ -22,17 +22,18 @@ the plugin alone.
 | `12-app-other-stack` | `other-stack` | a whole app is planned and built inside the project: maps it, writes the plan, keeps its stack |
 | `13-feature-direct-template` | `template` | a ticket without the command reaches `feature-development`, no new scaffold; whether `develop` fired too is not graded (the two overlap on purpose; the trace shows it) |
 | `14-app-other-folder` | files, no `package.json` | the app goes into a subfolder; `notes.md` stays as it is |
-| `15-ci-not-covered` | `template` | a CI request is not covered (pipelines come with the boilerplate): no file written or edited (the fixture already has a workflow), no other skill run, and the answer says so |
+| `15-ci-template` | `template` | a CI request reaches `deploy-setup`, which compares the project with the boilerplate's pipeline through `sync-pipeline.mjs`: no workflow written or edited by hand (the fixture already has it), no other skill run, nothing set on Cloudflare or GitHub (the fixture has no GitHub remote), and the answer lists that setup as next |
 | `16-ui-landing` | `landing` | a copy change in a landing page reaches `ui-development`: no `feature-development`, no new scaffold, no data library added |
 | `17-setup-asks-for-kind` | empty | a setup request that does not say landing page or web app: asks that one question (a web app includes authentication), no separate authentication question, and runs no `create-project.sh` |
 | `18-e2e-feature-template` | `template` | **output quality**, run to the end: a test and a story per component, `pnpm check` runs, the Result has a Route line and claims only what the trace shows |
 | `19-e2e-app-empty` | empty | **the main promise**, run to the end: one message gives `docs/plan.md`, the scaffold, every planned feature with a page test and story, `pnpm check`, and a Result that asks nothing and claims only what the trace shows |
+| `20-ci-other-stack` | `other-stack` | a CI/CD request in a project not made from the boilerplate is not covered: no file written, no `deploy-setup`, and the answer says so |
 
 `fixtures/` builds the folders; each case's `setup.sh` calls one. `fixtures/check-detect.sh`
 checks the tier `scripts/detect-project.mjs` gives each fixture, without a model; `verify.sh`
 runs it.
 
-Tags: `routing` (cases 01 to 17, short runs that stop once the route is clear), `e2e` (cases 18 and 19,
+Tags: `routing` (cases 01 to 17 and 20, short runs that stop once the route is clear), `e2e` (cases 18 and 19,
 a full feature, or a whole app, with install and gates: slow, several dollars a run for 18 and more for 19), and finer tags within
 them: `workflow-a`, `workflow-b`, `workflow-c`, `existing-project`, `no-trigger` (the plugin
 must not fire), `edge`, `failure`, `overlap`.

@@ -4,7 +4,8 @@ This repository ships the **web-dev** Claude Code plugin: an entry skill, `devel
 the project and routes a request to the skills that build web apps on React 19, Vite 8,
 TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui, and the skills that write
 the contracts around the code: `ticket` (docs/tickets/<id>/), `incident` (docs/incidents/<id>/)
-and `pr` (a pull or merge request's description).
+and `pr` (a pull or merge request's description). `deploy-setup` brings the boilerplate's CI/CD
+(unit and e2e tests, Cloudflare Pages deploys) into a project made from it.
 What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and how to run the
 demo in `README.md`.
 
@@ -25,16 +26,19 @@ here (Git, LF, evals only on request) applies to both.
                                   evals (they run only locally, tools/run-evals.sh)
 tools/                            maintainer scripts, not shipped: verify.sh, run-evals.sh,
                                   extract-snippets.mjs, check-guidelines.mjs,
-                                  check-create-project.sh, sync-references.sh, lint.sh,
-                                  validate-skills.sh
+                                  check-create-project.sh, check-sync-pipeline.sh,
+                                  sync-references.sh, lint.sh, validate-skills.sh
 web-dev/                          the plugin (its README.md is the user guide)
   .claude-plugin/plugin.json      name, version
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
   skills/                         the product: develop (entry), project-setup, feature-development,
-                                  api-integration, ui-development, ticket, incident, pr (their
-                                  contract templates in references/)
+                                  api-integration, ui-development, deploy-setup, ticket, incident,
+                                  pr (their contract templates in references/)
     project-setup/scripts/        create-project.sh (a new project from the boilerplate: landing
                                   page, or web app, always with auth), install-companions.sh
+    deploy-setup/scripts/         sync-pipeline.mjs (the boilerplate's CI/CD, test and Cloudflare
+                                  Pages files at the pin, copied from a project create-project.sh
+                                  makes)
   references/                     shared guidelines: stack-guidelines, coding-standards, architecture
   scripts/                        detect-project.mjs, verify-project.sh, check-contract.mjs (run
                                   by the skills), and check-contract's tests in scripts/test/
@@ -61,7 +65,7 @@ docs/evidence/                    reports, logs and screenshots from a demo run,
 |---|---|
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the tools they and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
-| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the two boilerplate variants (landing page, web app with auth) and refuses what `check-create-project.sh` expects, and in a project created from the boilerplate at its pinned commit (network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged (that repository's checked-out branch), `BOILERPLATE_REF=main` the latest boilerplate. Same as CI, whose weekly run uses `main`. |
+| `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the two boilerplate variants (landing page, web app with auth) and refuses what `check-create-project.sh` expects, `sync-pipeline.mjs` brings a project from the last Netlify commit to the pinned pipeline and refuses what `check-sync-pipeline.sh` expects, and in a project created from the boilerplate at its pinned commit (network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged (that repository's checked-out branch), `BOILERPLATE_REF=main` the latest boilerplate. Same as CI, whose weekly run uses `main`. |
 | `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (the pinned commit: network; `BOILERPLATE_REPO` and `BOILERPLATE_REF` as above) into `web-dev/references/`, keeping each file's preamble. Run it after moving the pin past a guideline change, then review and commit the diff. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality), through `tools/run-evals.sh`. Paid and local only: only when the user asks, on the release commit, after every free check (see the rule below and `web-dev/evals/README.md`). |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1 pyyaml==6.0.3` and skill-validator 1.8.0: `go install github.com/agent-ecosystem/skill-validator/cmd/skill-validator@v1.8.0` or its release binary) | Every skill passes the Agent Skills specification's validator (valid YAML frontmatter, only spec fields, `name` matches its folder) and skill-validator's `check --strict` (internal links resolve, every file under a skill is named by its text, content; a warning fails too, and no model is called), and every eval `case.yaml` parses. Also a CI job. |
@@ -101,7 +105,10 @@ corepack picks that version.
   and every check here, uses that commit, so a release never scaffolds code its skills do not
   match. After a boilerplate change is merged, move the pin to the merge commit
   (`git ls-remote <boilerplate> refs/heads/main`), run `sync-references.sh` and `verify.sh`, and
-  ship the pin in the same pull request as the skill changes that need it. CI's weekly run tries
+  ship the pin in the same pull request as the skill changes that need it. `deploy-setup` copies
+  the pipeline from a project created at the pin, so the pin move carries it too; a pipeline file
+  the boilerplate adds, renames or removes goes into the lists at the top of `sync-pipeline.mjs`
+  and into `check-sync-pipeline.sh`. CI's weekly run tries
   the boilerplate's `main` (`BOILERPLATE_REF=main`) to show drift before the pin moves.
 - **Companion skills are pinned to an audited commit** in `install-companions.sh`. Upgrading one
   means reading the diff and updating the SHA there, in `web-dev/README.md` and in

@@ -54,12 +54,13 @@ Offer `git init` and a first commit; commit only on a yes. After `git init`, run
 Skip under `develop`'s Workflow A (it builds on and reports at the end). Otherwise tell the user:
 
 - `pnpm dev`, or `pnpm dev:mock` to serve the API from `apps/web/src/mocks` (MSW), from the root;
-- a landing page: edit `apps/web/src/app/home-page.tsx` (copy, product name, contact address) and the site URL in `apps/web/public/sitemap.xml`, `robots.txt` and the `og:` tags in `apps/web/index.html`; CI runs Lighthouse on each Netlify draft (`pnpm lighthouse <url>` locally), and `/web-quality:audit` covers axe, Lighthouse and PageSpeed before launch;
+- a landing page: edit `apps/web/src/app/home-page.tsx` (copy, product name, contact address) and the site URL in `apps/web/public/sitemap.xml`, `robots.txt` and the `og:` tags in `apps/web/index.html`; CI runs Lighthouse on each Cloudflare Pages preview (`pnpm lighthouse <url>` locally), and `/web-quality:audit` covers axe, Lighthouse and PageSpeed before launch;
 - a web app: sign in as `demo@example.com` / `password` on the mocks; the home page sits inside `protectedRoutes()`, and a new page that needs a signed-in user goes there too (`apps/web/src/app/routes.tsx`);
 - copy `apps/web/.env.example` to `apps/web/.env.local` and set `VITE_API_URL` (every `VITE_*` value is public);
 - conventions live in the root `CLAUDE.md` (the monorepo, its packages, adding an app or a package) and `apps/web/CLAUDE.md` (the app; where its paths differ from the skills' examples, it wins);
 - the web-dev skills run from `apps/web` (`cd apps/web`): at the root, `develop` reports a monorepo root and stops;
-- next: `feature-development` (a ticket), `api-integration` (an endpoint), `ui-development` (a design), or `/web-dev:develop` for any of them.
+- CI/CD comes with the project (`.github/workflows/ci.yml`: the gates, a Cloudflare Pages preview per pull request, Lighthouse, production, then e2e on it), and deploys nothing until it is connected: `deploy-setup` creates the Pages projects and sets the GitHub secret and variables;
+- next: `feature-development` (a ticket), `api-integration` (an endpoint), `ui-development` (a design), `deploy-setup` (the deploy), or `/web-dev:develop` for any of them.
 
 Setup traps: `../../references/stack-guidelines.md`. Read the project's files over recalling config: TypeScript 6 uses `paths` without `baseUrl`; pnpm 11 reads its settings (catalog, overrides) from `pnpm-workspace.yaml`; the only linter is Oxlint (`oxlint.config.ts`). When a `CLAUDE.md` and the files disagree, the files win; tell the user.
 
