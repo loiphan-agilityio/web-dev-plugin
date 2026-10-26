@@ -16,8 +16,9 @@ the backend's; name them under **Not checked** when they matter.
 ## 1. Measure
 
 1. **Headers on the real host:** `node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs <url>` on
-   production and on a preview deploy (they can differ). Without a deployed URL, read the host config
-   (`netlify.toml`, `_headers`, `vercel.json`) and mark findings **config**.
+   production and on a preview deploy (they can differ: `references/headers-csp.md`). Without a
+   deployed URL, read the host config (the boilerplate's `apps/web/public/_headers` for Cloudflare
+   Pages, `netlify.toml`, `vercel.json`) and mark findings **config**.
 2. **Dependencies:** `pnpm audit --prod` for what ships, then `pnpm audit` for the toolchain.
    For each advisory: is the vulnerable code reachable (a dev-only CLI is not shipped), is a patched
    version within the declared range, does an override fix it.

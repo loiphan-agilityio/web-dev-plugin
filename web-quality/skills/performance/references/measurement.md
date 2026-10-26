@@ -2,7 +2,7 @@
 
 Both snippets run in the page through a browser tool that evaluates JavaScript (the Claude desktop
 browser's `javascript_tool`, Claude in Chrome, or Chrome DevTools MCP's `evaluate_script`). They use
-only web platform APIs and were run against the boilerplate's Netlify deploy.
+only web platform APIs and were run against the boilerplate's Cloudflare Pages deploy.
 
 ## Rules for a fair number
 
@@ -45,8 +45,8 @@ await new Promise((resolve) => {
 });
 ```
 
-On the boilerplate's home page (desktop, lab): `{ lcp: { ms: 1480, element: 'h1' }, fcpMs: 1480,
-ttfbMs: 283, cls: 0 }`. `lcp.element` and `lcp.url` say what to optimize: an `img` URL is an image to
+On the boilerplate's home page (desktop Chrome, lab, median of three): `{ lcp: { ms: 276,
+element: 'h1' }, fcpMs: 276, ttfbMs: 99, cls: 0 }`. `lcp.element` and `lcp.url` say what to optimize: an `img` URL is an image to
 size and prioritize, a text element waits on fonts or JavaScript. LCP equal to FCP and far after
 TTFB is the signature of client rendering: nothing paints until the bundle has run.
 

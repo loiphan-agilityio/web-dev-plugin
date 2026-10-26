@@ -19,7 +19,7 @@ and the render delay after it.
     (a build-time prerender or a framework with server rendering); that is an architecture change,
     so propose it rather than doing it inside an audit.
 - **TTFB over 0.8 s:** a cold serverless function, no CDN, redirects before the page. Static hosting
-  (Netlify, a CDN) of `dist/` is fast; check redirects with `check-headers.mjs` (`finalUrl`).
+  (Cloudflare Pages, a CDN) of `dist/` is fast; check redirects with `check-headers.mjs` (`finalUrl`).
 - **LCP image:** give it `width`/`height`, `fetchpriority="high"`, no `loading="lazy"`; serve a size
   close to the displayed size (`srcset`/`sizes`) in AVIF or WebP. A hero image that CSS loads cannot
   be discovered early: use an `<img>`.
@@ -55,8 +55,9 @@ and the render delay after it.
 
 - Hashed files under `assets/` are safe to cache a year as `immutable`; `index.html` must
   revalidate (`max-age=0, must-revalidate`) so a deploy is seen at once. `check-headers.mjs` checks
-  both. The boilerplate's `apps/web/netlify.toml` sets the `assets/*` rule; `index.html` relies on
-  Netlify's default revalidation, so another host needs that rule added.
+  both. The boilerplate's `apps/web/public/_headers` sets the `/assets/*` rule; `index.html` relies
+  on Cloudflare Pages' default (observed: `public, max-age=0, must-revalidate`), so another host
+  needs that rule added.
 - A missing hashed file must be a 404, not `index.html` with 200: `check-headers.mjs`
   (`missing-asset`).
 - Compression (gzip or Brotli) is the host's job; static hosts and CDNs do it. Check

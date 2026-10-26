@@ -146,8 +146,8 @@ corepack picks that version.
   (a Playwright spec, a config line) runs in a project created from the boilerplate with its gates
   green. A block that shows a pattern not run that way is marked ` ```ts sketch ` and says so.
 - **Facts about a host or a browser are observed, not assumed:** run `check-headers.mjs` or `curl`
-  on the deployed URL and write what it returned (the skills say, for example, that Netlify's draft
-  deploys of the boilerplate answer `X-Robots-Tag: noindex` and the live site none).
+  on the deployed URL and write what it returned (the skills say, for example, that the
+  boilerplate's Cloudflare Pages previews answer `X-Robots-Tag: noindex` and the live site none).
 - **Scripts stay read-only and print JSON** (`{ checks: [{ id, status, detail }] }`), exit 2 with
   the cause on stderr when they cannot run, use only Node's standard library, and get a test in
   `scripts/test/` for every check, including its failing case. A new check gets its line in the
