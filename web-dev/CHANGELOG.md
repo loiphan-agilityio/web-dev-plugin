@@ -3,6 +3,14 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## Unreleased
+
+- Dropped the `allowed-tools` rules the skills never use: `pnpm typecheck` (`api-integration`,
+  `feature-development`, `ui-development`), `node --version` and `pnpm install` (`develop`),
+  `mkdir -p *` (`ticket`, `incident`: they write with the Write tool), and four formatter forms
+  `feature-development` does not name (`pnpm format`, `npm run lint:fix`, `yarn lint:fix`,
+  `bun run format`).
+
 ## 0.6.1
 
 - `pr` writes the PR description to `pr-body.md` in a temporary folder outside the repository

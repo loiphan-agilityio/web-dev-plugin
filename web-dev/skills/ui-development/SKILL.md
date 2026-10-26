@@ -2,7 +2,7 @@
 name: ui-development
 description: This skill should be used when the user asks to "implement this design", "make it look like this screenshot", "build this screen from this Figma link", "style it with our DESIGN.md" or "match the mockup" in an app built from the web-dev template (shadcn/ui, Tailwind 4). It turns a design into theme tokens, shadcn components, every data state, tests and a browser check. Not for a ticket without a design (feature-development), one endpoint (api-integration) or a new project (project-setup).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm; the visual check needs a browser tool."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *)
 ---
 
 # ui-development

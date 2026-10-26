@@ -2,7 +2,7 @@
 name: ticket
 description: This skill should be used when the user types "/web-dev:ticket <id>", asks to "write the contract for ticket 412", "write intent, spec and plan for this issue", "turn these issues into specs", or gives several tickets to write up at once. It writes docs/tickets/<id>/intent.md, spec.md and plan.md from the issue (gh or glab) or the pasted text, grounded in the project's code, checks them with check-contract.mjs and commits them on a branch for review; several tickets are written in parallel, one subagent each. Not for building the feature (feature-development reads the contract), an incident write-up (incident), or a whole new app (develop).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's scripts/. Needs Node 22.22 or newer and git; gh or glab to read an issue by its number."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *) Bash(mkdir -p *)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *)
 ---
 
 # ticket
