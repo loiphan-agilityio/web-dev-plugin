@@ -21,38 +21,21 @@ Thresholds (Core Web Vitals, bundle budgets, Lighthouse targets, WCAG AA) are in
 
 ## What it measures with
 
-- **A browser tool that runs JavaScript in the page:** the Claude desktop app's browser, Claude in
-  Chrome, or Chrome DevTools MCP. It reads Core Web Vitals with `PerformanceObserver`
-  (`skills/performance/references/measurement.md`), the rendered `<head>` and the accessibility
-  tree. Keep the tab visible while a page loads, or no paint is recorded.
-- **`scripts/check-headers.mjs <url>`:** what the host really sends: HTTPS and HSTS, CSP (header or
-  meta), nosniff, clickjacking, Referrer-Policy, caching of the HTML and hashed assets, the 404 of a
-  gone asset, mixed content, `X-Robots-Tag`.
-- **`scripts/bundle-budget.mjs <dist>`:** gzip kB of the initial load (entry, preloads, styles)
-  against budgets, and the largest lazy chunks; `--fail` for CI.
-- **`scripts/pagespeed.mjs <url>`:** PageSpeed Insights on a public URL: real users' LCP, INP and
-  CLS from the Chrome UX Report (when the site has enough visits) and Lighthouse scores, mobile by
-  default. Set `PAGESPEED_API_KEY`, or the shared quota often answers 429. It cannot reach
-  localhost or a deploy behind a password.
-- **The project's own tools:** `pnpm audit`, Playwright with `@axe-core/playwright`, and in a
-  project from the boilerplate its lint (jsx-a11y), the Storybook a11y addon and `pnpm check`.
+| Tool | Measures |
+|---|---|
+| A browser tool that runs JavaScript (Claude desktop's browser, Claude in Chrome, Chrome DevTools MCP) | Core Web Vitals with `PerformanceObserver` (`skills/performance/references/measurement.md`), the rendered `<head>`, the accessibility tree. Keep the tab visible while a page loads, or no paint is recorded |
+| `scripts/check-headers.mjs <url>` | What the host sends: HTTPS and HSTS, CSP (header or meta), nosniff, clickjacking, Referrer-Policy, caching of the HTML and hashed assets, the 404 of a gone asset, mixed content, `X-Robots-Tag` |
+| `scripts/bundle-budget.mjs <dist>` | Gzip kB of the initial load (entry, preloads, styles) against budgets, and the largest lazy chunks; `--fail` for CI |
+| `scripts/pagespeed.mjs <url>` | PageSpeed Insights on a public URL: real users' LCP, INP, CLS (Chrome UX Report, when the site has enough visits) and Lighthouse scores, mobile by default. Set `PAGESPEED_API_KEY`, or the shared quota often answers 429; no localhost or password-protected deploys |
+| The project's own tools | `pnpm audit`, Playwright with `@axe-core/playwright`; in a project from the boilerplate, its lint (jsx-a11y), the Storybook a11y addon and `pnpm check` |
 
-The three scripts are read-only and print JSON. Lighthouse is optional: its scores join the report
-when it runs (Chrome DevTools MCP, or the Lighthouse CLI run by you), and never replace the
-measurements.
+The scripts are read-only and print JSON. Lighthouse is optional: its scores join the report when
+it runs (Chrome DevTools MCP, or the Lighthouse CLI run by you) and never replace the measurements.
 
 ## Install
 
-Requirements: Node 22 or newer, Claude Code. The repository root is a marketplace that lists this
-plugin next to `web-dev`:
-
-```bash
-claude plugin marketplace add git@github.com:loiphan-agilityio/web-dev-plugin.git
-```
-
-```bash
-claude plugin install web-quality@web-dev-plugin
-```
+Add the marketplace as the [repository README](../README.md#install) shows (this plugin needs
+Node 22 or newer), then `claude plugin install web-quality@web-dev-plugin`.
 
 Pin a release with `#web-quality--v<version>` on the marketplace URL. A git install is a cached
 copy: a release arrives when `version` in `.claude-plugin/plugin.json` changes and you run
