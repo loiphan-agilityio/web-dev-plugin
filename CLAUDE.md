@@ -57,6 +57,8 @@ web-quality/                      the second plugin (its README.md is the user g
   evals/                          routing cases, run.sh, fixtures
 examples/                         demo output, local only (ignored by git)
 docs/evidence/                    reports, logs and screenshots from a demo run, local only (ignored)
+docs/workflow-map/                the README's workflow map: every view as animated SVG, light and
+                                  dark, exported from the interactive map
 ```
 
 ## Commands
