@@ -3,6 +3,15 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.9.2
+
+- `project-setup` looks for `.git/` in the target and its parents before offering git: it offers
+  `git init` and a first commit only when there is no repository, offers just the commit when the
+  target already has `.git/` (kept by `create-project.sh`), and never nests a repository inside a
+  parent one (it says which repository holds the project and skips `pnpm run prepare`, since
+  husky installs hooks only at a repository's root). A declined offer goes under **Not done**,
+  the hand-over lists the commands to run later, and **Did** reports the git state.
+
 ## 0.9.1
 
 - The boilerplate pin moves to `ace5470`: its CI adds `X-Robots-Tag: noindex` to the `/*` block
