@@ -5,13 +5,17 @@ A git install is a cached copy, so a change reaches users only with a new versio
 
 ## Unreleased
 
-- `project-setup` has a git step of its own (7) that asks before changing anything: whether to
-  init and commit, the identity the commits carry (the `user.name` / `user.email` found, or
-  another pair set local to the repository, never `--global`), the URL of an empty GitHub or GitLab
-  repository (kept as given, SSH host aliases included), and whether to push. It runs
-  `git init -b main`, the identity, `pnpm run prepare`, the first commit, `git remote add origin`
-  and the first push with `PROTECTED_BRANCHES=none`, since the project's `pre-push` hook refuses
-  `main` and that push is what creates it; never `--no-verify` or `--force`.
+- `project-setup` puts the target on git before it creates the project (step 3), asking first:
+  the identity the commits carry (the `user.name` / `user.email` found, or another pair set local
+  to the repository, never `--global`), the GitHub or GitLab repository URL (kept as given, SSH
+  host aliases included), and whether to push. It runs `git init -b main`, the identity and
+  `git remote add origin`, then checks the repository for `main` (`git ls-remote`): an existing
+  `main` is pulled, and the user confirms that the project replaces its files; an empty repository
+  gets a `README.md` with `Hello World` pushed as `main`. `create-project.sh --replace` replaces
+  the files git tracks (outside `.claude/`), refusing a dirty working tree and untracked files in
+  the way. After the gates (step 8) it turns the hooks on, commits the scaffold and pushes `main`
+  with `PROTECTED_BRANCHES=none`, since the project's `pre-push` hook refuses `main`; never
+  `--no-verify` or `--force`.
 - `deploy-setup` no longer stops at step 5 when `gh` is signed out or `origin` is missing: each
   side (GitHub, Cloudflare) uses its CLI when installed and signed in, else Claude in Chrome in the
   user's browser; a project without `origin` gets its GitHub repository first. It creates all four
