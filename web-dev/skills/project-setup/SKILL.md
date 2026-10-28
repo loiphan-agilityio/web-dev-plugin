@@ -47,20 +47,34 @@ Never build the project by hand, from memory or from another template instead: r
 
 `pnpm test:e2e:install` in the target root (Chromium for Playwright, once per machine; it needs network, and a failure goes under **Not done**), then `pnpm check:report` (the gates of `pnpm check`: lint with Prettier and anti-slop, typecheck, unit tests with coverage, build, Storybook build and the Playwright e2e tests, run one after another; it ends with a checklist table of each gate's status, the unit and e2e pass rates and line coverage: put that table in the result), each as a plain command with no pipe or redirect: the skill's `allowed-tools` cover exactly those. Report the real output, failures included.
 
-Then git, by where the target sits (look for `.git/` in the target and each parent folder):
+## 7. Git
 
-- **No repository** (no `.git/` in the target or above it): offer `git init` and a first commit; run them only on a yes.
-- **The target has `.git/`** (`create-project.sh` kept it): do not run `git init`; offer the first commit only.
-- **A parent folder has `.git/`**: never run `git init` (it would nest a repository); say which repository the project is in, leave committing to the user, and skip `pnpm run prepare` (husky installs hooks only at a repository's root).
+Change nothing in git before the user answers. First look for `.git/` in the target and each parent folder:
 
-Once the target is a repository's root, run `pnpm run prepare` so husky turns the hooks on (`pnpm install` finds nothing to do in the installed project and skips it); check that `.husky/_/pre-push` exists before saying the hooks are on. Write the message as a Conventional Commit (`chore: scaffold <folder-name>`), since commitlint rejects anything else. A no goes under **Not done**.
+- **A parent folder has `.git/`:** never run `git init` (it would nest a repository) and ask nothing: say which repository the project is in, leave git to the user, and skip `pnpm run prepare` (husky installs hooks only at a repository's root).
+- **No repository, or the target has `.git/`** (`create-project.sh` kept it): read what git already has, `git config user.name` and `git config user.email` (the global values while the target has no repository) and, when the target has `.git/`, `git remote get-url origin`. Then ask in one message (the `AskUserQuestion` tool when available, as for the kind; else as text):
+  1. **Git:** `git init` and a first commit (only the commit when the target has `.git/`), or no git for now, which ends this step.
+  2. **Identity:** the name and email the commits carry. Offer the pair found ("Commit as <name> <email>") and a different one; with none found, ask for both, since a commit fails without them.
+  3. **Repository:** the URL of an empty repository the user created on GitHub or GitLab (no README, license or `.gitignore`, or the push is rejected), or none for now. Skip it when `origin` exists. Use the URL exactly as given: an SSH host alias (`git@github-work:org/app.git`) picks the user's key.
+  4. **Push:** push the first commit now or later; only with a URL from question 3.
 
-## 7. Hand over
+Then run, in this order, only what the answers allow:
+
+1. `git init -b main` (CI deploys from `main`, the Pages projects' production branch).
+2. `git config user.name "<name>"` and `git config user.email "<email>"` when the user gave a different pair: local to this repository, never `--global` (it would change every repository on the machine).
+3. `pnpm run prepare` so husky turns the hooks on (`pnpm install` finds nothing to do in the installed project and skips it); check that `.husky/_/pre-push` exists before saying the hooks are on.
+4. `git add -A` and `git commit -m "chore: scaffold <folder-name>"`: a Conventional Commit, since commitlint rejects anything else.
+5. `git remote add origin <url>`.
+6. `PROTECTED_BRANCHES=none git push -u origin <branch>` (`git branch --show-current`): the project's `pre-push` hook refuses a push to `main`, and this first push is what creates it in the empty repository; every later change goes through a branch and `/web-dev:pr`. Never `--no-verify` or `--force`: a rejected push goes under **Not done** with its output.
+
+A no, a skipped question or a failed command goes under **Not done**.
+
+## 8. Hand over
 
 Skip under `develop`'s Workflow A (it builds on and reports at the end). Otherwise tell the user:
 
 - `pnpm dev`, or `pnpm dev:mock` to serve the API from `apps/web/src/mocks` (MSW), from the root;
-- without git yet (declined in step 6): `git init`, `pnpm run prepare` (the hooks), then `git add -A` and `git commit -m "chore: scaffold <folder-name>"` from the root; `pr` and `deploy-setup` need it;
+- what step 7 left undone, from the root: `git init -b main`, `git config user.name` / `user.email` (no `--global`), `pnpm run prepare` (the hooks), `git add -A` and `git commit -m "chore: scaffold <folder-name>"`, `git remote add origin <url>`, then `PROTECTED_BRANCHES=none git push -u origin main`; `pr` needs the remote, and `deploy-setup` a GitHub one;
 - a landing page: edit `apps/web/src/app/home-page.tsx` (copy, product name, contact address) and the site URL in `apps/web/public/sitemap.xml`, `robots.txt` and the `og:` tags in `apps/web/index.html`; CI runs Lighthouse on each Cloudflare Pages preview (`pnpm lighthouse <url>` locally), and `/web-quality:audit` covers axe, Lighthouse and PageSpeed before launch;
 - a web app: sign in as `demo@example.com` / `password` on the mocks; the home page sits inside `protectedRoutes()`, and a new page that needs a signed-in user goes there too (`apps/web/src/app/routes.tsx`);
 - copy `apps/web/.env.example` to `apps/web/.env.local` and set `VITE_API_URL` (every `VITE_*` value is public);
@@ -77,7 +91,7 @@ Skip it under `develop`'s Workflow A; otherwise end with:
 
 ```
 ## Result
-**Did:** the project created (folder, landing page or web app with authentication), install, companions, the `pnpm check:report` checklist, and git (initialized, committed, hooks on, or why not)
+**Did:** the project created (folder, landing page or web app with authentication), install, companions, the `pnpm check:report` checklist, and git (initialized, identity, committed, hooks on, remote, pushed, or why not)
 **Saw:** facts observed, including the real gate output
 **Not done:** anything skipped or failed, such as a companion install
 **Blocked by:** questions that stopped part of the work (the kind), or "nothing"
