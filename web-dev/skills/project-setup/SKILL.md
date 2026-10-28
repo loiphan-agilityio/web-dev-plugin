@@ -47,13 +47,20 @@ Never build the project by hand, from memory or from another template instead: r
 
 `pnpm test:e2e:install` in the target root (Chromium for Playwright, once per machine; it needs network, and a failure goes under **Not done**), then `pnpm check:report` (the gates of `pnpm check`: lint with Prettier and anti-slop, typecheck, unit tests with coverage, build, Storybook build and the Playwright e2e tests, run one after another; it ends with a checklist table of each gate's status, the unit and e2e pass rates and line coverage: put that table in the result), each as a plain command with no pipe or redirect: the skill's `allowed-tools` cover exactly those. Report the real output, failures included.
 
-Offer `git init` and a first commit; commit only on a yes. After `git init`, run `pnpm run prepare` so husky turns the hooks on (`pnpm install` finds nothing to do in the installed project and skips it); check that `.husky/_/pre-push` exists before saying the hooks are on. Write the message as a Conventional Commit (`chore: scaffold <folder-name>`), since commitlint rejects anything else.
+Then git, by where the target sits (look for `.git/` in the target and each parent folder):
+
+- **No repository** (no `.git/` in the target or above it): offer `git init` and a first commit; run them only on a yes.
+- **The target has `.git/`** (`create-project.sh` kept it): do not run `git init`; offer the first commit only.
+- **A parent folder has `.git/`**: never run `git init` (it would nest a repository); say which repository the project is in, leave committing to the user, and skip `pnpm run prepare` (husky installs hooks only at a repository's root).
+
+Once the target is a repository's root, run `pnpm run prepare` so husky turns the hooks on (`pnpm install` finds nothing to do in the installed project and skips it); check that `.husky/_/pre-push` exists before saying the hooks are on. Write the message as a Conventional Commit (`chore: scaffold <folder-name>`), since commitlint rejects anything else. A no goes under **Not done**.
 
 ## 7. Hand over
 
 Skip under `develop`'s Workflow A (it builds on and reports at the end). Otherwise tell the user:
 
 - `pnpm dev`, or `pnpm dev:mock` to serve the API from `apps/web/src/mocks` (MSW), from the root;
+- without git yet (declined in step 6): `git init`, `pnpm run prepare` (the hooks), then `git add -A` and `git commit -m "chore: scaffold <folder-name>"` from the root; `pr` and `deploy-setup` need it;
 - a landing page: edit `apps/web/src/app/home-page.tsx` (copy, product name, contact address) and the site URL in `apps/web/public/sitemap.xml`, `robots.txt` and the `og:` tags in `apps/web/index.html`; CI runs Lighthouse on each Cloudflare Pages preview (`pnpm lighthouse <url>` locally), and `/web-quality:audit` covers axe, Lighthouse and PageSpeed before launch;
 - a web app: sign in as `demo@example.com` / `password` on the mocks; the home page sits inside `protectedRoutes()`, and a new page that needs a signed-in user goes there too (`apps/web/src/app/routes.tsx`);
 - copy `apps/web/.env.example` to `apps/web/.env.local` and set `VITE_API_URL` (every `VITE_*` value is public);
@@ -70,7 +77,7 @@ Skip it under `develop`'s Workflow A; otherwise end with:
 
 ```
 ## Result
-**Did:** the project created (folder, landing page or web app with authentication), install, companions, and the `pnpm check:report` checklist
+**Did:** the project created (folder, landing page or web app with authentication), install, companions, the `pnpm check:report` checklist, and git (initialized, committed, hooks on, or why not)
 **Saw:** facts observed, including the real gate output
 **Not done:** anything skipped or failed, such as a companion install
 **Blocked by:** questions that stopped part of the work (the kind), or "nothing"
