@@ -36,14 +36,14 @@ check, pr opens the pull request, and the boilerplate's CI/CD deploys it.
 <details open>
 <summary><b>/web-dev:develop</b></summary>
 
-The tier and the kind of request pick the route: A builds a whole app, an empty folder gets
+The tier (folder type) and the request type pick the route: A builds a whole app, an empty folder gets
 project-setup, C and the landing route run one skill, B maps the project first, contract requests go
 to their own skill, and the rest stops or is not covered yet. Double-click a route to see the skills
 it runs.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="develop-dark.svg">
-  <img alt="/web-dev:develop: The tier and the kind of request pick the route: A builds a whole app, an empty folder gets project-setup, C and the landing route run one skill, B maps the project first, contract requests go to their own skill, and the rest stops or is not covered yet. Double-click a route to see the skills it runs." src="develop-light.svg">
+  <img alt="/web-dev:develop: The tier (folder type) and the request type pick the route: A builds a whole app, an empty folder gets project-setup, C and the landing route run one skill, B maps the project first, contract requests go to their own skill, and the rest stops or is not covered yet. Double-click a route to see the skills it runs." src="develop-light.svg">
 </picture>
 
 | Card | What | When | How |
@@ -52,9 +52,9 @@ it runs.
 | [**Contracts**](../../web-dev/skills/develop/SKILL.md)<br>route · ticket · incident · pr | A ticket contract, an incident record or a pull request. | Any tier but unsupported. | develop invokes ticket, incident or pr; that skill's Result, with the Route line on top, is the report. |
 | [**Setup or landing**](../../web-dev/skills/develop/SKILL.md)<br>route · an empty folder | A new project with no features, or a landing page, in an empty folder. | Tier new with nothing in the folder, and a setup or landing request. | setup: `project-setup`, which asks landing page or web app and never picks for you. landing: `project-setup` with `--landing` (no question), then `ui-development` fits the page's copy and sections to the description and design; one Result. |
 | [**Workflow A**](../../web-dev/skills/develop/references/new-app.md)<br>route · a whole app, never asks | A new app from one description. | Tier new (or template, for a whole app). | Writes `docs/plan.md` (data model, API, 2–5 tickets, mock data, assumptions), runs project-setup as a web app (A2, skipped in a template folder), builds each ticket with feature-development in its own subagent (A3), applies a design once with ui-development (A4), runs the gates and opens the app on mocks. |
-| [**Workflow C**](../../web-dev/skills/develop/SKILL.md)<br>route · one skill | One feature, endpoint or screen in a template app. | Tier template. | Invokes the one skill the request needs and follows it through its gates and Result, with a Route line on top. |
+| [**Workflow C**](../../web-dev/skills/develop/SKILL.md)<br>route · one skill | One feature, endpoint or screen in an app made from the boilerplate. | Tier template. | Invokes the one skill the request needs and follows it through its gates and Result, with a Route line on top. |
 | [**Landing page**](../../web-dev/skills/develop/SKILL.md)<br>route · UI and deploy only | A landing page from the boilerplate: its UI kit, no API layer or Effect. | Tier landing. | A landing or ui request goes to `ui-development`, a ci request to `deploy-setup`; anything that needs data goes to Workflow B, which asks before adding a library. |
-| [**Workflow B**](../../web-dev/skills/develop/references/existing-project.md)<br>route · existing React project | A change in a project not made from the template. | Tier same-stack or other-stack; a landing project for anything that needs data. | One change (B1): the codebase-explorer agent maps the roles, then the skill for the kind (feature-development, api-integration or ui-development) builds it on the project's own client, query layer and tests, adds no library unasked, then `verify-project.sh`. A whole app (B2): a plan as in Workflow A, then each ticket through B1. A setup request in a folder with files (B3): a template or landing project gets only the missing piece, another stack gets nothing and the offer of a new project in a subfolder, and a folder of other files gets project-setup in a new subfolder. |
+| [**Workflow B**](../../web-dev/skills/develop/references/existing-project.md)<br>route · existing React project | A change in a project not made from the boilerplate. | Tier same-stack or other-stack; a landing project for anything that needs data. | One change (B1): the codebase-explorer agent maps the roles, then the skill for the request type (feature-development, api-integration or ui-development) builds it on the project's own client, query layer and tests, adds no library unasked, then `verify-project.sh`. A whole app (B2): a plan as in Workflow A, then each ticket through B1. A setup request in a folder with files (B3): a template or landing project gets only the missing piece, another stack gets nothing and the offer of a new project in a subfolder, and a folder of other files gets project-setup in a new subfolder. |
 | [**Stops**](../../web-dev/skills/develop/SKILL.md)<br>route · unsupported: says why | Not React, React behind an SSR framework (Next.js, Remix, Gatsby, Astro), or a monorepo root: nothing changes. | Tier unsupported. | Reports detect's `reasons`. A ci request at a monorepo root with `apps/web` is detected again in `apps/web` and routed by that tier, since the pipeline lives at the root. |
 | [**Not yet**](../../web-dev/skills/develop/SKILL.md)<br>route · says so, changes nothing | A bug fix, a review with no edits, a commit or push on its own, or CI/CD in a project not made from the boilerplate. | Any tier. | The Result says this version does not cover it, and nothing changes. The contract commit of `ticket` and `incident` and the push `pr` makes are covered. |
 
@@ -85,12 +85,12 @@ Also here, described above: **Workflow A** (/web-dev:develop), **project-setup**
 <details>
 <summary><b>/web-dev:develop › Setup or landing in an empty folder</b></summary>
 
-A setup request gets project-setup, which asks the kind; a landing request gets the landing variant,
+A setup request gets project-setup, which asks: app or landing page; a landing request gets the landing variant,
 then ui-development fits its copy and sections.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="wf-empty-dark.svg">
-  <img alt="Setup or landing in an empty folder: A setup request gets project-setup, which asks the kind; a landing request gets the landing variant, then ui-development fits its copy and sections." src="wf-empty-light.svg">
+  <img alt="Setup or landing in an empty folder: A setup request gets project-setup, which asks: app or landing page; a landing request gets the landing variant, then ui-development fits its copy and sections." src="wf-empty-light.svg">
 </picture>
 
 Also here, described above: **Setup or landing** (/web-dev:develop), **project-setup** (web-dev),
@@ -133,12 +133,12 @@ Also here, described above: **Landing page** (/web-dev:develop), **ui-developmen
 <details>
 <summary><b>/web-dev:develop › Workflow B</b></summary>
 
-The project's own architecture wins: map it, build with the skill for the kind on its code, then run
+The project's own architecture wins: map it, build with the skill for the request type on its code, then run
 its own gates.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="wf-b-dark.svg">
-  <img alt="Workflow B: The project&#x27;s own architecture wins: map it, build with the skill for the kind on its code, then run its own gates." src="wf-b-light.svg">
+  <img alt="Workflow B: The project&#x27;s own architecture wins: map it, build with the skill for the request type on its code, then run its own gates." src="wf-b-light.svg">
 </picture>
 
 | Card | What | When | How |
@@ -183,7 +183,7 @@ turn on after git init.
 | [**create-project.sh**](../../web-dev/skills/project-setup/scripts/create-project.sh)<br>script · boilerplate at ace5470 | Fetches the react-vite-boilerplate at the commit this plugin version pins and runs the boilerplate's own generator. | project-setup step 3. | `--auth` (a web app) or `--landing`; `--no-auth` is refused. Copies the result into the target, keeping `.git/` and `.claude/`; copies nothing when a project file already exists or the fetch fails. |
 | [**pnpm install**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/apps/web/package.json)<br>script · workspace + msw init | Installs every workspace package from the lockfile. | project-setup step 4. | In a web app, the app's postinstall runs `msw init`, which writes `apps/web/public/mockServiceWorker.js`; a landing page has no MSW. Then `pnpm test:e2e:install` downloads Chromium once per machine. |
 | [**install-companions.sh**](../../web-dev/skills/project-setup/scripts/install-companions.sh)<br>script · 8 pinned skills | Installs 8 audited third-party skills, pinned by commit. | project-setup step 5. | Uses the pinned skills CLI; fails on a missing companion, a missing skills-lock.json or an unpinned shadcn@latest. |
-| [**git hooks**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/.husky/pre-push)<br>hook · pnpm run prepare | Husky hooks from the boilerplate: pre-commit (lint-staged, typecheck), commit-msg (commitlint) and pre-push, which refuses main, master, dev, stag, prod and their long names. | After `git init`, when you say yes to it. | `pnpm run prepare` turns them on; project-setup checks that `.husky/_/pre-push` exists before saying the hooks are on. |
+| [**git hooks**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/.husky/pre-push)<br>hook · pnpm run prepare | Husky hooks from the boilerplate: pre-commit (lint-staged, typecheck), commit-msg (commitlint) and pre-push, which refuses main, master, dev, develop, stag, staging, prod and production. | After `git init`, when you say yes to it. | `pnpm run prepare` turns them on; project-setup checks that `.husky/_/pre-push` exists before saying the hooks are on. |
 
 Also here, described above: **project-setup** (web-dev), **pnpm check** (web-dev).
 
@@ -205,7 +205,7 @@ gets wrong for this stack.
 | [**shadcn**](../../web-dev/references/companions.md)<br>companion skill | Adds shadcn components with the CLI. | A missing UI primitive. | Rewritten to `pnpm exec shadcn` so nothing runs @latest. |
 | [**react-router-data-mode**](../../web-dev/references/companions.md)<br>companion skill | React Router data-mode patterns. | Routes and navigation. | Ignore loader-first fetching; data goes through TanStack Query. |
 | [**vite + vitest**](../../web-dev/references/companions.md)<br>companion skill | Vite config and Vitest usage. | Build or test config. | No Jest APIs; MSW for every request. |
-| [**react best practices**](../../web-dev/references/companions.md)<br>companion skill | React performance and composition patterns. | Component design. | Ignore its Next.js / RSC advice. |
+| [**react best practices**](../../web-dev/references/companions.md)<br>companion skill | React performance and composition patterns. | Component design. | Ignore its Next.js / React Server Components advice. |
 | [**react-hook-form**](../../web-dev/references/companions.md)<br>companion skill | React Hook Form patterns. | Forms. | Use effectTsResolver, never zodResolver. |
 | [**react-testing**](../../web-dev/references/companions.md)<br>companion skill | React Testing Library patterns. | Unit tests. | Query by role and label; Vitest, not Jest. |
 
@@ -227,7 +227,7 @@ One ticket becomes one feature folder; endpoints and designs go to the other two
 |---|---|---|---|
 | **Understand the ticket**<br>step · criteria, gaps sorted | Lists the acceptance criteria and sorts every gap; a `docs/tickets/<id>/` contract is the ticket when there is one. | feature-development, in order. | An open question (data, rule, contract) excludes its criterion and is asked; a presentation detail gets the simplest default, listed under Next. A contract's `AC-<n>` are the criteria, its `T<n>` the build order. |
 | **Data layer**<br>step · schemas, model, api, queries | Effect Schemas, business rules as pure functions, Effect.fn calls through ApiClient, a key factory and queryOptions. | feature-development, in order. | Copied from the verified todos feature; anything beyond one list and one create goes to api-integration. |
-| **Form + four states**<br>step · RHF + shadcn Field | The form with effectTsResolver and server 422 errors under their fields; loading, error with retry, empty and success. | feature-development, in order. | With a design, ui-development leads the UI. |
+| **Form + four states**<br>step · React Hook Form + shadcn Field | The form with effectTsResolver and server 422 errors under their fields; loading, error with retry, empty and success. | feature-development, in order. | With a design, ui-development leads the UI. |
 | **Routes + wiring**<br>step · lazy route, mocks, nav | A lazy route factory registered in routes.tsx (inside protectedRoutes in an app with authentication), the mock handlers in handlers.ts and a nav link when the layout has one. | feature-development, in order. | Three files, the diff quoted in feature-layout.md. |
 | **Tests, stories, e2e**<br>step · unit + story per component | A unit test and a story per component, a page test, schema and model tests, and one Playwright spec e2e/&lt;name&gt;.spec.ts. | feature-development, in order. | Unit tests drive every state with MSW; the e2e spec walks the main flow from the header link on the mock build. |
 
@@ -339,7 +339,7 @@ A Pages preview with Lighthouse, then production on main, then the one e2e run o
 | Card | What | When | How |
 |---|---|---|---|
 | [**check job**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/.github/workflows/ci.yml)<br>step · gates 1–5 + mock build | Gates 1–5 in one job, and the app built on the mocked API, which every deploy publishes. | Every pull request and push to main. | `pnpm check:report --skip e2e` on Node 24; the coverage report goes to Cloudflare Pages, or an artifact. |
-| [**public/_headers**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/apps/web/public/_headers)<br>board · Pages headers, SPA | The hosting rules Cloudflare Pages applies. | Every Pages deploy. | In `apps/web/public/`: security headers on every response, a year of cache for hashed assets, no-cache for mockServiceWorker.js. With no top-level 404.html, deep links reach React Router; a missing asset gets `assets/404.html`. |
+| [**public/_headers**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/apps/web/public/_headers)<br>board · Pages headers, single-page app | The hosting rules Cloudflare Pages applies. | Every Pages deploy. | In `apps/web/public/`: security headers on every response, a year of cache for hashed assets, no-cache for mockServiceWorker.js. With no top-level 404.html, deep links reach React Router; a missing asset gets `assets/404.html`. |
 | [**deploy-draft**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/.github/workflows/ci.yml)<br>step · Cloudflare Pages preview | Uploads the mock build and Storybook to Cloudflare Pages as a preview. | After check passes, when CLOUDFLARE_PAGES_APP_PROJECT is set (not for fork or Dependabot pull requests). | `wrangler pages deploy`: `pr-<n>` on a pull request, `main-draft` on a push to main, with `X-Robots-Tag: noindex` added to the preview's `_headers`. |
 | [**lighthouse**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/tools/lighthouse.mjs)<br>step · on the preview URL | Lighthouse (mobile) on the Pages preview. | After the preview deploy. | `tools/lighthouse.mjs`: accessibility under 100 or SEO under 95 fails the job; performance and best practices only warn. |
 | [**deploy-production**](https://github.com/loiphan-agilityio/react-vite-boilerplate/blob/main/.github/workflows/ci.yml)<br>step · main only, same files | Publishes the tested files to production. | Push to main, after lighthouse passes. | `wrangler pages deploy` with the files the preview used; nothing is rebuilt. Runs in the `production` environment, which can require approval. |
