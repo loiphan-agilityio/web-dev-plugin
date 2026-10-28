@@ -4,7 +4,7 @@
 # authentication overlay, or a landing page (its landing overlay: one public marketing page, no
 # sign-in, built without mocks). A web app always has authentication.
 #
-#   create-project.sh <target-dir> --auth | --landing
+#   create-project.sh <target-dir> --auth | --landing [--replace]
 #
 # There is no default: the generator asks only on a terminal, and Claude's shell is not one, so the
 # skill asks the user and passes the answer. Fetches the boilerplate at the commit pinned below,
@@ -13,6 +13,9 @@
 # conflicts and exits 1 without copying anything. Existing .git/ and .claude/ are left alone: the
 # project's .claude/settings.json (the commands the skills run, allowed without a prompt, and the
 # hook that formats each file Claude writes) is copied only when the target has none.
+# --replace (the skill passes it once the user agreed) replaces the files git tracks in the target,
+# outside .claude/: they are deleted, then the project is copied in. It needs a clean working tree,
+# so only committed files go, and untracked files still count as conflicts.
 #
 # BOILERPLATE_REPO fetches from another URL (a fork, a mirror, a local repository), its default
 # branch unless BOILERPLATE_REF names another commit, branch or tag (`main` tries the latest).
@@ -30,12 +33,29 @@ elif [[ -n "${BOILERPLATE_REPO:-}" ]]; then
 else
   ref="$pinned"
 fi
-usage="usage: create-project.sh <target-dir> --auth|--landing"
+usage="usage: create-project.sh <target-dir> --auth|--landing [--replace]"
 target="${1:?$usage}"
 kind="${2:-}"
+replace="${3:-}"
 if [[ "$kind" != --auth && "$kind" != --landing ]]; then
   echo "error: pass --auth or --landing (ask the user which); $usage" >&2
   exit 1
+fi
+if [[ -n "$replace" && "$replace" != --replace ]]; then
+  echo "error: unknown option $replace; $usage" >&2
+  exit 1
+fi
+tracked=""
+if [[ -n "$replace" ]]; then
+  if ! git -C "$target" rev-parse --verify --quiet HEAD >/dev/null 2>&1; then
+    echo "error: --replace needs a git repository with a commit in $target" >&2
+    exit 1
+  fi
+  if [[ -n "$(git -C "$target" status --porcelain --untracked-files=no)" ]]; then
+    echo "error: --replace needs a clean working tree in $target; commit or stash first" >&2
+    exit 1
+  fi
+  tracked="$(git -C "$target" ls-files -- . ':(exclude).claude')"
 fi
 
 tmp="$(mktemp -d)"
@@ -66,14 +86,16 @@ fi
 files="$(cd "$tmp/out" && find . -type f | sed 's#^\./##' | sort)"
 dirs="$(cd "$tmp/out" && find . -mindepth 1 -type d | sed 's#^\./##' | sort)"
 conflicts=""
+# is_replaced <path>: a tracked file that --replace deletes is no conflict.
+is_replaced() { [[ -n "$tracked" ]] && grep -qxF -- "$1" <<< "$tracked"; }
 while IFS= read -r f; do
-  if [[ -e "$target/$f" ]]; then
+  if [[ -e "$target/$f" ]] && ! is_replaced "$f"; then
     conflicts+="  $f"$'\n'
   fi
 done <<< "$files"
 # A file where the project has a directory (a file named `apps`) would make tar fail halfway.
 while IFS= read -r d; do
-  if [[ -e "$target/$d" && ! -d "$target/$d" ]]; then
+  if [[ -e "$target/$d" && ! -d "$target/$d" ]] && ! is_replaced "$d"; then
     conflicts+="  $d (a file where the project has a directory)"$'\n'
   fi
 done <<< "$dirs"
@@ -83,6 +105,10 @@ if [[ -n "$conflicts" ]]; then
   exit 1
 fi
 
+if [[ -n "$tracked" ]]; then
+  (cd "$target" && git ls-files -z -- . ':(exclude).claude' | xargs -0 rm -f)
+  kept+="; replaced the $(wc -l <<< "$tracked" | tr -d ' ') files git tracked"
+fi
 (cd "$tmp/out" && tar -cf - .) | (cd "$target" && tar -xf -)
 if [[ "$kind" == --auth ]]; then what="a web app with authentication"; else what="a landing page"; fi
 echo "created the project in $target ($(wc -l <<< "$files" | tr -d ' ') files, $what); the app is apps/web$kept"
