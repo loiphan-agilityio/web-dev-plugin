@@ -31,7 +31,7 @@ Gaps get the reading a typical user of that product would expect. Roles, payment
 
 ## A2. Scaffold
 
-Invoke `project-setup` (Skill tool) for the folder from A0, as a web app (`--auth`; it asks nothing then), and follow it through its gates; skip its hand-over. A companion install that fails offline goes under **Not done** and the build continues. A project that could not be created (no network, the boilerplate unreachable) stops the run: report it; never build the app from another template.
+Invoke `project-setup` (Skill tool) for the folder from A0, as a web app (`--auth`; it asks only its git questions then), and follow it through its gates; skip its hand-over. A companion install that fails offline goes under **Not done** and the build continues. A project that could not be created (no network, the boilerplate unreachable) stops the run: report it; never build the app from another template.
 
 ## A3. Build each feature
 

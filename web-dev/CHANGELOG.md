@@ -3,6 +3,22 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## Unreleased
+
+- `project-setup` has a git step of its own (7) that asks before changing anything: whether to
+  init and commit, the identity the commits carry (the `user.name` / `user.email` found, or
+  another pair set local to the repository, never `--global`), the URL of an empty GitHub or GitLab
+  repository (kept as given, SSH host aliases included), and whether to push. It runs
+  `git init -b main`, the identity, `pnpm run prepare`, the first commit, `git remote add origin`
+  and the first push with `PROTECTED_BRANCHES=none`, since the project's `pre-push` hook refuses
+  `main` and that push is what creates it; never `--no-verify` or `--force`.
+- `deploy-setup` no longer stops at step 5 when `gh` is signed out or `origin` is missing: each
+  side (GitHub, Cloudflare) uses its CLI when installed and signed in, else Claude in Chrome in the
+  user's browser; a project without `origin` gets its GitHub repository first. It creates all four
+  Pages projects (app, Storybook, coverage, Allure report) after one question, and a failing gate
+  no longer skips the deploy setup. The user still creates and pastes the API token; with Chrome,
+  Claude fills the forms up to that point and reads nothing while the token is on screen.
+
 ## 0.9.2
 
 - `project-setup` looks for `.git/` in the target and its parents before offering git: it offers

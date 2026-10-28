@@ -39,7 +39,7 @@ Each route's skills, scripts and checks: [workflow map](../docs/workflow-map/REA
 | `feature-development` | A ticket → a feature folder: schemas, API calls, queries, form, the four UI states, routes, a test and a story per component | "Implement this ticket: &lt;paste or issue URL&gt;" |
 | `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
 | `ui-development` | A design (screenshot, Figma frame, DESIGN.md) → matching UI with theme tokens and shadcn components, checked in a browser | "Make the settings page look like design/settings.png" |
-| `deploy-setup` | The boilerplate's CI/CD (`scripts/sync-pipeline.mjs`) and Cloudflare Pages, each command confirmed; you set the API token yourself | "Set up CI/CD and deploy this app to Cloudflare Pages" |
+| `deploy-setup` | The boilerplate's CI/CD (`scripts/sync-pipeline.mjs`) and Cloudflare Pages (app, Storybook, coverage and Allure report) with gh and wrangler, or Claude in Chrome without them; you paste the API token yourself | "Set up CI/CD and deploy this app to Cloudflare Pages" |
 
 ### Contracts
 
