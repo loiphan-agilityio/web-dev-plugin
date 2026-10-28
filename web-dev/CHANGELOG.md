@@ -12,6 +12,12 @@ A git install is a cached copy, so a change reaches users only with a new versio
   `git init -b main`, the identity, `pnpm run prepare`, the first commit, `git remote add origin`
   and the first push with `PROTECTED_BRANCHES=none`, since the project's `pre-push` hook refuses
   `main` and that push is what creates it; never `--no-verify` or `--force`.
+- `deploy-setup` no longer stops at step 5 when `gh` is signed out or `origin` is missing: each
+  side (GitHub, Cloudflare) uses its CLI when installed and signed in, else Claude in Chrome in the
+  user's browser; a project without `origin` gets its GitHub repository first. It creates all four
+  Pages projects (app, Storybook, coverage, Allure report) after one question, and a failing gate
+  no longer skips the deploy setup. The user still creates and pastes the API token; with Chrome,
+  Claude fills the forms up to that point and reads nothing while the token is on screen.
 
 ## 0.9.2
 

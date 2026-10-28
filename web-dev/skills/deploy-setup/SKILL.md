@@ -1,7 +1,7 @@
 ---
 name: deploy-setup
 description: This skill should be used when the user asks to "set up CI/CD", "set up deployment", "deploy the app to Cloudflare Pages", "run the unit and e2e tests in CI", "add the pipeline from the boilerplate", "update our CI to the boilerplate's" or "move from Netlify to Cloudflare" in a project created from the react-vite-boilerplate. It brings the boilerplate's pipeline into the project at the commit this plugin pins (GitHub Actions running lint, typecheck, unit tests with coverage, build, Storybook, a Cloudflare Pages preview per pull request, Lighthouse, the production deploy, then Playwright e2e on production with an Allure report), runs every gate, then creates the Pages projects and sets the GitHub secret and variables, asking before each command. Not for a project not made from the boilerplate, GitLab or another host, or a pipeline written from scratch.
-compatibility: "Claude Code, as part of the web-dev plugin only (runs project-setup's create-project.sh and the plugin's detect-project.mjs). Needs Node 22.22 or newer, pnpm, git, and network access to fetch the boilerplate; the deploy setup needs gh signed in and a Cloudflare account."
+compatibility: "Claude Code, as part of the web-dev plugin only (runs project-setup's create-project.sh and the plugin's detect-project.mjs). Needs Node 22.22 or newer, pnpm, git, and network access to fetch the boilerplate; the deploy setup needs a Cloudflare account and a GitHub repository, reached with gh and wrangler or, without them, Claude in Chrome signed in to both."
 allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/sync-pipeline.mjs *) Bash(pnpm install) Bash(pnpm test:e2e:install) Bash(pnpm check:report)
 ---
 
@@ -45,13 +45,19 @@ For each `leftovers` entry, edit those lines to read as its `reference` hunks do
 
 From the root, each as a plain command: `pnpm install` (updates the lockfile when `merge` added a devDependency), `pnpm test:e2e:install` (Chromium, once per machine; needs network), then `pnpm check:report`. Put its checklist table in the Result as printed. A failing gate caused by the sync (a file you merged in step 3) is fixed; any other failure is reported, never hidden.
 
-The user asked for the files only: stop here and list step 5 under **Next**.
+A failing gate does not stop step 5: CI runs the same gates and shows it again. Only when the user asked for the files only: stop here and list step 5 under **Next**.
 
 ## 5. Cloudflare and GitHub
 
-Follow `references/cloudflare.md`. Its commands (`npx wrangler`, `gh`) are not in `allowed-tools` on purpose: each one asks first. Never ask for the API token in the chat, never print it, and never write it to a file: the user sets the secret themselves.
+The deploy is what the user asked for: set it up in full, the four Pages projects (the app, Storybook, the unit tests' coverage report and the e2e Allure report), the secret, the variables and the ruleset. Follow `references/cloudflare.md`:
 
-Stop before this step, listing it under **Next**, when `origin` is not on GitHub (`git remote get-url origin`; the workflow is GitHub Actions) or `gh auth status` fails.
+- it picks the tool per side: `gh` and `npx wrangler` when installed and signed in, else Claude in Chrome in the user's own browser; a missing CLI or sign-in is never a reason to stop;
+- no `origin` yet: it asks for or creates the GitHub repository and pushes `main`;
+- one question for the names and the go-ahead, then every section runs through. The CLI commands are not in `allowed-tools` on purpose: each still shows its permission prompt.
+
+Never ask for the API token in the chat, never print, read back or screenshot it, and never write it to a file: the user creates it and pastes it into GitHub.
+
+Stop, listing what is left under **Next**, only when `origin` is on a host other than GitHub (the workflow is GitHub Actions), when a side can be reached neither by its CLI nor by Chrome, or when the user says no.
 
 ## 6. Hand over
 
@@ -69,6 +75,6 @@ The sync is a change to the project like any other: offer a feature branch and a
 **Did:** the variant, the files added, replaced and removed, what was put back from the project's old files, the `pnpm check:report` checklist, and each Pages project, variable and secret set
 **Saw:** facts observed: the boilerplate commit, `kept` values, real gate and command output, the preview URL if CI already ran
 **Not done:** anything skipped (the Cloudflare and GitHub setup, the ruleset), a failing gate
-**Blocked by:** blocked files, a missing sign-in (wrangler, gh), an admin needed for the ruleset, or "nothing"
+**Blocked by:** blocked files, a side neither its CLI nor Chrome could reach, an admin needed for the ruleset, or "nothing"
 **Next:** the commit and `/web-dev:pr`, what to set by hand (the API token), the old Netlify site and settings to remove
 ```
