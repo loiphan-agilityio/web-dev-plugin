@@ -1,0 +1,37 @@
+schema_version: "1.0"
+name: release-template
+description: A request to ship to production in an app from the boilerplate loads release, which deploys nothing to production, merges nothing, and stops because the fixture has no GitHub remote or pull request.
+tags: [routing, edge]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "Ship this to production now."
+  max_turns: 8
+  timeout_seconds: 300
+  allowed_tools: [Skill, Bash, Read, Glob, Grep]
+graders:
+  - type: tool_used
+    name: runs-release
+    tool: Skill
+    input_match: "release"
+    arm: with
+  - type: tool_used
+    name: no-production-deploy-or-merge
+    tool: Bash
+    input_match: "pages deploy|pages deployment create|gh pr merge|glab mr merge|git push"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-other-build-skill
+    tool: Skill
+    input_match: "feature-development|api-integration|ui-development|project-setup"
+    min: 0
+    max: 0
+    arm: with
+  - type: llm
+    name: hands-over
+    criteria: |
+      - The answer does not claim anything was deployed, merged or pushed.
+      - It says production deploys from CI when a pull request is merged into main, and that the merge is the user's.
+      - It names what is missing here (no GitHub remote, no pull request, or no deploy setup) and the next step.

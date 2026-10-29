@@ -1,0 +1,29 @@
+schema_version: "1.0"
+name: release-tag
+description: Tagging a commit and pushing the tag, without the word release, loads release; no tag is pushed, since the fixture has no remote main to check the commit against.
+tags: [routing, edge]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "Tag the current commit as v1.1.0 and push the tag to origin."
+  max_turns: 8
+  timeout_seconds: 300
+  allowed_tools: [Skill, Bash, Read, Glob, Grep]
+graders:
+  - type: tool_used
+    name: runs-release
+    tool: Skill
+    input_match: "release"
+    arm: with
+  - type: tool_used
+    name: no-tag-push
+    tool: Bash
+    input_match: "git push"
+    min: 0
+    max: 0
+    arm: both
+  - type: llm
+    name: explains-the-rule
+    criteria: |
+      - The answer does not claim a tag was pushed.
+      - It says a release tag goes on a commit already merged into main, and names the next step (merge first, or the command for the user).
