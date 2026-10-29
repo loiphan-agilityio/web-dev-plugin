@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -106,6 +106,132 @@ describe('guard: secret files', () => {
   it('allows Write of a new .env.local', () => assert.equal(tool('Write', { file_path: join(cwd, '.env.local') }), undefined));
   it('allows cp .env.example to a new .env.local', () => assert.equal(bash('cp .env.example .env.local'), undefined));
   it('allows Grep in a folder', () => assert.equal(tool('Grep', { pattern: 'x', path: 'src' }), undefined));
+});
+
+describe('guard: release gate', () => {
+  // A repository whose origin/main has one commit, plus a commit on a branch that is not merged.
+  const repo = mkdtempSync(join(tmpdir(), 'guard-release-'));
+  const remote = mkdtempSync(join(tmpdir(), 'guard-remote-'));
+  const sh = (...args) => execFileSync('git', args, { cwd: repo, stdio: 'ignore' });
+
+  execFileSync('git', ['init', '-q', '--bare', remote]);
+  sh('init', '-q', '-b', 'main');
+  sh('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'one');
+  sh('remote', 'add', 'origin', remote);
+  sh('push', '-q', 'origin', 'main');
+  sh('tag', 'v1.0.0');
+  sh('switch', '-q', '-c', 'feat/x');
+  sh('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'two');
+  sh('tag', 'v1.1.0');
+  after(() => {
+    rmSync(repo, { recursive: true, force: true });
+    rmSync(remote, { recursive: true, force: true });
+  });
+
+  const run = (command) => check({ tool_name: 'Bash', tool_input: { command }, cwd: repo });
+
+  for (const command of [
+    'git push origin main',
+    'git push origin HEAD:main',
+    'git push origin feat/x:refs/heads/production',
+    'git push origin v1.1.0',
+    'git push origin tag v1.1.0',
+    'git push origin refs/tags/v1.1.0',
+    'git push --tags',
+    'git push --follow-tags origin feat/x',
+    'gh pr merge 41 --squash',
+    'gh pr review 41 --approve',
+    'gh api -X PUT repos/o/r/pulls/41/merge',
+    'glab mr merge 7',
+    'glab mr approve 7',
+    'npx -y wrangler@4.149.0 pages deploy apps/web/dist --project-name app --branch main',
+    'wrangler pages deploy dist --project-name app --branch=production',
+    'pnpm dlx wrangler pages deployment create dist --project-name app --branch main',
+    'npx wrangler pages deploy dist --project-name app',
+    'npx wrangler pages deployment delete abc123 --project-name app',
+  ]) {
+    it(`refuses ${command}`, () => assert.ok(run(command)));
+  }
+
+  for (const command of [
+    'git push -u origin feat/x',
+    'git push origin v1.0.0',
+    'git push origin tag v1.0.0',
+    'gh pr create --draft --fill',
+    'gh pr ready 41',
+    'gh pr view 41 --json state',
+    'gh run watch 123',
+    'npx -y wrangler@4.149.0 pages deploy apps/web/dist --project-name app --branch release-check',
+    'npx wrangler pages deployment list --project-name app',
+    'npx vitest run',
+  ]) {
+    it(`allows ${command}`, () => assert.equal(run(command), undefined));
+  }
+
+  it('refuses PROTECTED_BRANCHES=none git push origin main once main exists', () => {
+    assert.ok(run('PROTECTED_BRANCHES=none git push -u origin main'));
+  });
+
+  it('allows PROTECTED_BRANCHES=none to create main in an empty repository', () => {
+    const empty = mkdtempSync(join(tmpdir(), 'guard-empty-'));
+    execFileSync('git', ['init', '-q', '--bare', empty]);
+    sh('remote', 'add', 'empty', empty);
+    assert.equal(run('PROTECTED_BRANCHES=none git push -u empty main'), undefined);
+    assert.ok(run('git push -u empty main'));
+    rmSync(empty, { recursive: true, force: true });
+  });
+
+  for (const command of [
+    'git push origin HEAD',
+    'git push -u origin @',
+    'git push origin HEAD:HEAD',
+    'gh -R o/r pr merge 41 --squash',
+    'gh --repo=o/r pr merge 41',
+    "gh api graphql -f query='mutation{mergePullRequest(input:{pullRequestId:\"x\"}){clientMutationId}}'",
+    "gh api graphql -f query='mutation{enablePullRequestAutoMerge(input:{pullRequestId:\"x\"}){clientMutationId}}'",
+    'glab api -X PUT projects/1/merge_requests/7/merge',
+    'npm exec -- wrangler pages deploy dist --project-name app --branch main',
+    'PROTECTED_BRANCHES=none git push -u https://invalid.example/x.git main',
+  ]) {
+    it(`refuses on main: ${command}`, () => {
+      sh('switch', '-q', 'main');
+      try {
+        assert.ok(run(command));
+      } finally {
+        sh('switch', '-q', 'feat/x');
+      }
+    });
+  }
+
+  it('allows git push origin HEAD on a feature branch', () => assert.equal(run('git push -u origin HEAD'), undefined));
+  it('reads the remote after -o <option>', () => assert.equal(run('git push -o ci.skip origin v1.0.0'), undefined));
+  it('reads --repo as the remote', () => assert.equal(run('git push --repo origin v1.0.0'), undefined));
+
+  it('checks the tag in the -C repository, not the hook cwd', () => {
+    assert.equal(check({ tool_name: 'Bash', tool_input: { command: `git -C ${repo} push origin v1.0.0` }, cwd }), undefined);
+    assert.ok(check({ tool_name: 'Bash', tool_input: { command: `git -C ${repo} push origin v1.1.0` }, cwd }));
+  });
+
+  it('uses the remote default branch when it is master', () => {
+    const other = mkdtempSync(join(tmpdir(), 'guard-master-'));
+    const bare = mkdtempSync(join(tmpdir(), 'guard-master-remote-'));
+    const g = (...args) => execFileSync('git', args, { cwd: other, stdio: 'ignore' });
+    execFileSync('git', ['init', '-q', '--bare', bare]);
+    g('init', '-q', '-b', 'master');
+    g('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'one');
+    g('remote', 'add', 'origin', bare);
+    g('push', '-q', 'origin', 'master');
+    g('tag', 'v2.0.0');
+    assert.equal(check({ tool_name: 'Bash', tool_input: { command: 'git push origin v2.0.0' }, cwd: other }), undefined);
+    rmSync(other, { recursive: true, force: true });
+    rmSync(bare, { recursive: true, force: true });
+  });
+
+  it('refuses a bare git push on main', () => {
+    sh('switch', '-q', 'main');
+    assert.ok(run('git push'));
+    sh('switch', '-q', 'feat/x');
+  });
 });
 
 describe('guard: as a hook', () => {

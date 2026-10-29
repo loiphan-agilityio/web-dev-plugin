@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // The guardrails skill's PreToolUse hook (hooks/hooks.json): refuses the git commands that rewrite
 // history, force-push, delete a remote branch or skip the hooks, and reading or writing secret
-// files, before Claude runs them. It reads the hook input as JSON on stdin; a refusal exits 2 with
+// files, and the release gate (production deploys, tags, merges and approvals; see the release
+// skill), before Claude runs them. It reads the hook input as JSON on stdin; a refusal exits 2 with
 // the reason on stderr, which Claude Code shows to Claude. Anything else exits 0. Commands are
 // split as a shell would (quotes, `;`, `&&`, `|`, redirects, `sh -c`), so a quoted commit message
 // is not mistaken for a flag. It stops mistakes, not someone set on getting around it: an alias, a
 // script file or a recursive `grep -r` still gets through.
 
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -94,10 +96,121 @@ const shortFlags = (w) => (/^-[A-Za-z]+$/.test(w) ? w.slice(1) : '');
 const hasFlag = (args, long, short) =>
   args.some((a) => long.some((l) => a === l || a.startsWith(`${l}=`)) || (short && shortFlags(a).includes(short)));
 
-const checkGit = (args) => {
+const protectedBranches = new Set(['main', 'master', 'dev', 'develop', 'stag', 'staging', 'prod', 'production']);
+
+/** Runs git in `cwd`: `{ out, status }`, status 0 on success, -1 when it could not run or timed out. */
+const gitRun = (cwd, args, timeout = 3000) => {
+  try {
+    return { out: execFileSync('git', args, { cwd, encoding: 'utf8', timeout, stdio: ['ignore', 'pipe', 'ignore'] }).trim(), status: 0 };
+  } catch (error) {
+    return { out: undefined, status: typeof error.status === 'number' ? error.status : -1 };
+  }
+};
+/** Runs git in `cwd`; its trimmed output, or undefined when it fails. */
+const git = (cwd, ...args) => gitRun(cwd, args).out;
+
+/** Push options that take the next word as their value. */
+const pushValueOptions = new Set(['-o', '--push-option', '--repo', '--receive-pack', '--exec']);
+
+/** The remote's default branch (`<remote>/HEAD`), else whichever of main and master it has. */
+const remoteMain = (cwd, remote) => {
+  const head = git(cwd, 'rev-parse', '--abbrev-ref', `refs/remotes/${remote}/HEAD`);
+  if (head && head !== `refs/remotes/${remote}/HEAD`) return git(cwd, 'rev-parse', '--verify', '--quiet', head);
+  for (const name of ['main', 'master']) {
+    const sha = git(cwd, 'rev-parse', '--verify', '--quiet', `refs/remotes/${remote}/${name}`);
+    if (sha) return sha;
+  }
+  return undefined;
+};
+
+/**
+ * The release gate on `git push <remote> <refspec>...`: no push to a protected branch, and a tag
+ * only when its commit is already on the remote's main (a merged commit). `--tags` and the like
+ * push every tag at once, so a tag goes by name.
+ */
+const checkPushTargets = (rest, cwd, firstPush) => {
+  if (hasFlag(rest, ['--tags', '--follow-tags', '--all'])) return 'push one tag by name, once its commit is merged: not every tag at once';
+  const words = [];
+  let repo;
+  for (let k = 0; k < rest.length; k++) {
+    if (pushValueOptions.has(rest[k])) {
+      if (rest[k] === '--repo') repo = rest[k + 1];
+      k++;
+    } else if (rest[k].startsWith('--repo=')) repo = rest[k].slice('--repo='.length);
+    else if (!rest[k].startsWith('-')) words.push(rest[k]);
+  }
+  const [remote = repo ?? 'origin', ...refspecs] = repo ? [repo, ...words] : words;
+  const current = git(cwd, 'branch', '--show-current') ?? '';
+  const targets = refspecs.length ? refspecs : [current];
+
+  for (let k = 0; k < targets.length; k++) {
+    let spec = targets[k];
+    if (spec === 'tag' && targets[k + 1]) spec = `refs/tags/${targets[++k]}`;
+    const [src, dst = src] = spec.split(':');
+    // HEAD and @ are the current branch: `git push origin HEAD` on main pushes main.
+    const name = ['HEAD', '@'].includes(dst) ? current : dst.replace(/^refs\/(heads|tags)\//, '');
+
+    // deploy-setup creates main in an empty repository with PROTECTED_BRANCHES=none git push -u
+    // origin main: allowed only while the remote has no branch of that name.
+    // ls-remote --exit-code exits 2 only when the ref is missing; any other failure (network,
+    // auth, timeout) keeps the branch protected.
+    const creates = firstPush && gitRun(cwd, ['ls-remote', '--exit-code', '--heads', remote, name], 5000).status === 2;
+    if (!dst.startsWith('refs/tags/') && protectedBranches.has(name) && !creates) {
+      return `'${name}' changes only through a merged pull request: the merge is a person's decision`;
+    }
+    const tag = dst.startsWith('refs/tags/') || git(cwd, 'show-ref', '--verify', '--quiet', `refs/tags/${name}`) !== undefined ? name : undefined;
+    if (tag) {
+      const sha = git(cwd, 'rev-list', '-n', '1', `refs/tags/${src.replace(/^refs\/tags\//, '')}`);
+      const main = remoteMain(cwd, remote);
+      if (!sha || !main || git(cwd, 'merge-base', '--is-ancestor', sha, main) === undefined) {
+        return `tag ${tag} is not on ${remote}'s default branch: tag a merged commit (git fetch ${remote} first)`;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+/** `gh` and `glab`: approving or merging a pull or merge request is the user's. */
+const checkForge = (cmd, all) => {
+  // Global flags before the subcommand: -R/--repo <owner/repo>, --hostname <host>.
+  const args = [];
+  for (let k = 0; k < all.length; k++) {
+    if (args.length === 0 && ['-R', '--repo', '--hostname'].includes(all[k])) k++;
+    else if (!(args.length === 0 && /^--(repo|hostname)=/.test(all[k]))) args.push(all[k]);
+  }
+  const [group, action] = args;
+  const merge = 'approving or merging a pull or merge request is a person\'s decision';
+
+  if (cmd === 'gh' && group === 'pr' && (action === 'merge' || (action === 'review' && hasFlag(args, ['--approve'], 'a')))) return merge;
+  if (cmd === 'glab' && group === 'mr' && (action === 'merge' || action === 'approve')) return merge;
+  if (cmd === 'gh' && group === 'api' && args.some((a) => /\/pulls\/\d+\/merge$|event=APPROVE|mergePullRequest|enablePullRequestAutoMerge|addPullRequestReview[\s\S]*APPROVE/.test(a))) return merge;
+  if (cmd === 'glab' && group === 'api' && args.some((a) => /merge_requests\/\d+\/(merge|approve)/.test(a))) return merge;
+
+  return undefined;
+};
+
+/** wrangler, direct or through npx, pnpm dlx/exec, bunx or yarn: production deploys come from CI. */
+const checkWrangler = (args) => {
+  const [group, action, ...rest] = args;
+  if (group !== 'pages') return undefined;
+  if (action === 'deployment' && rest[0] === 'delete') return 'deleting a Pages deployment cannot be undone: let the user do it';
+  if (action !== 'deploy' && !(action === 'deployment' && rest[0] === 'create')) return undefined;
+
+  const i = args.findIndex((a) => a === '--branch' || a.startsWith('--branch='));
+  const branch = i < 0 ? undefined : args[i].includes('=') ? args[i].split('=')[1] : args[i + 1];
+  if (!branch) return 'name a preview branch with --branch: without it Pages may treat the deploy as production';
+  if (protectedBranches.has(branch)) return `--branch ${branch} deploys to production: production deploys only from CI, after the pull request is merged`;
+
+  return undefined;
+};
+
+const checkGit = (args, base, firstPush = false) => {
   // Global options before the subcommand: -C <dir>, -c <key=value>, --git-dir=..., -p, ...
+  let cwd = base;
   let i = 0;
   for (; i < args.length && args[i].startsWith('-'); i++) {
+    if (args[i] === '-C' && args[i + 1]) cwd = resolve(cwd, args[i + 1]);
     if (args[i] === '-c' && /^core\.hookspath=/i.test(args[i + 1] ?? '')) return 'setting core.hooksPath skips the hooks: fix what they report instead';
     if (args[i] === '-C' || args[i] === '-c') i++;
   }
@@ -120,7 +233,7 @@ const checkGit = (args) => {
         return 'a force-push overwrites the remote: let the user run it';
       if (hasFlag(rest, ['--delete', '--prune'], 'd') || rest.some((a) => /^:./.test(a)))
         return 'deleting a remote branch: let the user run it';
-      return undefined;
+      return checkPushTargets(rest, cwd, firstPush);
     case 'branch':
       return hasFlag(rest, ['--force'], 'f') || rest.some((a) => /[DMC]/.test(shortFlags(a))) || (hasFlag(rest, ['--delete'], 'd') && hasFlag(rest, ['--force'], 'f'))
         ? 'force-moving, renaming over or deleting a branch: let the user run it'
@@ -148,7 +261,15 @@ const checkWords = (words, cwd, depth = 0) => {
 
   if (basename(cmd) === 'git') {
     if (assigns.some((a) => /^HUSKY=0$/.test(a))) return 'HUSKY=0 skips the hooks: fix what they report instead';
-    return checkGit(args);
+    return checkGit(args, cwd, assigns.includes('PROTECTED_BRANCHES=none'));
+  }
+
+  if (cmd === 'gh' || cmd === 'glab') return checkForge(cmd, args);
+
+  if (basename(cmd) === 'wrangler') return checkWrangler(args);
+  if (['npx', 'npm', 'pnpm', 'bunx', 'yarn'].includes(basename(cmd))) {
+    const w = args.findIndex((a) => /^wrangler(@|$)/.test(a));
+    if (w >= 0) return checkWrangler(args.slice(w + 1));
   }
 
   if (readers.has(basename(cmd)) && args.some((a) => !a.startsWith('-') && isSecretFile(a))) {

@@ -1,0 +1,25 @@
+schema_version: "1.0"
+name: guardrails-feature-push
+description: An ordinary push of a feature branch loads no web-dev skill (neither guardrails nor release); it only asks.
+tags: [routing, no-trigger]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "Commit README.md on a new branch feat/readme and push it to origin."
+  max_turns: 8
+  timeout_seconds: 300
+  allowed_tools: [Skill, Bash, Read, Glob, Grep, Edit, Write]
+graders:
+  - type: tool_used
+    name: no-skill
+    tool: Skill
+    min: 0
+    max: 0
+    arm: with
+  - type: tool_used
+    name: no-main-push
+    tool: Bash
+    input_match: "git push[^\\n]*\\b(main|master)\\b"
+    min: 0
+    max: 0
+    arm: both

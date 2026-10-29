@@ -33,7 +33,7 @@ web-dev/                          the plugin (its README.md is the user guide)
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
   skills/                         the product: develop (entry), project-setup, feature-development,
                                   api-integration, ui-development, deploy-setup, ticket, incident,
-                                  pr, guardrails (their contract templates in references/)
+                                  pr, guardrails, release (their contract templates in references/)
     project-setup/scripts/        create-project.sh (a new project from the boilerplate: landing
                                   page, or web app, always with auth), install-companions.sh
     deploy-setup/scripts/         sync-pipeline.mjs (the boilerplate's CI/CD, test and Cloudflare
@@ -41,7 +41,7 @@ web-dev/                          the plugin (its README.md is the user guide)
                                   makes)
   references/                     shared guidelines: stack-guidelines, coding-standards, architecture
   hooks/hooks.json                the guardrails hook: runs scripts/guard.mjs before each Bash,
-                                  Read, Edit and Write
+                                  Read, Edit, Write and Grep (also the release gate)
   scripts/                        detect-project.mjs, verify-project.sh, check-contract.mjs (run
                                   by the skills), guard.mjs (the hook), and their tests in
                                   scripts/test/
