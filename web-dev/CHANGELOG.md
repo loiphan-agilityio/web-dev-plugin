@@ -3,19 +3,29 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.10.0
 
-- `project-setup` puts the target on git before it creates the project (step 3), asking first:
-  the identity the commits carry (the `user.name` / `user.email` found, or another pair set local
-  to the repository, never `--global`), the GitHub or GitLab repository URL (kept as given, SSH
+- `project-setup` puts the target on git before it creates the project (step 3): with no
+  repository it runs `git init -b main` without asking, and "no git for now" is no longer offered,
+  so the first commit and the hooks always come with the project. The branch is always `main`:
+  never a plain `git init` (`master` where `init.defaultBranch` is unset), and a target whose
+  `.git/` is on another branch has it renamed to `main` (asking first when it has commits). It
+  asks first:
+  the identity the commits carry, always, even when git already has one (the `user.name` /
+  `user.email` found, confirmed by the user, or another pair asked for and set local to the
+  repository, never `--global`), the GitHub or GitLab repository URL (kept as given, SSH
   host aliases included), and whether to push. It runs `git init -b main`, the identity and
   `git remote add origin`, then checks the repository for `main` (`git ls-remote`): an existing
-  `main` is pulled, and the user confirms that the project replaces its files; an empty repository
-  gets a `README.md` with `Hello World` pushed as `main`. `create-project.sh --replace` replaces
+  `main` is pulled only after the user confirms that the project replaces its files; an empty
+  repository gets a `README.md` with `Hello World` committed as `main`, and pushed only when the
+  user chose to push. `create-project.sh --replace` replaces
   the files git tracks (outside `.claude/`), refusing a dirty working tree and untracked files in
-  the way. After the gates (step 8) it turns the hooks on, commits the scaffold and pushes `main`
-  with `PROTECTED_BRANCHES=none`, since the project's `pre-push` hook refuses `main`; never
-  `--no-verify` or `--force`.
+  the way. After the gates (step 8) it turns the hooks on, commits the scaffold and, only when every gate
+  passed, pushes `main` with `PROTECTED_BRANCHES=none`, since the project's `pre-push` hook
+  refuses `main`; never `--no-verify` or `--force`. A red gate leaves the commit local and the
+  push under **Not done**. The hand-over and the Result no longer suggest `git init` or the
+  hooks inside a parent repository, and a fifth question (`Branch`) goes in a second call, since
+  `AskUserQuestion` takes four.
 - `deploy-setup` no longer stops at step 5 when `gh` is signed out or `origin` is missing: each
   side (GitHub, Cloudflare) uses its CLI when installed and signed in, else Claude in Chrome in the
   user's browser; a project without `origin` gets its GitHub repository first. It creates all four

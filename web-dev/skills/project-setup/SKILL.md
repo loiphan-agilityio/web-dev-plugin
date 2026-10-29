@@ -28,22 +28,24 @@ Run the scripts exactly as written below, each as one plain command: `allowed-to
 
 ## 3. Git
 
-Before the project is created, put the target on git, and on the repository's `main` when there is one. Change nothing in git before the user answers. Run every command below in the target (`git init -b main <target>` creates the folder). First look for `.git/` in the target and each parent folder:
+Before the project is created, put the target on git, and on the repository's `main` when there is one. Git is not optional: with no repository, `git init` runs without asking, and only the identity, the remote and the push wait for the user's answers. Run every command below in the target (`git init -b main <target>` creates the folder). First look for `.git/` in the target and each parent folder:
 
 - **A parent folder has `.git/`:** never run `git init` (it would nest a repository) and ask nothing: say which repository the project is in, leave git to the user, skip the rest of this step and `pnpm run prepare` in step 8 (husky installs hooks only at a repository's root), and run step 4 without `--replace`.
 - **No repository, or the target has `.git/`** (kept as it is): read what git already has, `git config user.name` and `git config user.email` (the global values while the target has no repository) and, when the target has `.git/`, `git remote get-url origin`. Then ask, with the kind when step 2 asks it (the `AskUserQuestion` tool when available, as for the kind; else as text, in one message):
-  1. **Identity:** the name and email the commits carry. Offer the pair found ("Commit as <name> <email>") and a different one; with none found, ask for both, since a commit fails without them.
-  2. **Repository:** the URL of the GitHub or GitLab repository (empty, or with a `main` the project will replace), local git only for now, or no git for now (which ends this step; step 4 runs without `--replace`). Skip it when `origin` exists. Use the URL exactly as given: an SSH host alias (`git@github-work:org/app.git`) picks the user's key.
-  3. **Push:** push the scaffold commit to `main` at the end (step 8) or later; only with a repository.
+  1. **Identity:** the name and email the commits carry. Always ask it, under `develop`'s Workflow A too and when `origin` exists: never commit with an identity the user has not confirmed in this run, the global one included. Offer the pair found ("Commit as <name> <email>") and a different one; with none found, ask for both, since a commit fails without them. A different pair the user picks without typing it gets a follow-up question for the name and the email; never guess either.
+  2. **Repository:** the URL of the GitHub or GitLab repository (empty, or with a `main` the project will replace), or local git only for now. Never offer "no git": the repository, its first commit and the hooks always come with the project. Skip it when `origin` exists. Use the URL exactly as given: an SSH host alias (`git@github-work:org/app.git`) picks the user's key.
+  3. **Push:** push the scaffold commit to `main` at the end (step 8) or later; only with a repository. Asked in the same call as the repository, so its answer is ignored when the user picks local git only, and a skipped one means later: nothing is pushed without a yes.
 
-Then run, in this order, only what the answers allow:
+`AskUserQuestion` takes at most 4 questions in a call: when the kind, these three and `Branch` (step 1 below) make five, ask `Branch` in a second call right after.
 
-1. `git init -b main <target>` (CI deploys from `main`, the Pages projects' production branch).
+Then run, in this order (steps 2 to 4 only as the answers allow):
+
+1. `git init -b main <target>` when the target has no `.git/`, whatever the answers (CI deploys from `main`, the Pages projects' production branch). Never a plain `git init`: it names the branch after `init.defaultBranch`, `master` on most machines. When the target has `.git/`, read its branch (`git symbolic-ref --short HEAD`); on any branch but `main`, `git branch -m main`: without asking while it has no commit (`git rev-parse --verify HEAD` fails), else only after the user agrees (asked with the questions above, header `Branch`). A no goes under **Blocked by** and ends the run, since every later step pulls, commits and pushes `main`.
 2. `git config user.name "<name>"` and `git config user.email "<email>"` when the user gave a different pair: local to this repository, never `--global` (it would change every repository on the machine).
 3. `git remote add origin <url>`.
 4. `git ls-remote --exit-code --heads origin main`: exit 0 means the repository has `main`, 2 means it has none; any other exit (no access, no network) goes under **Blocked by** with its output, and nothing else in this step runs.
-   - **`main` exists:** `git pull origin main`. A pull that fails (untracked files it would overwrite, a merge conflict) stops the run: report it under **Blocked by**. Then confirm before anything is replaced: ask (header `Replace`) whether to go on, saying that every file in the folder will be replaced by the new project (`.git/` and `.claude/` stay), or stop. Only a yes goes on to step 4, with `--replace`; a no ends the run, the folder as it is, under **Blocked by**.
-   - **No `main`** (an empty repository) and no commit in the target yet: write `README.md` with the content `Hello World`, then `git add README.md`, `git commit -m "docs: add readme"` and `git push -u origin main`, which creates `main` (no hook yet: husky comes with the project). A rejected push goes under **Not done** with its output, and the run continues. Step 4 runs with `--replace` (the README is replaced by the project's).
+   - **`main` exists:** confirm before anything is pulled or replaced: ask (header `Replace`) whether to go on, saying that the repository's `main` will be pulled into the folder and every file of it replaced by the new project (`.git/` and `.claude/` stay), or stop. A no ends the run under **Blocked by**, nothing pulled: the folder holds only what step 3 set up (`.git/` with `origin`). Only on a yes, `git pull origin main`; a pull that fails (untracked files it would overwrite, a merge conflict) stops the run: report it under **Blocked by**. Then step 4 runs with `--replace`.
+   - **No `main`** (an empty repository) and no commit in the target yet: write `README.md` with the content `Hello World`, then `git add README.md` and `git commit -m "docs: add readme"` (no hook yet: husky comes with the project). Only when the user chose to push, `git push -u origin main`, which creates `main` on the host; a rejected push goes under **Not done** with its output, and the run continues. With push later, the README commit stays local and step 8's push, run later by the user, carries it. Step 4 runs with `--replace` (the README is replaced by the project's).
    - **Local git only, or no `main` while the target already has commits** (`git rev-parse --verify HEAD`): no README; with commits, ask the same confirmation and run step 4 with `--replace`; without, run it without `--replace`.
 
 Never `--no-verify` or `--force`. A no, a skipped question or a failed command goes under **Not done**.
@@ -71,18 +73,18 @@ Never build the project by hand, from memory or from another template instead: r
 
 ## 8. Commit and push
 
-Only when step 3 left a repository at the target's root:
+Whenever step 3 left a repository at the target's root (every case but a parent repository), without asking: these steps are part of the setup, not an offer.
 
 1. `pnpm run prepare` so husky turns the hooks on (`pnpm install` finds nothing to do in the installed project and skips it); check that `.husky/_/pre-push` exists before saying the hooks are on.
 2. `git add -A` and `git commit -m "chore: scaffold <folder-name>"`: a Conventional Commit, since commitlint rejects anything else.
-3. When the user chose to push: `PROTECTED_BRANCHES=none git push -u origin main`: the project's `pre-push` hook refuses a push to `main`, and the scaffold is `main`'s base; every later change goes through a branch and `/web-dev:pr`. Never `--no-verify` or `--force`: a rejected push (a protected `main` on the host, for one) goes under **Not done** with its output.
+3. When the user chose to push and every gate of step 7 passed: `PROTECTED_BRANCHES=none git push -u origin main`. With a red gate, push nothing: the commit stays local, and the push goes under **Not done** with the checklist, for the user to run once `pnpm check:report` passes (the pinned boilerplate passes every gate, so a red one is usually the machine: network, Chromium, a busy port). The push: the project's `pre-push` hook refuses a push to `main`, and the scaffold is `main`'s base; every later change goes through a branch and `/web-dev:pr`. Never `--no-verify` or `--force`: a rejected push (a protected `main` on the host, for one) goes under **Not done** with its output.
 
 ## 9. Hand over
 
 Skip under `develop`'s Workflow A (it builds on and reports at the end). Otherwise tell the user:
 
 - `pnpm dev`, or `pnpm dev:mock` to serve the API from `apps/web/src/mocks` (MSW), from the root;
-- what steps 3 and 8 left undone, from the root: `git init -b main`, `git config user.name` / `user.email` (no `--global`), `git remote add origin <url>`, `pnpm run prepare` (the hooks), `git add -A` and `git commit -m "chore: scaffold <folder-name>"`, then `PROTECTED_BRANCHES=none git push -u origin main`; `pr` needs the remote, and `deploy-setup` a GitHub one;
+- what steps 3 and 8 left undone, from the root (under a parent repository, only that the project is committed there, never `git init` or `pnpm run prepare`): `git init -b main` (only if it failed), `git config user.name` / `user.email` (no `--global`), `git remote add origin <url>`, `pnpm run prepare` (the hooks), `git add -A` and `git commit -m "chore: scaffold <folder-name>"`, then `PROTECTED_BRANCHES=none git push -u origin main`; `pr` needs the remote, and `deploy-setup` a GitHub one;
 - a landing page: edit `apps/web/src/app/home-page.tsx` (copy, product name, contact address) and the site URL in `apps/web/public/sitemap.xml`, `robots.txt` and the `og:` tags in `apps/web/index.html`; CI runs Lighthouse on each Cloudflare Pages preview (`pnpm lighthouse <url>` locally), and `/web-quality:audit` covers axe, Lighthouse and PageSpeed before launch;
 - a web app: sign in as `demo@example.com` / `password` on the mocks; the home page sits inside `protectedRoutes()`, and a new page that needs a signed-in user goes there too (`apps/web/src/app/routes.tsx`);
 - copy `apps/web/.env.example` to `apps/web/.env.local` and set `VITE_API_URL` (every `VITE_*` value is public);
@@ -102,6 +104,6 @@ Skip it under `develop`'s Workflow A; otherwise end with:
 **Did:** the project created (folder, landing page or web app with authentication), install, companions, the `pnpm check:report` checklist, and git (initialized, identity, remote, `main` pulled and replaced or seeded with the README, committed, hooks on, pushed, or why not)
 **Saw:** facts observed, including the real gate output
 **Not done:** anything skipped or failed, such as a companion install
-**Blocked by:** questions that stopped part of the work (the kind, the replace confirmation, a failed pull), or "nothing"
+**Blocked by:** questions that stopped part of the work (the kind, the branch rename, the replace confirmation, a failed pull), or "nothing"
 **Next:** what the user can do or ask next
 ```
