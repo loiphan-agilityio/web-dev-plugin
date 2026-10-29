@@ -51,6 +51,12 @@ Each is checked by `scripts/check-contract.mjs`.
 | `incident` | `docs/incidents/<id>/`: `report.md`, `rca.md` (each claim measured or hypothesis), `actions.md` (`A<n>`, which can become tickets) | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
 | `pr` | A draft PR (`gh`) or MR (`glab`) with the `pnpm check:report` checklist, ready only when CI passes; never pushes a protected branch, never merges | "/web-dev:pr" |
 
+### Guardrails
+
+| Skill | Does | Example |
+|---|---|---|
+| `guardrails` | Before a push, a commit on a protected branch, a history rewrite, a merge, a deploy or reading a secret: lists which rules are blocked by code, checked by a skill or only written down, and asks instead of acting; its hook (`hooks/hooks.json`, `scripts/guard.mjs`) refuses `--amend`, `reset --hard`, `rebase`, force-pushes, `--no-verify` and reading `.env` files and keys | "/web-dev:guardrails" · "Push this to main" |
+
 ### Not covered
 
 Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD outside a project from the
