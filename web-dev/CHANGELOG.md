@@ -3,6 +3,18 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.10.1
+
+- `project-setup` reads the rules on the GitHub repository's `main` right after `git remote add`
+  (`gh api repos/<owner>/<repo>/rules/branches/main`, read-only), since a ruleset can exist while
+  the repository is still empty: one that refuses every push to `main` and that the user cannot
+  bypass is named before anything is created, with the commands to lift it and turn it back on,
+  and the user picks lifted or push later. A push refused with `GH013` keeps the commits local and
+  goes under **Blocked by** with the same commands; the skill never changes a ruleset itself.
+- `deploy-setup` pushes `main` to an `origin` that has none (an empty repository) and applies the
+  `main` ruleset only once `main` is on GitHub: applied first, it refused the push that creates
+  `main`, so nothing could reach it again.
+
 ## 0.10.0
 
 - `project-setup` puts the target on git before it creates the project (step 3): with no
