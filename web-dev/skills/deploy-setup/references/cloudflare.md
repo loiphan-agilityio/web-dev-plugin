@@ -36,7 +36,9 @@ page says what to click. Without the Chrome tools either, ask the user to run `!
 
 **The repository** is `git remote get-url origin`:
 
-- on GitHub: `<owner>/<repo>` from the URL;
+- on GitHub: `<owner>/<repo>` from the URL. When it has no `main` yet (an empty repository:
+  `git ls-remote --exit-code --heads origin main` exits 2), `PROTECTED_BRANCHES=none git push -u
+  origin main` creates it, as below, before section 6 protects it;
 - on another host: stop, the workflow is GitHub Actions;
 - none: ask for the URL of an empty GitHub repository, or offer to create one (`gh repo create
   <owner>/<repo> --private`, or `github.com/new` in Chrome: private, no README, license or
@@ -119,6 +121,17 @@ from a fork or Dependabot gets no secrets: only its checks run, and `main` deplo
 squash-merged pull request, and the checks `Checks: lint, typecheck, unit, build`,
 `Deploy: preview` and `Lighthouse: deployed preview`. Applying it needs a repository admin; ask
 first.
+
+Apply it only once GitHub has `main` (`git ls-remote --exit-code --heads origin main` exits 0):
+it refuses every push to `main`, the one that creates it included, and nobody bypasses it, so on
+an empty repository nothing could ever reach `main` again. Without `main` (its push failed), the
+ruleset goes under **Not done**, to apply after `main` is pushed.
+
+A push to `main` refused with `GH013: Repository rule violations` means a ruleset is already
+there (`gh api repos/<owner>/<repo>/rules/branches/main` lists the active rules and their
+`ruleset_id`). Never lift it yourself: **Blocked by** names it, with the commands for the user to
+lift it (`gh api -X PUT repos/<owner>/<repo>/rulesets/<id> -f enforcement=disabled`), push, and
+turn it back on (`-f enforcement=active`).
 
 - gh: `gh api repos/<owner>/<repo>/rulesets` lists the rulesets. With none named `main`:
   `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. One named

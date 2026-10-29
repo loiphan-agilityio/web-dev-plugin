@@ -52,7 +52,7 @@ A failing gate does not stop step 5: CI runs the same gates and shows it again. 
 The deploy is what the user asked for: set it up in full, the four Pages projects (the app, Storybook, the unit tests' coverage report and the e2e Allure report), the secret, the variables and the ruleset. Follow `references/cloudflare.md`:
 
 - it picks the tool per side: `gh` and `npx wrangler` when installed and signed in, else Claude in Chrome in the user's own browser; a missing CLI or sign-in is never a reason to stop;
-- no `origin` yet: it asks for or creates the GitHub repository and pushes `main`;
+- no `origin` yet: it asks for or creates the GitHub repository and pushes `main`; an `origin` with no `main` (an empty repository) gets `main` pushed too, and the ruleset is applied only once `main` is on GitHub;
 - one question for the names and the go-ahead, then every section runs through. The CLI commands are not in `allowed-tools` on purpose: each still shows its permission prompt.
 
 Never ask for the API token in the chat, never print, read back or screenshot it, and never write it to a file: the user creates it and pastes it into GitHub.
