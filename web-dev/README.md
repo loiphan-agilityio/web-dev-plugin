@@ -90,7 +90,7 @@ in place: edits load at the next session or after `/reload-plugins`, with no ver
 `../../references/` and `../../scripts/`. `<plugin-dir>` is the `web-dev/` folder of your clone:
 
 ```bash
-mkdir billing-portal && cd billing-portal && git init
+mkdir billing-portal && cd billing-portal && git init -b main
 mkdir -p .claude
 cp -r <plugin-dir>/{skills,references,scripts,agents} .claude/
 claude "Scaffold a new web app called billing-portal"
