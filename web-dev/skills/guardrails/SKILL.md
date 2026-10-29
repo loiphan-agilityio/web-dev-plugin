@@ -17,7 +17,7 @@ Anything outward-facing or hard to undo stays with the user. Before such an acti
 | Commit messages follow Conventional Commits; staged files pass lint | the boilerplate's husky `commit-msg` (commitlint) and `pre-commit` hooks | Blocked by code |
 | `deploy-setup` never replaces a file git cannot restore | `sync-pipeline.mjs` reports it under `blocked` and exits 1 | Blocked by code |
 | Ticket, incident and PR documents have every section, and every criterion has a task | `check-contract.mjs` | Blocked by code |
-| No `git commit --amend`, `reset --hard`, `rebase`, force-push or remote branch delete, skipping the hooks (`--no-verify`, `-n`, `HUSKY=0`, `core.hooksPath`), `branch -f`, `-D` or `-M` | the plugin's PreToolUse hook, [`guard.mjs`](../../scripts/guard.mjs) (with its own tests) | Blocked by code |
+| No `git commit --amend`, `reset --hard`, `rebase`, force-push or remote branch delete, skipping the hooks (`--no-verify`, `-n`, `HUSKY=0`, `core.hooksPath`), `branch -f`, `-D` or `-M` | the plugin's PreToolUse hook, `../../scripts/guard.mjs` (with its own tests) | Blocked by code |
 | No reading, editing or overwriting `.env*`, `.envrc`, `.dev.vars`, `.npmrc`, keys or certificates (creating a new one from `.env.example` is fine) | the same hook, on Read, Edit, Write, Grep, shell readers, redirects and `cp`; a script, an alias or a recursive `grep -r` still gets through | Blocked by code |
 | No approving or merging a PR; it stays a draft until CI passes | `pr` | Checked by a skill |
 | Commit only on a new branch, staging only the files of the change; push only when the user asks | `ticket`, `incident`, `pr` | Checked by a skill |
