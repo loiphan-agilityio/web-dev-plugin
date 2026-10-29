@@ -33,15 +33,18 @@ web-dev/                          the plugin (its README.md is the user guide)
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
   skills/                         the product: develop (entry), project-setup, feature-development,
                                   api-integration, ui-development, deploy-setup, ticket, incident,
-                                  pr (their contract templates in references/)
+                                  pr, guardrails (their contract templates in references/)
     project-setup/scripts/        create-project.sh (a new project from the boilerplate: landing
                                   page, or web app, always with auth), install-companions.sh
     deploy-setup/scripts/         sync-pipeline.mjs (the boilerplate's CI/CD, test and Cloudflare
                                   Pages files at the pin, copied from a project create-project.sh
                                   makes)
   references/                     shared guidelines: stack-guidelines, coding-standards, architecture
+  hooks/hooks.json                the guardrails hook: runs scripts/guard.mjs before each Bash,
+                                  Read, Edit and Write
   scripts/                        detect-project.mjs, verify-project.sh, check-contract.mjs (run
-                                  by the skills), and check-contract's tests in scripts/test/
+                                  by the skills), guard.mjs (the hook), and their tests in
+                                  scripts/test/
   agents/                         codebase-explorer (shipped with the plugin)
   evals/                          routing and e2e cases for `claude plugin eval`, run.sh, fixtures
   docs/companion-audit.md         security and fit audit of the 8 companion skills
