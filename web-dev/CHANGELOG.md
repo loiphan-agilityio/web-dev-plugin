@@ -3,6 +3,19 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.10.2
+
+- `deploy-setup` no longer takes "done" on trust once the user has stored the Cloudflare API
+  token: it checks that GitHub lists `CLOUDFLARE_API_TOKEN` updated after the hand-over
+  (`gh secret list`, or the secrets page in Chrome), and hands over again when it does not. With
+  the secret and the variables set, it reruns the last push run on `main` (the whole pipeline,
+  production and e2e included; a manual `workflow_dispatch` run when there is none, which deploys
+  only the preview), waits for it in the background with `gh run watch`, reports each job, and
+  gives the user the run's URL and the links the run wrote (the commit statuses for production,
+  preview and coverage, the Allure report's annotation). A failed job is reported with its cause
+  (a token without Cloudflare Pages Edit sends the user back to the token) and rerun with
+  `--failed` once it is fixed.
+
 ## 0.10.1
 
 - `project-setup` reads the rules on the GitHub repository's `main` right after `git remote add`
