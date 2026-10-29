@@ -53,6 +53,7 @@ The deploy is what the user asked for: set it up in full, the four Pages project
 
 - it picks the tool per side: `gh` and `npx wrangler` when installed and signed in, else Claude in Chrome in the user's own browser; a missing CLI or sign-in is never a reason to stop;
 - no `origin` yet: it asks for or creates the GitHub repository and pushes `main`; an `origin` with no `main` (an empty repository) gets `main` pushed too, and the ruleset is applied only once `main` is on GitHub;
+- when the user says the token is stored, it checks that GitHub has the secret before going on, then reruns the pipeline, waits for it in the background and gives the user the links it deployed (section 7); a failed deploy job is reported with its cause and run again once that is fixed;
 - one question for the names and the go-ahead, then every section runs through. The CLI commands are not in `allowed-tools` on purpose: each still shows its permission prompt.
 
 Never ask for the API token in the chat, never print, read back or screenshot it, and never write it to a file: the user creates it and pastes it into GitHub.
@@ -72,9 +73,9 @@ The sync is a change to the project like any other: offer a feature branch and a
 
 ```
 ## Result
-**Did:** the variant, the files added, replaced and removed, what was put back from the project's old files, the `pnpm check:report` checklist, and each Pages project, variable and secret set
-**Saw:** facts observed: the boilerplate commit, `kept` values, real gate and command output, the preview URL if CI already ran
-**Not done:** anything skipped (the Cloudflare and GitHub setup, the ruleset), a failing gate
+**Did:** the variant, the files added, replaced and removed, what was put back from the project's old files, the `pnpm check:report` checklist, each Pages project, variable and secret set, and the pipeline run: its URL, each job's conclusion and the links it deployed (production, preview, coverage, Allure report)
+**Saw:** facts observed: the boilerplate commit, `kept` values, real gate and command output, the secret's `updatedAt` as GitHub listed it, the run's real conclusion
+**Not done:** anything skipped (the Cloudflare and GitHub setup, the ruleset, the run while the secret is missing), a failing gate, a failed job with its cause
 **Blocked by:** blocked files, a side neither its CLI nor Chrome could reach, an admin needed for the ruleset, or "nothing"
 **Next:** the commit and `/web-dev:pr`, what to set by hand (the API token), the old Netlify site and settings to remove
 ```

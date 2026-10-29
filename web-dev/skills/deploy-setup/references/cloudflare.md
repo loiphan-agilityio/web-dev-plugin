@@ -51,7 +51,7 @@ page says what to click. Without the Chrome tools either, ask the user to run `!
 Ask once (the `AskUserQuestion` tool when available): create the four Pages projects `<repo>`,
 `<repo>-storybook`, `<repo>-coverage` and `<repo>-e2e-report` and set the variables, or other
 names. With more than one Cloudflare account (section 2), ask which in the same question. On a yes,
-run sections 2 to 5 without asking again; each CLI command still shows its permission prompt.
+run sections 2 to 5 and 7 without asking again; each CLI command still shows its permission prompt.
 
 ## 2. Account id
 
@@ -92,8 +92,12 @@ it, and tell the user to revoke it and create another.
    token's page, then open
    `https://github.com/<owner>/<repo>/settings/secrets/actions/new`, type the name
    `CLOUDFLARE_API_TOKEN` and hand over: the user pastes the value and clicks Add secret.
-3. **Check.** `gh secret list`, or the page `settings/secrets/actions`, lists
-   `CLOUDFLARE_API_TOKEN` (the value is never shown).
+3. **Check, when the user says it is done.** Never take "done" on trust: `gh secret list --repo
+   <owner>/<repo> --json name,updatedAt`, or the page `settings/secrets/actions`, must list
+   `CLOUDFLARE_API_TOKEN` updated after the hand-over (the value is never shown; an older one is
+   the previous token, unless the user says they kept it). Missing or older: say what the page
+   shows, hand over again and check again on the next "done". Sections 5 and 6 go on meanwhile;
+   section 7 waits for the secret.
 
 ## 5. Variables
 
@@ -147,7 +151,41 @@ which the new workflow never reports, so the pull request could not merge.
 The `deploy-production` job runs in the `production` environment, which GitHub creates on its
 first run; approvals for it are set there (Settings > Environments).
 
-## 7. After a move from Netlify
+## 7. Run the pipeline and wait for it
+
+Once the secret is checked (section 4) and the variables are set (section 5), deploy without
+asking again: the deploy is what the user asked for. Earlier runs could not deploy (no secret, and
+the deploy jobs skip without `CLOUDFLARE_PAGES_APP_PROJECT`), and secrets and variables are read
+when a job runs, so running again is enough:
+
+1. **Start.** The last run of a push to `main`: `gh run list --repo <owner>/<repo> --workflow
+   ci.yml --branch main --event push --limit 1 --json databaseId,url`, then `gh run rerun <id>`.
+   It runs the whole pipeline: checks, preview, Lighthouse, production, then e2e on it. With no
+   such run: `gh workflow run ci.yml --repo <owner>/<repo> --ref main`, then the same `gh run
+   list` with `--event workflow_dispatch` for its id (it can take a few seconds to show); a manual
+   run deploys only the preview (`main-draft`) and Lighthouse, since production follows a push to
+   `main`: say so. With Chrome: the run's page, Re-run all jobs, or the workflow's Run workflow
+   button.
+2. **Wait.** `gh run watch <id> --repo <owner>/<repo> --exit-status --interval 30` in the
+   background (Bash `run_in_background`; never `sleep` or a polling loop), and tell the user it is
+   running, with the run's URL. Its notification is the signal; meanwhile do the rest of the
+   steps.
+3. **Read the result.** `gh run view <id> --repo <owner>/<repo> --json conclusion,headSha,url,jobs`
+   for each job's conclusion. A deploy job skipped means a variable is missing (section 5). A failed job:
+   `gh run view <id> --repo <owner>/<repo> --log-failed`, report its cause (wrangler's
+   `Authentication error [code: 10000]` is a token without Account > Cloudflare Pages > Edit, or for
+   another account: back to section 4), and once the cause is fixed `gh run rerun <id> --failed`
+   and wait again. Fix the cause, never the check; a failure that is not the setup's (an e2e test
+   on production) is reported, since e2e runs after the release and is fixed forward.
+4. **Hand over the links**, as observed, never built from the project names: the run's URL (its
+   summary page links the app, Storybook, the coverage and the Allure report) and the commit
+   statuses the run wrote, `gh api repos/<owner>/<repo>/commits/<sha>/statuses --jq '.[] |
+   "\(.context) \(.target_url)"'` with the run's `headSha` (`Prod - Webapp Deployment`, `Preview -
+   Webapp Deployment`, `Unit coverage report`). The Allure report's URL is the `Allure report`
+   annotation of the `E2E: production` job: `gh api repos/<owner>/<repo>/check-runs/<the job's
+   databaseId>/annotations --jq '.[] | select(.title == "Allure report") | .message'`.
+
+## 8. After a move from Netlify
 
 Once a Cloudflare deploy has passed, the Netlify settings are read by nothing. Offer to remove
 them, each on a yes: `gh secret delete NETLIFY_AUTH_TOKEN`, `gh variable delete NETLIFY_SITE_ID`
