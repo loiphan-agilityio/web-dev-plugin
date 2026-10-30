@@ -3,6 +3,16 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.9
+
+- Each skill with `allowed-tools` loads itself again in a later turn (the user's answer, a
+  subagent's report or a background task's result), so its commands no longer ask for permission
+  there.
+- `accessibility` and `seo` allow the gate commands they run (`pnpm build`, `pnpm typecheck`,
+  `pnpm test`, `pnpm test:e2e …`, `pnpm preview …`).
+- `seo` renders the canonical from each indexable page instead of a fixed tag in `index.html`, and
+  puts none on a `noindex` page; its Result marks each file new or edited as `git status` shows it.
+
 ## 0.2.8
 
 - The boilerplate deploys to Cloudflare Pages, no longer Netlify: `audit`, `security`,

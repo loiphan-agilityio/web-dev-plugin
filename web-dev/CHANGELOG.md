@@ -3,6 +3,37 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.11.0
+
+- New skill `release`: takes a merged pull request to production on the boilerplate's pipeline. It
+  checks the preview and CI, hands the merge to the user, follows the `main` run to Deploy:
+  production and E2E: production, tags a merged commit when asked, and rolls back through a revert
+  pull request. It loads for ship, merge, tag and rollback requests.
+- `guardrails`' hook (`guard.mjs`) also blocks pushes to protected branches (`HEAD` and `@`
+  included), merging or approving a pull request (gh, glab, the API and GraphQL), a Pages deploy to
+  production or without `--branch`, deleting a deployment, and a tag whose commit is not on the
+  remote's default branch. `guardrails` no longer loads for an ordinary feature-branch push. Eval
+  cases 23 to 25.
+- A skill's `allowed-tools` apply only in the turn it is loaded, so every skill that has them now
+  loads itself again when the user's answer, a subagent's report or a background task's result
+  arrives; its commands no longer ask for permission in that turn. `ticket`, `incident` and `pr` run
+  `check-contract.mjs` exactly as approved, and `ticket` runs it in the main session, not in its
+  subagents.
+- `project-setup`: `create-project.sh --name <name>` names the project (the root package, the page
+  `<title>`, the web manifest) instead of the target folder, and refuses `web`. The `node` and
+  `pnpm` version checks run as separate commands.
+- `develop`: Workflow A stops once, for the git questions, before the project is created, and runs
+  the git steps and `pnpm run prepare` through `project-setup`. Its ticket subagents list and search
+  with plain `grep` or `find`, create folders with Write, use `--filter web` for the app's commands,
+  and break one business rule to prove its tests can fail. Step A6 opens the app in Claude in Chrome
+  when it is available. Workflow B always maps the project with `codebase-explorer` first.
+- `feature-development` allows `pnpm typecheck` and `pnpm --filter web typecheck`. `api-integration`
+  stops when Effect's guide cannot be read, and a network-error test asserts that its handler ran.
+- `ui-development`: the app renders `.dark` from `index.html`, so a light design removes the class.
+  A new page goes inside `protectedRoutes`. The break-it check and the visual check are required,
+  with a 375px iframe when the Chrome window cannot be resized. A headless run uses no chained
+  commands, script edits, git or `pkill`.
+
 ## 0.10.2
 
 - `deploy-setup` no longer takes "done" on trust once the user has stored the Cloudflare API
