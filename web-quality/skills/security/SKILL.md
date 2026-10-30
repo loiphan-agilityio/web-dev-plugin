@@ -7,6 +7,8 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) 
 
 # security
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-quality:security`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Close the gaps a web frontend controls: what the host sends, what the dependencies carry, and what
 the code does with untrusted data. Headers and the policy: `references/headers-csp.md`.
 

@@ -7,7 +7,11 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *)
 
 # pr
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:pr`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Open one pull request (GitHub) or merge request (GitLab) for the current branch, described by the PR contract in `references/pr.md`: why, what changed, the ticket contract it implements, and the checklist that proves it. It opens as a draft and is marked ready for review only once CI passes on it, so a protected branch (`main`, `dev`, `staging`, `production`…) never gets a reviewable PR whose CI has not passed.
+
+Run the check exactly as written, `${CLAUDE_SKILL_DIR}/../../` included, as one plain command with no pipe or redirect: `allowed-tools` approves that exact form, and a shortened or resolved path asks for permission.
 
 - check: `node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs <body file>`, run from the project root
 

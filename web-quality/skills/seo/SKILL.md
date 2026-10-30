@@ -2,10 +2,12 @@
 name: seo
 description: This skill should be used when the user asks to "improve SEO", "check meta tags", "add page titles", "make it show up on Google", "add a sitemap", "add Open Graph tags", "fix social previews" or "add structured data" in a web app, or when the web-quality audit routes an SEO finding here. It reads each route's rendered head, checks titles, descriptions, canonical URLs, robots and sitemap, and social cards, fixes them in a React 19 + Vite single-page app, and says when a page needs prerendering. Not for keyword research or content strategy.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/. Needs a browser tool to read the rendered head of each route."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm check)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/pagespeed.mjs *) Bash(pnpm check) Bash(pnpm build) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e *) Bash(pnpm preview *)
 ---
 
 # seo
+
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-quality:seo`, with what arrived as args), then go on: its commands otherwise ask for permission.
 
 Make every public page findable and correctly described in search results and link previews.
 Thresholds: `../../references/thresholds.md`; the details for a client-rendered app:
@@ -40,7 +42,7 @@ Also fetch `/robots.txt` and `/sitemap.xml`: a single-page app's host answers an
 | `title` | unique per route, the page's subject first, about 50–60 characters |
 | `description` | unique per route, about 150 characters, says what the page offers |
 | `h1` | exactly one, matches the title's subject |
-| `canonical` | absolute URL of the preferred version (no tracking parameters) |
+| `canonical` | absolute URL of the preferred version (no tracking parameters); none on a `noindex` page, so a not-found view removes the site-wide one `index.html` sets |
 | `robots` | absent or `index, follow` on public pages; `noindex` on private, search-result and staging pages |
 | `lang` | the content's language |
 | `og:title`, `og:description`, `og:image` | set on pages people share; the image absolute, about 1200 × 630 |
@@ -69,5 +71,6 @@ Google's Lighthouse SEO score (`lab-seo`, target ≥ 95) as a regression guard, 
 ## Result
 
 A table per route (title, description, canonical, h1, robots, social card) before → after, the
-files changed, and what client rendering still limits (link previews per route) with the
+files changed, each marked new or edited as `git status` shows it (a file that existed with a
+placeholder is edited, not new), and what client rendering still limits (link previews per route) with the
 prerendering option if those pages matter.

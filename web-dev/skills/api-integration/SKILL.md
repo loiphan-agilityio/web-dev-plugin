@@ -7,6 +7,8 @@ allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm tes
 
 # api-integration
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:api-integration`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Wire one endpoint through the app's data flow, with a typed error for every failure and an MSW handler for every state:
 
 ```
@@ -16,7 +18,7 @@ component -> useQuery(xQueryOptions()) / useXMutation() -> runEffect(effect, sig
 
 Before writing code, read `node_modules/effect/AGENTS.md` in full, `../../references/stack-guidelines.md` (version traps), and the current `src/lib/api/client.ts`, `errors.ts` and the feature's `api.ts` / `queries.ts` / `mocks.ts` when they exist: match them. In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`.
 
-Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From the monorepo root, as under `develop`'s Workflow A, Effect's guide is `apps/web/node_modules/effect/AGENTS.md` and one test file runs with `pnpm --filter web test <path> --coverage.enabled=false` (the root `test` runs turbo, which rejects Vitest's flags); `pnpm lint:fix` and `pnpm check` work as written.
+Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From `apps/web`, `node_modules/effect` links into the root's `node_modules/.pnpm`: when reading the guide is refused (a session started without `--add-dir ../..`), say so under **Blocked by** and ask the user to restart with it; do not write Effect code without the guide. From the monorepo root, as under `develop`'s Workflow A, Effect's guide is `apps/web/node_modules/effect/AGENTS.md` and one test file runs with `pnpm --filter web test <path> --coverage.enabled=false` (the root `test` runs turbo, which rejects Vitest's flags); `pnpm lint:fix` and `pnpm check` work as written.
 
 **Loaded by `feature-development`:** do steps 1 to 5 for the endpoint, leave the page, routes and nav to it, and put what was done into its Result; its gate step runs the gates.
 

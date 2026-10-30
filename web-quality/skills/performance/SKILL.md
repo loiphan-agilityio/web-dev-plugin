@@ -7,6 +7,8 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/bundle-budget.mjs *) 
 
 # performance
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-quality:performance`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Make the page load and respond fast for real users, proven by numbers before and after.
 Thresholds: `../../references/thresholds.md`.
 

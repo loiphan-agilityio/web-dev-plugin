@@ -7,6 +7,8 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/detect-project.mjs *)
 
 # develop
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:develop`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Route one request to the workflow that fits the project, run it, and report once. Paths are relative to this skill's directory; the plugin's shared files are in `../../scripts/`, `../../references/` and `../../agents/`.
 
 Run the plugin's scripts exactly as written below, each as one plain command with no pipe or redirect: `allowed-tools` approves these exact forms for the run, so one message runs to the end without a permission prompt, headless included.
@@ -68,8 +70,8 @@ Everything else gets the simplest default, listed under **Assumptions**. Workflo
 
 ## 4. Run the workflow
 
-- **A, a new app:** follow `references/new-app.md`; the plan it writes takes the shape of `references/plan.md`.
-- **B, an existing project**, including a whole app or a setup request in a folder that already has files: follow `references/existing-project.md`; it maps the project with the `codebase-explorer` agent (`../../agents/codebase-explorer.md`).
+- **A, a new app:** follow `${CLAUDE_SKILL_DIR}/references/new-app.md`; the plan it writes takes the shape of `${CLAUDE_SKILL_DIR}/references/plan.md`.
+- **B, an existing project**, including a whole app or a setup request in a folder that already has files: follow `${CLAUDE_SKILL_DIR}/references/existing-project.md` (this skill's folder, not the project's); it maps the project with the `codebase-explorer` agent (`${CLAUDE_SKILL_DIR}/../../agents/codebase-explorer.md`).
 - **C, one change in a `template` project, or a landing, ui or ci change in a `landing` project:** invoke the skill from step 2 (Skill tool) and follow it through its gates and its Result. Put the **Route:** line on top of that Result; write no second one.
 - **setup in an empty folder:** invoke `project-setup`; its Result, with the **Route:** line on top, is the report.
 - **landing in an empty folder:** invoke `project-setup` with `--landing` (it asks nothing more), then `ui-development` for the page's copy and sections; one Result.

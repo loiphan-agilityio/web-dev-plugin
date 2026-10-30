@@ -7,13 +7,15 @@ allowed-tools: Bash(node --version) Bash(pnpm --version) Bash(bash ${CLAUDE_SKIL
 
 # project-setup
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:project-setup`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Create the project from the react-vite-boilerplate with the boilerplate's own generator (`create/index.js` in that repository), and leave it green. Every new project starts as the boilerplate at the commit this plugin version pins (`create-project.sh`), lockfile included, and authentication is the boilerplate's tested overlay, not code written here. The result is a pnpm + Turborepo monorepo: the app is `apps/web` (package `web`), the shadcn/ui kit `packages/ui` (`@repo/ui`). The project's root `CLAUDE.md` (the monorepo) and `apps/web/CLAUDE.md` (the app) are its convention source from then on.
 
 Run the scripts exactly as written below, each as one plain command: `allowed-tools` approves these exact forms, so the setup runs without a permission prompt, headless included.
 
 ## 1. Preconditions
 
-`node --version` (22.22 or newer: React Router 8's engines) and `pnpm --version` (10 or newer; it switches to the pinned `pnpm@11.17.0` inside the project). A missing or older tool stops the run: tell the user, and leave system tools to them.
+`node --version` (22.22 or newer: React Router 8's engines) and `pnpm --version` (10 or newer; it switches to the pinned `pnpm@11.17.0` inside the project). A missing or older tool stops the run: tell the user, and leave system tools to them. Run each as its own command, exactly as written: `allowed-tools` approves those two forms, and one chained with anything else (`ls`, `git config`) asks for permission.
 
 ## 2. Target and kind
 
@@ -52,7 +54,7 @@ Never `--no-verify` or `--force`. A no, a skipped question or a failed command g
 
 ## 4. Create
 
-`bash ${CLAUDE_SKILL_DIR}/scripts/create-project.sh <target-dir> --auth` for a web app, or `--landing` for a landing page, followed by ` --replace` when step 3 says so (it deletes the files git tracks outside `.claude/`, then copies the project in; it refuses a working tree with uncommitted changes). It fetches the boilerplate at the commit this plugin version pins (the one its skills were verified against), runs its generator into a temporary folder and copies the result into the target, keeping `.git/` and `.claude/`. The project brings `.claude/settings.json` at its root and in `apps/web` (the commands the skills run, allowed without a prompt, and a hook that runs Prettier on each file Claude writes); an existing root one is kept, and the script says so: say which under **Did**. It copies nothing when:
+`bash ${CLAUDE_SKILL_DIR}/scripts/create-project.sh <target-dir> --auth` for a web app, or `--landing` for a landing page, followed by ` --replace` when step 3 says so (it deletes the files git tracks outside `.claude/`, then copies the project in; it refuses a working tree with uncommitted changes). Add `--name <name>` when the request names the product (`--name acme` for "a landing page for Acme"): it names the root package, the page `<title>` and the web manifest, which otherwise take the target folder's name. Never name it `web` (the app's own package, `apps/web`): the script refuses it, so a target folder named `web` needs `--name`. It fetches the boilerplate at the commit this plugin version pins (the one its skills were verified against), runs its generator into a temporary folder and copies the result into the target, keeping `.git/` and `.claude/`. The project brings `.claude/settings.json` at its root and in `apps/web` (the commands the skills run, allowed without a prompt, and a hook that runs Prettier on each file Claude writes); an existing root one is kept, and the script says so: say which under **Did**. It copies nothing when:
 
 - a project file already exists in the target (with `--replace`, a file git does not track): it lists them and exits 1. Show the list and ask how to proceed; the user's files stay as they are;
 - the fetch fails (no network, no access to the repository, a `BOILERPLATE_REF` that does not exist), the repository has no generator, or the generator stops (it names a patch that no longer matches the boilerplate): report the output.
@@ -89,7 +91,7 @@ Skip under `develop`'s Workflow A (it builds on and reports at the end). Otherwi
 - a web app: sign in as `demo@example.com` / `password` on the mocks; the home page sits inside `protectedRoutes()`, and a new page that needs a signed-in user goes there too (`apps/web/src/app/routes.tsx`);
 - copy `apps/web/.env.example` to `apps/web/.env.local` and set `VITE_API_URL` (every `VITE_*` value is public);
 - conventions live in the root `CLAUDE.md` (the monorepo, its packages, adding an app or a package) and `apps/web/CLAUDE.md` (the app; where its paths differ from the skills' examples, it wins);
-- the web-dev skills run from `apps/web` (`cd apps/web`): at the root, `develop` reports a monorepo root and stops;
+- the web-dev skills run from `apps/web`, started as `cd apps/web && claude --add-dir ../..`: at the root, `develop` reports a monorepo root and stops, and without `--add-dir` the session cannot read `packages/ui` (the theme) or the root's `node_modules/.pnpm`, where `apps/web/node_modules/effect/AGENTS.md` resolves;
 - CI/CD comes with the project (`.github/workflows/ci.yml`: the gates, a Cloudflare Pages preview per pull request, Lighthouse, production, then e2e on it), and deploys nothing until it is connected: `deploy-setup` creates the Pages projects and sets the GitHub secret and variables;
 - next: `feature-development` (a ticket), `api-integration` (an endpoint), `ui-development` (a design), `deploy-setup` (the deploy), or `/web-dev:develop` for any of them.
 

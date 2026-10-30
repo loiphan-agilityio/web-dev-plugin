@@ -73,7 +73,7 @@ Conventions:
 
 - URLs are built from `config.apiUrl`, so they match exactly what `ApiClient` requests.
 - `create<Name>Handlers(initial)` returns fresh state per call; `<name>Mocks` holds one-off states (pending, errors by status, 422). Add one entry per error the endpoint can produce.
-- Network failure: `http.get(url('/todos'), () => HttpResponse.error())` (standard MSW; not in the todos example). It surfaces as `NetworkError`.
+- Network failure: `http.get(url('/todos'), () => HttpResponse.error())` (standard MSW; not in the todos example). It surfaces as `NetworkError`. A request no handler matches fails the same way, so a network-error test still passes when the path is wrong: also assert that the handler ran (a flag it sets before returning), and the break-it check on the path turns it red.
 - Mock bodies must satisfy the response schema, otherwise tests get `InvalidResponseError`. Reuse the schema types for fixtures.
 - Keep error bodies in the shape `ValidationBody` reads: `{ message, errors: { field: 'text' } }`.
 - Infinite loading state: `await delay('infinite')` inside the handler.

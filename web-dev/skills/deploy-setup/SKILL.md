@@ -7,6 +7,8 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/sync-pipeline.mjs *) Bash(p
 
 # deploy-setup
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:deploy-setup`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Give a project created from the react-vite-boilerplate the boilerplate's CI/CD, unit and e2e test setup and Cloudflare Pages deploy, as they are at the commit this plugin version pins (`../project-setup/scripts/create-project.sh`), then connect it to Cloudflare and GitHub. The files come from the boilerplate itself, never from memory: `scripts/sync-pipeline.mjs` creates a reference project of the same kind (web app or landing page) and copies them from it.
 
 - sync: `node ${CLAUDE_SKILL_DIR}/scripts/sync-pipeline.mjs <root>` (a report, writes nothing), then the same with `--apply`

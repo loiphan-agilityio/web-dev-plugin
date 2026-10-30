@@ -2,10 +2,12 @@
 name: ui-development
 description: This skill should be used when the user asks to "implement this design", "make it look like this screenshot", "build this screen from this Figma link", "style it with our DESIGN.md" or "match the mockup" in an app built from the web-dev template (shadcn/ui, Tailwind 4). It turns a design into theme tokens, shadcn components, every data state, tests and a browser check. Not for a ticket without a design (feature-development), one endpoint (api-integration) or a new project (project-setup).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm; the visual check needs a browser tool."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm -w check:report) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm -w check:report) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(pnpm dev:mock) Bash(pnpm dev:mock *)
 ---
 
 # ui-development
+
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:ui-development`, with what arrived as args), then go on: its commands otherwise ask for permission.
 
 Build or restyle a screen so it matches a design. The design is a visual target: the app gets real markup, tokens and components, never the screenshot or Figma frame as an image, and never a temporary Figma asset URL (it expires). Real assets in the design (logo, photos) are downloaded into `src/assets/` and imported, or into `public/` when they need a fixed URL; one that cannot be fetched gets a neutral placeholder.
 
@@ -22,7 +24,7 @@ Use every source present; look before asking:
 - **Figma link:** find the Figma MCP tools (ToolSearch `figma` when deferred). Take each frame's screenshot as the target and the design context for exact values; its generated code (absolute positions, raw hex) is a spec to read, not code to paste. Without the tools, ask for a PNG export per frame and breakpoint; a fetched Figma page renders nothing usable.
 - **None:** ask once: "Do you have a DESIGN.md or a Figma link for this? Both are optional; without them I use the app's current theme." With neither, keep the theme, skip step 2's value changes, and record "no design given: current theme".
 
-Then list what the design leaves out (loading, error and empty states, the other screen width, hover / focus / disabled, dark mode, long text) under **Design gaps**. Ask only when a missing piece changes structure (what a 5-column table becomes on a phone).
+Then list what the design leaves out (loading, error and empty states, the other screen width, hover / focus / disabled, dark mode, long text) under **Design gaps**. Ask only when a missing piece changes structure (what a 5-column table becomes on a phone). Unasked, a table keeps its identifying column and the column the design highlights (a status chip) visible at 375px: hide the secondary columns below `sm` rather than letting a sideways scroll take a highlighted column off-screen.
 
 ## 1. Inventory
 
@@ -30,8 +32,9 @@ Split the design into regions (shell, header, toolbar, list, card, form) and map
 
 ## 2. Tokens
 
-Tailwind 4 is CSS-first: the theme lives in `packages/ui/src/styles/globals.css` (values in `:root` / `.dark`, exposed by `@theme inline`; `apps/web/src/styles/index.css` only imports it), and there is no `tailwind.config.js`. Follow `references/design-mapping.md`:
+Tailwind 4 is CSS-first (from `apps/web`, reading and editing `packages/ui` needs a session started with `--add-dir ../..`: when it is refused, stop and ask the user to restart with it, never move tokens into `apps/web`): the theme lives in `packages/ui/src/styles/globals.css` (values in `:root` / `.dark`, exposed by `@theme inline`; `apps/web/src/styles/index.css` only imports it), and there is no `tailwind.config.js`. Follow `references/design-mapping.md`:
 
+- **Theme first:** `apps/web/index.html` has `<html class="dark">`, so the app renders the `.dark` values. A light design means removing that class and setting `color-scheme` to `light` (`references/design-mapping.md`, Dark mode), page background included, without asking; a dark design means editing `.dark`.
 - Map each design color by role, and edit the **values** in `:root`, so every component, focus ring and toast follows. Keep the design's value as given (hex is valid there).
 - A role the theme lacks (success, warning) gets a new variable, its `@theme inline` line and a `-foreground` pair.
 - Components use tokens only (`bg-primary`, `text-muted-foreground`) and `cn` from `@repo/ui/lib/utils`; raw colors and palette classes bypass the theme.

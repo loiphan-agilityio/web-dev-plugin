@@ -4,7 +4,7 @@
 # authentication overlay, or a landing page (its landing overlay: one public marketing page, no
 # sign-in, built without mocks). A web app always has authentication.
 #
-#   create-project.sh <target-dir> --auth | --landing [--replace]
+#   create-project.sh <target-dir> --auth | --landing [--replace] [--name <name>]
 #
 # There is no default: the generator asks only on a terminal, and Claude's shell is not one, so the
 # skill asks the user and passes the answer. Fetches the boilerplate at the commit pinned below,
@@ -16,6 +16,9 @@
 # --replace (the skill passes it once the user agreed) replaces the files git tracks in the target,
 # outside .claude/: they are deleted, then the project is copied in. It needs a clean working tree,
 # so only committed files go, and untracked files still count as conflicts.
+# --name names the project (the root package, the page <title>, the web manifest) instead of the
+# target folder. The name `web` is refused: it is apps/web's package, and the workspace needs
+# unique names.
 #
 # BOILERPLATE_REPO fetches from another URL (a fork, a mirror, a local repository), its default
 # branch unless BOILERPLATE_REF names another commit, branch or tag (`main` tries the latest).
@@ -33,18 +36,34 @@ elif [[ -n "${BOILERPLATE_REPO:-}" ]]; then
 else
   ref="$pinned"
 fi
-usage="usage: create-project.sh <target-dir> --auth|--landing [--replace]"
+usage="usage: create-project.sh <target-dir> --auth|--landing [--replace] [--name <name>]"
 target="${1:?$usage}"
 kind="${2:-}"
-replace="${3:-}"
 if [[ "$kind" != --auth && "$kind" != --landing ]]; then
   echo "error: pass --auth or --landing (ask the user which); $usage" >&2
   exit 1
 fi
-if [[ -n "$replace" && "$replace" != --replace ]]; then
-  echo "error: unknown option $replace; $usage" >&2
-  exit 1
-fi
+shift 2
+replace=""
+name=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --replace) replace=--replace ;;
+    --name)
+      name="${2:-}"
+      if [[ -z "$name" ]]; then
+        echo "error: --name needs a value; $usage" >&2
+        exit 1
+      fi
+      shift
+      ;;
+    *)
+      echo "error: unknown option $1; $usage" >&2
+      exit 1
+      ;;
+  esac
+  shift
+done
 tracked=""
 if [[ -n "$replace" ]]; then
   if ! git -C "$target" rev-parse --verify --quiet HEAD >/dev/null 2>&1; then
@@ -58,6 +77,17 @@ if [[ -n "$replace" ]]; then
   tracked="$(git -C "$target" ls-files -- . ':(exclude).claude')"
 fi
 
+# The generator names the project after its output folder, a temporary one here: pass --name or the
+# target's name instead (`.` counts as the folder it names). It asks "landing page or web app?" and,
+# for a web app, about authentication: answer both (a web app always gets it).
+if [[ -z "$name" ]]; then
+  name="$(node -p 'require("node:path").basename(require("node:path").resolve(process.argv[1]))' "$target")"
+fi
+if [[ "$(tr '[:upper:]' '[:lower:]' <<< "$name")" == web ]]; then
+  echo "error: the project cannot be named web, the name of its app package (apps/web); pass --name <product name>" >&2
+  exit 1
+fi
+
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 # fetch, not clone: a clone takes only a branch or a tag, and the pin is a commit.
@@ -68,10 +98,6 @@ if [[ ! -f "$tmp/src/create/index.js" ]]; then
   echo "error: $repo has no create/index.js at $ref" >&2
   exit 1
 fi
-# The generator names the project after its output folder, a temporary one here: pass the target's
-# name instead (`.` counts as the folder it names). It asks "landing page or web app?" and, for a
-# web app, about authentication: answer both (a web app always gets it).
-name="$(node -p 'require("node:path").basename(require("node:path").resolve(process.argv[1]))' "$target")"
 if [[ "$kind" == --landing ]]; then choice=(--landing); else choice=(--app "$kind"); fi
 # The generator prints next steps with the temporary path; the skill gives its own.
 node "$tmp/src/create/index.js" "$tmp/out" --from "$tmp/src" "${choice[@]}" --name "$name" >/dev/null
