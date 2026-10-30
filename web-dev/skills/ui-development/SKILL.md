@@ -2,16 +2,20 @@
 name: ui-development
 description: This skill should be used when the user asks to "implement this design", "make it look like this screenshot", "build this screen from this Figma link", "style it with our DESIGN.md" or "match the mockup" in an app built from the web-dev template (shadcn/ui, Tailwind 4). It turns a design into theme tokens, shadcn components, every data state, tests and a browser check. Not for a ticket without a design (feature-development), one endpoint (api-integration) or a new project (project-setup).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm; the visual check needs a browser tool."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm -w check:report) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm -w check:report) Bash(pnpm -w check:report *) Bash(pnpm exec vitest *) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(pnpm dev:mock) Bash(pnpm dev:mock *)
 ---
 
 # ui-development
+
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:ui-development`, with what arrived as args), then go on: its commands otherwise ask for permission.
 
 Build or restyle a screen so it matches a design. The design is a visual target: the app gets real markup, tokens and components, never the screenshot or Figma frame as an image, and never a temporary Figma asset URL (it expires). Real assets in the design (logo, photos) are downloaded into `src/assets/` and imported, or into `public/` when they need a fixed URL; one that cannot be fetched gets a neutral placeholder.
 
 Before starting, read the project's `CLAUDE.md` and `../../references/stack-guidelines.md` (version traps). In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`. Under `develop`'s Workflow A, take the default instead of asking (no design: the current theme; a new font: keep Geist; a palette change: apply it; a structural gap: step 3's mobile rules) and record it under **Design gaps**.
 
 Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From the monorepo root, as under `develop`'s Workflow A, `pnpm lint:fix` and `pnpm check` work as written; the app's own commands take `--filter web` (`pnpm --filter web exec shadcn add <name>`, `pnpm --filter web test <path> --coverage.enabled=false`), since the root scripts run turbo, which rejects their flags.
+
+Read files with the Read tool and change them with Edit or Write; list and search with a plain `ls`, `find` or `grep`, one command each. Never chain commands (`cd … &&`, `;`, a loop, a pipe or a redirect) and never edit with a script (`python3 - <<EOF`, `sed -i`): those forms ask for permission, which a headless run cannot give. Run no git command either (git always asks): read a change with Read, and move a file by writing it at the new path and removing the old one with a plain `rm`. Stop a background dev server with the tool that stops background tasks, never `pkill`.
 
 ## 0. Get the design
 
@@ -22,7 +26,7 @@ Use every source present; look before asking:
 - **Figma link:** find the Figma MCP tools (ToolSearch `figma` when deferred). Take each frame's screenshot as the target and the design context for exact values; its generated code (absolute positions, raw hex) is a spec to read, not code to paste. Without the tools, ask for a PNG export per frame and breakpoint; a fetched Figma page renders nothing usable.
 - **None:** ask once: "Do you have a DESIGN.md or a Figma link for this? Both are optional; without them I use the app's current theme." With neither, keep the theme, skip step 2's value changes, and record "no design given: current theme".
 
-Then list what the design leaves out (loading, error and empty states, the other screen width, hover / focus / disabled, dark mode, long text) under **Design gaps**. Ask only when a missing piece changes structure (what a 5-column table becomes on a phone).
+Then list what the design leaves out (loading, error and empty states, the other screen width, hover / focus / disabled, dark mode, long text) under **Design gaps**. Ask only when a missing piece changes structure (what a 5-column table becomes on a phone). Unasked, a table keeps its identifying column and the column the design highlights (a status chip) visible at 375px: hide the secondary columns below `sm` rather than letting a sideways scroll take a highlighted column off-screen.
 
 ## 1. Inventory
 
@@ -30,8 +34,9 @@ Split the design into regions (shell, header, toolbar, list, card, form) and map
 
 ## 2. Tokens
 
-Tailwind 4 is CSS-first: the theme lives in `packages/ui/src/styles/globals.css` (values in `:root` / `.dark`, exposed by `@theme inline`; `apps/web/src/styles/index.css` only imports it), and there is no `tailwind.config.js`. Follow `references/design-mapping.md`:
+Tailwind 4 is CSS-first (from `apps/web`, reading and editing `packages/ui` needs a session started with `--add-dir ../..`: when it is refused, stop and ask the user to restart with it, never move tokens into `apps/web`): the theme lives in `packages/ui/src/styles/globals.css` (values in `:root` / `.dark`, exposed by `@theme inline`; `apps/web/src/styles/index.css` only imports it), and there is no `tailwind.config.js`. Follow `references/design-mapping.md`:
 
+- **Theme first:** `apps/web/index.html` has `<html class="dark">`, so the app renders the `.dark` values. A light design means removing that class and setting `color-scheme` to `light` (`references/design-mapping.md`, Dark mode), page background included, without asking; a dark design means editing `.dark`.
 - Map each design color by role, and edit the **values** in `:root`, so every component, focus ring and toast follows. Keep the design's value as given (hex is valid there).
 - A role the theme lacks (success, warning) gets a new variable, its `@theme inline` line and a `-foreground` pair.
 - Components use tokens only (`bg-primary`, `text-muted-foreground`) and `cn` from `@repo/ui/lib/utils`; raw colors and palette classes bypass the theme.
@@ -46,15 +51,15 @@ Tailwind 4 is CSS-first: the theme lives in `packages/ui/src/styles/globals.css`
 - Data screens render the four states (`../feature-development/references/ui-states.md`), styled to the design: skeletons shaped like its rows, the empty state with the next action.
 - Spacing and type round to the 4px rhythm and type scale; an intentional off-scale value goes under **Design gaps**, as does low-contrast text (the token stays).
 - Keep shadcn's hover, `focus-visible` and `disabled` styles.
-- Data, forms and endpoints follow `feature-development` and `api-integration` (forms: `../feature-development/references/forms.md`). A new page gets its route factory, its entry in `src/app/routes.tsx` and a nav `Link` from `react-router` before tests and the visual check.
+- Data, forms and endpoints follow `feature-development` and `api-integration` (forms: `../feature-development/references/forms.md`). A new page gets its route factory, its entry in `src/app/routes.tsx` and a nav `Link` from `react-router` before tests and the visual check. In an app with the sign-in feature (`src/features/auth/`), that entry goes inside `protectedRoutes([...])` like the other pages: a design that shows no sign-in does not make the page public.
 
 ## 4. Tests
 
-React Testing Library by role and label for what the design shows: headings, landmarks, lists, buttons, labels. Every new component gets its own folder (`components/<Name>/index.tsx`, `../feature-development/references/feature-layout.md`) and its own test in that folder's `__tests__/` with `renderWithProviders`; the page test (`renderRoute`) covers how the parts work together; data screens test the four states (`../feature-development/references/testing.md`). Behaviour is asserted, not class names or colors.
+React Testing Library by role and label for what the design shows: headings, landmarks, lists, buttons, labels. Every new component gets its own folder (`components/<Name>/index.tsx`, `../feature-development/references/feature-layout.md`) and its own test in that folder's `__tests__/` with `renderWithProviders`; the page test (`renderRoute`) covers how the parts work together; data screens test the four states (`../feature-development/references/testing.md`). Behaviour is asserted, not class names or colors. Prove the new tests can fail: break one line they cover (a filter, a label, a status mapping in `model.ts`), run that test file (`pnpm test <path> --coverage.enabled=false`), see it go red, put the line back, and name the line and the red count under **Saw**.
 
 ## 5. Visual check
 
-Follow `references/visual-check.md`: with a browser tool, compare the page with the design region by region and fix, at most 3 rounds. With only a `DESIGN.md`, check its colors, type and spacing show; with no design, check the page at desktop width and 375px. Without a browser tool, record "visual check not done" under **Not done**.
+Read `references/visual-check.md` and follow it before the gates: with a browser tool (the desktop app's browser or Claude in Chrome, deferred tools included), this step is required, never skipped; compare the page with the design region by region and fix, at most 3 rounds. With only a `DESIGN.md`, check its colors, type and spacing show; with no design, check the page at desktop width and 375px. Without a browser tool, record "visual check not done" under **Not done**.
 
 ## 6. Gates
 

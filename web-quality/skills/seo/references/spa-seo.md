@@ -66,7 +66,9 @@ site none).
 
 One URL per page: pick `https` and with or without `www`, redirect the others at the host, and
 set `<link rel="canonical" href="https://www.example.com/todos">` on each page (React 19 hoists it
-like `<title>`). Query parameters for tracking or sorting do not make a new page.
+like `<title>`). Query parameters for tracking or sorting do not make a new page. Render it from
+each indexable page, not as a fixed tag in `index.html`: a fixed tag stays on every view, so the
+not-found view, which is `noindex`, would point its canonical at another page.
 
 ## Social cards
 

@@ -80,6 +80,12 @@ expect existing-kept 1 'apps/web/CLAUDE.md' -- "$tmp/auth" --auth
 expect file-for-dir 1 'apps (a file where the project has a directory)' -- "$tmp/blocked" --auth
 [[ "$(ls -A "$tmp/blocked")" == apps ]] || fail "file-for-dir copied files into $tmp/blocked"
 expect bad-option 1 'unknown option' -- "$tmp/none" --auth --force
+expect name-web 1 'cannot be named web' -- "$tmp/web" --landing
+[[ ! -e "$tmp/web" ]] || fail "name-web created $tmp/web"
+expect name-empty 1 '--name needs a value' -- "$tmp/none" --landing --name
+expect named-landing 0 'a landing page' -- "$tmp/web" --landing --name acme
+holds named-package "$tmp/web/package.json" '"name": "acme"'
+holds named-title "$tmp/web/apps/web/index.html" '<title>acme</title>'
 expect replace-no-git 1 'needs a git repository' -- "$tmp/blocked" --auth --replace
 echo dirty >>"$tmp/replace/old.txt"
 expect replace-dirty 1 'needs a clean working tree' -- "$tmp/replace" --auth --replace

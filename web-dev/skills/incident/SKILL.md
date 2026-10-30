@@ -7,7 +7,11 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *)
 
 # incident
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:incident`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Write the record of one incident in `docs/incidents/<id>/`: what happened (`report.md`), why (`rca.md`) and what changes so it does not happen again (`actions.md`). It is blameless: it names changes, gates and alerts, never people at fault. The templates are in `references/`: copy their sections in order and replace every `<!-- fill ... -->` comment.
+
+Run the check exactly as written, `${CLAUDE_SKILL_DIR}/../../` included, as one plain command with no pipe or redirect: `allowed-tools` approves that exact form, and a shortened or resolved path asks for permission.
 
 - check: `node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs docs/incidents/<id>`
 

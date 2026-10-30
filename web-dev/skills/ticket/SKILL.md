@@ -7,7 +7,11 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *)
 
 # ticket
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:ticket`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Write the contract for one ticket or several: three files in `docs/tickets/<id>/` that say why (`intent.md`), what, testably (`spec.md`) and how, in build order (`plan.md`). The contract is reviewed before any code, and `feature-development` builds from it. The templates are in `references/`: copy their sections in order and replace every `<!-- fill ... -->` comment.
+
+Run the check exactly as written, `${CLAUDE_SKILL_DIR}/../../` included, as one plain command with no pipe or redirect: `allowed-tools` approves that exact form, and a shortened or resolved path asks for permission.
 
 - check: `node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs docs/tickets/<id>`
 
@@ -34,11 +38,11 @@ Before writing, read the project's `CLAUDE.md` (and `apps/web/CLAUDE.md` in a mo
 With two or more tickets, write each in its own subagent (Agent tool, `general-purpose`), all started in one message, at most five at a time. They are safe to run together: each writes only its own `docs/tickets/<id>/`. Give each a self-contained brief, since it does not see this conversation:
 
 - the project's absolute path, the ticket's id and full text;
-- the absolute paths of the three templates (`${CLAUDE_SKILL_DIR}/references/intent.md`, `${CLAUDE_SKILL_DIR}/references/spec.md`, `${CLAUDE_SKILL_DIR}/references/plan.md`) and of the check script;
+- the absolute paths of the three templates (`${CLAUDE_SKILL_DIR}/references/intent.md`, `${CLAUDE_SKILL_DIR}/references/spec.md`, `${CLAUDE_SKILL_DIR}/references/plan.md`) and the check's rules from step 3;
 - the rules of this step 2, and: write only `docs/tickets/<id>/`, never code, never commit;
-- done when the check exits 0; report the check's JSON and the open questions.
+- do not run the check script (a subagent does not get this skill's `allowed-tools`, so it would ask for permission); done when the three files follow the templates and step 3's rules; report the files and the open questions.
 
-Run the check yourself on every folder when they report, and fix or re-brief any that fails.
+The check runs here, not in the subagents: run it yourself on every folder when they report, and fix or re-brief any that fails.
 
 ## 3. Check
 

@@ -7,6 +7,8 @@ allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-headers.mjs *) 
 
 # audit
 
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-quality:audit`, with what arrived as args), then go on: its commands otherwise ask for permission.
+
 Find what keeps a web page from being fast, accessible, findable and safe, from evidence. A score or
 a code smell is a lead, not a finding: measure first, read the code where the measurement points,
 and say which findings were measured and which are only read from the source.

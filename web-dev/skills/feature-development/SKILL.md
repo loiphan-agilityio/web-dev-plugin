@@ -2,16 +2,18 @@
 name: feature-development
 description: This skill should be used when the user asks to "implement this ticket", "build the X page", "add a form for X", "create a CRUD screen" or "develop the feature in this issue" in an app built from the web-dev template (React, Effect, TanStack Query, React Hook Form, shadcn/ui). It turns one ticket into a tested feature folder with schemas, business rules, API calls, queries, form, the four UI states, routes, tests and stories. Not for a new project (project-setup), one endpoint alone (api-integration) or a design with no ticket (ui-development).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the api-integration and ui-development skills' references. Needs Node 22.22 or newer and pnpm."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *) Bash(pnpm -w check:report) Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(npm run format) Bash(yarn format) Bash(bun run lint:fix)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/check-contract.mjs *) Bash(pnpm -w check:report) Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web typecheck) Bash(pnpm typecheck) Bash(pnpm --filter web exec shadcn add *) Bash(npm run format) Bash(yarn format) Bash(bun run lint:fix)
 ---
 
 # feature-development
+
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:feature-development`, with what arrived as args), then go on: its commands otherwise ask for permission.
 
 Turn one ticket into a tested feature in `src/features/<name>/`. `references/` holds the worked todos feature (a list and a create form), verified in a project from the boilerplate: copy its shapes, never library code from memory.
 
 Before writing code, read the project's `CLAUDE.md`, `../../references/stack-guidelines.md` (version traps) and, for Effect code, `node_modules/effect/AGENTS.md` in full. In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`.
 
-Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From the monorepo root, as under `develop`'s Workflow A, `pnpm lint:fix`, `pnpm check`, `pnpm test`, `pnpm test:watch` and `pnpm test:e2e:install` work as written, but the root scripts run turbo, which rejects the app's own flags: the rest take `--filter web` (`pnpm --filter web test <path> --coverage.enabled=false`, `pnpm --filter web exec shadcn add <name>`), and Effect's guide is `apps/web/node_modules/effect/AGENTS.md`.
+Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From `apps/web`, `node_modules/effect` links into the root's `node_modules/.pnpm`: when reading the guide is refused (a session started without `--add-dir ../..`), say so under **Blocked by** and ask the user to restart with it; do not write Effect code without the guide. From the monorepo root, as under `develop`'s Workflow A, `pnpm lint:fix`, `pnpm check`, `pnpm test`, `pnpm test:watch` and `pnpm test:e2e:install` work as written, but the root scripts run turbo, which rejects the app's own flags: the rest take `--filter web` (`pnpm --filter web test <path> --coverage.enabled=false`, `pnpm --filter web exec shadcn add <name>`), and Effect's guide is `apps/web/node_modules/effect/AGENTS.md`.
 
 ## 1. Understand the ticket
 

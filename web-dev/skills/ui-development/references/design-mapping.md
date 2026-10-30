@@ -127,7 +127,7 @@ The `:root` block holds the values. These are the lines you change:
   --primary-foreground: oklch(0.985 0 0);
 ```
 
-Replace `oklch(0.58 0.2 277)` with the design's value exactly as the design gives it; a hex color is valid here. Do the same for each role you mapped in the color table, and for `--radius`. Change the matching lines in `.dark` only when the design shows a dark version:
+Replace `oklch(0.58 0.2 277)` with the design's value exactly as the design gives it; a hex color is valid here. Do the same for each role you mapped in the color table, and for `--radius`. The app renders the `.dark` block, not `:root` (see Dark mode below), so a light design also takes the steps there. Change the matching lines in `.dark` when the design is dark:
 
 ```css
 .dark {
@@ -162,4 +162,21 @@ A different family needs a new `@fontsource` dependency: ask the user before add
 
 ## Dark mode
 
-Dark mode is not wired. `globals.css` has `@custom-variant dark (&:is(.dark *));` and a `.dark` block, but nothing adds the `.dark` class: there is no ThemeProvider, and `next-themes` is imported only by `packages/ui/src/components/sonner.tsx`. When the design shows a dark version, set the `.dark` values so the theme is ready, and report "dark tokens set, dark theme not active in the app" under **Design gaps**. Switching themes (a toggle, or following `prefers-color-scheme`) is a separate feature: ask before building it.
+The app is dark by default. `apps/web/index.html` fixes the theme in its first lines, and nothing changes it at run time (there is no ThemeProvider; `next-themes` is imported only by `packages/ui/src/components/sonner.tsx`):
+
+```html
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0b0c16" />
+```
+
+So every page renders the `.dark` values in `globals.css`. Match the design's theme:
+
+- **A dark design:** edit the `.dark` values.
+- **A light design:** edit the `:root` values, remove `class="dark"` from `<html>`, set `color-scheme` to `light` and `theme-color` to the design's page background. List the three `index.html` changes under **Did**. Do it without asking, even though the theme changes every page (sign-in and home included): matching the design's theme is what the request asked for.
+- **Both versions:** do both edits, keep the theme the design shows first, and report the other as "tokens set, theme not active in the app" under **Design gaps**.
+
+Switching themes (a toggle, or following `prefers-color-scheme`) is a separate feature: ask before building it.

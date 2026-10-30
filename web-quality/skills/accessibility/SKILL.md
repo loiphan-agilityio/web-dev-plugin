@@ -2,10 +2,12 @@
 name: accessibility
 description: This skill should be used when the user asks to "check accessibility", "make it accessible", "WCAG audit", "a11y review", "fix keyboard navigation", "screen reader support", "check color contrast" or "add axe tests" in a web app, or when the web-quality audit routes an accessibility finding here. It runs automated axe checks, walks the page by keyboard and through its accessibility tree against WCAG 2.2 AA, fixes the issues in a React app with shadcn/ui, and adds a regression test. Not for content writing or legal compliance advice.
 compatibility: "Claude Code, as part of the web-quality plugin: reads the plugin's references/. Needs a browser tool for the keyboard and accessibility-tree checks, and Playwright in the project for the automated test."
-allowed-tools: Bash(pnpm test:e2e) Bash(pnpm lint) Bash(pnpm check)
+allowed-tools: Bash(pnpm test:e2e) Bash(pnpm lint) Bash(pnpm check) Bash(pnpm build) Bash(pnpm typecheck) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e *) Bash(pnpm preview *)
 ---
 
 # accessibility
+
+`allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-quality:accessibility`, with what arrived as args), then go on: its commands otherwise ask for permission.
 
 Make every page usable by keyboard, screen reader, zoom and low vision, to WCAG 2.2 AA, and keep it
 that way with tests. Thresholds: `../../references/thresholds.md`; the checklist:
