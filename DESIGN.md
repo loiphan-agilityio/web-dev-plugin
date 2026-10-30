@@ -56,7 +56,7 @@ flowchart TD
 
 | Tier (`detect-project.mjs`) | The folder | Workflow |
 |---|---|---|
-| `new` | empty, or files without `package.json` (the app goes in a subfolder) | A: `docs/plan.md`, `project-setup`, `feature-development` per ticket, `ui-development` with a design; never asks |
+| `new` | empty, or files without `package.json` (the app goes in a subfolder) | A: `docs/plan.md`, `project-setup`, `feature-development` per ticket, `ui-development` with a design; asks only the git questions |
 | `template` | an app from the boilerplate (`apps/web`) | C: the one skill the request needs (A for a whole app: no new scaffold) |
 | `landing` | a landing page from the boilerplate: its UI kit, no API layer or Effect | C with `ui-development` for a landing or ui change, with `deploy-setup` for CI/CD; B for anything that needs data, so a library the page lacks is a question |
 | `same-stack` | the same stack, another layout | B: `codebase-explorer` maps the roles, then the skill works through the project's own files |

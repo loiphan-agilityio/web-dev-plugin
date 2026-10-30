@@ -34,7 +34,7 @@ Each route's skills, scripts and checks: [workflow map](../docs/workflow-map/REA
 
 | Skill | Does | Example |
 |---|---|---|
-| `develop` | The entry point: detects the folder (`scripts/detect-project.mjs`), then builds a whole app (**A**, planned in `docs/plan.md`, never asks), changes a React project not made from the boilerplate (**B**, mapped first by the `codebase-explorer` agent, checked by `scripts/verify-project.sh`) or makes one change in an app from it (**C**) | "/web-dev:develop Build an employee management app with CRUD, search and forms" |
+| `develop` | The entry point: detects the folder (`scripts/detect-project.mjs`), then builds a whole app (**A**, planned in `docs/plan.md`, asks only the git questions), changes a React project not made from the boilerplate (**B**, mapped first by the `codebase-explorer` agent, checked by `scripts/verify-project.sh`) or makes one change in an app from it (**C**) | "/web-dev:develop Build an employee management app with CRUD, search and forms" |
 | `project-setup` | A new project from the react-vite-boilerplate (`scripts/create-project.sh`): a landing page or a web app with sign-in, companion skills installed, all gates green | "Scaffold a new web app called billing-portal, with login" |
 | `feature-development` | A ticket → a feature folder: schemas, API calls, queries, form, the four UI states, routes, a test and a story per component | "Implement this ticket: &lt;paste or issue URL&gt;" |
 | `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |

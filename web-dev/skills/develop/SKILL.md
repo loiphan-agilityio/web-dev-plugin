@@ -66,7 +66,7 @@ Ask once, in one message, before writing code, when:
 - the work needs an action outside the folder (push, deploy): this version does none, except the push and the PR or MR that `pr` makes when the user asks for one, and the Cloudflare and GitHub setup `deploy-setup` makes, each command confirmed;
 - a **setup** request that does not say whether it is a landing page or a web app (a web app comes with authentication): `project-setup` asks, as its step 2 says, and never picks it for the user.
 
-Everything else gets the simplest default, listed under **Assumptions**. Workflow A never asks: the user asked once and expects a running app (always a web app, so with authentication).
+Everything else gets the simplest default, listed under **Assumptions**. Workflow A asks only `project-setup`'s git questions (`references/new-app.md`, A2): the user asked once and expects a running app (always a web app, so with authentication).
 
 ## 4. Run the workflow
 
@@ -74,7 +74,7 @@ Everything else gets the simplest default, listed under **Assumptions**. Workflo
 - **B, an existing project**, including a whole app or a setup request in a folder that already has files: follow `${CLAUDE_SKILL_DIR}/references/existing-project.md` (this skill's folder, not the project's); it maps the project with the `codebase-explorer` agent (`${CLAUDE_SKILL_DIR}/../../agents/codebase-explorer.md`).
 - **C, one change in a `template` project, or a landing, ui or ci change in a `landing` project:** invoke the skill from step 2 (Skill tool) and follow it through its gates and its Result. Put the **Route:** line on top of that Result; write no second one.
 - **setup in an empty folder:** invoke `project-setup`; its Result, with the **Route:** line on top, is the report.
-- **landing in an empty folder:** invoke `project-setup` with `--landing` (it asks nothing more), then `ui-development` for the page's copy and sections; one Result.
+- **landing in an empty folder:** invoke `project-setup` with `--landing` (it asks only its git questions), then `ui-development` for the page's copy and sections; one Result.
 - **ticket contract, incident, pr:** invoke `ticket`, `incident` or `pr`; its Result, with the **Route:** line on top, is the report.
 
 ## Result
