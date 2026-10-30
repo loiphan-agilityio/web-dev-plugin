@@ -1,6 +1,6 @@
 # Workflow A: a new app from one description
 
-Turn one description into a running app on mocked data. Every gap gets a sensible default that is written down; nothing stops for a question.
+Turn one description into a running app on mocked data. Every gap gets a sensible default that is written down; the one stop is `project-setup`'s git questions (A2).
 
 ```
 description -> docs/plan.md -> project-setup -> feature-development x N (one subagent each, in order) -> [ui-development] -> gates -> run
