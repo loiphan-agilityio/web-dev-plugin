@@ -2,7 +2,7 @@
 name: ui-development
 description: This skill should be used when the user asks to "implement this design", "make it look like this screenshot", "build this screen from this Figma link", "style it with our DESIGN.md" or "match the mockup" in an app built from the web-dev template (shadcn/ui, Tailwind 4). It turns a design into theme tokens, shadcn components, every data state, tests and a browser check. Not for a ticket without a design (feature-development), one endpoint (api-integration) or a new project (project-setup).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's references/ and scripts/ and the feature-development skill's references. Needs Node 22.22 or newer and pnpm; the visual check needs a browser tool."
-allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm -w check:report) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(pnpm dev:mock) Bash(pnpm dev:mock *)
+allowed-tools: Bash(pnpm lint) Bash(pnpm lint:fix) Bash(pnpm test) Bash(pnpm test *) Bash(pnpm test:e2e:install) Bash(pnpm check) Bash(pnpm -w check:report) Bash(pnpm -w check:report *) Bash(pnpm exec vitest *) Bash(pnpm exec shadcn add *) Bash(pnpm --filter web test *) Bash(pnpm --filter web exec shadcn add *) Bash(pnpm dev:mock) Bash(pnpm dev:mock *)
 ---
 
 # ui-development
@@ -14,6 +14,8 @@ Build or restyle a screen so it matches a design. The design is a visual target:
 Before starting, read the project's `CLAUDE.md` and `../../references/stack-guidelines.md` (version traps). In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`. Under `develop`'s Workflow A, take the default instead of asking (no design: the current theme; a new font: keep Geist; a palette change: apply it; a structural gap: step 3's mobile rules) and record it under **Design gaps**.
 
 Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From the monorepo root, as under `develop`'s Workflow A, `pnpm lint:fix` and `pnpm check` work as written; the app's own commands take `--filter web` (`pnpm --filter web exec shadcn add <name>`, `pnpm --filter web test <path> --coverage.enabled=false`), since the root scripts run turbo, which rejects their flags.
+
+Read files with the Read tool and change them with Edit or Write; list and search with a plain `ls`, `find` or `grep`, one command each. Never chain commands (`cd … &&`, `;`, a loop, a pipe or a redirect) and never edit with a script (`python3 - <<EOF`, `sed -i`): those forms ask for permission, which a headless run cannot give. Run no git command either (git always asks): read a change with Read, and move a file by writing it at the new path and removing the old one with a plain `rm`. Stop a background dev server with the tool that stops background tasks, never `pkill`.
 
 ## 0. Get the design
 
@@ -49,15 +51,15 @@ Tailwind 4 is CSS-first (from `apps/web`, reading and editing `packages/ui` need
 - Data screens render the four states (`../feature-development/references/ui-states.md`), styled to the design: skeletons shaped like its rows, the empty state with the next action.
 - Spacing and type round to the 4px rhythm and type scale; an intentional off-scale value goes under **Design gaps**, as does low-contrast text (the token stays).
 - Keep shadcn's hover, `focus-visible` and `disabled` styles.
-- Data, forms and endpoints follow `feature-development` and `api-integration` (forms: `../feature-development/references/forms.md`). A new page gets its route factory, its entry in `src/app/routes.tsx` and a nav `Link` from `react-router` before tests and the visual check.
+- Data, forms and endpoints follow `feature-development` and `api-integration` (forms: `../feature-development/references/forms.md`). A new page gets its route factory, its entry in `src/app/routes.tsx` and a nav `Link` from `react-router` before tests and the visual check. In an app with the sign-in feature (`src/features/auth/`), that entry goes inside `protectedRoutes([...])` like the other pages: a design that shows no sign-in does not make the page public.
 
 ## 4. Tests
 
-React Testing Library by role and label for what the design shows: headings, landmarks, lists, buttons, labels. Every new component gets its own folder (`components/<Name>/index.tsx`, `../feature-development/references/feature-layout.md`) and its own test in that folder's `__tests__/` with `renderWithProviders`; the page test (`renderRoute`) covers how the parts work together; data screens test the four states (`../feature-development/references/testing.md`). Behaviour is asserted, not class names or colors.
+React Testing Library by role and label for what the design shows: headings, landmarks, lists, buttons, labels. Every new component gets its own folder (`components/<Name>/index.tsx`, `../feature-development/references/feature-layout.md`) and its own test in that folder's `__tests__/` with `renderWithProviders`; the page test (`renderRoute`) covers how the parts work together; data screens test the four states (`../feature-development/references/testing.md`). Behaviour is asserted, not class names or colors. Prove the new tests can fail: break one line they cover (a filter, a label, a status mapping in `model.ts`), run that test file (`pnpm test <path> --coverage.enabled=false`), see it go red, put the line back, and name the line and the red count under **Saw**.
 
 ## 5. Visual check
 
-Follow `references/visual-check.md`: with a browser tool, compare the page with the design region by region and fix, at most 3 rounds. With only a `DESIGN.md`, check its colors, type and spacing show; with no design, check the page at desktop width and 375px. Without a browser tool, record "visual check not done" under **Not done**.
+Read `references/visual-check.md` and follow it before the gates: with a browser tool (the desktop app's browser or Claude in Chrome, deferred tools included), this step is required, never skipped; compare the page with the design region by region and fix, at most 3 rounds. With only a `DESIGN.md`, check its colors, type and spacing show; with no design, check the page at desktop width and 375px. Without a browser tool, record "visual check not done" under **Not done**.
 
 ## 6. Gates
 

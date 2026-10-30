@@ -10,9 +10,9 @@ A dev server with nothing to look at it is wasted time and a stray process, so c
   The `mcp__remote-devices__Claude_Browser__*` prefix (a cloud session linked to the user's computer) cannot reach a dev server in Claude's environment: treat it as no browser, and never expose or tunnel the dev server to get around that.
 - **Claude in Chrome**: tools named `mcp__claude-in-chrome__*`. Before it is turned on, the only one present may be `enable__mcp__claude-in-chrome`; call that first and the others appear. Load what you need in ONE ToolSearch call:
   ```
-  ToolSearch with query "select:mcp__claude-in-chrome__tabs_context_mcp,mcp__claude-in-chrome__navigate,mcp__claude-in-chrome__computer,mcp__claude-in-chrome__read_page,mcp__claude-in-chrome__tabs_create_mcp,mcp__claude-in-chrome__tabs_close_mcp"
+  ToolSearch with query "select:mcp__claude-in-chrome__tabs_context_mcp,mcp__claude-in-chrome__navigate,mcp__claude-in-chrome__computer,mcp__claude-in-chrome__read_page,mcp__claude-in-chrome__tabs_create_mcp,mcp__claude-in-chrome__tabs_close_mcp,mcp__claude-in-chrome__javascript_tool"
   ```
-  Add `mcp__claude-in-chrome__read_console_messages` to the same call if you want to see runtime errors, `mcp__claude-in-chrome__javascript_tool` if the design shows dark mode (section 4), and a window-resize tool if the deferred tool names include one (section 3, step 4).
+  Add `mcp__claude-in-chrome__read_console_messages` to the same call if you want to see runtime errors, `mcp__claude-in-chrome__javascript_tool` (the width fallback in section 3, step 4, and dark mode in section 4), and a window-resize tool if the deferred tool names include one (section 3, step 4).
   Chrome reaches the dev server only when it runs on the same machine as Claude's shell. From a cloud session `localhost` does not resolve: if the URL does not load, go to section 2.
   If the Claude in Chrome skill is installed, read it before the first browser call; it has the session rules (tabs, permissions, when to stop). Follow section 3B.
 
@@ -57,7 +57,7 @@ Neither browser, or it cannot load the page (headless and CI runs land here):
    ```
 2. **Read the real URL and port from Vite's output.** Do not assume one: Vite moves to another port when the usual one is busy.
 3. **Open the page in a NEW tab.** Never reuse or navigate the user's tabs: `tabs_context_mcp` first, then `tabs_create_mcp`, then `navigate`.
-4. **Screenshot at the design's width and at 375px** (`computer` with action `"screenshot"`). For the width, use the window-resize tool you loaded in section 1 if there was one (do not guess a tool name); otherwise ask the user to resize the window or use the browser's device mode, and if that is not possible, record the widths you could not check under **Not done**.
+4. **Screenshot at the design's width and at 375px** (`computer` with action `"screenshot"`). For the width, use the window-resize tool you loaded in section 1 if there was one (do not guess a tool name), then read `window.innerWidth` with `javascript_tool`: a maximized or fixed window keeps its width. When the width did not change, show the page in a frame of that width on the same origin, where the app keeps its sign-in: `javascript_tool` with `document.body.innerHTML = '<iframe src="<route>" style="width:375px;height:812px;border:0"></iframe>'`, wait, screenshot, then `navigate` to the route again. Only if neither works, record the widths you could not check under **Not done**.
 
 ### Both browsers: compare
 
@@ -70,7 +70,7 @@ Neither browser, or it cannot load the page (headless and CI runs land here):
    - icons: right icon, size, color.
 6. **Fix in the code**, tokens first (`packages/ui/src/styles/globals.css`), then component classes. The token and component rules from `design-mapping.md` still hold: no raw colors to "make it match", no edits to `packages/ui/src/components/`.
 7. **Repeat at most 3 rounds.** Pixel-perfect is not the goal; the design's structure, spacing rhythm, colors and type are. Whatever still differs after round 3 goes under **Not done** as remaining differences, each with a one-line reason (a rounded value, a variant difference, a missing asset).
-8. **Clean up:** close the tab you opened (`tabs_close_mcp`) and stop the background dev server.
+8. **Clean up:** close the tab you opened (`tabs_close_mcp`) and stop the background dev server with the tool that stops background tasks, never `pkill`.
 
 States the design does not show (loading, error, empty) are proven by the tests; you do not need to force them in the browser.
 
