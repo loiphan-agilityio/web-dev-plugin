@@ -26,8 +26,6 @@ the code.
   <img alt="/web-dev:develop runs detect-project.mjs, then routes: an empty folder to setup or landing, new or template to Workflow A for a whole app, template to Workflow C, landing to the landing route, same or other stack to Workflow B, unsupported to a stop, contract requests to ticket, incident or pr, and the rest to not yet." src="../docs/workflow-map/develop-light.svg">
 </picture>
 
-Each route's skills, scripts and checks: [workflow map](../docs/workflow-map/README.md).
-
 ## Skills
 
 ### Build

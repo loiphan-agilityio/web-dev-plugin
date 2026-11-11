@@ -52,7 +52,7 @@ The tier decides whether the template's rules apply, so a failed detection stops
 | **feature** | a ticket, page, form or CRUD screen | `template`: C with `feature-development`. Otherwise: B |
 | **api** | one endpoint, an error case, a mock, cache invalidation | `template`: C with `api-integration`. Otherwise: B |
 | **ui** | a design to match, with no ticket | `template`, `landing`: C with `ui-development`. Otherwise: B |
-| **ci** | a CI/CD pipeline, unit or e2e tests in CI, a deploy, the hosting's setup (Cloudflare Pages, GitHub secrets and variables), a move from Netlify | `template`, `landing`: C with `deploy-setup`. Otherwise: **not yet** (CI/CD only in a project from the boilerplate) |
+| **ci** | a CI/CD pipeline, unit or e2e tests in CI, a deploy, the hosting's setup (Cloudflare Pages, GitHub secrets and variables) | `template`, `landing`: C with `deploy-setup`. Otherwise: **not yet** (CI/CD only in a project from the boilerplate) |
 | **not yet** | a bug fix, a review with no edits, a commit or push on its own (beyond the contract commit `ticket` and `incident` make, and the push `pr` makes), or CI/CD work in a project not made from the boilerplate | say this version does not cover it; change nothing |
 
 Sort a mixed request by its largest part (a whole app with a design is **app**; a ticket with a design is **feature**). The first line of the Result is `**Route:** <kind>, <tier>, workflow <A|B|C> (<reason>)`.

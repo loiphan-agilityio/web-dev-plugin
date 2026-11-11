@@ -1,6 +1,6 @@
 ---
 name: deploy-setup
-description: This skill should be used when the user asks to "set up CI/CD", "set up deployment", "deploy the app to Cloudflare Pages", "run the unit and e2e tests in CI", "add the pipeline from the boilerplate", "update our CI to the boilerplate's" or "move from Netlify to Cloudflare" in a project created from the react-vite-boilerplate. It brings the boilerplate's pipeline into the project at the commit this plugin pins (GitHub Actions running lint, typecheck, unit tests with coverage, build, Storybook, a Cloudflare Pages preview per pull request, Lighthouse, the production deploy, then Playwright e2e on production with an Allure report), runs every gate, then creates the Pages projects and sets the GitHub secret and variables, asking before each command. Not for a project not made from the boilerplate, GitLab or another host, or a pipeline written from scratch.
+description: This skill should be used when the user asks to "set up CI/CD", "set up deployment", "deploy the app to Cloudflare Pages", "run the unit and e2e tests in CI", "add the pipeline from the boilerplate" or "update our CI to the boilerplate's" in a project created from the react-vite-boilerplate. It brings the boilerplate's pipeline into the project at the commit this plugin pins (GitHub Actions running lint, typecheck, unit tests with coverage, build, Storybook, a Cloudflare Pages preview per pull request, Lighthouse, the production deploy, then Playwright e2e on production with an Allure report), runs every gate, then creates the Pages projects and sets the GitHub secret and variables, asking before each command. Not for a project not made from the boilerplate, GitLab or another host, or a pipeline written from scratch.
 compatibility: "Claude Code, as part of the web-dev plugin only (runs project-setup's create-project.sh and the plugin's detect-project.mjs). Needs Node 22.22 or newer, pnpm, git, and network access to fetch the boilerplate; the deploy setup needs a Cloudflare account and a GitHub repository, reached with gh and wrangler or, without them, Claude in Chrome signed in to both."
 allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/sync-pipeline.mjs *) Bash(pnpm install) Bash(pnpm test:e2e:install) Bash(pnpm check:report)
 ---
@@ -18,10 +18,9 @@ Run it exactly as written, as one plain command with no pipe or redirect: `allow
 | Field | Holds |
 |---|---|
 | `variant` | `auth` (a web app) or `landing` |
-| `changes` | `{ path, action, detail }`: `add`, `update` (replaced by the boilerplate's), `remove` (`netlify.toml`), `section` (the root `CLAUDE.md`'s "CI/CD and deploy"), `merge` (`package.json` scripts or devDependencies the pipeline runs, `.gitignore` lines) |
+| `changes` | `{ path, action, detail }`: `add`, `update` (replaced by the boilerplate's), `section` (the root `CLAUDE.md`'s "CI/CD and deploy"), `merge` (`package.json` scripts or devDependencies the pipeline runs, `.gitignore` lines) |
 | `kept` | a `package.json` value the project changed, left as it is |
-| `blocked` | a file the sync would replace or remove that git cannot restore: uncommitted changes, untracked, or no git repository |
-| `leftovers` | other lines that still name Netlify, each with `reference`: the boilerplate's wording of the same place as `-U0` diff hunks |
+| `blocked` | a file the sync would replace that git cannot restore: uncommitted changes, untracked, or no git repository |
 
 ## 1. The project
 
@@ -32,16 +31,16 @@ The root is the folder with `pnpm-workspace.yaml` and `apps/web` (from `apps/web
 
 ## 2. Report
 
-Run sync without `--apply` and show the user the `changes`, `kept` and `leftovers` in a short list.
+Run sync without `--apply` and show the user the `changes` and `kept` in a short list.
 
-- No `changes` and no `leftovers`: the pipeline is already the pinned one; go to step 5.
+- No `changes`: the pipeline is already the pinned one; go to step 5.
 - `blocked` (exit 1): list the files and stop. Committing or stashing them is the user's call; never do it for them, and never edit around the refusal.
 
 ## 3. Apply
 
 Run sync with `--apply`. Then, for each `update` and `section`, read `git diff -- <path>`: the boilerplate's file replaced the project's, so put back what the project had added that the new file does not cover (a `VITE_API_URL` on the build step, a job, an extra Playwright project), on top of the new file. List each one under **Did**.
 
-For each `leftovers` entry, edit those lines to read as its `reference` hunks do (they are the boilerplate's own text for that place). Where the project rewrote the file, change only the lines that name Netlify or `netlify.toml`, to what the reference says about Cloudflare Pages or `public/_headers`. Leave `kept` values alone; name them under **Saw**.
+Leave `kept` values alone; name them under **Saw**.
 
 ## 4. Gates
 
@@ -75,9 +74,9 @@ The sync is a change to the project like any other: offer a feature branch and a
 
 ```
 ## Result
-**Did:** the variant, the files added, replaced and removed, what was put back from the project's old files, the `pnpm check:report` checklist, each Pages project, variable and secret set, and the pipeline run: its URL, each job's conclusion and the links it deployed (production, preview, coverage, Allure report)
+**Did:** the variant, the files added and replaced, what was put back from the project's old files, the `pnpm check:report` checklist, each Pages project, variable and secret set, and the pipeline run: its URL, each job's conclusion and the links it deployed (production, preview, coverage, Allure report)
 **Saw:** facts observed: the boilerplate commit, `kept` values, real gate and command output, the secret's `updatedAt` as GitHub listed it, the run's real conclusion
 **Not done:** anything skipped (the Cloudflare and GitHub setup, the ruleset, the run while the secret is missing), a failing gate, a failed job with its cause
 **Blocked by:** blocked files, a side neither its CLI nor Chrome could reach, an admin needed for the ruleset, or "nothing"
-**Next:** the commit and `/web-dev:pr`, what to set by hand (the API token), the old Netlify site and settings to remove
+**Next:** the commit and `/web-dev:pr`, what to set by hand (the API token)
 ```
