@@ -15,7 +15,7 @@ graders:
     tool: Skill
     min: 0
     max: 0
-    arm: with
+    arm: with-only
   - type: tool_used
     name: no-main-push
     tool: Bash
