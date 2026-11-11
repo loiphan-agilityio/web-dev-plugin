@@ -145,8 +145,8 @@ turn it back on (`-f enforcement=active`).
   Import a ruleset, and upload `.github/rulesets/main.json` (`file_upload`). One named `main`:
   delete it (ask first), then import.
 
-An old ruleset requires the old jobs' checks (`Deploy: Netlify draft`, `E2E: deployed preview`),
-which the new workflow never reports, so the pull request could not merge.
+An old ruleset can require checks of jobs the new workflow no longer has and so never reports,
+and the pull request could not merge.
 
 The `deploy-production` job runs in the `production` environment, which GitHub creates on its
 first run; approvals for it are set there (Settings > Environments).
@@ -184,12 +184,3 @@ when a job runs, so running again is enough:
    Webapp Deployment`, `Unit coverage report`). The Allure report's URL is the `Allure report`
    annotation of the `E2E: production` job: `gh api repos/<owner>/<repo>/check-runs/<the job's
    databaseId>/annotations --jq '.[] | select(.title == "Allure report") | .message'`.
-
-## 8. After a move from Netlify
-
-Once a Cloudflare deploy has passed, the Netlify settings are read by nothing. Offer to remove
-them, each on a yes: `gh secret delete NETLIFY_AUTH_TOKEN`, `gh variable delete NETLIFY_SITE_ID`
-and `gh variable delete NETLIFY_STORYBOOK_SITE_ID` (only those `gh secret list` and
-`gh variable list` show), or the same names on the Actions secrets and variables pages in Chrome.
-The Netlify site itself, and a custom domain pointing at it, are the user's to move: a domain goes
-under the Pages project's Custom domains.

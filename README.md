@@ -40,15 +40,13 @@ all six gates green, running on a mocked API (`pnpm dev:mock`). `examples/` is g
   <img alt="web-dev overview: /web-dev:develop scaffolds with project-setup and builds each ticket with feature-development, which hands endpoints to api-integration and designs to ui-development; ticket and incident write contracts first; build skills end on pnpm check, pr opens the pull request, and GitHub Actions deploys to Cloudflare Pages, connected by deploy-setup." src="docs/workflow-map/overview-light.svg">
 </picture>
 
-Every view of the map, with each card's details: [docs/workflow-map](docs/workflow-map/README.md).
-
 ## Repository
 
 | Path | Contents |
 |---|---|
 | [`web-dev/`](web-dev/), [`web-quality/`](web-quality/) | The two plugins |
 | [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) | The marketplace that lists them |
-| [`docs/workflow-map/`](docs/workflow-map/) | The workflow map |
+| [`docs/workflow-map/`](docs/workflow-map/) | The two diagrams the READMEs show |
 | [`spec.md`](spec.md), [`DESIGN.md`](DESIGN.md), [`CLAUDE.md`](CLAUDE.md) | Requirements, design, rules for changing the repository |
 | [`tools/`](tools/), [`.github/workflows/`](.github/workflows/) | Maintainer scripts and CI |
 

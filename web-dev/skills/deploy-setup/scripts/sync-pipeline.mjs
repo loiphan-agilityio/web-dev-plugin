@@ -2,7 +2,7 @@
 // Brings the CI/CD pipeline of the react-vite-boilerplate into a project created from it, at the
 // commit project-setup pins: the GitHub Actions workflow and its ruleset, the unit and e2e test
 // setup (Playwright, Allure, coverage), the Cloudflare Pages files and the tools CI runs. Prints
-// JSON: { boilerplate, variant, applied, changes, kept, blocked, leftovers }.
+// JSON: { boilerplate, variant, applied, changes, kept, blocked }.
 //
 //   node sync-pipeline.mjs <project-root>           report what would change, write nothing
 //   node sync-pipeline.mjs <project-root> --apply   write it
@@ -13,33 +13,23 @@
 // pick another boilerplate here too. Then:
 //
 // - owned files (the workflow, Playwright and Allure configs, _headers, the CI tools) are added
-//   when missing and replaced when they differ; obsolete ones (netlify.toml) are removed;
+//   when missing and replaced when they differ;
 // - seeded files (the e2e specs, dependabot.yml) are added only when missing: they are the
 //   project's own once written;
 // - the root CLAUDE.md gets the reference's "## CI/CD and deploy" section;
 // - package.json gets the scripts and devDependencies the pipeline runs, only those it lacks: a
 //   value the project changed is kept and listed under `kept`; .gitignore gets the lines it lacks.
 //
-// A file that would be replaced or removed must be tracked by git with no uncommitted change, so
-// `git diff` shows and `git restore` undoes what the sync did. Otherwise it is listed under
-// `blocked` and --apply writes nothing at all. `leftovers` lists the other lines that still name
-// Netlify, with the reference's wording of the same place as a diff hunk when it has the file.
+// A file that would be replaced must be tracked by git with no uncommitted change, so `git diff`
+// shows and `git restore` undoes what the sync did. Otherwise it is listed under `blocked` and
+// --apply writes nothing at all.
 // Exit 0 when the report or the sync is done, 1 when it is refused (apps/web is not an app from
 // the boilerplate, a blocked file), 2 when it cannot run (a wrong path or arguments, no reference),
 // with the cause on stderr.
 import { spawnSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-  mkdirSync,
-} from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -65,7 +55,6 @@ const seeded = [
   'apps/web/e2e/accessibility.spec.ts',
   '.github/dependabot.yml',
 ];
-const obsolete = ['apps/web/netlify.toml'];
 const section = { path: 'CLAUDE.md', heading: '## CI/CD and deploy' };
 // The scripts and devDependencies the workflow and `pnpm check` run, per package.json.
 const packageKeys = {
@@ -102,20 +91,6 @@ const packageKeys = {
     ],
   },
 };
-// Not searched for leftovers: generated, installed or binary.
-const skippedDirs = new Set([
-  '.git',
-  'node_modules',
-  '.turbo',
-  'dist',
-  'dist-e2e',
-  'coverage',
-  'storybook-static',
-  'allure-report',
-  'test-results',
-  'lighthouse',
-]);
-const netlify = /netlify/i;
 
 const fail = (message) => {
   console.error(`sync-pipeline: ${message}`);
@@ -186,7 +161,7 @@ const changes = [];
 const kept = [];
 /** @type {{ path: string, detail: string }[]} */
 const blocked = [];
-/** The new text of each file the sync writes (undefined: removed). */
+/** The new text of each file the sync writes. */
 const next = new Map();
 
 const change = (path, action, detail, text) => {
@@ -215,10 +190,6 @@ for (const path of seeded) {
   const want = read(ref, path);
   if (want !== undefined && read(root, path) === undefined)
     change(path, 'add', 'from the boilerplate (the project owns it from now on)', want);
-}
-for (const path of obsolete) {
-  if (read(root, path) !== undefined && read(ref, path) === undefined)
-    change(path, 'remove', 'replaced by the files above', undefined);
 }
 
 /** The text from `heading` to the next `## ` heading, or undefined. */
@@ -306,59 +277,12 @@ for (const [path, keys] of Object.entries(packageKeys)) {
   }
 }
 
-/** Every text file of the project, as paths relative to the root. */
-const projectFiles = (dir = root) =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(dir, entry.name);
-    // The companion skills in .claude/skills are third-party text, not the project's.
-    if (entry.isDirectory()) {
-      return skippedDirs.has(entry.name) || relative(root, path) === join('.claude', 'skills')
-        ? []
-        : projectFiles(path);
-    }
-    if (!entry.isFile() || entry.name === 'pnpm-lock.yaml' || statSync(path).size > 1_000_000)
-      return [];
-
-    return [relative(root, path)];
-  });
-/** The -U0 hunks of `git diff` from <text> to the reference's <path> that remove a Netlify line. */
-const referenceHunks = (path, text) => {
-  if (read(ref, path) === undefined) return [];
-  const mine = join(tmp, 'mine');
-  writeFileSync(mine, text);
-  const diff = spawnSync(
-    'git',
-    ['diff', '--no-index', '--no-color', '-U0', '--', mine, join(ref, path)],
-    { encoding: 'utf8' },
-  );
-
-  return diff.stdout
-    .split(/^(?=@@ )/m)
-    .slice(1)
-    .filter((hunk) => hunk.split('\n').some((line) => line.startsWith('-') && netlify.test(line)));
-};
-const leftovers = [];
-for (const path of projectFiles()) {
-  if (next.has(path) && next.get(path) === undefined) continue;
-  const text = next.has(path) ? next.get(path) : readFileSync(join(root, path), 'utf8');
-  if (text.includes('\0') || !netlify.test(text)) continue;
-  const lines = text
-    .split('\n')
-    .map((line, index) => ({ line: index + 1, text: line.trim() }))
-    .filter(({ text: line }) => netlify.test(line));
-  leftovers.push({ path, lines, reference: referenceHunks(path, text) });
-}
-
-const report = { boilerplate, variant, applied: false, changes, kept, blocked, leftovers };
+const report = { boilerplate, variant, applied: false, changes, kept, blocked };
 if (apply && blocked.length === 0) {
   for (const [path, text] of next) {
     const target = join(root, path);
-    if (text === undefined) {
-      rmSync(target);
-    } else {
-      mkdirSync(dirname(target), { recursive: true });
-      writeFileSync(target, text);
-    }
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, text);
   }
   report.applied = true;
 }

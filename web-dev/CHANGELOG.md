@@ -3,6 +3,20 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.12.0
+
+- **Removed:** `deploy-setup` no longer moves a project from Netlify to Cloudflare Pages: the
+  boilerplate deploys to Cloudflare Pages, and no project is still on the Netlify pipeline.
+  `sync-pipeline.mjs` no longer deletes `apps/web/netlify.toml`, no longer lists the lines that
+  still name Netlify (`leftovers` is gone from its JSON, and so is the `remove` action), and the
+  skill no longer offers to delete the Netlify secret and variables on GitHub. It still brings the
+  pipeline files to the pinned ones in such a project. To move a project that is still on Netlify,
+  run `deploy-setup` from 0.11.0 (the tag `web-dev--v0.11.0`) first.
+- `sync-pipeline.mjs` deletes no file: a pipeline file the boilerplate drops later stays in an
+  older project.
+- `develop` no longer says Workflow A never asks: it stops once, for `project-setup`'s git
+  questions, as it has since 0.10.0.
+
 ## 0.11.0
 
 - New skill `release`: takes a merged pull request to production on the boilerplate's pipeline. It

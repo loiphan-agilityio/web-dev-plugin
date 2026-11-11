@@ -31,7 +31,7 @@ Every version is pinned in the boilerplate's lockfile.
 | 5 | **Existing project:** a feature, endpoint or screen in a React project not made from the boilerplate, built on its own code and conventions | `develop` skill, Workflow B + `codebase-explorer` agent + `scripts/verify-project.sh`; `references/outside-template.md` in each building skill | The change reuses the project's HTTP client, query layer and tests, adds no library unasked, and the project's own gates pass |
 | 6 | **Watch mode:** the unit tests re-run whenever the code changes | `pnpm test:watch` (`vitest --watch`) in the boilerplate's `apps/web` | Saving a file re-runs the tests that import it, in any shell and with `CI` set |
 | 7 | **CI/CD:** unit tests on every pull request and push, Storybook and the app deployed, e2e tests on the deployed app | The boilerplate's `.github/workflows/ci.yml` and Playwright in `apps/web` (`e2e/`, `playwright.config.ts`); `feature-development` writes the specs; `deploy-setup` sets the pipeline up in a project from the boilerplate | A new project carries the workflow; `pnpm check` runs the e2e specs as its sixth gate; every feature adds `e2e/<name>.spec.ts`, and `verify.sh` runs the quoted one |
-| 8 | **Cloudflare Pages:** deploy a preview, check it, publish, then run the e2e tests on production | The boilerplate's `apps/web/public/_headers` + the workflow's deploy-draft, lighthouse, deploy-production and e2e jobs; `deploy-setup` brings them into a project from the boilerplate (`sync-pipeline.mjs`) and connects Cloudflare and GitHub | A preview deploy per pull request (`pr-<n>`); production only after Lighthouse passes on the preview; the e2e specs run against the production URL; `check-sync-pipeline.sh` (run by `verify.sh`) brings a project from the last Netlify commit to the pinned pipeline |
+| 8 | **Cloudflare Pages:** deploy a preview, check it, publish, then run the e2e tests on production | The boilerplate's `apps/web/public/_headers` + the workflow's deploy-draft, lighthouse, deploy-production and e2e jobs; `deploy-setup` brings them into a project from the boilerplate (`sync-pipeline.mjs`) and connects Cloudflare and GitHub | A preview deploy per pull request (`pr-<n>`); production only after Lighthouse passes on the preview; the e2e specs run against the production URL; `check-sync-pipeline.sh` (run by `verify.sh`) brings a project whose pipeline drifted back to the pinned one |
 | 9 | **Landing page or web app:** `project-setup` asks which, and a landing page comes complete (favicon and icons, manifest, title, description, Open Graph, `robots.txt`, `sitemap.xml`) | `project-setup` + `create-project.sh --landing` (the boilerplate's `create/templates/landing`) | `check-create-project.sh` creates both variants; a landing project passes `pnpm check:report` |
 | 10 | **Landing quality:** accessibility, axe, Lighthouse and PageSpeed before launch | The boilerplate's `e2e/accessibility.spec.ts` and CI `lighthouse` job (`tools/lighthouse.mjs`); web-quality's `audit` landing checklist and `scripts/pagespeed.mjs` | axe finds 0 violations; Lighthouse accessibility 100 and SEO ≥ 95 or CI fails |
 | 11 | **Output checklist:** unit pass rate (%), coverage, build, lint, e2e pass rate | The boilerplate's `pnpm check:report` (`tools/check-report.mjs`), in CI's run summary; `project-setup`, `feature-development`, `api-integration`, `ui-development` and `develop`'s Workflow A put it in their Result; outside the boilerplate (Workflow B) `scripts/verify-project.sh` prints the same checklist as aligned text for lint, typecheck, unit tests (pass rate from Vitest, Jest or Mocha) and build, with a `missing` row per gate the project lacks, or one Check row for a project with its own `check` | A failing test shows as `FAIL: 97.5% (39/40 passed)` (in `verify-project.sh`, `✘ Unit tests  97.5% (39/40 passed)`) and exit 1 |
@@ -41,6 +41,8 @@ Every version is pinned in the boilerplate's lockfile.
 | 15 | **Incident contracts:** `/web-dev:incident <id>` writes `docs/incidents/<id>/report.md`, `rca.md`, `actions.md` | `incident` skill + `scripts/check-contract.mjs` | Status is open, mitigated or resolved; follow-ups `A<n>` listed |
 | 16 | **Anti-slop for TypeScript:** no `as any`, hand-written `_tag` checks or unexplained casts | The boilerplate's anti-slop Oxlint plugins (`tools/oxlint/anti-slop`, `pnpm lint`), and the quoted todos feature that `verify.sh` lints | `pnpm lint` passes with 0 anti-slop errors |
 | 17 | **PR contracts:** `/web-dev:pr` opens a pull or merge request described by why, what changed, the ticket contract it implements and the `pnpm check:report` checklist; it is not opened ready into a protected branch before CI passes | `pr` skill + `scripts/check-contract.mjs` (a description file) | `check-contract.mjs` passes: four sections filled, linked contracts pass, every gate passes (`scripts/test/`); the PR stays a draft while CI fails |
+| 18 | **Guardrails:** what is outward-facing or hard to undo stays with the user: no history rewrite, force-push, skipped hook or push to a protected branch, no reading or overwriting secret files | `guardrails` skill + the plugin's PreToolUse hook (`hooks/hooks.json`, `scripts/guard.mjs`) | The hook refuses each such command and file (`scripts/test/guard.test.mjs`); an ordinary feature-branch push only asks |
+| 19 | **Release:** `/web-dev:release` takes a merged pull request to production, tags a merged commit and rolls back through a revert pull request; the merge is the user's | `release` skill + the hook's release gate (`scripts/guard.mjs`) | The hook refuses a merge, an approval, a production deploy and a tag whose commit is not on the remote's default branch (`scripts/test/guard.test.mjs`) |
 | + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma, DESIGN.md; all optional) | `ui-development` skill | Theme tokens, shadcn components and the four data states, no raw colors |
 
 ### Each skill must
@@ -52,7 +54,8 @@ Every version is pinned in the boilerplate's lockfile.
 - Run `pnpm check` (all six gates; lint includes a Prettier check, e2e runs Playwright) before reporting done; in a
   project not made from the boilerplate, `scripts/verify-project.sh`, which runs the gates the
   project has and names the ones it lacks.
-- End with a `## Result` block: Did / Saw / Not done / Blocked by / Next.
+- End with a `## Result` block: Did / Saw / Not done / Blocked by / Next (`guardrails` and
+  `release` have a shape of their own).
 - Exclude an acceptance criterion that depends on an unanswered question (data, a business rule,
   what the backend must agree with), and name it in the report instead of guessing. A detail the
   ticket leaves out that only changes presentation gets the simplest default, listed under
@@ -87,7 +90,7 @@ Requirement 4, one message to a whole app: the demo in `README.md` ("Demo") give
   conflicting files. An existing project gets features through Workflow B instead.
 - Not yet: bug fixes, review without edits, and commits beyond the contract commit of `ticket` and
   `incident` (`develop` reports them as not covered and changes nothing); a PR or MR goes through
-  `pr`, which never merges.
+  `pr`, and a release through `release`: neither merges.
 
 ## Distribution
 

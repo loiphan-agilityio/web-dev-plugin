@@ -70,10 +70,12 @@ flowchart TD
 | `feature-development` | A ticket, story or issue | `api-integration` for endpoint detail, `ui-development` for the UI when there is a design |
 | `api-integration` | One endpoint on its own | — (when loaded by `feature-development`, it hands the UI and the Result back) |
 | `ui-development` | A design with no ticket | — (when loaded by `feature-development`, it hands data work back) |
-| `deploy-setup` | CI/CD, a deploy or a move from Netlify in a project from the boilerplate | — (`pr` opens the pull request whose CI deploys the first preview) |
+| `deploy-setup` | CI/CD or a deploy in a project from the boilerplate | — (`pr` opens the pull request whose CI deploys the first preview) |
 | `ticket` | Tickets to write up before any code (`/web-dev:ticket`) | — (`feature-development` builds from the contract later) |
 | `incident` | An incident report or postmortem (`/web-dev:incident`) | `ticket` for its follow-ups, when the user asks |
 | `pr` | A branch to send for review as a pull or merge request (`/web-dev:pr`) | — (it links the ticket contract; review and merge stay with the user) |
+| `release` | Going live, a release tag, a rollback or "is it live" in a project with the boilerplate's pipeline (`/web-dev:release`) | `pr` for a missing or a revert pull request, `deploy-setup` for a missing pipeline; the merge stays with the user |
+| `guardrails` | Before anything outward-facing or hard to undo: a push to a protected branch, a history rewrite, a merge, a deploy, a secret file (`/web-dev:guardrails`) | — (its hook, `guard.mjs`, refuses those commands in every skill) |
 
 Each skill still triggers on its own words ("Implement this ticket", "Add PATCH /todos/:id"), so a
 user who knows which one they need skips the routing. `develop` and `feature-development` tell
@@ -146,10 +148,9 @@ flowchart LR
 - The pipeline above is the react-vite-boilerplate's (`.github/workflows/ci.yml`,
   `apps/web/public/_headers`), so every project created from it carries it. The plugin writes no
   pipeline of its own: `deploy-setup` brings a project from the boilerplate to the pinned one with
-  `sync-pipeline.mjs`, which copies the files from a reference project created at the pin (a
-  project from an older pin, still on Netlify, is moved to Cloudflare Pages), then creates the
-  Pages projects and sets the GitHub secret and variables, each command asked first. CI/CD in a
-  project not made from the boilerplate stays "not yet".
+  `sync-pipeline.mjs`, which copies the files from a reference project created at the pin, then
+  creates the Pages projects and sets the GitHub secret and variables, each command asked first.
+  CI/CD in a project not made from the boilerplate stays "not yet".
 - `pnpm check` is six gates: lint, typecheck, unit tests with coverage, build, Storybook build and
   Playwright e2e. The e2e gate builds with `--mode mock` into `dist-e2e/` (apart from `build`'s
   `dist/`, which runs alongside) and serves it with `vite preview`, so it tests the same build CI
@@ -186,7 +187,7 @@ flowchart LR
 | `ApiClient` reads `AppConfig` and `AuthToken` services instead of module constants | Config and the bearer token become layers a test can replace (`client.test.ts` does), and sign-in is one line in `runtime.ts` (`AuthToken.fromGetter`) instead of an edit inside the client every app redoes differently. `config` stays as a constant for the code outside Effect (`main.tsx`, MSW handlers). |
 | One entry skill (`develop`) that routes, instead of a slash command plus five skills that compete on their descriptions | The plan asks for one input. A skill can be typed (`/web-dev:develop`) and still triggers on plain words; the routing rules live in one file instead of five descriptions. |
 | Model evals run only locally, when the maintainer asks, last; free checks run on every change | An eval run is paid model time and a whole-app case costs dollars. Lint, `verify.sh`, `check-detect.sh` and the validators catch most mistakes for free, so the model only judges finished work: `tools/run-evals.sh` refuses single cases, uncommitted work, a HEAD that is not the release commit and plugin content already evaluated, runs every free check first, and runs one arm unless the baseline Δ is needed. No CI job runs them, so no workflow holds an API key. |
-| `deploy-setup` copies the pipeline from a reference project created at the pin (`sync-pipeline.mjs`), not from snippets in the skill | The workflow, its configs and its tools are some 1,000 lines that differ between a web app and a landing page; copied from the boilerplate's own generator output they match the pin exactly, and `check-sync-pipeline.sh` proves that a project from the last Netlify commit ends up identical to one created at the pin. A file it would replace must be tracked and unchanged in git, so `git diff` shows what changed and nothing uncommitted is lost. |
+| `deploy-setup` copies the pipeline from a reference project created at the pin (`sync-pipeline.mjs`), not from snippets in the skill | The workflow, its configs and its tools are some 1,000 lines that differ between a web app and a landing page; copied from the boilerplate's own generator output they match the pin exactly, and `check-sync-pipeline.sh` proves that a project whose pipeline drifted ends up identical to one created at the pin. A file it would replace must be tracked and unchanged in git, so `git diff` shows what changed and nothing uncommitted is lost. |
 | Detect the project with a script (`detect-project.mjs`), not by reading files each time | The same folder always gets the same tier, the reasons are printed, and `check-detect.sh` tests it without a model. |
 | Existing projects keep their stack; the skills say per rule what still holds outside the boilerplate | The boilerplate's layers are one way to meet the rules (typed errors, four states, tests on mocks). Forcing Effect or MSW into a working project is a rewrite nobody asked for. |
 | Shared guidelines in `references/`, copied word for word from the boilerplate's `apps/web/CLAUDE.md` | Skills need them in projects that never had the boilerplate; a project from it needs them without the plugin. The boilerplate is the one source: `sync-references.sh` copies its sections into `references/`, and `check-guidelines.mjs` fails when the two copies differ. |
