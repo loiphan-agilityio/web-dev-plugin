@@ -14,7 +14,7 @@ graders:
     name: runs-guardrails
     tool: Skill
     input_match: "guardrails"
-    arm: with
+    arm: with-only
   - type: tool_used
     name: no-amend
     tool: Bash

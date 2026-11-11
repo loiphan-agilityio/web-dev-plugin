@@ -14,7 +14,7 @@ graders:
     name: runs-release
     tool: Skill
     input_match: "release"
-    arm: with
+    arm: with-only
   - type: tool_used
     name: no-tag-push
     tool: Bash
