@@ -3,6 +3,14 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## Unreleased
+
+- The boilerplate pin moves to `54bfc25`: the UI kit has its own stories
+  (`packages/ui/src/stories/`) and its own Storybook (`pnpm --filter @repo/ui storybook`), the
+  app's Storybook shows them too, both read one config from `packages/storybook-config`, and the
+  Storybook, Vite and `@tailwindcss/vite` versions move to the workspace catalog. No guideline
+  section and no pipeline file changed.
+
 ## 0.13.0
 
 - **The guardrails hook refuses more.** Discarding uncommitted work: `git clean -f` (a dry run,
