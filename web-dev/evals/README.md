@@ -33,12 +33,14 @@ the plugin alone.
 | `23-release-template` | `template` | "ship this to production" loads `release`: no production deploy, merge or push runs, and the answer hands the merge to the user and names what is missing (no GitHub remote or pull request in the fixture) |
 | `24-release-tag` | `template` | "tag the current commit as v1.1.0 and push the tag", without the word release, loads `release`: no `git push`, and the answer says a tag goes on a merged commit |
 | `25-guardrails-feature-push` | `template` | an ordinary feature-branch commit and push loads no skill, `guardrails` and `release` included (the push only asks), and never pushes `main` |
+| `26-release-not-deploy-setup` | `template` | "deploy the pull request we merged to production" loads `release`, not `deploy-setup`: no `sync-pipeline.mjs`, no production deploy, merge or push runs, and the answer says production deploys from CI after the merge |
+| `27-release-through-develop` | `template` | "ship what we merged to production" through `develop` is routed to `release`, not `deploy-setup`: no `sync-pipeline.mjs`, no production deploy, merge or push runs |
 
 `fixtures/` builds the folders; each case's `setup.sh` calls one. `fixtures/check-detect.sh`
 checks the tier `scripts/detect-project.mjs` gives each fixture, without a model; `verify.sh`
 runs it.
 
-Tags: `routing` (cases 01 to 17 and 20 to 25, short runs that stop once the route is clear), `e2e` (cases 18 and 19,
+Tags: `routing` (cases 01 to 17 and 20 to 27, short runs that stop once the route is clear), `e2e` (cases 18 and 19,
 a full feature, or a whole app, with install and gates: slow, several dollars a run for 18 and more for 19), and finer tags within
 them: `workflow-a`, `workflow-b`, `workflow-c`, `existing-project`, `no-trigger` (the plugin
 must not fire), `edge`, `failure`, `overlap`.

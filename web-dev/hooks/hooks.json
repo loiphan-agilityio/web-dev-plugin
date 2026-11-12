@@ -1,5 +1,5 @@
 {
-  "description": "web-dev guardrails: refuses history rewrites, force-pushes, skipped hooks and reading secret files",
+  "description": "web-dev guardrails: refuses history rewrites, discarding uncommitted work, force-pushes, skipped hooks, reading or overwriting secret files, and the release gate (a push to a protected branch, approving or merging a pull request, a production deploy, a tag whose commit is not merged)",
   "hooks": {
     "PreToolUse": [
       {

@@ -1,10 +1,13 @@
 {
   "name": "web-quality",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "Measurement-first web quality for single-page apps, tuned for React + Vite projects from the react-vite-boilerplate: one entry point, /web-quality:audit, that measures a page in a real browser and its build (Core Web Vitals, bundle budgets, response headers, accessibility, SEO), separates measured findings from hypotheses, and routes fixes to the performance, accessibility, seo and security skills.",
+  "homepage": "https://github.com/loiphan-agilityio/web-dev-plugin",
+  "repository": "https://github.com/loiphan-agilityio/web-dev-plugin",
   "author": {
     "name": "web-dev contributors"
   },
+  "license": "MIT",
   "keywords": [
     "web-quality",
     "core-web-vitals",

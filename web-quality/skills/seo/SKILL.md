@@ -71,6 +71,6 @@ Google's Lighthouse SEO score (`lab-seo`, target ≥ 95) as a regression guard, 
 ## Result
 
 A table per route (title, description, canonical, h1, robots, social card) before → after, the
-files changed, each marked new or edited as `git status` shows it (a file that existed with a
+files changed, each marked new or edited, as read before the change (a file that existed with a
 placeholder is edited, not new), and what client rendering still limits (link previews per route) with the
 prerendering option if those pages matter.

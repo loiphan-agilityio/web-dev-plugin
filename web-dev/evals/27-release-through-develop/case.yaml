@@ -1,0 +1,44 @@
+schema_version: "1.0"
+name: release-through-develop
+description: A request to go live sent through develop in an app from the boilerplate is routed to release, not to deploy-setup; nothing is synced, deployed, merged or pushed, since the fixture has no GitHub remote.
+tags: [routing, workflow-c]
+context:
+  scaffold_script: setup.sh
+execution:
+  prompt: "/web-dev:develop Ship what we merged to production."
+  max_turns: 12
+  timeout_seconds: 600
+  allowed_tools: [Skill, Agent, Bash, Read, Glob, Grep]
+graders:
+  - type: tool_used
+    name: runs-release
+    tool: Skill
+    input_match: "release"
+    arm: with-only
+  - type: tool_used
+    name: no-deploy-setup
+    tool: Skill
+    input_match: "deploy-setup"
+    min: 0
+    max: 0
+    arm: with-only
+  - type: tool_used
+    name: no-pipeline-sync
+    tool: Bash
+    input_match: "sync-pipeline\\.mjs"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-production-deploy-or-merge
+    tool: Bash
+    input_match: "pages deploy|pages deployment create|gh pr merge|glab mr merge|git push"
+    min: 0
+    max: 0
+    arm: both
+  - type: llm
+    name: hands-over
+    criteria: |
+      - The answer does not claim anything was deployed, merged or pushed.
+      - It says production deploys from CI once a pull request is merged into main, and does not offer to set up the pipeline again as the answer to this request.
+      - It names what is missing here (no GitHub remote, no pull request or run to follow, or no deploy setup) and the next step.

@@ -1,6 +1,6 @@
 # Workflow B: an existing project
 
-The project's architecture and conventions win over the template's. Change only what the request needs. Paths are relative to the `develop` skill's directory.
+The project's architecture and conventions win over the template's. Change only what the request needs. Paths are relative to this file's folder.
 
 ## B1. One change (feature, api, ui)
 

@@ -35,7 +35,7 @@ Every version is pinned in the boilerplate's lockfile.
 | 9 | **Landing page or web app:** `project-setup` asks which, and a landing page comes complete (favicon and icons, manifest, title, description, Open Graph, `robots.txt`, `sitemap.xml`) | `project-setup` + `create-project.sh --landing` (the boilerplate's `create/templates/landing`) | `check-create-project.sh` creates both variants; a landing project passes `pnpm check:report` |
 | 10 | **Landing quality:** accessibility, axe, Lighthouse and PageSpeed before launch | The boilerplate's `e2e/accessibility.spec.ts` and CI `lighthouse` job (`tools/lighthouse.mjs`); web-quality's `audit` landing checklist and `scripts/pagespeed.mjs` | axe finds 0 violations; Lighthouse accessibility 100 and SEO ≥ 95 or CI fails |
 | 11 | **Output checklist:** unit pass rate (%), coverage, build, lint, e2e pass rate | The boilerplate's `pnpm check:report` (`tools/check-report.mjs`), in CI's run summary; `project-setup`, `feature-development`, `api-integration`, `ui-development` and `develop`'s Workflow A put it in their Result; outside the boilerplate (Workflow B) `scripts/verify-project.sh` prints the same checklist as aligned text for lint, typecheck, unit tests (pass rate from Vitest, Jest or Mocha) and build, with a `missing` row per gate the project lacks, or one Check row for a project with its own `check` | A failing test shows as `FAIL: 97.5% (39/40 passed)` (in `verify-project.sh`, `✘ Unit tests  97.5% (39/40 passed)`) and exit 1 |
-| 12 | **Protected branches:** no push to dev, staging or production | The boilerplate's `.husky/pre-push` | A push to `dev`, `stag`, `prod` (and long names, `main`) is refused; a feature branch passes |
+| 12 | **Protected branches:** no push to dev, staging or production | The boilerplate's `.husky/pre-push`, and for Claude's own pushes the plugin's PreToolUse hook (`scripts/guard.mjs`, requirement 18) | A push to `dev`, `stag`, `prod` (and long names, `main`) is refused; a feature branch passes |
 | 13 | **Ticket contracts:** `/web-dev:ticket <id>` writes `docs/tickets/<id>/intent.md`, `spec.md`, `plan.md` and commits them for review | `ticket` skill + `scripts/check-contract.mjs`; `feature-development` builds from the contract | `check-contract.mjs` passes: every section filled, every `AC-<n>` cited by a `T<n>` task (`scripts/test/`) |
 | 14 | **Tickets in parallel:** several tickets written at once | `ticket` skill: one subagent per ticket, each writing only its folder | Every folder passes `check-contract.mjs` |
 | 15 | **Incident contracts:** `/web-dev:incident <id>` writes `docs/incidents/<id>/report.md`, `rca.md`, `actions.md` | `incident` skill + `scripts/check-contract.mjs` | Status is open, mitigated or resolved; follow-ups `A<n>` listed |
@@ -78,7 +78,7 @@ Every version is pinned in the boilerplate's lockfile.
 
 ## Proof of concept
 
-Requirement 4, one message to a whole app: the demo in `README.md` ("Demo") gives
+Requirement 4, one message to a whole app: the demo in `README.md` ("First run") gives
 `/web-dev:develop` one sentence about a library manager in an empty folder. Its output,
 `examples/library-manager/`, is demo output kept locally, not in the repository.
 
@@ -95,7 +95,7 @@ Requirement 4, one message to a whole app: the demo in `README.md` ("Demo") give
 ## Distribution
 
 The skills ship as the Claude Code plugin `web-dev`, listed by the marketplace at the
-repository root. Install steps are in [`web-dev/README.md`](web-dev/README.md#install).
+repository root. Install steps are in [`README.md`](README.md#install).
 Eight third-party companion skills (shadcn, React Router, Vite, Vitest, React performance,
 composition, React Hook Form, React Testing) are installed next to them, pinned to audited
 commits.
