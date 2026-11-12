@@ -3,6 +3,14 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.2.10
+
+- `seo` marks each file in its Result new or edited as it read it before the change, so the step
+  needs no `git status`.
+- The README has a troubleshooting table (PageSpeed's 429, a URL that is not public, a hidden
+  tab) and points to the repository README for requirements and the install command.
+- MIT license (`LICENSE`).
+
 ## 0.2.9
 
 - Each skill with `allowed-tools` loads itself again in a later turn (the user's answer, a

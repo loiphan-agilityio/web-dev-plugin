@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, describe, it } from 'node:test';
@@ -38,7 +38,45 @@ describe('guard: git', () => {
     'git -C app commit -a --amend',
     'git reset --hard HEAD~1',
     'git rebase -i main',
-    'GIT_EDITOR=true git rebase --continue',
+    'git rebase main',
+    'git rebase --skip',
+    'git rebase --continue --exec true',
+    'git rebase --abort --no-verify',
+    'git clean -fdx',
+    'git clean -f',
+    'git clean --force -d',
+    'git checkout -- .',
+    'git checkout -- src/app.tsx',
+    'git checkout HEAD~1 -- src/app.tsx',
+    'git checkout .',
+    'git restore .',
+    'git restore src/app.tsx',
+    'git restore --source=HEAD~1 src/app.tsx',
+    'git restore --staged --worktree src/app.tsx',
+    'git restore -SW src/app.tsx',
+    'git checkout -f main',
+    'git checkout --force',
+    'git switch --discard-changes main',
+    'git switch -f main',
+    'git stash drop',
+    'git stash drop stash@{1}',
+    'git stash clear',
+    'env git push --force',
+    'env -i PATH=/usr/bin git push --force',
+    'env -u GIT_DIR git commit --amend',
+    'env HUSKY=0 git commit -m x',
+    'sudo git push --force',
+    'sudo -u deploy git push --force',
+    'sudo -Eu deploy git push --force',
+    'sudo -E env git reset --hard',
+    'command git commit --amend',
+    'nohup git push -f',
+    'time git rebase main',
+    'time -p git reset --hard',
+    'exec git push --force',
+    'exec -a g git push --force',
+    'FOO=1 env BAR=2 git commit --amend',
+    'sudo sh -c "git commit --amend"',
     'git push --force origin main',
     'git push origin main --force',
     'git push -f',
@@ -76,11 +114,61 @@ describe('guard: git', () => {
     'git log --oneline',
     'git log --grep=rebase',
     'git branch -d merged',
+    'git rebase --continue',
+    'GIT_EDITOR=true git rebase --continue',
+    'git rebase --abort',
+    'git clean -n',
+    'git clean -nfd',
+    'git clean --dry-run -fdx',
+    'git checkout main',
+    'git checkout -b feat/x',
+    'git checkout main --',
+    'git checkout -',
+    'git checkout -b feat/x origin/main',
+    'git checkout --track origin/feat/x',
+    'git stash',
+    'git stash push -u -m wip',
+    'git stash pop',
+    'git stash list',
+    'git switch main',
+    'git restore --staged src/app.tsx',
+    'git restore -S .',
+    'env',
+    'env FOO=1 git status',
+    'sudo git status',
+    'command -v git',
+    'time pnpm check',
     'git switch -c docs/ticket-412',
     'echo "--no-verify"',
     'pnpm check',
   ]) {
     it(`allows ${command}`, () => assert.equal(bash(command), undefined));
+  }
+});
+
+describe('guard: git checkout of a path', () => {
+  const repo = mkdtempSync(join(tmpdir(), 'guard-checkout-'));
+  const sh = (...args) => execFileSync('git', args, { cwd: repo, stdio: 'ignore' });
+  const at = (command) => check({ tool_name: 'Bash', tool_input: { command }, cwd: repo });
+
+  sh('init', '-q', '-b', 'main');
+  mkdirSync(join(repo, 'src'));
+  mkdirSync(join(repo, 'docs'));
+  writeFileSync(join(repo, 'src/app.tsx'), 'export {};\n');
+  writeFileSync(join(repo, 'docs/plan.md'), '# Plan\n');
+  sh('add', '.');
+  sh('-c', 'user.name=t', '-c', 'user.email=t@example.com', 'commit', '-q', '-m', 'chore: base');
+  sh('branch', 'feat/x');
+  sh('branch', 'docs');
+  after(() => rmSync(repo, { recursive: true, force: true }));
+
+  for (const command of ['git checkout src/app.tsx', 'git checkout src', 'git checkout main src/app.tsx', 'git checkout feat/x docs/plan.md', 'git -C src checkout app.tsx']) {
+    it(`refuses ${command}`, () => assert.ok(at(command)));
+  }
+
+  // `docs` is a branch and a folder: git takes it as the branch.
+  for (const command of ['git checkout feat/x', 'git checkout docs', 'git checkout HEAD~0', 'git checkout not-here-yet', 'git checkout -b fix/y main']) {
+    it(`allows ${command}`, () => assert.equal(at(command), undefined));
   }
 });
 
@@ -100,6 +188,50 @@ describe('guard: secret files', () => {
   it('refuses < .env', () => assert.ok(bash('wc -l < .env')));
   it('refuses cp .env elsewhere', () => assert.ok(bash('cp .env /tmp/leak')));
   it('refuses cp over an existing .env', () => assert.ok(bash('cp .env.example .env')));
+
+  for (const command of [
+    'grep SECRET .env',
+    'rg foo .env.local',
+    'grep -n KEY src/a.ts .env',
+    'grep -e KEY .env',
+    'grep -ne KEY .env',
+    'grep --regexp=KEY .env',
+    'grep -f .env src/a.ts',
+    'grep --file=.env src/a.ts',
+    'grep -A 3 KEY .env',
+    'grep -A3 KEY .env',
+    'grep --color KEY .env',
+    'grep -- KEY .env',
+    'grep KEY -- .env',
+    'grep 2>/dev/null KEY .env',
+    'egrep KEY .env',
+    'rg -g "*.ts" -t ts KEY .env',
+    'rg --glob=!dist -e KEY .env',
+    'sudo cat .env',
+    'env grep KEY .env',
+  ]) {
+    it(`refuses ${command}`, () => assert.ok(bash(command)));
+  }
+
+  for (const command of [
+    'rg -n .env src',
+    'grep -n "\\.env" .gitignore',
+    'grep .env',
+    'grep -e .env .gitignore',
+    'grep -rne .env src',
+    'grep --regexp .env src',
+    'grep -A 3 .env README.md',
+    'grep -- .env README.md',
+    'rg -g .env.* -t ts .env src',
+    'rg --glob .env.* --type-not md .env',
+    'rg --color never .env src',
+    'rg .env > found.txt',
+  ]) {
+    it(`allows ${command}`, () => assert.equal(bash(command), undefined));
+  }
+
+  // The limit the guardrails skill states: a recursive search reads the secret files in its way.
+  it('does not see a recursive grep -r', () => assert.equal(bash('grep -r API_KEY .'), undefined));
 
   it('allows Read .env.example', () => assert.equal(tool('Read', { file_path: '/app/.env.example' }), undefined));
   it('allows Read src/env.ts', () => assert.equal(tool('Read', { file_path: '/app/src/env.ts' }), undefined));
@@ -178,6 +310,9 @@ describe('guard: release gate', () => {
     sh('remote', 'add', 'empty', empty);
     assert.equal(run('PROTECTED_BRANCHES=none git push -u empty main'), undefined);
     assert.ok(run('git push -u empty main'));
+    assert.ok(run('env PROTECTED_BRANCHES=none git push -u empty main'));
+    assert.ok(run('PROTECTED_BRANCHES=none sudo git push -u empty main'));
+    assert.ok(run('sudo git push -u empty main'));
     rmSync(empty, { recursive: true, force: true });
   });
 

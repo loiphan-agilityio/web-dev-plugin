@@ -1,10 +1,13 @@
 {
   "name": "web-dev",
-  "version": "0.12.0",
-  "description": "Web development on a modern React stack (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7, shadcn/ui): one entry point, /web-dev:develop, that inspects the repository, picks the workflow (new project, existing project, one feature or API) and runs the skills for project setup (a landing page or a web app), feature development, API integration, UI development and deploy setup (the boilerplate's CI/CD, unit and e2e tests and Cloudflare Pages deploys); ticket, incident and pr write the contracts around the code (docs/tickets/<id>/ intent, spec and plan; docs/incidents/<id>/ report, root cause and actions; a pull or merge request described by why, changes, its ticket and the check:report checklist, opened as a draft and marked ready once CI passes).",
+  "version": "0.13.0",
+  "description": "Web development on a modern React stack (React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7, shadcn/ui): one entry point, /web-dev:develop, inspects the repository and runs the skills for project setup (a landing page or a web app), feature development, API integration, UI development and deploy setup (CI/CD and Cloudflare Pages); ticket, incident and pr write the contracts around the code, and release takes a merged pull request to production. Its guardrails hook runs before each of Claude's tool calls in every folder while the plugin is enabled and refuses history rewrites, force-pushes, skipped git hooks, pushes to a protected branch, merging a pull request, production deploys and reading secret files.",
+  "homepage": "https://github.com/loiphan-agilityio/web-dev-plugin",
+  "repository": "https://github.com/loiphan-agilityio/web-dev-plugin",
   "author": {
     "name": "web-dev contributors"
   },
+  "license": "MIT",
   "keywords": [
     "react",
     "vite",

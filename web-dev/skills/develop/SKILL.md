@@ -2,14 +2,14 @@
 name: develop
 description: This skill should be used when the user types "/web-dev:develop", describes a whole web app, POC, MVP or landing page to build ("build an employee management app with CRUD and search"), or asks for a feature, endpoint or screen in an existing React project that is not built on the web-dev stack (axios, zod, Redux). It detects the project, picks the workflow and runs the other web-dev skills. Not for non-React projects, Next.js or SSR, bug fixes, code review or PR/MR work.
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's scripts/, references/ and agents/ beside skills/ and runs the other web-dev skills. Needs Node 22.22 or newer."
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/detect-project.mjs *) Bash(bash ${CLAUDE_SKILL_DIR}/../../scripts/verify-project.sh *) Bash(mkdir -p *) Bash(pnpm lint:fix) Bash(pnpm check) Bash(pnpm check:report)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/detect-project.mjs *) Bash(bash ${CLAUDE_SKILL_DIR}/../../scripts/verify-project.sh *) Bash(mkdir -p *) Bash(pnpm lint:fix) Bash(pnpm check) Bash(pnpm check:report) Bash(pnpm dev:mock)
 ---
 
 # develop
 
 `allowed-tools` approves this skill's commands only in the turn it is loaded. In any later turn (the user's answer to its question, or a subagent's or background task's result), load it again first (Skill tool, `web-dev:develop`, with what arrived as args), then go on: its commands otherwise ask for permission.
 
-Route one request to the workflow that fits the project, run it, and report once. Paths are relative to this skill's directory; the plugin's shared files are in `../../scripts/`, `../../references/` and `../../agents/`.
+Route one request to the workflow that fits the project, run it, and report once. Paths are relative to this skill's directory, and in a file under `references/` to that file's folder; the plugin's shared files are in `../../scripts/`, `../../references/` and `../../agents/`.
 
 Run the plugin's scripts exactly as written below, each as one plain command with no pipe or redirect: `allowed-tools` approves these exact forms for the run, so one message runs to the end without a permission prompt, headless included.
 
@@ -52,7 +52,8 @@ The tier decides whether the template's rules apply, so a failed detection stops
 | **feature** | a ticket, page, form or CRUD screen | `template`: C with `feature-development`. Otherwise: B |
 | **api** | one endpoint, an error case, a mock, cache invalidation | `template`: C with `api-integration`. Otherwise: B |
 | **ui** | a design to match, with no ticket | `template`, `landing`: C with `ui-development`. Otherwise: B |
-| **ci** | a CI/CD pipeline, unit or e2e tests in CI, a deploy, the hosting's setup (Cloudflare Pages, GitHub secrets and variables) | `template`, `landing`: C with `deploy-setup`. Otherwise: **not yet** (CI/CD only in a project from the boilerplate) |
+| **ci** | a CI/CD pipeline, unit or e2e tests in CI, setting up a deploy, the hosting's setup (Cloudflare Pages, GitHub secrets and variables) | `template`, `landing`: C with `deploy-setup`. Otherwise: **not yet** (CI/CD only in a project from the boilerplate) |
+| **release** | going live with what is merged or about to be ("ship it", "deploy to production"), a release tag, a rollback, "is it live yet" | `template`, `landing`: `release`. Otherwise: **not yet** (releases only on the boilerplate's pipeline) |
 | **not yet** | a bug fix, a review with no edits, a commit or push on its own (beyond the contract commit `ticket` and `incident` make, and the push `pr` makes), or CI/CD work in a project not made from the boilerplate | say this version does not cover it; change nothing |
 
 Sort a mixed request by its largest part (a whole app with a design is **app**; a ticket with a design is **feature**). The first line of the Result is `**Route:** <kind>, <tier>, workflow <A|B|C> (<reason>)`.
@@ -63,7 +64,7 @@ Ask once, in one message, before writing code, when:
 
 - a `same-stack`, `other-stack` or `landing` project would need a new dependency (Effect, shadcn/ui, React Hook Form, a router);
 - in Workflow B or C, a criterion depends on data, a business rule or the backend contract, and neither the request nor the code answers it;
-- the work needs an action outside the folder (push, deploy): this version does none, except the push and the PR or MR that `pr` makes when the user asks for one, and the Cloudflare and GitHub setup `deploy-setup` makes, each command confirmed;
+- the work needs an action outside the folder (push, deploy): this version does none, except the push and the PR or MR that `pr` makes when the user asks for one, the Cloudflare and GitHub setup `deploy-setup` makes, each command confirmed, and the tag or revert branch `release` pushes when the user asks for one;
 - a **setup** request that does not say whether it is a landing page or a web app (a web app comes with authentication): `project-setup` asks, as its step 2 says, and never picks it for the user.
 
 Everything else gets the simplest default, listed under **Assumptions**. Workflow A asks only `project-setup`'s git questions (`references/new-app.md`, A2): the user asked once and expects a running app (always a web app, so with authentication).

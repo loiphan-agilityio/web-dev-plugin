@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // The guardrails skill's PreToolUse hook (hooks/hooks.json): refuses the git commands that rewrite
-// history, force-push, delete a remote branch or skip the hooks, and reading or writing secret
-// files, and the release gate (production deploys, tags, merges and approvals; see the release
-// skill), before Claude runs them. It reads the hook input as JSON on stdin; a refusal exits 2 with
-// the reason on stderr, which Claude Code shows to Claude. Anything else exits 0. Commands are
-// split as a shell would (quotes, `;`, `&&`, `|`, redirects, `sh -c`), so a quoted commit message
-// is not mistaken for a flag. It stops mistakes, not someone set on getting around it: an alias, a
-// script file or a recursive `grep -r` still gets through.
+// history, discard uncommitted work, force-push, delete a remote branch or skip the hooks, and
+// reading or writing secret files, and the release gate (production deploys, tags, merges and
+// approvals; see the release skill), before Claude runs them. It reads the hook input as JSON on
+// stdin; a refusal exits 2 with the reason on stderr, which Claude Code shows to Claude. Anything
+// else exits 0. Commands are split as a shell would (quotes, `;`, `&&`, `|`, redirects, `sh -c`),
+// so a quoted commit message is not mistaken for a flag, and `env`, `sudo`, `command`, `nohup`,
+// `time` and `exec` in front of a command are looked through. It stops mistakes, not someone set
+// on getting around it: an alias, a script file or a recursive `grep -r` still gets through.
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
@@ -90,6 +91,74 @@ const isRedirect = (w) => /^[<>]/.test(w);
 const readers = new Set(['cat', 'less', 'more', 'head', 'tail', 'bat', 'grep', 'egrep', 'rg', 'sed', 'awk', 'source', '.', 'tee', 'base64', 'xxd', 'od', 'strings']);
 const copiers = new Set(['cp', 'mv', 'ln', 'install']);
 const shells = new Set(['sh', 'bash', 'zsh', 'dash']);
+
+/** Commands that run the command after them, each with its options that take the next word as their value. */
+const wrappers = new Map([
+  ['env', ['-u', '--unset', '-C', '--chdir']],
+  ['sudo', ['-u', '--user', '-g', '--group', '-h', '--host', '-p', '--prompt', '-C', '--close-from', '-D', '--chdir', '-R', '--chroot', '-T', '--command-timeout', '-U', '--other-user', '-r', '--role', '-t', '--type']],
+  ['command', []],
+  ['nohup', []],
+  ['time', ['-f', '--format', '-o', '--output']],
+  ['exec', ['-a']],
+]);
+
+/** The words behind any wrappers (`sudo -u x env A=1 git ...` gives `git ...`), and the assignments the wrappers set. */
+const unwrap = (words) => {
+  const assigns = [];
+  let rest = words;
+
+  while (rest.length && wrappers.has(basename(rest[0]))) {
+    const valued = wrappers.get(basename(rest[0]));
+    let k = 1;
+    for (; k < rest.length; k++) {
+      if (valued.includes(rest[k]) || valued.includes(`-${shortFlags(rest[k]).at(-1)}`)) k++;
+      else if (/^\w+=/.test(rest[k])) assigns.push(rest[k]);
+      else if (!rest[k].startsWith('-')) break;
+    }
+    rest = rest.slice(k);
+  }
+
+  return { rest, assigns };
+};
+
+/** Search commands, whose first word is the pattern: their short and long options that take a value. */
+const searchers = new Map([
+  ['grep', { short: 'efABCmdD', long: ['--regexp', '--file', '--after-context', '--before-context', '--context', '--max-count', '--include', '--exclude', '--exclude-from', '--exclude-dir', '--label', '--binary-files', '--devices', '--directories'] }],
+  ['rg', { short: 'efABCgtTmMjErd', long: ['--regexp', '--file', '--after-context', '--before-context', '--context', '--glob', '--iglob', '--type', '--type-not', '--type-add', '--max-count', '--max-columns', '--max-depth', '--max-filesize', '--threads', '--encoding', '--replace', '--sort', '--sortr', '--color', '--colors', '--pre', '--pre-glob', '--ignore-file', '--engine', '--context-separator', '--path-separator'] }],
+]);
+searchers.set('egrep', searchers.get('grep'));
+
+/**
+ * The files a search command reads: the words after the pattern (the first word that is not an
+ * option or an option's value, unless `-e` or `-f` gave the pattern), and the file `-f` names.
+ */
+const searchFiles = (cmd, args) => {
+  const { short, long } = searchers.get(cmd);
+  const files = [];
+  let pattern = false;
+  let options = true;
+  const take = (flag, value) => {
+    if (flag === 'e' || flag === 'f') pattern = true;
+    if (flag === 'f' && value) files.push(value);
+  };
+
+  for (let k = 0; k < args.length; k++) {
+    const a = args[k];
+
+    if (isRedirect(a)) k++;
+    else if (options && a === '--') options = false;
+    else if (options && a.startsWith('--')) {
+      const [name, ...value] = a.split('=');
+      if (long.includes(name)) take(name === '--regexp' ? 'e' : name === '--file' ? 'f' : name, value.length ? value.join('=') : args[++k]);
+    } else if (options && /^-./.test(a)) {
+      const at = [...a].findIndex((ch, n) => n > 0 && short.includes(ch));
+      if (at > 0) take(a[at], a.slice(at + 1) || args[++k]);
+    } else if (pattern) files.push(a);
+    else pattern = true;
+  }
+
+  return files;
+};
 
 /** Short flags in `-abc` form, or undefined for a long flag or a value. */
 const shortFlags = (w) => (/^-[A-Za-z]+$/.test(w) ? w.slice(1) : '');
@@ -205,6 +274,29 @@ const checkWrangler = (args) => {
   return undefined;
 };
 
+/** Checkout options that take the next word as their value: the new branch's name, a merge style. */
+const checkoutValueOptions = new Set(['-b', '-B', '--orphan', '--conflict', '--pathspec-from-file']);
+
+/**
+ * Whether `git checkout` overwrites files instead of switching: a pathspec after `--`, a path
+ * after the branch, or one word that names no commit and exists as a path. A name that is both a
+ * branch and a path is the branch, as git reads it.
+ */
+const checkoutPath = (rest, cwd) => {
+  const dashes = rest.indexOf('--');
+  if (dashes >= 0) return dashes < rest.length - 1;
+
+  const words = [];
+  for (let k = 0; k < rest.length; k++) {
+    if (checkoutValueOptions.has(rest[k])) return false;
+    if (!rest[k].startsWith('-')) words.push(rest[k]);
+  }
+  if (words.length > 1) return true;
+  if (words.length === 0 || git(cwd, 'rev-parse', '--verify', '--quiet', `${words[0]}^{commit}`) !== undefined) return false;
+
+  return existsSync(resolve(cwd, words[0]));
+};
+
 const checkGit = (args, base, firstPush = false) => {
   // Global options before the subcommand: -C <dir>, -c <key=value>, --git-dir=..., -p, ...
   let cwd = base;
@@ -227,7 +319,20 @@ const checkGit = (args, base, firstPush = false) => {
     case 'reset':
       return hasFlag(rest, ['--hard']) ? 'git reset --hard discards work: use git revert, or let the user run it' : undefined;
     case 'rebase':
-      return 'git rebase rewrites history: let the user run it';
+      // --abort and --continue cancel or finish a rebase the user started.
+      return rest.length === 1 && ['--abort', '--continue'].includes(rest[0]) ? undefined : 'git rebase rewrites history: let the user run it';
+    case 'clean':
+      return hasFlag(rest, ['--force'], 'f') && !hasFlag(rest, ['--dry-run'], 'n') ? 'git clean -f deletes untracked files: let the user run it' : undefined;
+    case 'checkout':
+      if (hasFlag(rest, ['--force'], 'f')) return 'git checkout -f discards uncommitted changes: let the user run it';
+      return checkoutPath(rest, cwd) ? 'git checkout of a path discards uncommitted changes: let the user run it' : undefined;
+    case 'switch':
+      return hasFlag(rest, ['--discard-changes', '--force'], 'f') ? 'git switch --discard-changes discards uncommitted changes: let the user run it' : undefined;
+    case 'stash':
+      return ['drop', 'clear'].includes(rest[0]) ? `git stash ${rest[0]} deletes stashed work: let the user run it` : undefined;
+    case 'restore':
+      // --staged alone only unstages; anything else writes the working tree.
+      return hasFlag(rest, ['--staged'], 'S') && !hasFlag(rest, ['--worktree'], 'W') ? undefined : 'git restore discards uncommitted changes: let the user run it';
     case 'push':
       if (hasFlag(rest, ['--force', '--force-with-lease', '--mirror'], 'f') || rest.some((a) => /^\+/.test(a)))
         return 'a force-push overwrites the remote: let the user run it';
@@ -247,7 +352,8 @@ const checkWords = (words, cwd, depth = 0) => {
   const assigns = [];
   let k = 0;
   for (; k < words.length && /^\w+=/.test(words[k]); k++) assigns.push(words[k]);
-  const [cmd, ...args] = words.slice(k);
+  const wrapped = unwrap(words.slice(k));
+  const [cmd, ...args] = wrapped.rest;
 
   for (let i = 0; i < words.length; i++) {
     if (isRedirect(words[i]) && words[i + 1] && isSecretFile(words[i + 1]) && (words[i] === '<' || existsSync(resolve(cwd, words[i + 1])))) return `${basename(words[i + 1])} holds secrets: the user reads or edits it`;
@@ -260,8 +366,9 @@ const checkWords = (words, cwd, depth = 0) => {
   }
 
   if (basename(cmd) === 'git') {
-    if (assigns.some((a) => /^HUSKY=0$/.test(a))) return 'HUSKY=0 skips the hooks: fix what they report instead';
-    return checkGit(args, cwd, assigns.includes('PROTECTED_BRANCHES=none'));
+    if ([...assigns, ...wrapped.assigns].some((a) => /^HUSKY=0$/.test(a))) return 'HUSKY=0 skips the hooks: fix what they report instead';
+    // The first-push exception holds only for the assignment right in front of git, not through a wrapper.
+    return checkGit(args, cwd, wrapped.rest.length === words.length - k && assigns.includes('PROTECTED_BRANCHES=none'));
   }
 
   if (cmd === 'gh' || cmd === 'glab') return checkForge(cmd, args);
@@ -272,7 +379,8 @@ const checkWords = (words, cwd, depth = 0) => {
     if (w >= 0) return checkWrangler(args.slice(w + 1));
   }
 
-  if (readers.has(basename(cmd)) && args.some((a) => !a.startsWith('-') && isSecretFile(a))) {
+  const read = searchers.has(basename(cmd)) ? searchFiles(basename(cmd), args) : args.filter((a) => !a.startsWith('-'));
+  if (readers.has(basename(cmd)) && read.some(isSecretFile)) {
     return 'that file holds secrets: the user reads or edits it';
   }
 

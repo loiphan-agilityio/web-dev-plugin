@@ -34,12 +34,22 @@ it runs (Chrome DevTools MCP, or the Lighthouse CLI run by you) and never replac
 
 ## Install
 
-Add the marketplace as the [repository README](../README.md#install) shows (this plugin needs
-Node 22 or newer), then `claude plugin install web-quality@web-dev-plugin`.
+Requirements and the marketplace command are in the
+[repository README](../README.md#requirements); then
+`claude plugin install web-quality@web-dev-plugin`. The plugin adds no hook.
 
 Pin a release with `#web-quality--v<version>` on the marketplace URL. A git install is a cached
 copy: a release arrives when `version` in `.claude-plugin/plugin.json` changes and you run
-`claude plugin update web-quality@web-dev-plugin` (or enable auto-update).
+`claude plugin update web-quality@web-dev-plugin` (or enable auto-update), then restart Claude
+Code.
+
+## Troubleshooting
+
+| You see | Why | Do |
+|---|---|---|
+| `the API answered 429: … (set PAGESPEED_API_KEY to use your own quota)`, exit 2 | PageSpeed's shared quota is spent. The audit goes on and lists PageSpeed under **Not checked** | Set `PAGESPEED_API_KEY` (a Google Cloud API key) and run it again |
+| `… is not public: PageSpeed Insights loads the page from Google's servers` | PageSpeed cannot reach localhost or a private network | Give it a deployed, public URL; the in-browser measurements still work locally |
+| No LCP or paint in the browser measurements | A hidden tab records no paint | Keep the tab visible while the page loads |
 
 ## Limits
 

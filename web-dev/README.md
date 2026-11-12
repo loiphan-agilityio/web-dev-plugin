@@ -4,77 +4,29 @@ One request, tested code: `/web-dev:develop <request>` reads the folder and runs
 fits, in a new folder or an existing React project. Three more skills write the contracts around
 the code.
 
-[![React 19](https://img.shields.io/badge/React-19-20232A?logo=react&logoColor=61DAFB)](https://react.dev)
-[![Vite 8](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev)
-[![TypeScript 6](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Effect 4](https://img.shields.io/badge/Effect-4-4B5563?logo=effect&logoColor=white)](https://effect.website)
-[![TanStack Query 5](https://img.shields.io/badge/TanStack_Query-5-FF4154?logo=reactquery&logoColor=white)](https://tanstack.com/query)
-[![React Hook Form 7](https://img.shields.io/badge/React_Hook_Form-7-EC5990?logo=reacthookform&logoColor=white)](https://react-hook-form.com)
-[![shadcn/ui Tailwind 4](https://img.shields.io/badge/shadcn%2Fui-Tailwind_4-4B5563?logo=shadcnui&logoColor=white)](https://ui.shadcn.com)
-[![React Router 8](https://img.shields.io/badge/React_Router-8-CA4245?logo=reactrouter&logoColor=white)](https://reactrouter.com)
-
-[![Vitest 5](https://img.shields.io/badge/Vitest-5-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
-[![Testing Library React](https://img.shields.io/badge/Testing_Library-React-E33332?logo=testinglibrary&logoColor=white)](https://testing-library.com/docs/react-testing-library/intro/)
-[![MSW 3](https://img.shields.io/badge/MSW-3-FF6A33?logo=mockserviceworker&logoColor=white)](https://mswjs.io)
-[![Playwright 1.64](https://img.shields.io/badge/Playwright-1.64-2EAD33)](https://playwright.dev)
-[![Storybook 10](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)](https://storybook.js.org)
-[![GitHub Actions CI](https://img.shields.io/badge/GitHub_Actions-CI-2088FF?logo=githubactions&logoColor=white)](https://docs.github.com/actions)
-[![Cloudflare Pages deploy](https://img.shields.io/badge/Cloudflare_Pages-deploy-F38020?logo=cloudflarepages&logoColor=white)](https://pages.cloudflare.com)
+Stack: React 19, Vite 8, TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7, shadcn/ui on
+Tailwind CSS 4, React Router 8, Vitest 5, MSW 3, Storybook 10, Playwright; GitHub Actions and
+Cloudflare Pages for CI/CD.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="../docs/workflow-map/develop-dark.svg">
   <img alt="/web-dev:develop runs detect-project.mjs, then routes: an empty folder to setup or landing, new or template to Workflow A for a whole app, template to Workflow C, landing to the landing route, same or other stack to Workflow B, unsupported to a stop, contract requests to ticket, incident or pr, and the rest to not yet." src="../docs/workflow-map/develop-light.svg">
 </picture>
 
-## Skills
-
-### Build
-
-| Skill | Does | Example |
-|---|---|---|
-| `develop` | The entry point: detects the folder (`scripts/detect-project.mjs`), then builds a whole app (**A**, planned in `docs/plan.md`, asks only the git questions), changes a React project not made from the boilerplate (**B**, mapped first by the `codebase-explorer` agent, checked by `scripts/verify-project.sh`) or makes one change in an app from it (**C**) | "/web-dev:develop Build an employee management app with CRUD, search and forms" |
-| `project-setup` | A new project from the react-vite-boilerplate (`scripts/create-project.sh`): a landing page or a web app with sign-in, companion skills installed, all gates green | "Scaffold a new web app called billing-portal, with login" |
-| `feature-development` | A ticket → a feature folder: schemas, API calls, queries, form, the four UI states, routes, a test and a story per component | "Implement this ticket: &lt;paste or issue URL&gt;" |
-| `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
-| `ui-development` | A design (screenshot, Figma frame, DESIGN.md) → matching UI with theme tokens and shadcn components, checked in a browser | "Make the settings page look like design/settings.png" |
-| `deploy-setup` | The boilerplate's CI/CD (`scripts/sync-pipeline.mjs`) and Cloudflare Pages (app, Storybook, coverage and Allure report) with gh and wrangler, or Claude in Chrome without them; you paste the API token yourself | "Set up CI/CD and deploy this app to Cloudflare Pages" |
-
-### Contracts
-
-Each is checked by `scripts/check-contract.mjs`.
-
-| Skill | Writes | Example |
-|---|---|---|
-| `ticket` | `docs/tickets/<id>/`: `intent.md`, `spec.md` (`AC-<n>` criteria, open questions), `plan.md` (`T<n>` tasks), committed on a branch; one subagent per ticket | "/web-dev:ticket 412 413 414" |
-| `incident` | `docs/incidents/<id>/`: `report.md`, `rca.md` (each claim measured or hypothesis), `actions.md` (`A<n>`, which can become tickets) | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
-| `pr` | A draft PR (`gh`) or MR (`glab`) with the `pnpm check:report` checklist, ready only when CI passes; never pushes a protected branch, never merges | "/web-dev:pr" |
-
-### Guardrails and releases
-
-| Skill | Does | Example |
-|---|---|---|
-| `guardrails` | Before a push, a commit on a protected branch, a history rewrite, a merge, a deploy or reading a secret: lists which rules are blocked by code, checked by a skill or only written down, and asks instead of acting; its hook (`hooks/hooks.json`, `scripts/guard.mjs`) refuses `--amend`, `reset --hard`, `rebase`, force-pushes, `--no-verify` and reading `.env` files and keys | "/web-dev:guardrails" · "Push this to main" |
-| `release` | A merged pull request → production: checks the PR's preview and CI, hands you the merge, follows the `main` run to `Deploy: production` and `E2E: production`, tags the merged commit when asked, rolls back through a revert PR. Never merges, approves, pushes `main` or deploys production itself; the hook enforces it | "Ship this to production" · "Roll back the last release" |
-
-### Not covered
-
-Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD outside a project from the
-boilerplate. Not yet: bug fixes, reviews without edits, commits beyond the contract commits;
-`develop` says so and changes nothing.
-
 ## Install
 
-Add the marketplace as the [repository README](../README.md#install) shows, then
+Requirements, the marketplace command and the first run are in the
+[repository README](../README.md#requirements); then
 `claude plugin install web-dev@web-dev-plugin`. pnpm 10 or newer switches to the pinned pnpm
 11.17 by itself.
 
-- **Source:** the `marketplace add` URL can also be
-  `https://github.com/loiphan-agilityio/web-dev-plugin.git`. It installs from `main`; append
-  `#<ref>` for another branch or a release tag (`#web-dev--v<version>`). Git uses your own
-  credentials and never prompts: an SSH key in `ssh-agent`, or a credential your git helper stores.
+- **Source:** the marketplace installs from `main`; append `#<ref>` to its URL for another branch
+  or a release tag (`#web-dev--v<version>`). Git uses your own credentials and never prompts: an
+  SSH key in `ssh-agent`, or a credential your git helper stores.
 - **Updates:** a git install is a cached copy, so a release arrives only when `version` in
-  `.claude-plugin/plugin.json` changes. Run `claude plugin update web-dev@web-dev-plugin`, or
-  enable auto-update once (`/plugin` → Marketplaces → web-dev-plugin → Enable auto-update).
+  `.claude-plugin/plugin.json` changes. Run `claude plugin update web-dev@web-dev-plugin` and
+  restart Claude Code, or enable auto-update once (`/plugin` → Marketplaces → web-dev-plugin →
+  Enable auto-update).
 - **For a whole team:** run `marketplace add` in the repository with `--scope project` and commit
   the `.claude/settings.json` it writes; teammates who trust the folder get the marketplace.
 - **Usage:** type `/web-dev:develop <request>`, or ask in plain words
@@ -82,6 +34,9 @@ Add the marketplace as the [repository README](../README.md#install) shows, then
   one message runs to the end with no settings file:
   `claude -p "/web-dev:develop <request>" --permission-mode acceptEdits --allowedTools Skill`
   (see Permissions below).
+- **Companion skills:** every new project gets eight third-party skills, fetched by
+  `npx skills@1.7.2` at audited commits, without a question: see
+  [Companion skills](#companion-skills) and [`docs/companion-audit.md`](docs/companion-audit.md).
 
 <details>
 <summary>From a clone, copied folders, or an existing project</summary>
@@ -120,6 +75,88 @@ skill's references (its `compatibility` field says which), so one skill installe
 (`npx skills add … --skill <name>`) has broken paths.
 
 </details>
+
+## Guardrails hook
+
+Installing the plugin adds a PreToolUse hook (`hooks/hooks.json`): `node scripts/guard.mjs` runs
+before every Bash, Read, Edit, MultiEdit, Write, NotebookEdit and Grep call Claude makes. It is on
+whenever the plugin is enabled, in every folder, whether or not the project is a web-dev one, and
+it needs `node` on your `PATH`.
+
+| It refuses | Examples |
+|---|---|
+| History rewrites | `git commit --amend`, `git rebase`, `git reset --hard` |
+| Discarding uncommitted work | `git clean -f`, `git checkout <path>`, `git restore <path>`, `git stash drop` |
+| Overwriting or deleting on the remote | a force-push, deleting a remote branch |
+| Skipping the git hooks | `--no-verify`, `HUSKY=0`, `core.hooksPath` |
+| The release gate | a push to a protected branch, merging or approving a pull request, a production deploy, a tag whose commit is not on the remote's default branch |
+| Secret files | reading, editing or overwriting `.env*`, `.npmrc`, keys and certificates; creating a new one from `.env.example` is allowed |
+
+The exact rules, and which are enforced by code, by a skill or only written down, are the table in
+[`skills/guardrails/SKILL.md`](skills/guardrails/SKILL.md).
+
+- **A refusal** reaches Claude as `Blocked by the web-dev guardrails: <reason>. See the guardrails
+  skill.`, for example `git commit --amend rewrites a commit: make a new commit instead`. The
+  `guardrails` skill tells Claude to say so and offer the safe alternative, not to try another
+  route.
+- **To go ahead anyway,** run the command yourself in your own terminal: the hook sees only Claude's
+  tool calls.
+- **To turn it off,** `claude plugin disable web-dev@web-dev-plugin` (back on with
+  `claude plugin enable web-dev@web-dev-plugin`) or
+  `claude plugin uninstall web-dev@web-dev-plugin`. That turns the skills off too: there is no
+  switch for the hook alone or for one rule.
+- It stops mistakes, not someone set on getting around it: an alias or a script file still gets
+  through. The real lock on a protected branch is branch protection on the server.
+
+## Skills
+
+### Build
+
+| Skill | Does | Example |
+|---|---|---|
+| `develop` | The entry point: detects the folder (`scripts/detect-project.mjs`), then builds a whole app (**A**, planned in `docs/plan.md`, asks only the git questions), changes a React project not made from the boilerplate (**B**, mapped first by the `codebase-explorer` agent, checked by `scripts/verify-project.sh`) or makes one change in an app from it (**C**) | "/web-dev:develop Build an employee management app with CRUD, search and forms" |
+| `project-setup` | A new project from the react-vite-boilerplate (`scripts/create-project.sh`): a landing page or a web app with sign-in, companion skills installed, all gates green | "Scaffold a new web app called billing-portal, with login" |
+| `feature-development` | A ticket → a feature folder: schemas, API calls, queries, form, the four UI states, routes, a test and a story per component | "Implement this ticket: &lt;paste or issue URL&gt;" |
+| `api-integration` | One endpoint: schema, `ApiClient` call, query or mutation, MSW mocks, error tests | "Add PATCH /todos/:id to toggle completion" |
+| `ui-development` | A design (screenshot, Figma frame, DESIGN.md) → matching UI with theme tokens and shadcn components, checked in a browser | "Make the settings page look like design/settings.png" |
+| `deploy-setup` | The boilerplate's CI/CD (`scripts/sync-pipeline.mjs`) and Cloudflare Pages (app, Storybook, coverage and Allure report) with gh and wrangler, or Claude in Chrome without them; you paste the API token yourself | "Set up CI/CD and deploy this app to Cloudflare Pages" |
+
+### Contracts
+
+Each is checked by `scripts/check-contract.mjs`.
+
+| Skill | Writes | Example |
+|---|---|---|
+| `ticket` | `docs/tickets/<id>/`: `intent.md`, `spec.md` (`AC-<n>` criteria, open questions), `plan.md` (`T<n>` tasks), committed on a branch; one subagent per ticket | "/web-dev:ticket 412 413 414" |
+| `incident` | `docs/incidents/<id>/`: `report.md`, `rca.md` (each claim measured or hypothesis), `actions.md` (`A<n>`, which can become tickets) | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
+| `pr` | A draft PR (`gh`) or MR (`glab`) with the `pnpm check:report` checklist, ready only when CI passes; never pushes a protected branch, never merges | "/web-dev:pr" |
+
+### Guardrails and releases
+
+| Skill | Does | Example |
+|---|---|---|
+| `guardrails` | Before a push, a commit on a protected branch, a history rewrite, a merge, a deploy or reading a secret: lists which rules are blocked by code, checked by a skill or only written down, and asks instead of acting; its hook is described under [Guardrails hook](#guardrails-hook) | "/web-dev:guardrails" · "Push this to main" |
+| `release` | A merged pull request → production: checks the PR's preview and CI, hands you the merge, follows the `main` run to `Deploy: production` and `E2E: production`, tags the merged commit when asked, rolls back through a revert PR. Never merges, approves, pushes `main` or deploys production itself; the hook enforces it | "Ship this to production" · "Roll back the last release" |
+
+### Not covered
+
+Out of scope: SSR / Next.js, non-React projects, backend code, CI/CD outside a project from the
+boilerplate. Not yet: bug fixes, reviews without edits, commits beyond the contract commits;
+`develop` says so and changes nothing.
+
+## Troubleshooting
+
+| You see | Why | Do |
+|---|---|---|
+| `project-setup` stops at its first step and names Node or pnpm | It needs Node 22.22 or newer (React Router 8's engines) and pnpm 10 or newer, and leaves system tools to you | Install or upgrade the tool, then ask again |
+| `create-project.sh` ends with git's fetch error and no project | The boilerplate could not be fetched from github.com: no network, a proxy, or no access | Check that `git ls-remote https://github.com/loiphan-agilityio/react-vite-boilerplate.git` answers in your terminal. `BOILERPLATE_REPO=<URL or path>` fetches from a mirror or a local clone instead (its default branch unless `BOILERPLATE_REF` names a commit, branch or tag) |
+| `error: these files already exist in <folder>; nothing was copied:` | The folder already holds files the project would overwrite; the script never overwrites | Use an empty folder, or move the listed files away |
+| `Blocked by the web-dev guardrails: …` | The hook refused one of Claude's tool calls | Run the command yourself in your terminal: [Guardrails hook](#guardrails-hook) |
+| A push to `main` is rejected | The project's `pre-push` hook refuses pushes to protected branches; on GitHub, a ruleset on `main` answers `GH013: Repository rule violations` | Work on a branch and open a pull request (`/web-dev:pr`). Only the scaffold commit goes straight to `main`, with `PROTECTED_BRANCHES=none git push -u origin main`; a ruleset is yours to lift, the skill prints the commands |
+| The e2e gate fails for a missing browser | Playwright's Chromium is downloaded once per machine and needs network | `pnpm test:e2e:install` from the project root, then `pnpm check:report` |
+| `companions not installed (<n>):` | The companion skills come from GitHub through npm's `skills` CLI and need network; the setup goes on without them | From the project root, run `install-companions.sh` again (the command is under [Install](#install), Existing project) |
+| `develop` reports a monorepo root and stops | In a project from the boilerplate the skills run from the app | `cd apps/web && claude --add-dir ../..` |
+| A new release does not arrive | A git install is a cached copy that changes only with `version` | `claude plugin update web-dev@web-dev-plugin`, then restart Claude Code |
 
 ## Contributing
 

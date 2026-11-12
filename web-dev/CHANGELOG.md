@@ -3,6 +3,38 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.13.0
+
+- **The guardrails hook refuses more.** Discarding uncommitted work: `git clean -f` (a dry run,
+  `-n`, passes), `git checkout` of a path, with or without `--` (a word that names no commit and
+  exists as a file or folder; a name that is both a branch and a path is the branch), `git
+  checkout -f`, `git switch --discard-changes` and `-f`, `git restore` of the working tree (`git
+  restore --staged` only unstages and passes), `git stash drop` and `git stash clear`. A refused
+  command behind `env`, `sudo`, `command`, `nohup`, `time` or `exec` (`env git push --force`,
+  `sudo cat .env`) is refused too, and the first-push exception (`PROTECTED_BRANCHES=none git push
+  -u origin main`) holds only with the variable right in front of `git`.
+- **The hook refuses less.** `git rebase --abort` and `git rebase --continue` pass: they cancel or
+  finish a rebase the user started. The pattern of `grep`, `egrep` and `rg` is no longer taken for
+  a file, so `rg -n .env src` and `grep -n "\.env" .gitignore` pass; `grep SECRET .env` is still
+  refused.
+- `project-setup` pushes once. The README commit of an empty repository stays local and the
+  scaffold push creates `main` with both commits; before, the hook refused the README push. When
+  the repository already has `main`, the skill pushes nothing and hands the user the command,
+  since the hook refuses every push to an existing `main`.
+- `guardrails` says the hook runs in every folder while the plugin is enabled, names every tool it
+  runs before (MultiEdit, NotebookEdit and Grep were missing) and lists `stag` and `prod` among
+  the protected branches. The hook's description names the release gate.
+- `deploy-setup`'s description sends releasing a merged pull request, tagging and rolling back to
+  `release` (eval case 26), and `develop` has a **release** route: going live, a tag, a rollback
+  or "is it live yet" in a project from the boilerplate loads `release`; its **ci** route is for
+  setting up a deploy (eval case 27).
+- `develop` allows `pnpm dev:mock`, which its new-app check runs; `ui-development` no longer
+  allows `pnpm exec vitest`, which no step runs.
+- The READMEs lead with requirements, an HTTPS install command, what installing changes (the hook,
+  the companion skills), the first run and a troubleshooting table. The manifests name `release`
+  and the hook.
+- MIT license (`LICENSE`).
+
 ## 0.12.0
 
 - **Removed:** `deploy-setup` no longer moves a project from Netlify to Cloudflare Pages: the
