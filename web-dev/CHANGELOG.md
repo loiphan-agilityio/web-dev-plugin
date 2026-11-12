@@ -3,7 +3,7 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.14.0
 
 - The boilerplate pin moves to `54bfc25`: the UI kit has its own stories
   (`packages/ui/src/stories/`) and its own Storybook (`pnpm --filter @repo/ui storybook`), the
