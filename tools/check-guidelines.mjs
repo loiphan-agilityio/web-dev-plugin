@@ -29,7 +29,7 @@ const sectionOf = (lines, heading) => {
   return text(lines.slice(start, next < 0 ? undefined : next));
 };
 
-const mirrored = ['stack-guidelines.md', 'coding-standards.md', 'architecture.md'];
+const mirrored = ['stack-guidelines.md'];
 const template = readFileSync(claudeMd, 'utf8').split(/\r?\n/);
 const problems = mirrored.flatMap((name) => {
   const path = join(referencesDir, name);

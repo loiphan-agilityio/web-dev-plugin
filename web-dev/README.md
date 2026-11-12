@@ -281,8 +281,9 @@ and GitHub (CI/CD in any other project is not yet covered).
 Third-party skills for parts of the stack, installed by `install-companions.sh` (itself pinned to
 `skills@1.7.2`) at an audited commit. The security and fit review of each is in
 [`docs/companion-audit.md`](docs/companion-audit.md); what Claude must ignore in each is in
-[`references/companions.md`](references/companions.md), which every skill reads first. When a
-companion disagrees with the project, the project's `CLAUDE.md` and the web-dev skills win.
+[`references/companions.md`](references/companions.md), which the skills that write app code read
+first. When a companion disagrees with the project, the project's `CLAUDE.md` and the web-dev
+skills win.
 
 | Skill | Source | Commit | License | What it is for |
 |---|---|---|---|---|

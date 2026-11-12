@@ -40,7 +40,7 @@ web-dev/                          the plugin (its README.md is the user guide)
     deploy-setup/scripts/         sync-pipeline.mjs (the boilerplate's CI/CD, test and Cloudflare
                                   Pages files at the pin, copied from a project create-project.sh
                                   makes)
-  references/                     shared guidelines: stack-guidelines, coding-standards, architecture
+  references/                     shared by the skills: stack-guidelines (version traps), companions
   hooks/hooks.json                the guardrails hook: runs scripts/guard.mjs before each Bash,
                                   Read, Edit, Write and Grep (also the release gate)
   scripts/                        detect-project.mjs, verify-project.sh, check-contract.mjs (run
@@ -72,7 +72,7 @@ docs/workflow-map/                the two diagrams the READMEs show (overview, d
 | `pnpm install` (repository root) | Installs the git hooks (husky) and the tools they and `pnpm lint` use. Run it once after cloning. |
 | `pnpm lint` (repository root) | ShellCheck on the scripts and `node --check` on the `.mjs` scripts. |
 | `bash tools/verify.sh` | Each eval fixture gets its tier, `create-project.sh` creates the two boilerplate variants (landing page, web app with auth) and refuses what `check-create-project.sh` expects, `sync-pipeline.mjs` brings a project whose pipeline drifted back to the pinned pipeline and refuses what `check-sync-pipeline.sh` expects, and in a project created from the boilerplate at its pinned commit (network) `references/` match its `apps/web/CLAUDE.md`, the format hook works and the quoted todos feature passes all six gates (lint, typecheck, test, build, Storybook build, Playwright e2e; it installs Chromium first). `BOILERPLATE_REPO=<path or URL>` tests a boilerplate branch before it is merged (that repository's checked-out branch), `BOILERPLATE_REF=main` the latest boilerplate. Same as CI, whose weekly run uses `main`. |
-| `bash tools/sync-references.sh` | Copies the shared guideline sections from the boilerplate's `apps/web/CLAUDE.md` (the pinned commit: network; `BOILERPLATE_REPO` and `BOILERPLATE_REF` as above) into `web-dev/references/`, keeping each file's preamble. Run it after moving the pin past a guideline change, then review and commit the diff. |
+| `bash tools/sync-references.sh` | Copies the version traps section from the boilerplate's `apps/web/CLAUDE.md` (the pinned commit: network; `BOILERPLATE_REPO` and `BOILERPLATE_REF` as above) into `web-dev/references/stack-guidelines.md`, keeping its preamble. Run it after moving the pin past a guideline change, then review and commit the diff. |
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality), through `tools/run-evals.sh`. Paid and local only: only when the user asks, on the release commit, after every free check (see the rule below and `web-dev/evals/README.md`). |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1 pyyaml==6.0.3` and skill-validator 1.8.0: `go install github.com/agent-ecosystem/skill-validator/cmd/skill-validator@v1.8.0` or its release binary) | Every skill passes the Agent Skills specification's validator (valid YAML frontmatter, only spec fields, `name` matches its folder) and skill-validator's `check --strict` (internal links resolve, every file under a skill is named by its text, content; a warning fails too, and no model is called), and every eval `case.yaml` parses. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` (and `web-quality/...`, and `.` for the marketplace) | Each plugin manifest and the marketplace manifest are valid. |
@@ -92,11 +92,11 @@ corepack picks that version.
   `verify.sh` writes those blocks into a project created from the boilerplate and runs every gate on them, so the
   markdown is the todos feature's only source. A block that shows a pattern found in neither is
   marked ` ```ts sketch ` and says so.
-- **Shared guidelines live in `web-dev/references/`:** version traps in `stack-guidelines.md`,
-  code style in `coding-standards.md`, the data flow in `architecture.md`. Skills point there
+- **The version traps live in `web-dev/references/stack-guidelines.md`.** Skills point there
   (`../../references/` from a skill) and keep only the traps of their own step. The boilerplate's
-  `apps/web/CLAUDE.md` carries the same sections word for word, so a project from it has them
-  without the plugin. The boilerplate is the source: change a section there, then run
+  `apps/web/CLAUDE.md` carries the same section word for word, so a project from it has it
+  without the plugin; its code style and data flow sections are only there, and the skills read
+  the project's `CLAUDE.md`. The boilerplate is the source: change the section there, then run
   `bash tools/sync-references.sh` here and commit what it copied. `check-guidelines.mjs` (in
   `verify.sh`) fails when the two differ and names that command. Edit only the preamble above a
   section in `references/`.

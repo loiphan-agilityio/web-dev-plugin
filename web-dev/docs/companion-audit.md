@@ -42,8 +42,8 @@ read the changelog, then change the version everywhere that rule lists.
 ## Override notes
 
 The overrides themselves live in one place, [`../references/companions.md`](../references/companions.md),
-which every skill reads before following a companion. The audit found them at these lines of the
-pinned commits:
+which the skills that write app code read before following a companion. The audit found them at
+these lines of the pinned commits:
 
 - `shadcn`: the Tailwind v3 branch (`SKILL.md:156`, `customization.md:111-121`) and `next-themes`
   (`customization.md:52-55`); its RSC notes are inert on Vite (`isRSC` is false).
