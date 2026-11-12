@@ -1,7 +1,7 @@
 # Stack guidelines
 
-The library versions this plugin is written for, and the APIs that changed in them. Every skill
-reads this file before writing code. It holds for a project on these majors (one from the boilerplate, or a
+The library versions this plugin is written for, and the APIs that changed in them. The skills that
+write app code read this file first. It holds for a project on these majors (one from the boilerplate, or a
 project whose `package.json` pins the same majors). In a project on other majors, the installed
 versions win: read its `package.json` and the types in `node_modules`, and do not apply a trap
 from this file to a library the project does not have.

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { after, before, describe, it } from 'node:test';
+import { after, describe, it } from 'node:test';
 
 import { checkHeaders } from '../check-headers.mjs';
 import { statuses } from './statuses.mjs';
@@ -43,7 +43,6 @@ describe('check-headers', () => {
     const address = /** @type {import('node:net').AddressInfo} */ (server.address());
     return `http://127.0.0.1:${address.port}/`;
   };
-  before(() => {});
   after(() => {
     for (const server of servers) server.close();
   });

@@ -7,19 +7,19 @@ detect="$here/../../scripts/detect-project.mjs"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-tier_of() { node "$detect" "$1" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).tier'; }
-
 failed=0
-expect() {
-  local name="$1" want="$2" got
-  got="$(tier_of "$tmp/$name")"
+# expect_field <folder> <JavaScript expression on r, the parsed report> <value>
+expect_field() {
+  local name="$1" field="$2" want="$3" got
+  got="$(node "$detect" "$tmp/$name" | node -p 'const r = JSON.parse(require("node:fs").readFileSync(0, "utf8")); eval(process.argv[1])' "$field")"
   if [[ "$got" == "$want" ]]; then
-    echo "  ok   $name: $got"
+    echo "  ok   $name: $field is $got"
   else
-    echo "  FAIL $name: $got, expected $want" >&2
+    echo "  FAIL $name: $field is \"$got\", expected \"$want\"" >&2
     failed=1
   fi
 }
+expect() { expect_field "$1" r.tier "$2"; }
 
 mkdir -p "$tmp/empty/.git" "$tmp/other" "$tmp/template" "$tmp/landing" "$tmp/same-stack" "$tmp/other-stack" "$tmp/vue" "$tmp/broken"
 (cd "$tmp/other" && bash "$here/notes-folder.sh")
@@ -82,46 +82,18 @@ expect vue unsupported
 expect monorepo unsupported
 expect remix unsupported
 
-expect_no_other_majors() {
-  local name="$1" why="$2" other_majors
-  other_majors="$(node "$detect" "$tmp/$name" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).otherMajors.length')"
-  if [[ "$other_majors" == 0 ]]; then
-    echo "  ok   $name: $why"
-  else
-    echo "  FAIL $name: otherMajors has $other_majors entries, expected 0" >&2
-    failed=1
-  fi
-}
-expect_no_other_majors range "installed react 19 matches the guidelines"
+# Installed react 19 matches the guidelines.
+expect_field range 'r.otherMajors.join("; ")' ""
 # Not installed: react, typescript and tailwindcss are `catalog:`, pinned in pnpm-workspace.yaml.
-expect_no_other_majors template/apps/web "the boilerplate's catalog: versions match the guidelines"
-expect_no_other_majors catalog-unknown/app "an unresolved catalog:stable is not reported"
+expect_field template/apps/web 'r.otherMajors.join("; ")' ""
+# An unresolved catalog:stable is not reported.
+expect_field catalog-unknown/app 'r.otherMajors.join("; ")' ""
+expect_field catalog-comment/app 'r.otherMajors.join("; ")' "react ^18.3.1 (guidelines: 19)"
+expect_field catalogs/app 'r.otherMajors.join("; ")' \
+  "react ^18.3.1 (guidelines: 19); typescript ~5.9.3 (guidelines: 6)"
 
-expect_other_majors() {
-  local name="$1" want="$2" got
-  got="$(node "$detect" "$tmp/$name" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).otherMajors.join("; ")')"
-  if [[ "$got" == "$want" ]]; then
-    echo "  ok   $name: otherMajors $got"
-  else
-    echo "  FAIL $name: otherMajors \"$got\", expected \"$want\"" >&2
-    failed=1
-  fi
-}
-expect_other_majors catalog-comment/app "react ^18.3.1 (guidelines: 19)"
-expect_other_majors catalogs/app "react ^18.3.1 (guidelines: 19); typescript ~5.9.3 (guidelines: 6)"
-
-expect_package_manager() {
-  local name="$1" want="$2" got
-  got="$(node "$detect" "$tmp/$name" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).packageManager')"
-  if [[ "$got" == "$want" ]]; then
-    echo "  ok   $name: package manager $got"
-  else
-    echo "  FAIL $name: package manager $got, expected $want" >&2
-    failed=1
-  fi
-}
-expect_package_manager pnpm-ws/apps/web pnpm
-expect_package_manager yarn-ws/packages/app yarn
+expect_field pnpm-ws/apps/web r.packageManager pnpm
+expect_field yarn-ws/packages/app r.packageManager yarn
 
 # A broken package.json and a missing folder are errors with their own exit codes, not tiers.
 expect_exit() {

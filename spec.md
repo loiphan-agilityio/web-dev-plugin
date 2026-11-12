@@ -84,8 +84,9 @@ Requirement 4, one message to a whole app: the demo in `README.md` ("First run")
 
 ## Out of scope
 
-- SSR and Next.js, backend code, and writing or changing CI/CD pipelines: the boilerplate brings
-  its own (requirements 7 and 8), and the skills leave it as it is.
+- SSR and Next.js, backend code, and a CI/CD pipeline of the plugin's own: the boilerplate brings
+  one (requirements 7 and 8), `deploy-setup` copies it into a project from the boilerplate, and
+  CI/CD in any other project is not covered.
 - Applying the skeleton to an existing project: `create-project.sh` refuses a folder with
   conflicting files. An existing project gets features through Workflow B instead.
 - Not yet: bug fixes, review without edits, and commits beyond the contract commit of `ticket` and

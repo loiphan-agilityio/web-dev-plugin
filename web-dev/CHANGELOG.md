@@ -8,8 +8,16 @@ A git install is a cached copy, so a change reaches users only with a new versio
 - The boilerplate pin moves to `54bfc25`: the UI kit has its own stories
   (`packages/ui/src/stories/`) and its own Storybook (`pnpm --filter @repo/ui storybook`), the
   app's Storybook shows them too, both read one config from `packages/storybook-config`, and the
-  Storybook, Vite and `@tailwindcss/vite` versions move to the workspace catalog. No guideline
-  section and no pipeline file changed.
+  Storybook, Vite and `@tailwindcss/vite` versions move to the workspace catalog. The shared
+  guidelines (`references/stack-guidelines.md`) and the pipeline files did not change.
+- **Removed:** `references/architecture.md` and `references/coding-standards.md`. No skill or agent
+  ever named them, so nothing loaded them; a project from the boilerplate has both sections in its
+  `apps/web/CLAUDE.md`, which the skills read. `references/stack-guidelines.md` stays and is still
+  checked against the boilerplate.
+- `develop`'s existing-project workflow points at the `project-setup` steps that hold the
+  companion skills and the git hooks (6 and 8, not 5 and 6).
+- The README, the companion audit and `stack-guidelines.md` no longer say every skill reads the
+  shared references: the skills that write app code do.
 
 ## 0.13.0
 
