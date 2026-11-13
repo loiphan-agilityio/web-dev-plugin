@@ -3,8 +3,9 @@
 This repository ships the **web-dev** Claude Code plugin: an entry skill, `develop`, that inspects
 the project and routes a request to the skills that build web apps on React 19, Vite 8,
 TypeScript 6, Effect 4, TanStack Query 5, React Hook Form 7 and shadcn/ui, and the skills that write
-the contracts around the code: `ticket` (docs/tickets/<id>/), `incident` (docs/incidents/<id>/)
-and `pr` (a pull or merge request's description). `deploy-setup` brings the boilerplate's CI/CD
+the contracts around the code: `ticket` (docs/tickets/<id>/), `incident` (docs/incidents/<id>/),
+`pr` (a pull or merge request's description) and `review-mr` (a security and code review left as a pending
+review the user curates before Claude posts it). `deploy-setup` brings the boilerplate's CI/CD
 (unit and e2e tests, Cloudflare Pages deploys) into a project made from it; `release` takes a
 merged pull request to production, and `guardrails` keeps what is hard to undo with the user.
 What the skills must do is in `spec.md`, how they are built in `DESIGN.md`, and how to run the
@@ -34,7 +35,7 @@ web-dev/                          the plugin (its README.md is the user guide)
   CHANGELOG.md                    one entry per release (version bump + tag web-dev--v<version>)
   skills/                         the product: develop (entry), project-setup, feature-development,
                                   api-integration, ui-development, deploy-setup, ticket, incident,
-                                  pr, guardrails, release (their contract templates in references/)
+                                  pr, review-mr, guardrails, release (their contract templates in references/)
     project-setup/scripts/        create-project.sh (a new project from the boilerplate: landing
                                   page, or web app, always with auth), install-companions.sh
     deploy-setup/scripts/         sync-pipeline.mjs (the boilerplate's CI/CD, test and Cloudflare

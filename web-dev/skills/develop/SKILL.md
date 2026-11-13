@@ -1,6 +1,6 @@
 ---
 name: develop
-description: This skill should be used when the user types "/web-dev:develop", describes a whole web app, POC, MVP or landing page to build ("build an employee management app with CRUD and search"), or asks for a feature, endpoint or screen in an existing React project that is not built on the web-dev stack (axios, zod, Redux). It detects the project, picks the workflow and runs the other web-dev skills. Not for non-React projects, Next.js or SSR, bug fixes, code review or PR/MR work.
+description: This skill should be used when the user types "/web-dev:develop", describes a whole web app, POC, MVP or landing page to build ("build an employee management app with CRUD and search"), or asks for a feature, endpoint or screen in an existing React project that is not built on the web-dev stack (axios, zod, Redux). It detects the project, picks the workflow and runs the other web-dev skills. Not for non-React projects, Next.js or SSR, bug fixes, or opening or reviewing a PR/MR asked for directly (pr, review-mr).
 compatibility: "Claude Code, as part of the web-dev plugin only: reads the plugin's scripts/, references/ and agents/ beside skills/ and runs the other web-dev skills. Needs Node 22.22 or newer."
 allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/../../scripts/detect-project.mjs *) Bash(bash ${CLAUDE_SKILL_DIR}/../../scripts/verify-project.sh *) Bash(mkdir -p *) Bash(pnpm lint:fix) Bash(pnpm check) Bash(pnpm check:report) Bash(pnpm dev:mock)
 ---
@@ -49,12 +49,13 @@ The tier decides whether the template's rules apply, so a failed detection stops
 | **ticket contract** | intent, spec and plan for one or more tickets, before any code | any tier but `unsupported`: `ticket` (several tickets run in parallel, one subagent each) |
 | **incident** | an incident report, postmortem or root cause analysis | any tier but `unsupported`: `incident` |
 | **pr** | a pull or merge request for the current branch, to send it for review | any tier but `unsupported`: `pr` |
+| **review-mr** | review a merge or pull request (security included) and draft comments on it, or post a drafted review | any tier but `unsupported`: `review-mr` |
 | **feature** | a ticket, page, form or CRUD screen | `template`: C with `feature-development`. Otherwise: B |
 | **api** | one endpoint, an error case, a mock, cache invalidation | `template`: C with `api-integration`. Otherwise: B |
 | **ui** | a design to match, with no ticket | `template`, `landing`: C with `ui-development`. Otherwise: B |
 | **ci** | a CI/CD pipeline, unit or e2e tests in CI, setting up a deploy, the hosting's setup (Cloudflare Pages, GitHub secrets and variables) | `template`, `landing`: C with `deploy-setup`. Otherwise: **not yet** (CI/CD only in a project from the boilerplate) |
 | **release** | going live with what is merged or about to be ("ship it", "deploy to production"), a release tag, a rollback, "is it live yet" | `template`, `landing`: `release`. Otherwise: **not yet** (releases only on the boilerplate's pipeline) |
-| **not yet** | a bug fix, a review with no edits, a commit or push on its own (beyond the contract commit `ticket` and `incident` make, and the push `pr` makes), or CI/CD work in a project not made from the boilerplate | say this version does not cover it; change nothing |
+| **not yet** | a bug fix, a commit or push on its own (beyond the contract commit `ticket` and `incident` make, the push `pr` makes and the review `review-mr` posts), or CI/CD work in a project not made from the boilerplate | say this version does not cover it; change nothing |
 
 Sort a mixed request by its largest part (a whole app with a design is **app**; a ticket with a design is **feature**). The first line of the Result is `**Route:** <kind>, <tier>, workflow <A|B|C> (<reason>)`.
 
@@ -64,7 +65,7 @@ Ask once, in one message, before writing code, when:
 
 - a `same-stack`, `other-stack` or `landing` project would need a new dependency (Effect, shadcn/ui, React Hook Form, a router);
 - in Workflow B or C, a criterion depends on data, a business rule or the backend contract, and neither the request nor the code answers it;
-- the work needs an action outside the folder (push, deploy): this version does none, except the push and the PR or MR that `pr` makes when the user asks for one, the Cloudflare and GitHub setup `deploy-setup` makes, each command confirmed, and the tag or revert branch `release` pushes when the user asks for one;
+- the work needs an action outside the folder (push, deploy): this version does none, except the push and the PR or MR that `pr` makes when the user asks for one, the Cloudflare and GitHub setup `deploy-setup` makes, each command confirmed, and the tag or revert branch `release` pushes when the user asks for one, and the pending review `review-mr` drafts and submits only on the user's word;
 - a **setup** request that does not say whether it is a landing page or a web app (a web app comes with authentication): `project-setup` asks, as its step 2 says, and never picks it for the user.
 
 Everything else gets the simplest default, listed under **Assumptions**. Workflow A asks only `project-setup`'s git questions (`references/new-app.md`, A2): the user asked once and expects a running app (always a web app, so with authentication).
@@ -76,7 +77,7 @@ Everything else gets the simplest default, listed under **Assumptions**. Workflo
 - **C, one change in a `template` project, or a landing, ui or ci change in a `landing` project:** invoke the skill from step 2 (Skill tool) and follow it through its gates and its Result. Put the **Route:** line on top of that Result; write no second one.
 - **setup in an empty folder:** invoke `project-setup`; its Result, with the **Route:** line on top, is the report.
 - **landing in an empty folder:** invoke `project-setup` with `--landing` (it asks only its git questions), then `ui-development` for the page's copy and sections; one Result.
-- **ticket contract, incident, pr:** invoke `ticket`, `incident` or `pr`; its Result, with the **Route:** line on top, is the report.
+- **ticket contract, incident, pr, review-mr:** invoke `ticket`, `incident`, `pr` or `review-mr`; its Result, with the **Route:** line on top, is the report.
 
 ## Result
 

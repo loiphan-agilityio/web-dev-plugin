@@ -74,6 +74,7 @@ flowchart TD
 | `ticket` | Tickets to write up before any code (`/web-dev:ticket`) | — (`feature-development` builds from the contract later) |
 | `incident` | An incident report or postmortem (`/web-dev:incident`) | `ticket` for its follow-ups, when the user asks |
 | `pr` | A branch to send for review as a pull or merge request (`/web-dev:pr`) | — (it links the ticket contract; review and merge stay with the user) |
+| `review-mr` | A merge or pull request to review, security included (`/web-dev:review-mr !12`), then "post it" | — (drafts a pending review; the user curates it on the host; the verdict and the merge stay with the user) |
 | `release` | Going live, a release tag, a rollback or "is it live" in a project with the boilerplate's pipeline (`/web-dev:release`) | `pr` for a missing or a revert pull request, `deploy-setup` for a missing pipeline; the merge stays with the user |
 | `guardrails` | Before anything outward-facing or hard to undo: a push to a protected branch, a history rewrite, a merge, a deploy, a secret file (`/web-dev:guardrails`) | — (its hook, `guard.mjs`, refuses those commands in every skill) |
 

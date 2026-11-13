@@ -3,6 +3,22 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.15.0
+
+- **New skill: `review-mr`** (`/web-dev:review-mr !12`). It reviews a merge request (GitLab) or pull
+  request (GitHub) for security (the patterns in its `references/security.md`: untrusted data in
+  HTML, code or URLs, open redirects, tokens and secrets, new dependencies, loosened headers; a
+  secret's value is never quoted), correctness, the web-dev conventions (on a project from the
+  boilerplate; elsewhere the project's own) and the ACs of the ticket contract it links, and leaves
+  its comments as a pending review that only you see. You edit or delete them on the host, then say
+  "post it", and it submits what is left as a comment review with a summary ending "Drafted with
+  Claude, reviewed by @<you>". It stops when you already have a pending review on that PR, and never
+  approves or requests changes. With no findings it drafts nothing. `develop` routes review requests
+  to it instead of reporting them as not yet covered (eval cases 28 and 29).
+- **The guardrails hook refuses requesting changes** as well as approving: `gh pr review
+  --request-changes` (`-r`), `event=REQUEST_CHANGES` through `gh api`, and GitLab's
+  `reviewer_state=requested_changes` through `glab api`. A comment review passes.
+
 ## 0.14.0
 
 - The boilerplate pin moves to `54bfc25`: the UI kit has its own stories
