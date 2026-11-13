@@ -172,6 +172,9 @@ corepack picks that version.
 - Messages follow Conventional Commits (`feat(ui-development): ...`), checked by commitlint in the
   `commit-msg` hook. The `pre-commit` hook runs ShellCheck and `node --check` on staged scripts.
   Never commit with `--no-verify`.
+- A commit message is the subject line only (`feat(ui-development): ...`): no body and no
+  `Co-Authored-By` trailer. The why and the details go in the pull request's description; a squash
+  merge keeps the PR title as the commit on `main`, so clear the body in the merge dialog too.
 - `main` changes only through a squash-merged pull request whose four CI checks pass:
   `.github/rulesets/main.json`, applied once by a repository admin with
   `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. After
