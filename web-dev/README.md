@@ -10,7 +10,7 @@ Cloudflare Pages for CI/CD.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="../docs/workflow-map/develop-dark.svg">
-  <img alt="/web-dev:develop runs detect-project.mjs, then routes: an empty folder to setup or landing, new or template to Workflow A for a whole app, template to Workflow C, landing to the landing route, same or other stack to Workflow B, unsupported to a stop, contract requests to ticket, incident or pr, and the rest to not yet." src="../docs/workflow-map/develop-light.svg">
+  <img alt="/web-dev:develop runs detect-project.mjs, then routes: an empty folder to setup or landing, new or template to Workflow A for a whole app, template to Workflow C, landing to the landing route, same or other stack to Workflow B, unsupported to a stop, contract requests to ticket, incident, pr or review-mr, and the rest to not yet." src="../docs/workflow-map/develop-light.svg">
 </picture>
 
 ## Install
@@ -89,7 +89,7 @@ it needs `node` on your `PATH`.
 | Discarding uncommitted work | `git clean -f`, `git checkout <path>`, `git restore <path>`, `git stash drop` |
 | Overwriting or deleting on the remote | a force-push, deleting a remote branch |
 | Skipping the git hooks | `--no-verify`, `HUSKY=0`, `core.hooksPath` |
-| The release gate | a push to a protected branch, merging or approving a pull request, a production deploy, a tag whose commit is not on the remote's default branch |
+| The release gate | a push to a protected branch, merging, approving or requesting changes on a pull request, a production deploy, a tag whose commit is not on the remote's default branch |
 | Secret files | reading, editing or overwriting `.env*`, `.npmrc`, keys and certificates; creating a new one from `.env.example` is allowed |
 
 The exact rules, and which are enforced by code, by a skill or only written down, are the table in
@@ -130,6 +130,7 @@ Each is checked by `scripts/check-contract.mjs`.
 | `ticket` | `docs/tickets/<id>/`: `intent.md`, `spec.md` (`AC-<n>` criteria, open questions), `plan.md` (`T<n>` tasks), committed on a branch; one subagent per ticket | "/web-dev:ticket 412 413 414" |
 | `incident` | `docs/incidents/<id>/`: `report.md`, `rca.md` (each claim measured or hypothesis), `actions.md` (`A<n>`, which can become tickets) | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
 | `pr` | A draft PR (`gh`) or MR (`glab`) with the `pnpm check:report` checklist, ready only when CI passes; never pushes a protected branch, never merges | "/web-dev:pr" |
+| `review-mr` | Reviews an MR or PR (security, correctness, these conventions, the linked ticket's ACs) and leaves its comments as a pending review only you see; you edit or delete them on the host, then say "post it" and it submits the rest as a comment review. Never approves or requests changes | "/web-dev:review-mr !12" · "post it" |
 
 ### Guardrails and releases
 

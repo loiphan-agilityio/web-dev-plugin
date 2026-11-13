@@ -7,7 +7,7 @@ Two Claude Code plugins for React web apps: **web-dev** builds tested code from 
 
 | Plugin | What it does | Start with | Guide |
 |---|---|---|---|
-| **web-dev** | Scaffolds a project, builds features, endpoints and screens, sets up CI/CD, writes ticket, incident and PR contracts; every gate passes before it is done | `/web-dev:develop <request>` | [`web-dev/README.md`](web-dev/README.md) |
+| **web-dev** | Scaffolds a project, builds features, endpoints and screens, sets up CI/CD, writes ticket, incident and PR contracts, drafts MR reviews, security included, that you curate before they are posted; every gate passes before it is done | `/web-dev:develop <request>` | [`web-dev/README.md`](web-dev/README.md) |
 | **web-quality** | Audits speed, accessibility, SEO and security in a real browser, labels each finding measured or hypothesis, fixes it and measures again | `/web-quality:audit <url>` | [`web-quality/README.md`](web-quality/README.md) |
 
 ## Requirements

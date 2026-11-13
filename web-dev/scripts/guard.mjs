@@ -240,7 +240,7 @@ const checkPushTargets = (rest, cwd, firstPush) => {
   return undefined;
 };
 
-/** `gh` and `glab`: approving or merging a pull or merge request is the user's. */
+/** `gh` and `glab`: approving, requesting changes on or merging a pull or merge request is the user's. */
 const checkForge = (cmd, all) => {
   // Global flags before the subcommand: -R/--repo <owner/repo>, --hostname <host>.
   const args = [];
@@ -250,11 +250,15 @@ const checkForge = (cmd, all) => {
   }
   const [group, action] = args;
   const merge = 'approving or merging a pull or merge request is a person\'s decision';
+  const verdict = 'requesting changes on a pull or merge request is a person\'s decision: submit the review as a comment';
 
   if (cmd === 'gh' && group === 'pr' && (action === 'merge' || (action === 'review' && hasFlag(args, ['--approve'], 'a')))) return merge;
+  if (cmd === 'gh' && group === 'pr' && action === 'review' && hasFlag(args, ['--request-changes'], 'r')) return verdict;
   if (cmd === 'glab' && group === 'mr' && (action === 'merge' || action === 'approve')) return merge;
   if (cmd === 'gh' && group === 'api' && args.some((a) => /\/pulls\/\d+\/merge$|event=APPROVE|mergePullRequest|enablePullRequestAutoMerge|addPullRequestReview[\s\S]*APPROVE/.test(a))) return merge;
+  if (cmd === 'gh' && group === 'api' && args.some((a) => /event=REQUEST_CHANGES|addPullRequestReview[\s\S]*REQUEST_CHANGES/.test(a))) return verdict;
   if (cmd === 'glab' && group === 'api' && args.some((a) => /merge_requests\/\d+\/(merge|approve)/.test(a))) return merge;
+  if (cmd === 'glab' && group === 'api' && args.some((a) => /reviewer_state=requested_changes/.test(a))) return verdict;
 
   return undefined;
 };

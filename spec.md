@@ -43,6 +43,7 @@ Every version is pinned in the boilerplate's lockfile.
 | 17 | **PR contracts:** `/web-dev:pr` opens a pull or merge request described by why, what changed, the ticket contract it implements and the `pnpm check:report` checklist; it is not opened ready into a protected branch before CI passes | `pr` skill + `scripts/check-contract.mjs` (a description file) | `check-contract.mjs` passes: four sections filled, linked contracts pass, every gate passes (`scripts/test/`); the PR stays a draft while CI fails |
 | 18 | **Guardrails:** what is outward-facing or hard to undo stays with the user: no history rewrite, force-push, skipped hook or push to a protected branch, no reading or overwriting secret files | `guardrails` skill + the plugin's PreToolUse hook (`hooks/hooks.json`, `scripts/guard.mjs`) | The hook refuses each such command and file (`scripts/test/guard.test.mjs`); an ordinary feature-branch push only asks |
 | 19 | **Release:** `/web-dev:release` takes a merged pull request to production, tags a merged commit and rolls back through a revert pull request; the merge is the user's | `release` skill + the hook's release gate (`scripts/guard.mjs`) | The hook refuses a merge, an approval, a production deploy and a tag whose commit is not on the remote's default branch (`scripts/test/guard.test.mjs`) |
+| 20 | **Review MR:** `/web-dev:review-mr !12` reviews a merge or pull request (security, correctness, the web-dev conventions, the ticket contract it links) and leaves its comments as a pending review only the user sees; the user edits or deletes them on the host, and on the user's word it submits what is left as a comment review | `review-mr` skill + the hook (`scripts/guard.mjs`) | Nothing is submitted in the turn that drafts; the hook refuses approving and requesting changes (`scripts/test/guard.test.mjs`) |
 | + | Not in the assignment: build a UI that matches a design (screenshot, mockup, Figma, DESIGN.md; all optional) | `ui-development` skill | Theme tokens, shadcn components and the four data states, no raw colors |
 
 ### Each skill must
@@ -89,9 +90,9 @@ Requirement 4, one message to a whole app: the demo in `README.md` ("First run")
   CI/CD in any other project is not covered.
 - Applying the skeleton to an existing project: `create-project.sh` refuses a folder with
   conflicting files. An existing project gets features through Workflow B instead.
-- Not yet: bug fixes, review without edits, and commits beyond the contract commit of `ticket` and
+- Not yet: bug fixes, and commits beyond the contract commit of `ticket` and
   `incident` (`develop` reports them as not covered and changes nothing); a PR or MR goes through
-  `pr`, and a release through `release`: neither merges.
+  `pr`, its review through `review-mr`, and a release through `release`: none merges or approves.
 
 ## Distribution
 

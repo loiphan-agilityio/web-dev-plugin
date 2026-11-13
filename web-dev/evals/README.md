@@ -35,12 +35,14 @@ the plugin alone.
 | `25-guardrails-feature-push` | `template` | an ordinary feature-branch commit and push loads no skill, `guardrails` and `release` included (the push only asks), and never pushes `main` |
 | `26-release-not-deploy-setup` | `template` | "deploy the pull request we merged to production" loads `release`, not `deploy-setup`: no `sync-pipeline.mjs`, no production deploy, merge or push runs, and the answer says production deploys from CI after the merge |
 | `27-release-through-develop` | `template` | "ship what we merged to production" through `develop` is routed to `release`, not `deploy-setup`: no `sync-pipeline.mjs`, no production deploy, merge or push runs |
+| `28-review-mr-template` | `template` | "review mr!12" loads `review-mr`; with no GitLab or GitHub remote it stops at its preconditions and submits nothing |
+| `29-review-mr-through-develop` | `template` | a security review request through `develop` is routed to `review-mr`, not to `pr` or **not yet**; nothing is submitted, pushed or opened |
 
 `fixtures/` builds the folders; each case's `setup.sh` calls one. `fixtures/check-detect.sh`
 checks the tier `scripts/detect-project.mjs` gives each fixture, without a model; `verify.sh`
 runs it.
 
-Tags: `routing` (cases 01 to 17 and 20 to 27, short runs that stop once the route is clear), `e2e` (cases 18 and 19,
+Tags: `routing` (cases 01 to 17 and 20 to 29, short runs that stop once the route is clear), `e2e` (cases 18 and 19,
 a full feature, or a whole app, with install and gates: slow, several dollars a run for 18 and more for 19), and finer tags within
 them: `workflow-a`, `workflow-b`, `workflow-c`, `existing-project`, `no-trigger` (the plugin
 must not fire), `edge`, `failure`, `overlap`.
