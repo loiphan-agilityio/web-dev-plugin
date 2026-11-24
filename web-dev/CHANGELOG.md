@@ -3,7 +3,7 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.18.0
 
 - **`review-mr` security pass has a bar for findings.** "When a security lead is a finding" in
   `references/security.md`: a comment names the actor, the control, the boundary and the result;

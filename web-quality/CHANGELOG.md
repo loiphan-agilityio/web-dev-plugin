@@ -3,7 +3,7 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.2.11
 
 - `security` has four more client patterns (`postMessage` origin, prototype pollution with a
   gadget, service worker caches across sign-out, `BroadcastChannel` and `storage` identity), and
