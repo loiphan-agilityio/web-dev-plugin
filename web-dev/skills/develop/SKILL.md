@@ -27,7 +27,7 @@ Run detect (`<target>`: the folder the request names, else the current directory
 | `landing` | a landing page from the boilerplate (its `apps/web`): its UI kit, no API layer or Effect | C with `ui-development` for a **landing** or **ui** request, C with `deploy-setup` for **ci**, else B |
 | `same-stack` | the template's stack in another layout | B |
 | `other-stack` | React on another stack (`reasons` names what is missing) | B |
-| `unsupported` | not React, React behind an SSR framework (Next.js, Remix, Gatsby, Astro), or a monorepo root | stop: report `reasons`. A **ci** request at a monorepo root with `apps/web`: detect `apps/web` and route by its tier, since the pipeline lives at the root |
+| `unsupported` | not React, React behind an SSR framework (Next.js, Remix, Gatsby, Astro), or a monorepo root | stop: report `reasons`. A **ci** request at a monorepo root with `apps/web`: detect `apps/web` and route by its tier, since the pipeline lives at the root. A **review-mr** request is routed whatever the tier: `review-mr` reviews with the project's own rules |
 
 `otherMajors` lists libraries on another major than `../../references/stack-guidelines.md`: the installed types win over that file.
 
@@ -49,7 +49,7 @@ The tier decides whether the template's rules apply, so a failed detection stops
 | **ticket contract** | intent, spec and plan for one or more tickets, before any code | any tier but `unsupported`: `ticket` (several tickets run in parallel, one subagent each) |
 | **incident** | an incident report, postmortem or root cause analysis | any tier but `unsupported`: `incident` |
 | **pr** | a pull or merge request for the current branch, to send it for review | any tier but `unsupported`: `pr` |
-| **review-mr** | review a merge or pull request (security included) and draft comments on it, or post a drafted review | any tier but `unsupported`: `review-mr` |
+| **review-mr** | review a merge or pull request (security included) and draft comments on it, or post a drafted review | any tier, `unsupported` included: `review-mr` |
 | **feature** | a ticket, page, form or CRUD screen | `template`: C with `feature-development`. Otherwise: B |
 | **api** | one endpoint, an error case, a mock, cache invalidation | `template`: C with `api-integration`. Otherwise: B |
 | **ui** | a design to match, with no ticket | `template`, `landing`: C with `ui-development`. Otherwise: B |

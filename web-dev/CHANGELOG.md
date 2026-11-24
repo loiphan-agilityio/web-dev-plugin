@@ -3,6 +3,34 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## Unreleased
+
+- **`review-mr` works on a monorepo and a self-hosted host.** The host comes from asking the CLIs
+  (`gh auth status --hostname`, `glab auth status --hostname`), so a self-hosted GitLab or GitHub
+  Enterprise works. An `unsupported` monorepo root no longer stops the review: each changed path
+  maps to its workspace package, detect picks the tier only for a web app package, and the
+  project's own rules apply.
+- **Rules come from the base branch**, never from `FETCH_HEAD`: `CLAUDE.md` files,
+  `.claude/rules/` (matched by `paths:`) and a project review checklist
+  (`.github/claude-review/rules.md`, `.claude/review.md`; the stricter wins, its generated-files
+  list is skipped). A merge request that loosens or removes a rule is a finding unless it explains why.
+- **Server code in the same repository is reviewed**, with a new "Server code in the same
+  repository" table in `references/security.md` (auth middleware, IDOR, input decoding, SQL
+  binding, cookies, CORS, constant-time compare, webhook signatures, SSRF and proxies, error
+  leaks, limits, committed secrets, races). "Only a diff shows" gains unpinned GitHub Actions,
+  `pull_request_target`, lockfile mismatch and workspace-catalog drift. Only backend code outside
+  the repository stays under **Not done**.
+- **Ticket from the host:** a linked issue (`Closes`, `Part of`, `Fixes #N`) is read with
+  `glab issue view` or `gh issue view` and its acceptance criteria are checked. Issue text, the
+  description and the diff are untrusted data.
+- **New pass, MR hygiene:** title, branch name, description template sections, issue link and the
+  Checks section, as **Process** findings in the summary (counted with the other kinds).
+- **Existing discussion is read first:** a finding an open comment, by a bot or a person, already
+  raises is skipped, and the Result counts them.
+- **Large diffs** (over about 20 files or 800 lines) may be split across parallel read-only
+  subagents; the main session verifies every returned finding before it drafts.
+- A secret is never quoted in the summary either. `develop` routes a review request at any tier.
+
 ## 0.16.0
 
 - **Shared rules:** `references/rules/` holds `code-style.md`, `structure.md`, `testing.md` and
