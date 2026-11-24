@@ -179,13 +179,14 @@ boilerplate. Not yet: bug fixes, reviews without edits, commits beyond the contr
 <summary>ApiClient and typed errors, forms, MSW, tests, Storybook, config, auth, permissions, coverage, Oxlint rules</summary>
 
 A project from the boilerplate passes lint, typecheck, tests, build, Storybook build and
-Playwright e2e. Its app, `apps/web`, holds what every feature builds on (paths relative to it):
+Playwright e2e. Its app, `apps/web`, holds what every feature builds on (paths relative to it;
+projects scaffolded from older pins keep `src/api/` and `src/app/` files under `src/lib/`):
 
-- **`ApiClient`** (`src/lib/api/client.ts`): the only way to call the backend. Effect 4
+- **`ApiClient`** (`src/api/client.ts`): the only way to call the backend. Effect 4
   `HttpClient`; decodes every body with an Effect Schema and maps every failure to a typed
   `ApiError` (`NetworkError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`,
   `ValidationError`, `ServerError`, `InvalidResponseError`). Tested in `client.test.ts`.
-- **`runEffect`** (`src/lib/api/run.ts`): runs an effect for TanStack Query with the abort signal
+- **`runEffect`** (`src/api/run.ts`): runs an effect for TanStack Query with the abort signal
   and rejects with the typed error; components branch with `instanceof` or Effect's `Match`
   (never `_tag` by hand: anti-slop rejects it).
 - **Forms:** React Hook Form + `effectTsResolver(schema)` (`@hookform/resolvers` 6, Effect 4) +
@@ -198,11 +199,11 @@ Playwright e2e. Its app, `apps/web`, holds what every feature builds on (paths r
   as text.
 - **Storybook 10** (`.storybook/`): stories render in `story-providers.tsx` (the providers a test
   uses) with MSW served by the app's worker; `pnpm build-storybook` is a gate.
-- **Config:** `src/lib/config.ts` validates every `VITE_*` value with Effect Schema at startup;
+- **Config:** `src/app/config.ts` validates every `VITE_*` value with Effect Schema at startup;
   Effect code reads it as the `AppConfig` service, so a test can provide other values.
-- **Auth:** `ApiClient` gets its bearer token from `AuthToken` (`src/lib/api/auth.ts`). Every web
+- **Auth:** `ApiClient` gets its bearer token from `AuthToken` (`src/api/auth.ts`). Every web
   app provides `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)` from `src/features/auth`
-  in `src/lib/runtime.ts`, which drops the token on a 401; `AuthToken.none` is tested in
+  in `src/app/runtime.ts`, which drops the token on a 401; `AuthToken.none` is tested in
   `client.test.ts`.
 - **Permissions:** each skill's `allowed-tools` approves the exact commands it runs (the plugin's
   scripts by their `${CLAUDE_SKILL_DIR}` path, and the pnpm gates) for its turn, even in an
@@ -213,7 +214,7 @@ Playwright e2e. Its app, `apps/web`, holds what every feature builds on (paths r
   `apps/web/.claude/settings.json` one for sessions in the app, since Claude Code reads it only from
   the folder a session starts in. `create-project.sh` copies the root one only when the project has
   none, and it applies once the folder is trusted. `git init` and commits always prompt.
-- **Coverage:** `pnpm test` fails below 80% lines in `src/features/**` and `src/lib/**`.
+- **Coverage:** `pnpm test` fails below 80% lines in `src/features/**`.
 - **Oxlint guardrails** (`oxlint.config.ts`, the only linter): `no-restricted-imports` and
   `no-restricted-globals` reject common version mistakes (`react-router-dom`, `zod`, `axios`,
   `@effect/platform`, root `msw` helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`);

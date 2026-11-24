@@ -1,6 +1,6 @@
 # Forms
 
-Source: the todos feature (`components/TodoForm/index.tsx`), `src/lib/forms.ts`, `packages/ui/src/components/field.tsx` of the boilerplate.
+Source: the todos feature (`components/TodoForm/index.tsx`), `src/utils/form-errors.ts`, `packages/ui/src/components/field.tsx` of the boilerplate.
 
 ## The full form
 
@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@repo/ui/components/alert';
 import { Button } from '@repo/ui/components/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@repo/ui/components/field';
 import { Input } from '@repo/ui/components/input';
-import { setFormErrors } from '@/lib/forms';
+import { setFormErrors } from '@/utils/form-errors';
 
 import { useCreateTodo } from '../../queries';
 import { NewTodo, type NewTodoInput } from '../../schemas';
@@ -94,7 +94,7 @@ export const TodoForm = () => {
 
 ## Server errors
 
-`setFormErrors` (`src/lib/forms.ts`; read it in the project for the code), in short:
+`setFormErrors` (`src/utils/form-errors.ts`; read it in the project for the code), in short:
 
 - A `ValidationError` with `fields` puts each message under the field named by the server key. Those keys must equal your form field names; if the API names them differently, map before calling `setError`, or tell the user the contract mismatches.
 - The third argument, `form.getValues()`, sends a message for a name the form has no input for (`account`, a server-only rule) to `errors.root.server` too; without it that message is set but never shown. A boilerplate from before 0.3.3 of this plugin takes two arguments: drop the third there.

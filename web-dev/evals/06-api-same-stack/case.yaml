@@ -26,5 +26,5 @@ graders:
     name: builds-on-the-project
     focus: trace
     criteria: |
-      - The new call goes through src/api/http.ts (or a function added beside getJson there), not a new client and not src/lib/api/client.ts.
-      - The agent did not create src/lib/api/, src/test/render.tsx or other template files the project does not have.
+      - The new call goes through src/api/http.ts (or a function added beside getJson there), not a new client and not src/api/client.ts.
+      - The agent did not create src/api/client.ts, src/test/render.tsx or other template files the project does not have.

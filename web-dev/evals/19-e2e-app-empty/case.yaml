@@ -15,7 +15,7 @@ graders:
   - type: regex
     name: scaffolds-the-template
     target: files
-    pattern: 'src/lib/api/client\.ts'
+    pattern: 'src/(lib/)?api/client\.ts'
   - type: regex
     name: builds-a-feature-api
     target: files

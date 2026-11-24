@@ -135,7 +135,10 @@ const packageManager =
 
 // What makes an app from the boilerplate (the `template` and `landing` tiers).
 const markers = {
-  apiClient: readText(join(dir, 'src/lib/api/client.ts')).includes('ApiClient'),
+  // src/api/ in the current boilerplate; src/lib/api/ in projects scaffolded from older pins.
+  apiClient: ['src/api/client.ts', 'src/lib/api/client.ts'].some((file) =>
+    readText(join(dir, file)).includes('ApiClient'),
+  ),
   testRender: existsSync(join(dir, 'src/test/render.tsx')),
 };
 const workspaces =
@@ -203,7 +206,7 @@ const tierOf = () => {
     return 'template';
   }
   reasons.push(
-    'same stack, other layout: no src/lib/api/client.ts ApiClient or src/test/render.tsx',
+    'same stack, other layout: no src/api/client.ts (or src/lib/api/client.ts) ApiClient or src/test/render.tsx',
   );
   return 'same-stack';
 };

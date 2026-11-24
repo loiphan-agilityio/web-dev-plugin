@@ -113,7 +113,7 @@ The form alone makes no `GET`, so the 422 override is one `server.use()` call. T
 ```tsx file=src/features/todos/components/TodosPage/__tests__/TodosPage.test.tsx
 import { screen, within } from '@testing-library/react';
 
-import { tokenStore } from '@/lib/api/token';
+import { tokenStore } from '@/api/token';
 import { server } from '@/mocks/server';
 import { renderRoute } from '@/test/render';
 

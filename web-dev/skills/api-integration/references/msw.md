@@ -18,7 +18,7 @@ import type { RequestHandler } from 'msw';      // types may still come from the
 import { http, HttpResponse } from 'msw/http';
 import { delay } from 'msw/utils/delay';
 
-import { config } from '@/lib/config';
+import { config } from '@/app/config';
 
 import type { NewTodo, Todo } from './schemas';
 

@@ -73,7 +73,7 @@ Every version is pinned in the boilerplate's lockfile.
 - Render four distinct states on every data screen: loading, error with retry, empty, success.
 - Show server validation errors (422) next to the matching form fields.
 - Mock every request with MSW in tests; an unhandled request fails the test.
-- Keep at least 80% line coverage in `src/features/**` and `src/lib/**`.
+- Keep at least 80% line coverage in `src/features/**`.
 - Walk each feature's main flow in a Playwright spec that passes on the mock build locally and
   on the live Cloudflare Pages site in CI.
 

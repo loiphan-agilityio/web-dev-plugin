@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Writes a `same-stack` fixture into the current directory: the web-dev stack (React, Vite, Effect,
-# TanStack Query, React Hook Form) in a layout of its own: no src/lib/api/client.ts, no
+# TanStack Query, React Hook Form) in a layout of its own: no src/api/client.ts (or src/lib/api/client.ts), no
 # src/test/render.tsx. Enough files for routing and the project map; nothing is installed.
 set -euo pipefail
 mkdir -p src/api src/pages src/hooks src/pages/__tests__
