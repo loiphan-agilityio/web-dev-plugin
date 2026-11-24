@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Copies the shared guideline sections from their source, the boilerplate's apps/web/CLAUDE.md,
-# into web-dev/references/ (check-guidelines.mjs --write keeps each file's preamble). Run it after a
+# and its whole .claude/rules/*.md files into web-dev/references/ and references/rules/
+# (check-guidelines.mjs --write keeps each guideline file's preamble, deletes stale rule files). Run it after a
 # guideline change is merged in the boilerplate, then review the diff and commit it.
 #
 #   tools/sync-references.sh   creates a project with create-project.sh --auth (the

@@ -24,6 +24,7 @@ whole app; the diff-only rows are what a reviewer sees that a scan of the finish
 | Change | Risk | What the comment asks for |
 |---|---|---|
 | a key, token, password or private URL written in the code, a fixture or a config file | the secret is exposed in the branch history | never quote the value; rotate it, then load it from the server or the CI secret store (the SKILL's secret rule) |
+| a secret (`secrets.*`, a secret-holding environment) used in a workflow that runs on `push` or `pull_request` | every pushed branch runs its own copy of that file, so any branch can read the secret | secrets only in workflows whose trigger runs the default branch's copy (`workflow_run`, `repository_dispatch`, `schedule`) and execute nothing from the branch, or in an environment limited to protected branches |
 | a dependency added or its version range changed in `package.json` | supply chain, a known advisory | name the package and ask why; no audit is run here (`pnpm audit` belongs to web-quality's `security`) |
 | `public/_headers`, a CSP or another security header loosened or removed | the browser stops blocking injected scripts, framing or sniffing | keep the header; widen the one directive the change needs, with a reason |
 | auth, session or redirect code changed with no test for the hostile case | a regression nobody sees | a test with the hostile input (`//evil.example`, `javascript:alert(1)`, an expired token) |

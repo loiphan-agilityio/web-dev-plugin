@@ -20,6 +20,10 @@ export const TodoList = () => {
   const { data, isPending, isError, error, refetch, isRefetching } =
     useQuery(todoListQueryOptions());
 
+  const handleRetry = () => {
+    void refetch();
+  };
+
   // isPending is true only before the first result, so a background refetch keeps the list.
   if (isPending) {
     return (
@@ -43,7 +47,7 @@ export const TodoList = () => {
             size="sm"
             className="mt-2"
             disabled={isRefetching}
-            onClick={() => void refetch()}
+            onClick={handleRetry}
           >
             Try again
           </Button>
