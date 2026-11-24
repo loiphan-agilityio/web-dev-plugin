@@ -3,6 +3,21 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.19.0
+
+- **The boilerplate pin moves to the `src/api` layout** (react-vite-boilerplate#41). A new project
+  has no `src/lib/`: the HTTP layer (`ApiClient`, `ApiError`, `runEffect`, `AuthToken`) is in
+  `src/api/`, `config`, `runtime`, `query-client` and `stale-chunk` are flat files in `src/app/`,
+  and `report-error` and `form-errors` (was `forms.ts`) are in `src/utils/`. Coverage counts
+  `src/api`, `src/app`, `src/features` and `src/utils`.
+- **Detection accepts both layouts.** `detect-project.mjs` gives the `template` tier when
+  `ApiClient` is in `src/api/client.ts` or, for projects from older pins, `src/lib/api/client.ts`.
+  New `check-detect.sh` fixtures cover both and a `src/api/client.ts` without `ApiClient`.
+- **References name the new paths** (`api-integration`, `feature-development`, README, evals 06
+  and 19), with one note that older projects keep these files under `src/lib/`.
+- **`references/rules/structure.md`** gains the closed list of top-level folders of an app's
+  `src/` and the files of a feature folder, synced from the boilerplate.
+
 ## 0.18.0
 
 - **`review-mr` security pass has a bar for findings.** "When a security lead is a finding" in
