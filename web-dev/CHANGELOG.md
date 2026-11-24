@@ -3,7 +3,7 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
-## Unreleased
+## 0.17.0
 
 - **`review-mr` works on a monorepo and a self-hosted host.** The host comes from asking the CLIs
   (`gh auth status --hostname`, `glab auth status --hostname`), so a self-hosted GitLab or GitHub
