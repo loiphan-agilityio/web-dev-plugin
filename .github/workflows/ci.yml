@@ -107,4 +107,4 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - run: node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs
+      - run: node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs tools/test/*.test.mjs

@@ -77,7 +77,7 @@ docs/workflow-map/                the two diagrams the READMEs show (overview, d
 | `bash evals/run.sh --tag routing` in `web-dev/` | The routing evals, one arm (`--ablation with-without` adds the no-plugin baseline; `--tag e2e` for output quality), through `tools/run-evals.sh`. Paid and local only: only when the user asks, on the release commit, after every free check (see the rule below and `web-dev/evals/README.md`). |
 | `bash tools/validate-skills.sh` (after `pip install skills-ref==0.1.1 pyyaml==6.0.3` and skill-validator 1.8.0: `go install github.com/agent-ecosystem/skill-validator/cmd/skill-validator@v1.8.0` or its release binary) | Every skill passes the Agent Skills specification's validator (valid YAML frontmatter, only spec fields, `name` matches its folder) and skill-validator's `check --strict` (internal links resolve, every file under a skill is named by its text, content; a warning fails too, and no model is called), and every eval `case.yaml` parses. Also a CI job. |
 | `claude plugin validate --strict web-dev/.claude-plugin/plugin.json` (and `web-quality/...`, and `.` for the marketplace) | Each plugin manifest and the marketplace manifest are valid. |
-| `node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs` | web-dev's contract check against temporary folders (the shipped templates included), and web-quality's measurement scripts against local servers and temporary builds, no network. Also a CI job. |
+| `node --test web-dev/scripts/test/*.test.mjs web-quality/scripts/test/*.test.mjs tools/test/*.test.mjs` | web-dev's contract check against temporary folders (the shipped templates included), web-quality's measurement scripts against local servers and temporary builds, and tools/'s check-guidelines.mjs against temporary folders, no network. Also a CI job. |
 | `bash evals/run.sh --tag routing` in `web-quality/` | web-quality's routing evals. Paid, as above. |
 
 The boilerplate pins pnpm in `packageManager`; run pnpm from inside a project made from it so
@@ -96,11 +96,13 @@ corepack picks that version.
 - **The version traps live in `web-dev/references/stack-guidelines.md`.** Skills point there
   (`../../references/` from a skill) and keep only the traps of their own step. The boilerplate's
   `apps/web/CLAUDE.md` carries the same section word for word, so a project from it has it
-  without the plugin; its code style and data flow sections are only there, and the skills read
-  the project's `CLAUDE.md`. The boilerplate is the source: change the section there, then run
-  `bash tools/sync-references.sh` here and commit what it copied. `check-guidelines.mjs` (in
-  `verify.sh`) fails when the two differ and names that command. Edit only the preamble above a
-  section in `references/`.
+  without the plugin; its data flow section is only there, and the skills read the project's
+  `CLAUDE.md`. **The conventions (code style, structure, testing, Git) live in
+  `web-dev/references/rules/`**, whole-file copies of the boilerplate's `.claude/rules/`, for
+  projects that have none of their own. The boilerplate is the source of both: change it there,
+  then run `bash tools/sync-references.sh` here and commit what it copied. `check-guidelines.mjs`
+  (in `verify.sh`) fails when they differ and names that command. Never edit a file in
+  `references/rules/`, and edit only the preamble above a section in the other `references/` files.
 - **Skills reach the plugin's shared files by relative path** (`../../references/`,
   `../../scripts/`, `../../agents/`), which holds both for the installed plugin and for a project
   that copies `skills/`, `references/`, `scripts/` and `agents/` into its `.claude/`.

@@ -27,7 +27,7 @@ The **base** is the branch the user names, else the remote's default: `git remot
 
 ## 2. The ticket
 
-The ticket id comes from the user, else the branch name (`feat/412-search`, `docs/ticket-412`), else the commit messages. Its contract is `docs/tickets/<id>/`: `intent.md` (Problem, Outcome) gives **Why**, `spec.md` the criteria this branch covers. Several tickets: name each. A change with no ticket (a dependency bump, a chore, a fix with no issue) says `none: <why>` under **Ticket**. Never invent an id; ask when the branch names a ticket whose folder is missing.
+The ticket id comes from the user, else the ticket folders the branch changes (`git diff --name-only origin/<base>...HEAD -- docs/tickets`), else the commit messages (`Closes #412`). Branch names carry no ticket number (`../../references/rules/git-workflow.md`), so never read one from the branch. Its contract is `docs/tickets/<id>/`: `intent.md` (Problem, Outcome) gives **Why**, `spec.md` the criteria this branch covers. Several tickets: name each. A change with no ticket (a dependency bump, a chore, a fix with no issue) says `none: <why>` under **Ticket**. Never invent an id; ask when the user or a commit names a ticket whose folder is missing.
 
 ## 3. Gates
 
@@ -42,7 +42,7 @@ Write it to `pr-body.md` in a new temporary folder outside the repository (`mkte
 - **Ticket:** a link to the contract on this branch (GitHub `https://github.com/<owner>/<repo>/blob/<branch>/docs/tickets/<id>/`, GitLab `<project URL>/-/tree/<branch>/docs/tickets/<id>`) and the criteria it covers (`AC-1`, `AC-3`), or `none: <why>`.
 - **Evidence:** the checklist from step 3, then `CI: pending`.
 
-The title is a Conventional Commit (`feat(<scope>): <summary>`): a squash merge makes it the commit message, and projects from the boilerplate run commitlint.
+The title is a Conventional Commit (`feat(<scope>): <summary>`): a squash merge makes it the commit message, and projects from the boilerplate run commitlint. Its scope, summary and length follow `../../references/rules/git-workflow.md` (and the project's `.claude/rules/` when it adds to it). A repository with its own description template (`.github/pull_request_template.md`, `.gitlab/merge_request_templates/`) keeps it: add the sections of `references/pr.md` it lacks after its own.
 
 Run the check from the project root. It fails on a missing section, a `<!-- fill` marker, evidence with no checklist or with a failing gate, a linked ticket folder that does not exist or whose contract fails its own check, or a cited criterion its spec does not list. Fix the description until it exits 0; exit 2 means it could not run (a wrong path): report it.
 

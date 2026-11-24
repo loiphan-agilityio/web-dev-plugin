@@ -52,7 +52,7 @@ Run the check on each folder. It fails on a missing file or section, a `<!-- fil
 
 The contract goes through review like code. Commit it on a branch, never on `main`, `dev`, `staging` or `production`:
 
-1. `git switch -c docs/ticket-<id>` (one ticket) or `docs/tickets-<first id>-<last id>`, unless the user is on a feature branch for this work;
+1. `git switch -c docs/<gist>-ticket-contract`, where `<gist>` is 2 to 4 lowercase words of the ticket's subject (`docs/item-search-ticket-contract`; several tickets: their common subject), with no ticket number or other digits (`../../references/rules/git-workflow.md`), unless the user is on a feature branch for this work;
 2. `git add docs/tickets/<id>` for each contract, and `git diff --cached --name-only` to confirm only those files;
 3. `git commit -m "docs(ticket): intent, spec and plan for <id>"` (a Conventional Commit: projects from the boilerplate run commitlint).
 
