@@ -3,6 +3,13 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-quality--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## Unreleased
+
+- `security` has four more client patterns (`postMessage` origin, prototype pollution with a
+  gadget, service worker caches across sign-out, `BroadcastChannel` and `storage` identity), and
+  says a pattern is a lead, not a finding, until untrusted data reaches it and the result reaches
+  another user, origin or session.
+
 ## 0.2.10
 
 - `seo` marks each file in its Result new or edited as it read it before the change, so the step
