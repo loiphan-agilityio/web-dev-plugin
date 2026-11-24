@@ -214,7 +214,7 @@ projects scaffolded from older pins keep `src/api/` and `src/app/` files under `
   `apps/web/.claude/settings.json` one for sessions in the app, since Claude Code reads it only from
   the folder a session starts in. `create-project.sh` copies the root one only when the project has
   none, and it applies once the folder is trusted. `git init` and commits always prompt.
-- **Coverage:** `pnpm test` fails below 80% lines in `src/features/**`.
+- **Coverage:** `pnpm test` fails below 80% lines in `src/api/**`, `src/app/**`, `src/features/**` and `src/utils/**`.
 - **Oxlint guardrails** (`oxlint.config.ts`, the only linter): `no-restricted-imports` and
   `no-restricted-globals` reject common version mistakes (`react-router-dom`, `zod`, `axios`,
   `@effect/platform`, root `msw` helpers, `clsx`, `fetch` in any form, `XMLHttpRequest`);
