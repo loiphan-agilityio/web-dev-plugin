@@ -3,6 +3,27 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## 0.16.0
+
+- **Shared rules:** `references/rules/` holds `code-style.md`, `structure.md`, `testing.md` and
+  `git-workflow.md`, whole-file copies of the boilerplate's `.claude/rules/`. A project from the
+  boilerplate has them in its own `.claude/rules/`; `feature-development`, `ui-development`,
+  `api-integration` and `review-mr` read the project's, or these when the project has none.
+  `tools/check-guidelines.mjs` (in `verify.sh`) fails when the two differ, and
+  `sync-references.sh` copies them.
+- The boilerplate pin moves to `4f06740`: those rule files, the format hook finding the repository
+  root from its own location (a session started in `apps/web` formats `packages/` too), and a
+  pre-commit hook that no longer fails on a commit of only lint-ignored files. The pipeline files
+  did not change.
+- **Branch names carry no ticket number** (Conventional Branch, `git-workflow.md`). `pr` takes the
+  ticket from the `docs/tickets/` folders the branch changes or from its commits (`Closes #412`),
+  never from the branch name, and keeps a repository's own description template, adding the
+  sections it lacks. `ticket` branches are `docs/<gist>-ticket-contract`, `incident` branches
+  `docs/<gist>-incident-report`.
+- `review-mr`'s security reference flags a secret used in a workflow that runs on `push` or
+  `pull_request`.
+- The todos list's retry button uses a named handler (`handleRetry`), as `code-style.md` asks.
+
 ## 0.15.0
 
 - **New skill: `review-mr`** (`/web-dev:review-mr !12`). It reviews a merge request (GitLab) or pull
