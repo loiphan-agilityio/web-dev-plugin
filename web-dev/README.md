@@ -130,7 +130,7 @@ Each is checked by `scripts/check-contract.mjs`.
 | `ticket` | `docs/tickets/<id>/`: `intent.md`, `spec.md` (`AC-<n>` criteria, open questions), `plan.md` (`T<n>` tasks), committed on a branch; one subagent per ticket | "/web-dev:ticket 412 413 414" |
 | `incident` | `docs/incidents/<id>/`: `report.md`, `rca.md` (each claim measured or hypothesis), `actions.md` (`A<n>`, which can become tickets) | "/web-dev:incident INC-12: login returned 500 after the 09:00 deploy" |
 | `pr` | A draft PR (`gh`) or MR (`glab`) with the `pnpm check:report` checklist, ready only when CI passes; never pushes a protected branch, never merges | "/web-dev:pr" |
-| `review-mr` | Reviews an MR or PR (security, correctness, these conventions, the linked ticket's ACs) and leaves its comments as a pending review only you see; you edit or delete them on the host, then say "post it" and it submits the rest as a comment review. Never approves or requests changes | "/web-dev:review-mr !12" · "post it" |
+| `review-mr` | Reviews an MR or PR (security, server code in the same repository included, correctness, the project's own rules from the base branch or these conventions, the linked ticket's ACs, the MR's title, branch and description; comments an existing review already made are skipped; works in a monorepo and on a self-hosted GitLab) and leaves its comments as a pending review only you see; you edit or delete them on the host, then say "post it" and it submits the rest as a comment review. Never approves or requests changes | "/web-dev:review-mr !12" · "post it" |
 
 ### Guardrails and releases
 
