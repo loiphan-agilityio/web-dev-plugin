@@ -35,6 +35,12 @@ the backend's; name them under **Not checked** when they matter.
 | a token in `localStorage` | readable by any injected script | an httpOnly cookie set by the backend; until then, a strict CSP |
 | a secret in a `VITE_*` variable | Vite inlines it into the public bundle | keep secrets on the server; `VITE_*` is public |
 | `target="_blank"` to another site with `rel` removing `noopener` | the opened page controls this tab | leave `rel` at its default or add `noopener` |
+| a `postMessage` handler that acts on `event.data` with no exact `event.origin` check (and `event.source` when frames share the origin), or sensitive data posted to `*` | any page that can open or frame this one sends commands or reads the data | compare `event.origin` to one expected origin and name the target origin when posting |
+| a deep merge or path assignment fed by URL or JSON data | prototype pollution; a finding only with a gadget that reads the polluted property | reject `__proto__`, `constructor` and `prototype` keys, or use `Map` or `Object.create(null)` |
+| a service worker or Cache Storage entry holding a personalized response | served after sign-out or an account switch | do not cache authenticated responses; clear the cache on sign-out |
+| a `BroadcastChannel` or `storage` event carrying identity or a command | another tab or a stale session acts on it | bind the message to the current session and re-check before acting |
+
+A pattern is a lead: report it only when untrusted data reaches it and the result reaches another user, origin or later session. A flag alone is not a finding.
 
 Then grep the built `dist/` for anything that looks like a key or an internal URL.
 

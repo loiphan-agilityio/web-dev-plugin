@@ -3,6 +3,20 @@
 Each release bumps `version` in `.claude-plugin/plugin.json` and is tagged `web-dev--v<version>`.
 A git install is a cached copy, so a change reaches users only with a new version.
 
+## Unreleased
+
+- **`review-mr` security pass has a bar for findings.** "When a security lead is a finding" in
+  `references/security.md`: a comment names the actor, the control, the boundary and the result;
+  a hardening gap with no path is a summary line; a fact outside the repository is a **Not done**
+  line for the owner to check. Security comments carry a severity (`**Security (high):**`), and a
+  lead that holds is checked on its sibling paths. In a large diff the main session tries to refute
+  a subagent's security finding before keeping it.
+- New rows: token and OAuth/OIDC checks, session rotation and revocation, CSRF, WebSocket origin,
+  cache deception, `Host` headers, queue and webhook actors, revocation on membership change,
+  derived copies, existence leaks, regex and parser cost, `postMessage`, prototype pollution,
+  service worker caches, CI shell injection and cache or token scope, and an "LLM features" table.
+  Adapted from cloudflare/security-audit-skill (MIT).
+
 ## 0.17.0
 
 - **`review-mr` works on a monorepo and a self-hosted host.** The host comes from asking the CLIs
