@@ -16,7 +16,7 @@ component -> useQuery(xQueryOptions()) / useXMutation() -> runEffect(effect, sig
           -> Effect.fn in features/<name>/api.ts -> ApiClient -> effect/http
 ```
 
-Before writing code, read `node_modules/effect/AGENTS.md` in full, `../../references/stack-guidelines.md` (version traps), the conventions in the project's `.claude/rules/` (from the monorepo root in a project from the boilerplate), or `../../references/rules/` when the project has none, and the current `src/lib/api/client.ts`, `errors.ts` and the feature's `api.ts` / `queries.ts` / `mocks.ts` when they exist: match them. In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`.
+Before writing code, read `node_modules/effect/AGENTS.md` in full, `../../references/stack-guidelines.md` (version traps), the conventions in the project's `.claude/rules/` (from the monorepo root in a project from the boilerplate), or `../../references/rules/` when the project has none, and the current `src/api/client.ts`, `errors.ts` and the feature's `api.ts` / `queries.ts` / `mocks.ts` when they exist: match them. In a project not made from the template, read `references/outside-template.md` first. Before following a companion skill, read its entry in `../../references/companions.md`.
 
 Paths and commands below are the app folder's (`apps/web` in a project from the boilerplate). From `apps/web`, `node_modules/effect` links into the root's `node_modules/.pnpm`: when reading the guide is refused (a session started without `--add-dir ../..`), say so under **Blocked by** and ask the user to restart with it; do not write Effect code without the guide. From the monorepo root, as under `develop`'s Workflow A, Effect's guide is `apps/web/node_modules/effect/AGENTS.md` and one test file runs with `pnpm --filter web test <path> --coverage.enabled=false` (the root `test` runs turbo, which rejects Vitest's flags); `pnpm lint:fix` and `pnpm check` work as written.
 
@@ -46,7 +46,7 @@ Extend `createTodosHandlers(initial)` and `todosMocks` (pending, error, validati
 
 `pnpm lint:fix`, then `pnpm check`, each as a plain command with no pipe or redirect. In a project from the boilerplate, run `pnpm -w check:report` instead of `pnpm check`: the same gates, run at the workspace root from any folder of it, ending with the checklist (each gate, the unit and e2e pass rates, line coverage) that goes in the Result. Fix the cause until green; a rule, a type and an assertion stay as strict as they are. If it stops at the e2e gate with "Executable doesn't exist", Chromium is missing on this machine: run `pnpm test:e2e:install` once, then the same gate command again (`pnpm -w check:report` in a project from the boilerplate).
 
-Auth: `ApiClient` sends the bearer token `AuthToken` gives: in a web app from the template, the token of `src/features/auth`. For an app with sign-in but no such feature, provide `AuthToken.fromGetter(...)` in `src/lib/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
+Auth: `ApiClient` sends the bearer token `AuthToken` gives: in a web app from the template, the token of `src/features/auth`. For an app with sign-in but no such feature, provide `AuthToken.fromGetter(...)` in `src/app/runtime.ts` ([references/effect-http.md](references/effect-http.md), Auth), only when asked, and name `runtime.ts` in the Result.
 
 ## Result
 

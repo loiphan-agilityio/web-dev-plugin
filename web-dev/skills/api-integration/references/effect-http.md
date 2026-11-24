@@ -47,7 +47,7 @@ One function per endpoint, named `'<name>.<action>'` for tracing:
 ```ts file=src/features/todos/api.ts
 import { Effect } from 'effect';
 
-import { ApiClient } from '@/lib/api/client';
+import { ApiClient } from '@/api/client';
 
 import { type NewTodo, Todo, TodoList } from './schemas';
 
@@ -66,7 +66,9 @@ export const createTodo = Effect.fn('todos.create')(function* (input: NewTodo) {
 
 No try/catch and no status handling here. The error channel is already `ApiError`.
 
-## ApiClient surface (`src/lib/api/client.ts`)
+## ApiClient surface (`src/api/client.ts`)
+
+Projects scaffolded from older pins keep it at `src/lib/api/client.ts`, with the rest of `src/api/` and `src/app/` under `src/lib/`.
 
 `get(path, schema, { urlParams? })`, `post(path, body, schema)`, `put(path, body, schema)`,
 `patch(path, body, schema)` return `Effect<schema Type, ApiError>`; `delete(path)` returns
@@ -79,7 +81,7 @@ No try/catch and no status handling here. The error channel is already `ApiError
 
 ## How ApiClient works inside
 
-Read `ApiClient.layer` in `src/lib/api/client.ts`. It takes Effect's `HttpClient`, maps every
+Read `ApiClient.layer` in `src/api/client.ts`. It takes Effect's `HttpClient`, maps every
 request (`prependUrl(apiUrl)` with `apiUrl` from `AppConfig`, `acceptJson`), applies
 `filterStatusOk`, adds the `AuthToken` token to each request with `HttpClientRequest.bearerToken`
 (a 401 tells `auth.rejected` which token the API refused), decodes the body with `HttpClientResponse.schemaBodyJson(schema)` and turns every
@@ -91,8 +93,8 @@ Failure mapping is in [errors.md](errors.md). The layer is `.pipe(Layer.provide(
 
 ## Changing ApiClient
 
-Edit `src/lib/api/client.ts` only when an endpoint cannot be expressed with the current methods. Keep the change minimal, keep `toApiError` as the only error mapper, and re-run `pnpm check`. `ApiClient.layer` needs `AppConfig` and `AuthToken`; `AppLayer` in `src/lib/runtime.ts` provides them (`AppConfig.layer`, `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)`). A new service layer is added there with `Layer.mergeAll`, and `AppServices` (the requirement type `runEffect` accepts) follows automatically.
+Edit `src/api/client.ts` only when an endpoint cannot be expressed with the current methods. Keep the change minimal, keep `toApiError` as the only error mapper, and re-run `pnpm check`. `ApiClient.layer` needs `AppConfig` and `AuthToken`; `AppLayer` in `src/app/runtime.ts` provides them (`AppConfig.layer`, `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)`). A new service layer is added there with `Layer.mergeAll`, and `AppServices` (the requirement type `runEffect` accepts) follows automatically.
 
 ## Auth
 
-`AuthToken` (`src/lib/api/auth.ts`) holds where the bearer token comes from, read again for every request. In a web app from the boilerplate (every one has authentication), `runtime.ts` already provides `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)` from `src/features/auth`, so a 401 to any request drops the token and `RequireAuth` sends the user to `/login`. For an app with sign-in but no such feature (one not made from the template), change one line in `src/lib/runtime.ts`: `AuthToken.none` (no token) becomes `AuthToken.fromGetter(() => <the token the session holds>, (token) => <drop it if it is still the session's>)`; `ApiClient` then sends `Authorization: Bearer <token>`, calls the second function with the token a 401 rejected, and the 401 still reaches the UI as `UnauthorizedError` (route it to the sign-in page). In a boilerplate from before that hook, `fromGetter` takes the getter alone. How the session stores the token, and the sign-in screen and its endpoint, are the app's; build them as a feature, ask the user where the token lives, and name `runtime.ts` in the Result since every request changes. `client.test.ts` shows how to test with other layers (`Layer.succeed(AppConfig, ...)`, `AuthToken.fromGetter`).
+`AuthToken` (`src/api/auth.ts`) holds where the bearer token comes from, read again for every request. In a web app from the boilerplate (every one has authentication), `runtime.ts` already provides `AuthToken.fromGetter(tokenStore.get, tokenStore.reject)` from `src/features/auth`, so a 401 to any request drops the token and `RequireAuth` sends the user to `/login`. For an app with sign-in but no such feature (one not made from the template), change one line in `src/app/runtime.ts`: `AuthToken.none` (no token) becomes `AuthToken.fromGetter(() => <the token the session holds>, (token) => <drop it if it is still the session's>)`; `ApiClient` then sends `Authorization: Bearer <token>`, calls the second function with the token a 401 rejected, and the 401 still reaches the UI as `UnauthorizedError` (route it to the sign-in page). In a boilerplate from before that hook, `fromGetter` takes the getter alone. How the session stores the token, and the sign-in screen and its endpoint, are the app's; build them as a feature, ask the user where the token lives, and name `runtime.ts` in the Result since every request changes. `client.test.ts` shows how to test with other layers (`Layer.succeed(AppConfig, ...)`, `AuthToken.fromGetter`).

@@ -10,7 +10,7 @@ Before writing a component, hook, helper, constant, type or test helper:
 
 1. Read the export index of the app or package you are in, and of the packages it depends on, when
    the project keeps one (a `CATALOG.md`); otherwise list the exports of the folders that could
-   hold it (`src/components/`, `src/lib/`, `packages/ui/src/`).
+   hold it (`src/components/`, `src/utils/`, `src/hooks/`, `packages/ui/src/`).
 2. `git grep` for the behaviour, not only the name (`git grep -n "toLocaleTimeString"`), since the
    same logic can sit under another name.
 3. Reuse it, or extend it with a parameter. Do not write a second version next to the first.
@@ -48,6 +48,37 @@ update the imports; never copy it.
 No `src/layouts/`, `src/contexts/` or `src/types/`: a layout belongs to the routes that use it, and
 a React context lives with its owner (a feature's context, provider and `useX` hook in the
 feature; an app-wide provider mounted with the app's providers).
+
+## Top-level folders of an app's `src/`
+
+The list is closed: ask before adding a new top-level folder.
+
+| Folder | Holds |
+|---|---|
+| `app/` | The composition root: `routes.tsx`, pages, layouts (`RootLayout/`, any `<Name>Layout/`), the providers, the route error screen, and app-wide wiring as flat files (`runtime.ts`, `query-client.ts`, `config.ts`). |
+| `api/` | The HTTP layer: `ApiClient`, `ApiError`, `runEffect`, the auth token. |
+| `features/` | One folder per feature (below). |
+| `components/` | Components with domain meaning that two or more features use (an `OrderSummary`, a `UserAvatar`). A primitive with no domain meaning (button, dialog) goes to `packages/ui`. |
+| `constants/` | Values two or more features use, one file per domain (`path.ts`). Values only; no functions. |
+| `hooks/` | `use-*.ts` hooks two or more features use. |
+| `utils/` | Pure functions two or more features use (`report-error.ts`, `form-errors.ts`). |
+| `mocks/` | The MSW wiring: `handlers.ts` (spreads each feature's handlers), `server.ts`, `browser.ts`. |
+| `test/` | Test setup, render helpers and environment fakes (see `testing.md`). |
+| `styles/` | `index.css`: imports `@repo/ui/globals.css` and adds app-only tokens. |
+
+A layout lives in `src/app/<Name>Layout/` (one only a feature uses lives in that feature); an
+app-wide provider is mounted with the app's providers in `src/app/`. An app has only the folders it uses.
+
+### A feature folder
+
+`src/features/<name>/` holds what one feature needs, with only the files it uses: `schemas.ts`
+(Effect Schemas only this feature reads), `model.ts` (business rules as pure functions), `api.ts`
+(`Effect.fn` calls through `ApiClient`), `queries.ts` (query key factory, `queryOptions`,
+mutations), `mocks.ts` (MSW handlers, see `testing.md`), `constants.ts`, `types.ts`,
+`components/`, `hooks/`, `utils/`, `__tests__/`.
+
+Another feature is used only through its `schemas`, `model`, `queries` or `routes`; never import
+its `api`, `mocks` or `components`. Something two features both need moves up a level.
 
 ## Component folders
 

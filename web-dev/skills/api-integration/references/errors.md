@@ -1,6 +1,6 @@
 # ApiError and status mapping
 
-All in `src/lib/api/errors.ts` and `src/lib/api/client.ts`. Every API failure is one member of the `ApiError` union in `errors.ts`, each a `Schema.TaggedError`:
+All in `src/api/errors.ts` and `src/api/client.ts`. Every API failure is one member of the `ApiError` union in `errors.ts`, each a `Schema.TaggedError`:
 
 ## Status to error
 
@@ -14,7 +14,7 @@ All in `src/lib/api/errors.ts` and `src/lib/api/client.ts`. Every API failure is
 | any other non-2xx | `ServerError { status }` | `{ status: 500 }` |
 | 2xx but body fails the schema | `InvalidResponseError { message }` | a body with a wrong field type |
 
-`ValidationError` reads the 400/422 body with `ValidationBody` in `src/lib/api/client.ts`
+`ValidationError` reads the 400/422 body with `ValidationBody` in `src/api/client.ts`
 (`{ message?, errors?: Record<string, string> }`); a malformed error body still yields a
 `ValidationError`, with the default message and no fields.
 
@@ -23,7 +23,7 @@ If the real backend uses another error body shape, change `ValidationBody` and t
 ## The mapping code
 
 `fromStatus` (status → error) and `toApiError` (every `HttpClientError` / `SchemaError` → `ApiError`)
-are in `src/lib/api/client.ts`; read both before changing a mapping. `toApiError` matches
+are in `src/api/client.ts`; read both before changing a mapping. `toApiError` matches
 every `HttpClientError` reason with `Match.tagsExhaustive` (`TransportError | EncodeError |
 InvalidUrlError | StatusCodeError | DecodeError | EmptyBodyError`), so a new Effect reason becomes a
 compile error, not a silent gap.
@@ -41,7 +41,7 @@ Add a `case` in `fromStatus` (e.g. 409 to a new `ConflictError`, 429, 5xx splits
 2. `toUserMessage` in `errors.ts`: add a handler to its `Match.tagsExhaustive`; it is exhaustive over `ApiError`, so TypeScript flags it if you forget.
 3. `client.ts`: import it and return it from `fromStatus` (or `toApiError`).
 4. `query-client.ts`: decide whether it is transient. Only `NetworkError` and a 5xx `ServerError` are retried; leave new 4xx cases out.
-5. `src/lib/forms.ts` (`setFormErrors`) needs a change only if the new error carries field messages; otherwise it already falls through to `errors.root.server` with `toUserMessage`.
+5. `src/utils/form-errors.ts` (`setFormErrors`) needs a change only if the new error carries field messages; otherwise it already falls through to `errors.root.server` with `toUserMessage`.
 6. Add a mock (`<name>Mocks.<case>`) and a test. Existing `Match.tagsExhaustive` over `ApiError` fail typecheck until they handle the case; that is the point.
 
 ## Tests per endpoint

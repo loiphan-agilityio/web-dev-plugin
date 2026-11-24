@@ -4,14 +4,14 @@ Code blocks are copied from the boilerplate's `apps/web` or the verified todos f
 
 ## `runEffect`: the bridge
 
-`runEffect(effect, signal?)` in `src/lib/api/run.ts` runs an effect on the app runtime and returns a
+`runEffect(effect, signal?)` in `src/api/run.ts` runs an effect on the app runtime and returns a
 Promise for `queryFn` / `mutationFn`.
 
 - A typed failure is thrown as the `ApiError` itself: branch on it with the error classes (`query.error instanceof NotFoundError`) or `Match`.
 - Pass the query's `signal` so cancellation interrupts the fiber and aborts the fetch. Mutations have no signal.
 - `E extends ApiError` means an `Effect.fn` that can fail with anything else will not compile here.
 
-## Query client policy (`src/lib/query-client.ts`)
+## Query client policy (`src/app/query-client.ts`)
 
 `createQueryClient` registers `ApiError` as TanStack Query's `defaultError` (so `query.error` is
 typed), sets `staleTime: 30_000`, retries a query once and only for `NetworkError` or a
@@ -23,7 +23,7 @@ typed), sets `staleTime: 30_000`, retries a query once and only for `NetworkErro
 ```ts file=src/features/todos/queries.ts
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { runEffect } from '@/lib/api/run';
+import { runEffect } from '@/api/run';
 
 import { createTodo, listTodos } from './api';
 import type { NewTodo } from './schemas';

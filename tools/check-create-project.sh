@@ -55,7 +55,7 @@ expect no-auth-refused 1 'pass --auth or --landing' -- "$tmp/none" --no-auth
 expect auth 0 'with authentication.*kept the existing .claude/settings.json' -- "$tmp/auth" --auth
 expect app 0 'with authentication' -- "$tmp/app" --auth
 expect landing 0 'a landing page' -- "$tmp/landing" --landing
-holds auth-wired "$tmp/auth/apps/web/src/lib/runtime.ts" 'AuthToken.fromGetter(tokenStore.get, tokenStore.reject)'
+holds auth-wired "$tmp/auth/apps/web/src/app/runtime.ts" 'AuthToken.fromGetter(tokenStore.get, tokenStore.reject)'
 holds auth-routes "$tmp/auth/apps/web/src/app/routes.tsx" 'protectedRoutes('
 # Named after the target, not the generator's temporary folder.
 holds named "$tmp/app/package.json" '"name": "app"'

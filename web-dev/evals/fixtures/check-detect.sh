@@ -45,6 +45,18 @@ printf '{"dependencies":{"react":"^19.3.1","@repo/ui":"workspace:*","effect":"^4
 : > "$tmp/ui-with-effect/src/test/render.tsx"
 printf '{"dependencies":{"react":"^19.3.1","@repo/ui":"workspace:*"},"devDependencies":{"vite":"^8.3.5"}}\n' \
   > "$tmp/ui-no-helpers/package.json"
+# The template tier accepts the ApiClient in src/api/ (current boilerplate) or src/lib/api/ (older
+# pins); an ApiClient-less src/api/client.ts is no template.
+stack='{"dependencies":{"react":"^19.3.1","effect":"^4.0.5","@tanstack/react-query":"^5.104.5","react-hook-form":"^7.90.0"},"devDependencies":{"vite":"^8.3.5"}}'
+mkdir -p "$tmp/layout-api/src/api" "$tmp/layout-api/src/test" "$tmp/layout-lib/src/lib/api" \
+  "$tmp/layout-lib/src/test" "$tmp/layout-no-client/src/api" "$tmp/layout-no-client/src/test"
+for d in layout-api layout-lib layout-no-client; do
+  printf '%s\n' "$stack" > "$tmp/$d/package.json"
+  : > "$tmp/$d/src/test/render.tsx"
+done
+echo 'export class ApiClient {}' > "$tmp/layout-api/src/api/client.ts"
+echo 'export class ApiClient {}' > "$tmp/layout-lib/src/lib/api/client.ts"
+echo 'export const http = 1;' > "$tmp/layout-no-client/src/api/client.ts"
 # Workspace packages with no packageManager field and no lockfile of their own: the workspace root
 # (pnpm-workspace.yaml, or package.json `workspaces`) holds the lockfile.
 mkdir -p "$tmp/pnpm-ws/apps/web" "$tmp/yarn-ws/packages/app"
@@ -77,6 +89,9 @@ expect landing/apps/web landing
 expect ui-with-effect same-stack
 expect ui-no-helpers other-stack
 expect same-stack same-stack
+expect layout-api template
+expect layout-lib template
+expect layout-no-client same-stack
 expect other-stack other-stack
 expect vue unsupported
 expect monorepo unsupported

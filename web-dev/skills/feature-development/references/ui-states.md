@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle } from '@repo/ui/components/alert';
 import { Button } from '@repo/ui/components/button';
 import { Skeleton } from '@repo/ui/components/skeleton';
-import { toUserMessage } from '@/lib/api/errors';
+import { toUserMessage } from '@/api/errors';
 
 import { openFirst } from '../../model';
 import { todoListQueryOptions } from '../../queries';
@@ -85,7 +85,7 @@ export const TodoList = () => {
 
 - Order matters: pending, error, empty, success. TypeScript narrows `data` after the first two returns.
 - `isRefetching` disables the retry button while the retry runs.
-- `error` is already typed as `ApiError` (registered in `src/lib/query-client.ts`); branch on the error class only when one error needs its own UI (a detail page's 404).
+- `error` is already typed as `ApiError` (registered in `src/app/query-client.ts`); branch on the error class only when one error needs its own UI (a detail page's 404).
 
 ## Page composition
 
